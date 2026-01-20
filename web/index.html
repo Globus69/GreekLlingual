@@ -35,13 +35,14 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* DEBUG COLORS (User Requested) */
+        /* DEBUG COLORS (User Requested) - DISABLED */
+        /*
         header { background: rgba(255, 0, 0, 0.1) !important; border: 1px solid red; position: relative; }
         .hero-section { background: rgba(0, 255, 0, 0.1); border: 1px solid green; position: relative; }
         .stats-card { background: rgba(0, 0, 255, 0.1) !important; border: 1px dashed blue; position: relative; }
-        /* .actions-group { background: rgba(255, 255, 0, 0.1); border: 1px dashed yellow; position: relative; } */
         .modules-grid { background: rgba(0, 255, 255, 0.1); border: 1px dashed cyan; position: relative; }
         .tile { background: rgba(255, 0, 255, 0.1) !important; border: 1px dotted magenta; }
+        */
 
         /* Debug Labels */
         header::before { content: "1"; position: absolute; top: 5px; left: 5px; background: red; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; z-index: 9999; animation: blink 1s infinite; }
@@ -107,6 +108,20 @@
         }
 
         .username { font-size: 14px; font-weight: 600; color: var(--text-main); }
+
+        .datetime-display {
+            font-size: 13px;
+            font-weight: 500;
+            color: #6E6E73;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.05), 0 -1px 0 rgba(0, 0, 0, 0.5);
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
 
         /* VIEW MANAGEMENT */
         .view {
@@ -201,21 +216,25 @@
             gap: 12px;
             width: 100%;
             height: 100%;
-            border: 2px solid red;
             padding: 12px;
             border-radius: 12px;
         }
 
         .grid-cell {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            border: none;
             border-radius: 8px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: #8E8E93;
+            align-items: stretch;
+            justify-content: stretch;
             min-height: 40px;
+        }
+
+        .grid-cell .btn {
+            width: 100%;
+            height: 100%;
+            min-width: auto;
+            min-height: auto;
         }
 
         .btn {
@@ -355,6 +374,7 @@
         <!-- HEADER (Shared) -->
         <header>
             <div class="brand"><span class="brand-icon">🏛️</span> GreekLingua</div>
+            <div class="datetime-display" id="datetime">20.01.2026 21:53:05</div>
             <div class="user-profile"><div class="avatar">SW</div><span class="username">SWS</span></div>
         </header>
 
@@ -382,7 +402,7 @@
                                 <button class="btn btn-primary" style="background:#FF5722;" onclick="showToast('📖 Starting Comprehension...')"><span>📖</span> Comprehension</button>
                             </div>
                             <div class="grid-cell">
-                                <button class="btn btn-primary" style="background:#9C27B0;" onclick="openView('quiz-view')"><span>📝</span> Exam Quiz</button>
+                                <button class="btn btn-primary" style="background:#9C27B0;" onclick="showToast('📚 Opening Stories...')"><span>📚</span> Stories</button>
                             </div>
                             <div class="grid-cell">
                                 <button class="btn btn-secondary" onclick="showToast('⚡️ Quick Lesson Started')"><span>⚡️</span> 20 min Quick Lesson</button>
@@ -390,7 +410,9 @@
                             <div class="grid-cell">
                                 <button class="btn btn-primary" style="background:#00BCD4;" onclick="showToast('🎮 Starting Game...')"><span>🎮</span> Game</button>
                             </div>
-                            <div class="grid-cell">Cell 6</div>
+                            <div class="grid-cell">
+                                <button class="btn btn-secondary" onclick="showToast('🧪 Running Test...')"><span>🧪</span> Test</button>
+                            </div>
                             <div class="grid-cell">
                                 <button class="btn btn-primary" style="background:#34C759;" onclick="showToast('📅 Lesson Started')"><span>📅</span> Lesson Today</button>
                             </div>
@@ -417,17 +439,17 @@
                     <div class="tile" onclick="openView('cyprus-view')">
                          <div class="tile-icon">🏛️</div><div class="tile-label">Cyprus</div><div class="tile-sub">Exam Prep</div>
                     </div>
-                    <div class="tile" onclick="showToast('Stories coming soon')">
-                        <div class="tile-icon">📖</div><div class="tile-label">Stories</div>
+                    <div class="tile" onclick="showToast('Exam Quiz coming soon')">
+                        <div class="tile-icon">❓</div><div class="tile-label">Quiz</div><div class="tile-sub">Reading</div>
                     </div>
                     <div class="tile" onclick="showToast('Video Class coming soon')">
                         <div class="tile-icon">🎥</div><div class="tile-label">Video Class</div>
                     </div>
-                    <div class="tile" onclick="showToast('Library coming soon')">
-                        <div class="tile-icon">📚</div><div class="tile-label">Library</div>
-                    </div>
                     <div class="tile" onclick="showToast('Audio Player coming soon')">
                          <div class="tile-icon">🎧</div><div class="tile-label">Audio</div>
+                    </div>
+                    <div class="tile" onclick="showToast('Library coming soon')">
+                        <div class="tile-icon">📚</div><div class="tile-label">Library</div>
                     </div>
                 </div>
             </div>
@@ -548,7 +570,25 @@
             loadPhrases();
             document.getElementById('quiz-content').innerHTML = quizText;
             updateCard();
+            
+            // Start live datetime
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
         };
+
+        // Update DateTime Display
+        function updateDateTime() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            const dateTimeStr = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+            document.getElementById('datetime').innerText = dateTimeStr;
+        }
 
         // NAVIGATION
         function openView(viewId) {
