@@ -39,7 +39,7 @@
         header { background: rgba(255, 0, 0, 0.1) !important; border: 1px solid red; position: relative; }
         .hero-section { background: rgba(0, 255, 0, 0.1); border: 1px solid green; position: relative; }
         .stats-card { background: rgba(0, 0, 255, 0.1) !important; border: 1px dashed blue; position: relative; }
-        .actions-group { background: rgba(255, 255, 0, 0.1); border: 1px dashed yellow; position: relative; }
+        /* .actions-group { background: rgba(255, 255, 0, 0.1); border: 1px dashed yellow; position: relative; } */
         .modules-grid { background: rgba(0, 255, 255, 0.1); border: 1px dashed cyan; position: relative; }
         .tile { background: rgba(255, 0, 255, 0.1) !important; border: 1px dotted magenta; }
 
@@ -219,8 +219,24 @@
         }
 
         .btn {
-            border: none; border-radius: 18px; font-family: inherit; font-weight: 700; cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; overflow: hidden;
+            border: none; 
+            border-radius: 18px; 
+            font-family: inherit; 
+            font-weight: 700; 
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            position: relative; 
+            overflow: hidden;
+            /* Glassmorphism Effect */
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
         .btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
         .btn:active { transform: scale(0.98); }
@@ -359,15 +375,31 @@
                     </div>
                     <div class="actions-group">
                         <div class="actions-inner-grid">
-                            <div class="grid-cell">Cell 1</div>
-                            <div class="grid-cell">Cell 2</div>
-                            <div class="grid-cell">Cell 3</div>
-                            <div class="grid-cell">Cell 4</div>
-                            <div class="grid-cell">Cell 5</div>
+                            <div class="grid-cell">
+                                <button class="btn btn-primary" onclick="showToast('✨ Preparing Magic Round...')"><span>✨</span> Start Magic Round</button>
+                            </div>
+                            <div class="grid-cell">
+                                <button class="btn btn-primary" style="background:#FF5722;" onclick="showToast('📖 Starting Comprehension...')"><span>📖</span> Comprehension</button>
+                            </div>
+                            <div class="grid-cell">
+                                <button class="btn btn-primary" style="background:#9C27B0;" onclick="openView('quiz-view')"><span>📝</span> Exam Quiz</button>
+                            </div>
+                            <div class="grid-cell">
+                                <button class="btn btn-secondary" onclick="showToast('⚡️ Quick Lesson Started')"><span>⚡️</span> 20 min Quick Lesson</button>
+                            </div>
+                            <div class="grid-cell">
+                                <button class="btn btn-primary" style="background:#00BCD4;" onclick="showToast('🎮 Starting Game...')"><span>🎮</span> Game</button>
+                            </div>
                             <div class="grid-cell">Cell 6</div>
-                            <div class="grid-cell">Cell 7</div>
-                            <div class="grid-cell">Cell 8</div>
-                            <div class="grid-cell">Cell 9</div>
+                            <div class="grid-cell">
+                                <button class="btn btn-primary" style="background:#34C759;" onclick="showToast('📅 Lesson Started')"><span>📅</span> Lesson Today</button>
+                            </div>
+                            <div class="grid-cell">
+                                <button class="btn btn-tertiary" onclick="openView('vokabeln-view')"><span>🔁</span> Vokabeln wiederholen</button>
+                            </div>
+                            <div class="grid-cell">
+                                <button class="btn btn-secondary" onclick="window.print()"><span>🖨️</span> Print</button>
+                            </div>
                         </div>
                     </div>
                 </div>
