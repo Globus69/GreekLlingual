@@ -164,8 +164,16 @@ function startMagicMix() {
     showPlaceholder("✨ Preparing Magic Mix...");
 }
 
+function startLessonToday() {
+    showPlaceholder("📅 Starting Today's Lesson...");
+}
+
 function startQuickLesson() {
     showPlaceholder("⚡️ Starting 20min Session...");
+}
+
+function startRepeat() {
+    showPlaceholder("🔁 Loading Review Session...");
 }
 
 function showPlaceholder(msg = "Feature coming soon") {

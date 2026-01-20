@@ -164,6 +164,13 @@ body {
     justify-content: space-between;
     align-items: center;
     height: 80px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15, 15, 17, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .header-content {
@@ -338,6 +345,15 @@ body {
     justify-content: center;
     flex: 1;
     min-width: 320px;
+    align-items: center;
+    /* Center items for 40% width look */
+}
+
+.button-row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    justify-content: center;
 }
 
 .action-btn {
@@ -356,6 +372,9 @@ body {
     font-family: inherit;
     position: relative;
     overflow: hidden;
+    width: 40%;
+    /* User requested 40% size */
+    min-width: 250px;
 }
 
 .magic-btn {

@@ -3,261 +3,520 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreekLingua</title>
-    <link rel="stylesheet" href="style.css">
+    <title>GreekLingua Dashboard</title>
+    <style>
+        :root {
+            --bg-body: #0F0F11;
+            --bg-card: #1C1C1E;
+            --bg-card-hover: #242426;
+            --accent: #007AFF;
+            --accent-glow: rgba(0, 122, 255, 0.3);
+            --text-main: #EDEDED;
+            --text-sub: #8E8E93;
+            --border-light: rgba(255, 255, 255, 0.05);
+            --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* DEBUG COLORS (User Requested) */
+        header { background: rgba(255, 0, 0, 0.1) !important; border: 1px solid red; }
+        .hero-section { background: rgba(0, 255, 0, 0.1); border: 1px solid green; }
+        .stats-card { background: rgba(0, 0, 255, 0.1) !important; border: 1px dashed blue; }
+        .actions-group { background: rgba(255, 255, 0, 0.1); border: 1px dashed yellow; }
+        .modules-grid { background: rgba(0, 255, 255, 0.1); border: 1px dashed cyan; }
+        .tile { background: rgba(255, 0, 255, 0.1) !important; border: 1px dotted magenta; }
+
+        /* HEADER */
+        header {
+            height: 70px;
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            background: rgba(15, 15, 17, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .brand-icon { font-size: 24px; }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #1C1C1E;
+            padding: 6px 16px 6px 6px;
+            border-radius: 30px;
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #007AFF, #5856D6);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; color: white;
+        }
+
+        .username { font-size: 14px; font-weight: 600; color: var(--text-main); }
+
+        /* VIEW MANAGEMENT */
+        .view {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        .view.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* DASHBOARD CONTENT */
+        .dashboard-content {
+            padding: 24px 32px;
+            gap: 24px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+        }
+
+        .hero-section {
+            display: flex;
+            gap: 32px;
+            align-items: stretch;
+            height: 200px;
+            flex-shrink: 0;
+        }
+
+        .stats-card {
+            background: linear-gradient(160deg, #1C1C1E 0%, #151517 100%);
+            border-radius: 24px;
+            width: 340px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card::after {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 120px; height: 120px;
+            background: radial-gradient(circle, rgba(0, 122, 255, 0.15), transparent 70%);
+            pointer-events: none;
+        }
+
+        .stats-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .level-badge { font-size: 32px; font-weight: 800; color: #fff; line-height: 1; }
+        .level-label { font-size: 11px; color: var(--text-sub); font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+        .streak { background: rgba(255, 69, 58, 0.12); color: #FF453A; padding: 6px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .stats-mid { display: flex; gap: 24px; margin-top: 10px; }
+        .stat-item .val { font-size: 16px; font-weight: 700; color: #fff; }
+        .stat-item .lbl { font-size: 11px; color: var(--text-sub); }
+        .stats-footer { margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px; font-size: 13px; color: #D1D1D6; line-height: 1.4; }
+
+        .actions-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            justify-content: center;
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .action-column { display: flex; flex-direction: column; gap: 16px; }
+
+        .btn {
+            border: none; border-radius: 18px; font-family: inherit; font-weight: 700; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; overflow: hidden;
+        }
+        .btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        .btn:active { transform: scale(0.98); }
+
+        .btn-primary { background: var(--accent); color: white; width: 280px; height: 60px; font-size: 17px; box-shadow: 0 8px 25px rgba(0, 122, 255, 0.25); }
+        .btn-secondary { background: rgba(0, 122, 255, 0.1); color: #409CFF; width: 280px; height: 60px; font-size: 17px; border: 1px solid rgba(0, 122, 255, 0.2); }
+        .btn-tertiary { background: transparent; color: #FF453A; border: 1px solid rgba(255, 69, 58, 0.3); font-size: 14px; height: 48px; width: 280px; border-radius: 14px; }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 28px;
+            padding: 10px 0 32px 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .modules-grid::-webkit-scrollbar { width: 6px; }
+        .modules-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .tile {
+            background: var(--bg-card); border-radius: 24px; aspect-ratio: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; border: 1px solid var(--border-light); cursor: pointer; transition: all 0.2s; position: relative;
+        }
+        .tile:hover { background: var(--bg-card-hover); transform: scale(1.03); box-shadow: 0 15px 40px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.1); z-index: 5; }
+        .tile-icon { font-size: 56px; margin-bottom: 20px; transition: transform 0.2s; }
+        .tile:hover .tile-icon { transform: scale(1.1); }
+        .tile-label { font-size: 17px; font-weight: 700; color: var(--text-main); text-align: center; }
+        .tile-sub { font-size: 12px; color: var(--text-sub); margin-top: 4px; font-weight: 500; }
+
+        /* MODULE VIEWS STYLES */
+        .module-header {
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: transparent;
+            border-bottom: 1px solid var(--border-light);
+            flex-shrink: 0;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.08); border: none; color: #007AFF; font-size: 15px; font-weight: 600;
+            cursor: pointer; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 6px;
+        }
+        .back-btn:hover { background: rgba(0, 122, 255, 0.15); }
+
+        .module-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Flashcard Specifics */
+         .card-area { width: 100%; display: flex; justify-content: center; align-items: center; perspective: 1200px; flex-direction: column; gap: 30px; }
+         .card-wrapper { position: relative; width: 600px; height: 400px; }
+         .card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1); cursor: pointer; }
+         .card.flipped { transform: rotateY(180deg); }
+         .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: #1C1C1E; border-radius: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; border: 1px solid var(--border-light); }
+         .card-back { transform: rotateY(180deg); background: #1C1C1E; }
+         .lang-label { position: absolute; top: 30px; font-size: 12px; font-weight: 700; color: #636366; letter-spacing: 2px; }
+         .main-word { font-size: 64px; font-weight: 800; color: #EDEDED; text-align: center; margin-bottom: 20px; }
+         .example-sentence { font-size: 18px; color: #8E8E93; font-style: italic; text-align: center; }
+         .controls-bar { display: flex; gap: 20px; }
+
+         /* Lists (Phrasen, etc) */
+         .list-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 12px; }
+         .list-item { background: #1C1C1E; border-radius: 18px; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-light); transition: background 0.2s; }
+         .list-item:hover { background: #242426; border-color: var(--accent); }
+         
+         /* Quiz */
+         .quiz-box { background: #1C1C1E; border-radius: 24px; padding: 48px; max-width: 800px; line-height: 2; font-size: 20px; color: #D1D1D6; border: 1px solid var(--border-light); }
+         .quiz-word { color: #FF453A; text-decoration: underline; text-decoration-color: rgba(255, 69, 58, 0.3); text-underline-offset: 4px; cursor: pointer; }
+         .quiz-word:hover { background: rgba(255, 69, 58, 0.15); }
+
+        /* Login Overlay */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0F0F11; z-index: 9999; display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: rgba(30, 30, 32, 0.95); padding: 14px 28px; border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; gap: 10px; transition: transform 0.4s; opacity: 0;
+            pointer-events: none; z-index: 1000;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    </style>
 </head>
 <body>
 
-    <div id="app">
-
-        <!-- LOGIN VIEW (Initial State) -->
-        <div id="login-view" class="view active">
-            <div class="login-container">
-                <div class="login-card">
-                    <div class="login-logo">🏛️</div>
-                    <div class="login-title">GreekLingua</div>
-                    <div class="login-subtitle">Sign in to continue your journey</div>
-                    
-                    <div class="input-group">
-                        <input type="email" class="login-input" placeholder="Email" value="user@example.com">
-                    </div>
-                    <div class="input-group">
-                        <input type="password" class="login-input" placeholder="Password" value="password123">
-                    </div>
-                    
-                    <button class="login-btn" onclick="handleLogin()">Sign In</button>
-                    
-                    <button class="biometric-btn" onclick="handleLogin()">
-                        <span style="font-size:18px">👤</span> Use FaceID
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- DASHBOARD VIEW -->
-        <div id="dashboard-view" class="view">
-            <!-- Header -->
-            <header class="app-header">
-                <div class="header-content">
-                    <div class="header-logo">🏛️</div>
-                    <h1>GreekLingua</h1>
-                </div>
-                <div class="user-profile">
-                    <div class="avatar">SW</div>
-                    <span class="username">SWS</span>
-                    <span style="color:#666; font-size:10px">▼</span>
-                </div>
-            </header>
-
-            <!-- Hero Section: Stats & Magic -->
-            <section class="dashboard-hero">
-                <!-- Stats Card -->
-                <div class="stats-card">
-                    <div class="stats-header">
-                        <div class="level-info">
-                            <span class="level-label">Current Level</span>
-                            <span class="level-val">B1</span>
-                        </div>
-                        <div class="streak-badge">
-                            🔥 5 Days
-                        </div>
-                    </div>
-                    
-                    <div class="stats-grid">
-                        <div class="mini-stat">
-                            <span class="mini-val">187</span>
-                            <span class="mini-lbl">Vocabs</span>
-                        </div>
-                        <div class="mini-stat">
-                            <span class="mini-val">14.5h</span>
-                            <span class="mini-lbl">Learned</span>
-                        </div>
-                    </div>
-                    
-                    <div class="daily-tip">
-                        💡 <span class="tip-highlight">Today:</span> 12 new vocabs + 1 short text about Cyprus.
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-area">
-                    <button class="action-btn magic-btn" onclick="startMagicMix()">
-                        <span class="magic-icon">✨</span>
-                        Start Magic Round
-                    </button>
-                    <button class="action-btn quick-btn" onclick="startQuickLesson()">
-                        <span class="magic-icon">⚡️</span>
-                        20 min Quick Lesson
-                    </button>
-                </div>
-            </section>
-
-            <!-- Grid -->
-            <div class="dashboard-grid">
-                <!-- Vokabeln (Active) -->
-                <div class="tile active-tile" onclick="openModule('vokabeln')">
-                    <div class="tile-icon">📝</div>
-                    <div class="tile-title">Vokabeln</div>
-                    <div class="tile-subtitle">12 Due Today</div>
-                </div>
-
-                <div class="tile" onclick="openModule('phrases')">
-                    <div class="tile-icon">💬</div>
-                    <div class="tile-title">Phrasen</div>
-                    <div class="tile-subtitle">Travel & Chat</div>
-                </div>
-
-                <div class="tile" onclick="openModule('quiz')">
-                    <div class="tile-icon">❓</div>
-                    <div class="tile-title">Quiz</div>
-                    <div class="tile-subtitle">Reading Comprehension</div>
-                </div>
-                
-                <div class="tile" onclick="openModule('cyprus')">
-                    <div class="tile-icon">🏛️</div>
-                    <div class="tile-title">Cyprus Exam</div>
-                    <div class="tile-subtitle">B1 Prep</div>
-                </div>
-
-                <div class="tile" onclick="openModule('stories')">
-                    <div class="tile-icon">📖</div>
-                    <div class="tile-title">Stories</div>
-                    <div class="tile-subtitle">Immersive</div>
-                </div>
-
-                <div class="tile" onclick="openModule('video')">
-                    <div class="tile-icon">🎥</div>
-                    <div class="tile-title">Video Class</div>
-                    <div class="tile-subtitle">Native Speakers</div>
-                </div>
-
-                <div class="tile" onclick="showPlaceholder()">
-                    <div class="tile-icon">🎧</div>
-                    <div class="tile-title">Audio</div>
-                    <div class="tile-subtitle">Listening</div>
-                </div>
-
-                <div class="tile" onclick="openModule('books')">
-                    <div class="tile-icon">📚</div>
-                    <div class="tile-title">Library</div>
-                    <div class="tile-subtitle">Reference</div>
-                </div>
-            </div>
-            
-            <div id="toast" class="toast">
-                <span style="font-size:18px">🚀</span>
-                <span id="toast-msg">Feature coming soon</span>
-            </div>
-        </div>
-
-        <!-- MODULE VIEWS (Previously Implemented) -->
-        <!-- Vokabeln -->
-        <div id="vokabeln-view" class="view">
-            <div class="module-header">
-                <button class="back-btn" onclick="openDashboard()">← Dashboard</button>
-                <div class="progress-container"><span id="progress-text">1 / 5</span></div>
-            </div>
-            <div class="card-area">
-                <div class="card-wrapper">
-                    <div class="card" id="flashcard" onclick="flipCard()">
-                        <div class="card-face card-front">
-                            <span class="lang-label">ENGLISH</span>
-                            <div class="main-word" id="word-front">Hello</div>
-                            <div class="example-sentence" id="example-front">Example...</div>
-                            <div class="flip-hint">Click or Space to Flip</div>
-                        </div>
-                        <div class="card-face card-back">
-                            <span class="lang-label">ΕΛΛΗΝΙΚΑ</span>
-                            <div class="main-word" id="word-back">Γεια σου</div>
-                            <div class="example-sentence" id="example-back">Example...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="controls-bar">
-                <button class="control-btn outline" id="prev-btn" onclick="prevCard()" disabled>← Prev</button>
-                <button class="control-btn primary" onclick="flipCard()">Flip Card</button>
-                <button class="control-btn outline" id="next-btn" onclick="nextCard()">Next →</button>
-            </div>
-        </div>
-
-        <!-- Phrases -->
-        <div id="phrases-view" class="view">
-            <div class="module-header">
-                <button class="back-btn" onclick="openDashboard()">← Dashboard</button>
-                <div class="progress-container">Common Phrases</div>
-            </div>
-            <div id="phrases-list" class="phrases-list"></div>
-        </div>
-
-        <!-- Quiz -->
-        <div id="quiz-view" class="view">
-            <div class="module-header">
-                <button class="back-btn" onclick="openDashboard()">← Dashboard</button>
-                <div class="progress-container">Reading Quiz</div>
-            </div>
-            <div class="quiz-container">
-                <div class="quiz-box">
-                    <p class="quiz-text" id="quiz-content"></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cyprus -->
-        <div id="cyprus-view" class="view">
-            <div class="module-header">
-                <button class="back-btn" onclick="openDashboard()">← Dashboard</button>
-                <div class="progress-container">Cyprus Exam</div>
-            </div>
-            <div class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
-                <div class="grid-item" onclick="openModule('cyprus-listening')">
-                    <div class="grid-icon">🎧</div>
-                    <div class="grid-title">Listening</div>
-                </div>
-                 <div class="grid-item" onclick="showPlaceholder()">
-                    <div class="grid-icon">📖</div>
-                    <div class="grid-title">Reading</div>
-                </div>
-                 <div class="grid-item" onclick="showPlaceholder()">
-                    <div class="grid-icon">✍️</div>
-                    <div class="grid-title">Writing</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cyprus Listening Subview -->
-        <div id="cyprus-listening-view" class="view">
-             <div class="module-header">
-                <button class="back-btn" onclick="openModule('cyprus')">← Exam Overview</button>
-                <div class="progress-container">Listening Practice</div>
-            </div>
-            <div class="phrases-list" id="cyprus-listening-list"></div>
-        </div>
-
-        <!-- Video, Stories, Books, Text Placeholders -->
-        <div id="video-view" class="view">
-            <div class="module-header"><button class="back-btn" onclick="openDashboard()">←</button></div>
-            <div class="grid-container" id="video-grid"></div>
-        </div>
-        <div id="stories-view" class="view">
-            <div class="module-header"><button class="back-btn" onclick="openDashboard()">←</button></div>
-            <div class="player-container">
-                 <div class="player-mock">
-                    <div class="player-title">The Brave Little Owl</div>
-                    <div class="player-progress"><div class="player-bar"></div></div>
-                    <div class="player-controls">
-                        <button class="player-btn">⏮</button><button class="player-btn">⏸</button><button class="player-btn">⏭</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="books-view" class="view">
-            <div class="module-header"><button class="back-btn" onclick="openDashboard()">←</button></div>
-             <div class="grid-container" id="book-grid"></div>
-        </div>
-        
+    <div id="login-overlay">
+        <h1 style="color:white; font-size: 24px;">🏛️ Logging in...</h1>
     </div>
 
-    <script src="script.js"></script>
+    <div id="app">
+        <!-- HEADER (Shared) -->
+        <header>
+            <div class="brand"><span class="brand-icon">🏛️</span> GreekLingua</div>
+            <div class="user-profile"><div class="avatar">SW</div><span class="username">SWS</span></div>
+        </header>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboard-view" class="view active">
+            <div class="dashboard-content">
+                <div class="hero-section">
+                    <div class="stats-card">
+                        <div class="stats-top">
+                            <div><div class="level-label">Current Level</div><div class="level-badge">B1</div></div>
+                            <div class="streak"><span>🔥</span> 5 Days</div>
+                        </div>
+                        <div class="stats-mid">
+                            <div class="stat-item"><div class="val">187</div><div class="lbl">Vocabs</div></div>
+                            <div class="stat-item"><div class="val">14.5h</div><div class="lbl">Learned</div></div>
+                        </div>
+                        <div class="stats-footer"><i>Today:</i> 12 new vocabs & 1 short text.</div>
+                    </div>
+                    <div class="actions-group">
+                        <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
+                            <button class="btn btn-primary" onclick="showToast('✨ Preparing Magic Round...')"><span>✨</span> Start Magic Round</button>
+                            <button class="btn btn-primary" style="background:#34C759;" onclick="showToast('📅 Lesson Started')"><span>📅</span> Lesson Today</button>
+                        </div>
+                        <div class="action-column">
+                            <button class="btn btn-secondary" onclick="showToast('⚡️ Quick Lesson Started')"><span>⚡️</span> 20 min Quick Lesson</button>
+                            <button class="btn btn-tertiary" onclick="openView('vokabeln-view')"><span>🔁</span> Vokabeln wiederholen</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modules-grid">
+                    <div class="tile active" onclick="openView('vokabeln-view')">
+                        <div class="tile-icon">📝</div><div class="tile-label">Vokabeln</div><div class="tile-sub">12 Due</div>
+                    </div>
+                    <div class="tile" onclick="openView('phrases-view')">
+                        <div class="tile-icon">💬</div><div class="tile-label">Phrases</div><div class="tile-sub">Travel</div>
+                    </div>
+                    <div class="tile" onclick="openView('quiz-view')">
+                        <div class="tile-icon">❓</div><div class="tile-label">Quiz</div><div class="tile-sub">Reading</div>
+                    </div>
+                    <div class="tile" onclick="openView('cyprus-view')">
+                         <div class="tile-icon">🏛️</div><div class="tile-label">Cyprus</div><div class="tile-sub">Exam Prep</div>
+                    </div>
+                    <div class="tile" onclick="showToast('Stories coming soon')">
+                        <div class="tile-icon">📖</div><div class="tile-label">Stories</div>
+                    </div>
+                    <div class="tile" onclick="showToast('Video Class coming soon')">
+                        <div class="tile-icon">🎥</div><div class="tile-label">Video Class</div>
+                    </div>
+                    <div class="tile" onclick="showToast('Library coming soon')">
+                        <div class="tile-icon">📚</div><div class="tile-label">Library</div>
+                    </div>
+                    <div class="tile" onclick="showToast('Audio Player coming soon')">
+                         <div class="tile-icon">🎧</div><div class="tile-label">Audio</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VOKABELN VIEW -->
+        <div id="vokabeln-view" class="view">
+            <div class="module-header">
+                <button class="back-btn" onclick="openView('dashboard-view')">← Dashboard</button>
+                <div style="font-weight:600">Vocabulary Flashcards</div>
+            </div>
+            <div class="module-content">
+                <div class="card-area">
+                    <div class="card-wrapper">
+                        <div class="card" id="flashcard" onclick="flipCard()">
+                            <div class="card-face card-front">
+                                <span class="lang-label">ENGLISH</span>
+                                <div class="main-word" id="word-front">Hello</div>
+                                <div class="example-sentence" id="example-front">...</div>
+                                <div class="flip-hint">Click to flip</div>
+                            </div>
+                            <div class="card-face card-back">
+                                <span class="lang-label">ΕΛΛΗΝΙΚΑ</span>
+                                <div class="main-word" id="word-back">Γεια σου</div>
+                                <div class="example-sentence" id="example-back">...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="controls-bar">
+                        <button class="btn btn-secondary" style="width:120px;" onclick="prevCard()">Prev</button>
+                        <button class="btn btn-primary" style="width:160px;" onclick="flipCard()">Flip</button>
+                        <button class="btn btn-secondary" style="width:120px;" onclick="nextCard()">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PHRASES VIEW -->
+        <div id="phrases-view" class="view">
+             <div class="module-header">
+                <button class="back-btn" onclick="openView('dashboard-view')">← Dashboard</button>
+                <div style="font-weight:600">Common Phrases</div>
+            </div>
+            <div class="module-content">
+                <div class="list-container" id="phrases-list-container">
+                    <!-- JS Injected -->
+                </div>
+            </div>
+        </div>
+
+        <!-- QUIZ VIEW -->
+        <div id="quiz-view" class="view">
+             <div class="module-header">
+                <button class="back-btn" onclick="openView('dashboard-view')">← Dashboard</button>
+                <div style="font-weight:600">Reading Quiz</div>
+            </div>
+            <div class="module-content">
+                <div class="quiz-box">
+                    <p id="quiz-content"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CYPRUS VIEW -->
+        <div id="cyprus-view" class="view">
+            <div class="module-header">
+               <button class="back-btn" onclick="openView('dashboard-view')">← Dashboard</button>
+               <div style="font-weight:600">Cyprus Exam Preparation</div>
+           </div>
+           <div class="module-content">
+               <div class="modules-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); padding:0;">
+                   <div class="tile" onclick="showToast('Listening Exercise...')">
+                       <div class="tile-icon">🎧</div><div class="tile-label">Listening</div>
+                   </div>
+                   <div class="tile" onclick="showToast('Reading Exercise...')">
+                        <div class="tile-icon">📖</div><div class="tile-label">Reading</div>
+                   </div>
+                   <div class="tile" onclick="showToast('Writing Exercise...')">
+                        <div class="tile-icon">✍️</div><div class="tile-label">Writing</div>
+                   </div>
+               </div>
+           </div>
+       </div>
+
+        <!-- TOAST -->
+        <div id="toast" class="toast"><span>🚀</span><span id="toast-msg">Action started</span></div>
+
+    </div>
+
+    <script>
+        // DATA
+        const vocab = [
+            { en: "Hello", gr: "Γεια σου", ex_en: "Hello friend", ex_gr: "Γεια σου φίλε" },
+            { en: "Thank you", gr: "Ευχαριστώ", ex_en: "Thank you very much", ex_gr: "Ευχαριστώ πολύ" },
+            { en: "Water", gr: "Νερό", ex_en: "I want water", ex_gr: "Θέλω νερό" }
+        ];
+        const phrases = [
+            { en: "Good morning", gr: "Καλημέρα" },
+            { en: "How are you?", gr: "Τι κάνεις;" },
+            { en: "I'm fine", gr: "Είμαι καλά" }
+        ];
+        const quizText = `Σήμερα είναι μια όμορφη <u class="quiz-word" onclick="alert('Day')">μέρα</u>.`;
+
+        // STATE
+        let currentVocabIdx = 0;
+        let isFlipped = false;
+
+        // INIT
+        window.onload = () => {
+            // Login Animation
+            setTimeout(() => {
+                const overlay = document.getElementById('login-overlay');
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 500);
+            }, 1000);
+
+            // Load Data
+            loadPhrases();
+            document.getElementById('quiz-content').innerHTML = quizText;
+            updateCard();
+        };
+
+        // NAVIGATION
+        function openView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        // MODULE LOGIC
+        function loadPhrases() {
+            const container = document.getElementById('phrases-list-container');
+            container.innerHTML = phrases.map(p => `
+                <div class="list-item">
+                    <span style="color:#EDEDED">${p.en}</span>
+                    <span style="color:#007AFF; font-weight:700">${p.gr}</span>
+                </div>
+            `).join('');
+        }
+
+        // FLASHCARD
+        function updateCard() {
+            const v = vocab[currentVocabIdx];
+            document.getElementById('word-front').innerText = v.en;
+            document.getElementById('example-front').innerText = v.ex_en;
+            document.getElementById('word-back').innerText = v.gr;
+            document.getElementById('example-back').innerText = v.ex_gr;
+        }
+
+        function flipCard() {
+            const c = document.getElementById('flashcard');
+            isFlipped = !isFlipped;
+            isFlipped ? c.classList.add('flipped') : c.classList.remove('flipped');
+        }
+
+        function nextCard() {
+            if (currentVocabIdx < vocab.length - 1) {
+                currentVocabIdx++;
+                resetCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentVocabIdx > 0) {
+                currentVocabIdx--;
+                resetCard();
+            }
+        }
+
+        function resetCard() {
+            isFlipped = false;
+            document.getElementById('flashcard').classList.remove('flipped');
+            setTimeout(updateCard, 300);
+        }
+    </script>
 </body>
 </html>
