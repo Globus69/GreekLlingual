@@ -44,25 +44,7 @@
         .tile { background: rgba(255, 0, 255, 0.1) !important; border: 1px dotted magenta; }
         */
 
-        /* Debug Labels */
-        header::before { content: "1"; position: absolute; top: 5px; left: 5px; background: red; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; z-index: 9999; animation: blink 1s infinite; }
-        .hero-section::before { content: "2"; position: absolute; top: 5px; left: 5px; background: green; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; z-index: 9999; animation: blinkColorful 1s infinite; }
-        .stats-card::before { content: "3"; position: absolute; top: 5px; left: 5px; background: blue; color: white; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; z-index: 9999; animation: blink 1s infinite; }
-        .actions-group::before { content: "4"; position: absolute; top: 5px; left: 5px; background: #cccc00; color: black; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; z-index: 9999; animation: blink 1s infinite; }
-        .modules-grid::before { content: "5"; position: absolute; top: 5px; left: 5px; background: cyan; color: black; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; z-index: 9999; animation: blink 1s infinite; }
 
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.3; }
-        }
-
-        @keyframes blinkColorful {
-            0% { background: green; opacity: 1; }
-            25% { background: yellow; opacity: 1; }
-            50% { background: orange; opacity: 0.3; }
-            75% { background: red; opacity: 1; }
-            100% { background: green; opacity: 1; }
-        }
 
         /* HEADER */
         header {
@@ -267,7 +249,7 @@
         .modules-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 28px;
+            gap: 2px;
             padding: 10px 0 32px 0;
             overflow-y: auto;
             flex: 1;
@@ -402,7 +384,7 @@
                                 <button class="btn btn-primary" style="background:#FF5722;" onclick="showToast('📖 Starting Comprehension...')"><span>📖</span> Comprehension</button>
                             </div>
                             <div class="grid-cell">
-                                <button class="btn btn-primary" style="background:#9C27B0;" onclick="showToast('📚 Opening Stories...')"><span>📚</span> Stories</button>
+                                <button class="btn btn-primary" style="background:#FF9800 !important;" onclick="showToast('📝 Starting Exam Test...')"><span>📝</span> Exam Test</button>
                             </div>
                             <div class="grid-cell">
                                 <button class="btn btn-secondary" onclick="showToast('⚡️ Quick Lesson Started')"><span>⚡️</span> 20 min Quick Lesson</button>
@@ -450,6 +432,9 @@
                     </div>
                     <div class="tile" onclick="showToast('Library coming soon')">
                         <div class="tile-icon">📚</div><div class="tile-label">Library</div>
+                    </div>
+                    <div class="tile" onclick="showToast('📚 Opening Stories...')">
+                        <div class="tile-icon">📚</div><div class="tile-label">Stories</div><div class="tile-sub">Short Stories</div>
                     </div>
                 </div>
             </div>
