@@ -1,3 +1,16 @@
+# GreekLingua – Prompt: Dashboard – Styling des Progress-Rings (conic-gradient)
+
+**Projekt**: GreekLingua (HellenicHorizons)  
+**Zweck dieses Prompts**: Schöner, macOS-ähnlicher Fortschrittsring in der .mastery-box (Learning Mastery), mit conic-gradient, Prozent-Anzeige und Text, später dynamisch via JS  
+**Priorität**: Hoch  
+**Erstellt**: 21. Januar 2026  
+**Status**: An Antigravity gesendet – Ergebnis ausstehend  
+**Entwicklungsumgebung**: Läuft aktuell auf http://localhost:3001 (npm run dev -p 3001)  
+**Ziel**: Visuell ansprechender Ring (blauer Gradient), Integration in .mastery-box, responsive Skalierung
+
+## Prompt-Inhalt (kopiert und an Antigravity gesendet)
+
+
 Du arbeitest an GreekLingua Dashboard – speziell am Progress-Ring in der .mastery-box (Learning Mastery).
 
 Aufgabe: Implementiere einen schönen, macOS-ähnlichen Progress-Ring mit conic-gradient (aktuell 38 % zum B1-Ziel).

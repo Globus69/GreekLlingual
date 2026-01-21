@@ -7,6 +7,12 @@
 **Ordner für Prompts**: `_PROMPTS_`  
 **Stand**: 21. Januar 2026
 
+**Site-Struktur**  
+- Aktuell: SPA mit View-Switching (index.html, style.css, script.js)  
+- Entwicklung: Läuft auf http://localhost:3001 (npm run dev -p 3001)  
+- Geplant: Next.js 14/15 (src/app/, src/components/, src/db/)
+
+
 ## 1. Bereits ausgeführte / getestete Prompts
 
 - **Dashboard Initial (Mock-up 1)**  

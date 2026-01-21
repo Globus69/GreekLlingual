@@ -3,166 +3,214 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/db/supabase';
-import { useAuth } from '@/context/AuthContext';
 import Flashcard from '@/components/learning/Flashcard';
-import { calculateSM2, getNextDueDate } from '@/lib/srt/sm2';
 import '@/styles/liquid-glass.css';
 
-interface Vocab {
-    id: string;
-    term: string;
-    translation: string;
-    example_sentence_term: string;
-    example_sentence_translation: string;
-    repetition_count: number;
-    ease_factor: number;
-    current_interval: number;
+interface LearningItem {
+    id: number;
+    type: string;
+    english: string;
+    greek: string;
+    example_en: string | null;
+    example_gr: string | null;
+    audio_url: string | null;
+    created_at: string;
 }
 
+interface StudentProgress {
+    id: number;
+    student_id: string;
+    item_id: number;
+    interval_days: number;
+    ease_factor: number;
+    attempts: number;
+    correct_count: number;
+    last_attempt: string | null;
+    next_review: string | null;
+}
+
+interface VocabWithProgress extends LearningItem {
+    student_progress?: StudentProgress[];
+}
+
+const STUDENT_ID = 'demo-student-id';
+
 export default function VokabelnPage() {
-    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
-    const [vocabs, setVocabs] = useState<Vocab[]>([]);
+    const [vocabulary, setVocabulary] = useState<VocabWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [finished, setFinished] = useState(false);
+    const [totalDue, setTotalDue] = useState(0);
 
     useEffect(() => {
-        if (!authLoading && !user) {
-            router.push('/login');
-            return;
-        }
+        fetchVocabulary();
+    }, []);
 
-        if (user) {
-            fetchDueVocabs();
-        }
-    }, [user, authLoading, router]);
-
-    const fetchDueVocabs = async () => {
+    const fetchVocabulary = async () => {
         setLoading(true);
         try {
-            // First, try to fetch due vocabs
             const { data, error } = await supabase
-                .from('vocabs')
-                .select('*')
-                .lte('due_date', new Date().toISOString())
-                .limit(10);
+                .from('learning_items')
+                .select(`
+                    *,
+                    student_progress!left(*)
+                `)
+                .eq('type', 'vocabulary')
+                .order('next_review', { foreignTable: 'student_progress', ascending: true, nullsFirst: true })
+                .limit(20);
 
-            if (error) throw error;
-
-            if (data && data.length > 0) {
-                setVocabs(data);
+            if (error) {
+                console.error("Error fetching vocabs:", error);
+                setVocabulary(getDemoVocabs());
+            } else if (data && data.length > 0) {
+                setVocabulary(data as VocabWithProgress[]);
+                setTotalDue(data.length);
             } else {
-                // If no due vocabs, fetch some new ones (or random for now)
-                const { data: newData, error: newError } = await supabase
-                    .from('vocabs')
-                    .select('*')
-                    .limit(5);
-
-                if (newError) throw newError;
-                setVocabs(newData || []);
+                setVocabulary(getDemoVocabs());
             }
         } catch (err) {
-            console.error("Error fetching vocabs:", err);
-            // Fallback for demo purposes if DB is empty
-            setVocabs([
-                {
-                    id: '1',
-                    term: 'Hello',
-                    translation: 'Γεια σου',
-                    example_sentence_term: 'Hello friend',
-                    example_sentence_translation: 'Γεια σου φίλε',
-                    repetition_count: 0,
-                    ease_factor: 2.5,
-                    current_interval: 0
-                },
-                {
-                    id: '2',
-                    term: 'Thank you',
-                    translation: 'Ευχαριστώ',
-                    example_sentence_term: 'Thank you very much',
-                    example_sentence_translation: 'Ευχαριστώ πολύ',
-                    repetition_count: 0,
-                    ease_factor: 2.5,
-                    current_interval: 0
-                }
-            ]);
+            console.error("Fetch error:", err);
+            setVocabulary(getDemoVocabs());
         } finally {
             setLoading(false);
         }
     };
 
+    const getDemoVocabs = (): VocabWithProgress[] => [
+        {
+            id: 1,
+            type: 'vocabulary',
+            english: 'Hello',
+            greek: 'Γεια σου',
+            example_en: 'Hello friend',
+            example_gr: 'Γεια σου φίλε',
+            audio_url: null,
+            created_at: new Date().toISOString()
+        },
+        {
+            id: 2,
+            type: 'vocabulary',
+            english: 'Thank you',
+            greek: 'Ευχαριστώ',
+            example_en: 'Thank you very much',
+            example_gr: 'Ευχαριστώ πολύ',
+            audio_url: null,
+            created_at: new Date().toISOString()
+        },
+        {
+            id: 3,
+            type: 'vocabulary',
+            english: 'Water',
+            greek: 'Νερό',
+            example_en: 'I want water',
+            example_gr: 'Θέλω νερό',
+            audio_url: null,
+            created_at: new Date().toISOString()
+        }
+    ];
+
     const handleScore = async (quality: number) => {
-        const currentVocab = vocabs[currentIndex];
+        const item = vocabulary[currentIndex];
+        const progress = item.student_progress?.[0] || {
+            interval_days: 1.0,
+            ease_factor: 2.5,
+            attempts: 0,
+            correct_count: 0
+        };
 
-        // Calculate new SRT values
-        const { interval, repetitionCount, easeFactor } = calculateSM2(
-            quality,
-            currentVocab.repetition_count,
-            currentVocab.ease_factor,
-            currentVocab.current_interval
-        );
+        let newInterval = progress.interval_days;
+        let newEase = progress.ease_factor;
 
-        const nextDueDate = getNextDueDate(interval);
+        if (quality === 1) {
+            newInterval = 1;
+        } else {
+            newInterval = Math.round(progress.interval_days * quality);
+            if (quality > 2.5) newEase += 0.1;
+        }
 
-        // Update Supabase
+        const nextReview = new Date();
+        nextReview.setDate(nextReview.getDate() + newInterval);
+
         try {
             const { error } = await supabase
-                .from('vocabs')
-                .update({
-                    repetition_count: repetitionCount,
-                    ease_factor: easeFactor,
-                    current_interval: interval,
-                    due_date: nextDueDate.toISOString(),
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', currentVocab.id);
+                .from('student_progress')
+                .upsert({
+                    item_id: item.id,
+                    student_id: STUDENT_ID,
+                    attempts: progress.attempts + 1,
+                    correct_count: quality > 1 ? progress.correct_count + 1 : progress.correct_count,
+                    last_attempt: new Date().toISOString(),
+                    next_review: nextReview.toISOString(),
+                    interval_days: newInterval,
+                    ease_factor: newEase
+                });
 
             if (error) console.error("Update error:", error);
         } catch (err) {
             console.error("Failed to update SRT data:", err);
         }
 
-        // Move to next card
-        if (currentIndex < vocabs.length - 1) {
+        if (currentIndex < vocabulary.length - 1) {
             setCurrentIndex(currentIndex + 1);
         } else {
             setFinished(true);
         }
     };
 
-    if (authLoading || loading) {
-        return <div className="login-overlay"><h1 style={{ color: 'white' }}>🏛️ Preparing Lesson...</h1></div>;
-    }
-
-    if (finished || vocabs.length === 0) {
+    if (loading) {
         return (
-            <div className="login-overlay" style={{ flexDirection: 'column', gap: '20px' }}>
-                <h1 style={{ color: 'white' }}>🎉 Lesson Complete!</h1>
-                <p style={{ color: '#8E8E93' }}>You've finished all your scheduled reviews for now.</p>
-                <button className="btn btn-primary" onClick={() => router.push('/dashboard')}>Back to Dashboard</button>
+            <div className="login-overlay">
+                <h1 style={{ color: 'white' }}>🏛️ Loading Vocabulary...</h1>
             </div>
         );
     }
 
-    const currentVocab = vocabs[currentIndex];
+    if (finished || vocabulary.length === 0) {
+        return (
+            <div className="login-overlay" style={{ flexDirection: 'column', gap: '20px' }}>
+                <h1 style={{ color: 'white' }}>🎉 Session Complete!</h1>
+                <p style={{ color: '#8E8E93', fontSize: '16px' }}>
+                    {vocabulary.length === 0
+                        ? "No vocabulary items available. Please add some to the database."
+                        : `You've reviewed ${vocabulary.length} cards today!`
+                    }
+                </p>
+                <button
+                    className="btn btn-primary"
+                    onClick={() => router.push('/dashboard')}
+                    style={{ padding: '14px 32px', fontSize: '16px' }}
+                >
+                    Back to Dashboard
+                </button>
+            </div>
+        );
+    }
+
+    const currentVocab = vocabulary[currentIndex];
 
     return (
-        <div className="dashboard-layout">
-            <header>
-                <button className="back-btn" onClick={() => router.push('/dashboard')}>← Dashboard</button>
-                <div style={{ fontWeight: 600 }}>Vocabulary Session</div>
-                <div className="progress-container">
-                    {currentIndex + 1} / {vocabs.length}
+        <div id="app" className="dashboard-layout">
+            <header className="app-header" style={{ padding: '20px 60px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <button
+                    className="back-btn"
+                    onClick={() => router.push('/dashboard')}
+                    style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: '#007AFF', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer' }}
+                >
+                    ← Dashboard
+                </button>
+                <div style={{ fontWeight: 600, fontSize: '18px', color: '#fff' }}>Vocabulary Flashcards</div>
+                <div className="progress-container" style={{ background: '#1C1C1E', padding: '8px 16px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, color: '#8E8E93' }}>
+                    {currentIndex + 1} / {vocabulary.length} {totalDue > 0 && `(${totalDue} due)`}
                 </div>
             </header>
 
-            <main className="dashboard-content">
+            <main className="dashboard-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, overflow: 'hidden' }}>
                 <Flashcard
-                    term={currentVocab.term}
-                    translation={currentVocab.translation}
-                    exampleTerm={currentVocab.example_sentence_term}
-                    exampleTranslation={currentVocab.example_sentence_translation}
+                    term={currentVocab.english}
+                    translation={currentVocab.greek}
+                    exampleTerm={currentVocab.example_en || ''}
+                    exampleTranslation={currentVocab.example_gr || ''}
                     onScore={handleScore}
                 />
             </main>

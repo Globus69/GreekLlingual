@@ -19,12 +19,12 @@ interface ActionTileProps {
 function ActionTile({ icon, label, primary, onClick }: ActionTileProps) {
     return (
         <div
-            className="action-tile-clean"
+            className="action-tile-clean debug-button"
             onClick={onClick}
             style={primary ? { borderColor: 'rgba(0, 122, 255, 0.4)', background: 'rgba(0, 122, 255, 0.03)' } : {}}
         >
             <div className="at-icon">{icon}</div>
-            <div className="at-label">{label}</div>
+            <div className="at-label debug-text">{label}</div>
         </div>
     );
 }
@@ -57,26 +57,26 @@ export default function DashboardPage() {
     return (
         <div id="app" className="dashboard-layout">
             <DashboardHeader />
-            <main className="dashboard-content debug-flex">
-                <div className="hero-section debug-flex" style={{ height: 'auto', flex: '0 0 auto' }}>
+            <main className="dashboard-content debug-box">
+                <div className="hero-section debug-box" style={{ height: 'auto', flex: '0 0 auto' }}>
                     <StatsCard />
                     {/* Hero Right Side (Welcome / quick info) can go here if needed, 
                         or we can keep it cleaner as per new design focus on footer */}
-                    <div className="action-area debug-flex" style={{ alignItems: 'flex-start', paddingLeft: '20px' }}>
-                        <h2 style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#fff' }}>Welcome back, SWS! 🏛️</h2>
-                        <p style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}>
+                    <div className="action-area debug-box" style={{ alignItems: 'flex-start', paddingLeft: '20px' }}>
+                        <h2 className="debug-text" style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#fff' }}>Welcome back, SWS! 🏛️</h2>
+                        <p className="debug-text" style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}>
                             Ready to continue your journey? You have <b>12 new vocabulary cards</b> waiting for review today.
                         </p>
                     </div>
                 </div>
 
-                <div className="dashboard-footer-area debug-flex">
+                <div className="dashboard-footer-area debug-box">
                     {/* LEFT: MASTERY BOX */}
-                    <div className="mastery-box debug-flex">
+                    <div className="mastery-box debug-box">
                         <div className="mastery-header">
                             <div>
-                                <div className="mastery-title">Learning Mastery</div>
-                                <div style={{ color: '#8E8E93', marginTop: '4px', fontSize: '15px' }}>Performance Hub Overview</div>
+                                <div className="mastery-title debug-text">Learning Mastery</div>
+                                <div className="debug-text" style={{ color: '#8E8E93', marginTop: '4px', fontSize: '15px' }}>Performance Hub Overview</div>
                             </div>
                             <div className="progress-ring-container">
                                 <div className="progress-ring-bg"></div>
@@ -84,7 +84,7 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        <div className="performance-mini-tiles debug-grid">
+                        <div className="performance-mini-tiles debug-box">
                             <div className="mini-tile">
                                 <span className="m-val">🔥 5 Days</span>
                                 <span className="m-lbl">Current Streak</span>
@@ -105,7 +105,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
-                    <div className="quick-actions-grid debug-grid">
+                    <div className="quick-actions-grid debug-box">
                         <ActionTile icon="✨" label="Magic Round" primary />
                         <ActionTile icon="⚡" label="20 min Quick Lesson" />
                         <ActionTile icon="🔄" label="Review Vocabulary" onClick={() => router.push('/vokabeln')} />

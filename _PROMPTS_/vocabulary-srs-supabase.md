@@ -1,8 +1,14 @@
-- **Vokabeln SRS + Supabase**  
-  Aufgabe: Implementiere das Vokabeln-Modul vollständig mit Supabase + SRS.
-  Datei: `vocabulary-srs-supabase-2026-01-21.md`  
-  Status: in Arbeit
+# GreekLingua – Prompt: Vokabeln-Modul mit SRS + Supabase-Anbindung
 
+**Projekt**: GreekLingua (HellenicHorizons)  
+**Zweck dieses Prompts**: Vollständige Implementierung des Vokabeln-Moduls mit dynamischem Laden aus Supabase, Flip-Cards, Bewertung (Schwer/Gut/Sehr gut) und einfachem Spaced-Repetition-System (SRS)  
+**Priorität**: Hoch  
+**Erstellt**: 21. Januar 2026  
+**Status**: An Antigravity gesendet – Ergebnis ausstehend  
+**Entwicklungsumgebung**: Läuft aktuell auf http://localhost:3001 (npm run dev -p 3001)  
+**Ziel**: Nahtlose Integration in bestehende .view#vocabulary-view, Wiederverwendung von .card, .flipped, .control-btn Klassen
+
+## Prompt-Inhalt (kopiert und an Antigravity gesendet)
 
 Du arbeitest an GreekLingua – einer Web-Lern-App (HTML/CSS/JS + Supabase).
 
