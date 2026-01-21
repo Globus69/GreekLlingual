@@ -9,8 +9,8 @@ export default function ActionGrid() {
     };
 
     return (
-        <div className="actions-group">
-            <div className="actions-inner-grid">
+        <div className="actions-group debug-flex">
+            <div className="actions-inner-grid debug-grid">
                 <div className="grid-cell">
                     <button className="btn btn-primary glass" onClick={() => showToast('✨ Preparing Magic Round...')}>
                         <span>✨</span> Start Magic Round

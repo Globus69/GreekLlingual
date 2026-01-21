@@ -16,7 +16,7 @@ export default function PerformanceHub() {
     const maxCount = Math.max(...data.map(d => d.count));
 
     return (
-        <div className="tile" style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '30px' }}>
+        <div className="tile debug-flex" style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '30px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '24px' }}>
                 <div>
                     <div style={{ fontSize: '13px', color: '#8E8E93', fontWeight: 600, textTransform: 'uppercase' }}>Learning Mastery</div>

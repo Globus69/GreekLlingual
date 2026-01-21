@@ -24,7 +24,7 @@ export default function ModuleGrid() {
     };
 
     return (
-        <div className="modules-grid">
+        <div className="modules-grid debug-grid">
             <PerformanceHub />
             {modules.map((m) => (
                 <div key={m.id} className="tile" onClick={() => handleModuleClick(m.id)}>

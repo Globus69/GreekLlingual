@@ -37,8 +37,8 @@ export default function DashboardPage() {
     return (
         <div id="app" className="dashboard-layout">
             <DashboardHeader />
-            <main className="dashboard-content">
-                <div className="hero-section">
+            <main className="dashboard-content debug-flex">
+                <div className="hero-section debug-flex">
                     <StatsCard />
                     <ActionGrid />
                 </div>
