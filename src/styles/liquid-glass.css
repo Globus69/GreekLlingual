@@ -86,7 +86,7 @@ html,
 }
 
 .mastery-total-time {
-    font-size: 32px;
+    font-size: 26px;
     font-weight: 800;
     color: #fff;
     margin-bottom: 12px;
@@ -719,105 +719,7 @@ header {
     }
 }
 
-/* ========================================
-   DEBUG VISUALIZER (_DEBUG.md)
-   ======================================== */
 
-:root {
-    --debug-box: #FF3B30;
-    /* 🔴 Red for Boxes/Containers */
-    --debug-button: #34C759;
-    /* 🟢 Green for Buttons */
-    --debug-text: #FFD60A;
-    /* 🟡 Yellow for Text Fields */
-}
-
-body {
-    counter-reset: box-id button-id text-id;
-}
-
-/* 🔴 RED: Boxes/Containers with Numbers */
-.debug-box {
-    outline: 2px solid var(--debug-box) !important;
-    position: relative;
-    counter-increment: box-id;
-}
-
-.debug-box::after {
-    content: "BOX " counter(box-id);
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: var(--debug-box);
-    color: white;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 4px 8px;
-    z-index: 9999;
-    border-bottom-left-radius: 6px;
-    pointer-events: none;
-    line-height: 1;
-    font-family: 'SF Mono', monospace;
-    letter-spacing: 0.5px;
-}
-
-/* 🟢 GREEN: Buttons with Numbers */
-.debug-button {
-    outline: 2px solid var(--debug-button) !important;
-    position: relative;
-    counter-increment: button-id;
-}
-
-.debug-button::after {
-    content: "BTN " counter(button-id);
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: var(--debug-button);
-    color: white;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 4px 8px;
-    z-index: 9999;
-    border-bottom-right-radius: 6px;
-    pointer-events: none;
-    line-height: 1;
-    font-family: 'SF Mono', monospace;
-    letter-spacing: 0.5px;
-}
-
-/* �� YELLOW: Text Fields with Numbers */
-.debug-text {
-    outline: 2px solid var(--debug-text) !important;
-    position: relative;
-    counter-increment: text-id;
-}
-
-.debug-text::after {
-    content: "TXT " counter(text-id);
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: var(--debug-text);
-    color: #000;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 4px 8px;
-    z-index: 9999;
-    border-top-left-radius: 6px;
-    pointer-events: none;
-    line-height: 1;
-    font-family: 'SF Mono', monospace;
-    letter-spacing: 0.5px;
-}
-
-/* Legacy compatibility - NO counter increment to avoid duplicates */
-.debug-flex,
-.debug-grid {
-    outline: 2px solid var(--debug-box) !important;
-    position: relative;
-    /* Removed counter-increment to prevent duplicate box numbers */
-}
 
 /* ========================================
    VOCABULARY DIALOG V3 (Ultra-Compact)

@@ -21,12 +21,12 @@ interface ActionTileProps {
 function ActionTile({ icon, label, primary, onClick }: ActionTileProps) {
     return (
         <div
-            className="action-tile-clean debug-button"
+            className="action-tile-clean"
             onClick={onClick}
             style={primary ? { borderColor: 'rgba(0, 122, 255, 0.4)', background: 'rgba(0, 122, 255, 0.03)' } : {}}
         >
             <div className="at-icon">{icon}</div>
-            <div className="at-label debug-text">{label}</div>
+            <div className="at-label">{label}</div>
         </div>
     );
 }
@@ -84,23 +84,23 @@ export default function DashboardPage() {
         <div id="app" className="dashboard-layout">
             <DashboardHeader />
             <main className="dashboard-content">
-                <div className="hero-section debug-box" style={{ height: 'auto', flex: '0 0 auto' }}>
+                <div className="hero-section" style={{ height: 'auto', flex: '0 0 auto' }}>
                     <StatsCard />
                     {/* Hero Right Side (Welcome / quick info) can go here if needed, 
                         or we can keep it cleaner as per new design focus on footer */}
                     <div className="action-area" style={{ alignItems: 'flex-start', paddingLeft: '20px' }}>
-                        <h2 className="debug-text" style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#fff' }}>Welcome back, SWS! 🏛️</h2>
-                        <p className="debug-text" style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}>
+                        <h2 style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#fff' }}>Welcome back, SWS! 🏛️</h2>
+                        <p style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}>
                             Ready to continue your journey? You have <b>12 new vocabulary cards</b> waiting for review today.
                         </p>
                     </div>
                 </div>
 
-                <div className="dashboard-footer-area debug-box">
+                <div className="dashboard-footer-area">
                     {/* LEFT: MASTERY BOX (PIMPED) */}
-                    <div className="mastery-box debug-box">
-                        <div className="mastery-title-v3 debug-text">Learning Mastery</div>
-                        <div className="mastery-total-time debug-text">Gesamt gelernt: 14.5 Stunden</div>
+                    <div className="mastery-box">
+                        <div className="mastery-title-v3">Learning Mastery</div>
+                        <div className="mastery-total-time">Total time spent learning: 14.5 hours</div>
 
                         <div className="mastery-stats-row">
                             <div className="mastery-bar-container">
@@ -142,8 +142,8 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="vocab-progress-section">
-                            <div className="vocab-status-text debug-text">
-                                <b>187 / 600</b> Vokabeln sicher – 413 brauchen Aufmerksamkeit
+                            <div className="vocab-status-text">
+                                <b>187 / 600</b> Vocabulary confidently – 413 require attention
                             </div>
                             <div className="vocab-bar-dual">
                                 <div className="vocab-bar-learned" style={{ width: '31%' }}></div>
@@ -151,30 +151,30 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        <div className="mastery-suggestion debug-text">
+                        <div className="mastery-suggestion">
                             Suggestion for today: 12 new vocabulary cards + 1 short text about Cyprus.
                         </div>
                     </div>
 
                     {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
-                    <div className="quick-actions-grid debug-box">
+                    <div className="quick-actions-grid">
                         <ActionTile icon="✨" label="Magic Round" primary />
                         <ActionTile icon="⚡" label="20 min Quick Lesson" />
-                        <ActionTile icon="🔄" label="Review Vocabulary" onClick={() => setIsVocabDialogOpen(true)} />
-                        <ActionTile icon="📅" label="Due Cards Today" />
+                        <ActionTile icon="💬" label="Daily Phrases" />
+                        <ActionTile icon="📚" label="Short Stories" />
 
                         <ActionTile icon="⚠️" label="Train Weak Words" />
-                        <ActionTile icon="🏛️" label="Cyprus Exam Sim" />
-                        <ActionTile icon="💬" label="Daily Phrases" />
-                        <ActionTile icon="🎧" label="Audio Immersion" />
+                        <ActionTile icon="🔄" label="Review Vocabulary" onClick={() => setIsVocabDialogOpen(true)} />
+                        <ActionTile icon="📅" label="Due Cards Today" />
+                        <ActionTile icon="📐" label="Grammar Quick Hits" />
 
-                        <ActionTile icon="📖✍️" label="Read & Write" />
-                        <ActionTile icon="📚" label="Short Stories" />
                         <ActionTile icon="👂" label="Listening Practice" />
                         <ActionTile icon="🗣️" label="Pronunciation Trainer" />
+                        <ActionTile icon="🧠" label="Comprehension" />
+                        <ActionTile icon="🎧" label="Audio Immersion" />
 
-                        <ActionTile icon="📐" label="Grammar Quick Hits" />
-                        <ActionTile icon="🗨️" label="Conversation Starters" />
+                        <ActionTile icon="📝" label="Test" />
+                        <ActionTile icon="🏛️" label="Cyprus Exam Sim" />
                         <ActionTile icon="📕" label="Book Recommendations" />
                         <ActionTile icon="📊" label="Progress History" />
                     </div>
