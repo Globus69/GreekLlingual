@@ -8,13 +8,14 @@ früfe, ob die folgenden .md Dateinen im Projkt vollständig umgesetzt sind.
 - **2. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/dashboard-progress-ring-conic.md**
 - **3. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/prompts-overview.md**
 - **4. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/vocabulary-srs-supabase.md**
-5. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/vocabulary-dialog-compact-srs-improvements.md
-- **!!! nicht gut umgesetzt !!! 6. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/ocabulary-dialog-improvements-v2.md**
-7. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/ocabulary-dialog-improvements-v3.md
-8. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/dashboard-mastery-box-improvements.md
+- **5. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/vocabulary-dialog-compact-srs-improvements.md**
+- **!!! nicht gut umgesetzt !!! 6. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/vocabulary-dialog-improvements-v2.md**
+- **7. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/vocabulary-dialog-improvements-v3.md**
+- **8. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/dashboard-mastery-box-improvements.md**
+- **9. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/vocabulary-dialog-improvements-v4.md**
 
 
-Erstelle eine Übersicht. 
+**Erstelle eine Übersicht. 
 
-und füge die Übersicht ein.
+und füge die Übersicht ein.**
 
