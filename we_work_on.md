@@ -30,11 +30,10 @@
 - [x] Implement `upsert` logic for `student_progress` tracking.
 
 ### 4. UI & Navigation
-- [ ] Implement `.back-btn` logic to return to Dashboard.
-- [ ] Add progress indicator ("X/Y fällig").
-- [ ] Ensure seamless transition between `.view` elements.
+- [x] Implement `.back-btn` logic to return to Dashboard.
+- [x] Add progress indicator ("X/Y fällig").
+- [x] Ensure seamless transition between `.view` elements.
 
-### 5. Final Polishing
-- [ ] Verify macOS Dark Mode styling.
-- [ ] Conduct functional testing with live Supabase data.
-- [ ] Document JavaScript/React logic for user review.
+### 6. Debug & Layout Audit
+- [x] Implement Debug Mapping (Numbers for Frames/Flex/Grid).
+- [ ] Visual Audit: Verify containment and alignment.

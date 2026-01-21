@@ -356,7 +356,7 @@
 
     <div id="app">
         <!-- HEADER (Shared) -->
-        <header>
+        <header class="debug-flex">
             <div class="brand"><span class="brand-icon">🏛️</span> GreekLingua</div>
             <div class="datetime-display" id="datetime">20.01.2026 21:53:05</div>
             <div class="user-profile"><div class="avatar">SW</div><span class="username">SWS</span></div>
@@ -364,9 +364,9 @@
 
         <!-- DASHBOARD VIEW -->
         <div id="dashboard-view" class="view active">
-            <div class="dashboard-content">
-                <div class="hero-section">
-                    <div class="stats-card">
+            <div class="dashboard-content debug-flex">
+                <div class="hero-section debug-flex">
+                    <div class="stats-card debug-flex">
                         <div class="stats-top">
                             <div><div class="level-label">Current Level</div><div class="level-badge">B1</div></div>
                             <div class="streak"><span>🔥</span> 5 Days</div>
@@ -377,8 +377,8 @@
                         </div>
                         <div class="stats-footer"><i>Today:</i> 12 new vocabs & 1 short text.</div>
                     </div>
-                    <div class="actions-group">
-                        <div class="actions-inner-grid">
+                    <div class="actions-group debug-flex">
+                        <div class="actions-inner-grid debug-grid">
                             <div class="grid-cell">
                                 <button class="btn btn-primary" onclick="showToast('✨ Preparing Magic Round...')"><span>✨</span> Start Magic Round</button>
                             </div>
@@ -410,7 +410,7 @@
                     </div>
                 </div>
 
-                <div class="modules-grid">
+                <div class="modules-grid debug-grid">
                     <div class="tile active" onclick="openView('vokabeln-view')">
                         <div class="tile-icon">📝</div><div class="tile-label">Vokabeln</div><div class="tile-sub">12 Due</div>
                     </div>
@@ -444,13 +444,13 @@
 
         <!-- VOKABELN VIEW -->
         <div id="vokabeln-view" class="view">
-            <div class="module-header">
+            <div class="module-header debug-flex">
                 <button class="back-btn" onclick="openDashboard()">← Dashboard</button>
                 <div class="progress-container" id="vocab-progress">Lade Daten...</div>
                 <div style="font-weight:600">Vocabulary Flashcards</div>
             </div>
-            <div class="module-content">
-                <div class="card-area">
+            <div class="module-content debug-flex">
+                <div class="card-area debug-flex">
                     <div class="card-wrapper">
                         <div class="card" id="flashcard" onclick="flipCard()">
                             <div class="card-face card-front">
@@ -466,13 +466,13 @@
                             </div>
                         </div>
 
-                        <div class="rating-bar">
+                        <div class="rating-bar debug-flex">
                             <button class="control-btn outline" onclick="rateVocab(1)">🔴 Schwer</button>
                             <button class="control-btn primary" onclick="rateVocab(2.5)">🟡 Gut</button>
                             <button class="control-btn primary" style="background:#34C759;" onclick="rateVocab(3)">🟢 Sehr gut</button>
                         </div>
                     </div>
-                    <div class="controls-bar" id="nav-controls">
+                    <div class="controls-bar debug-flex" id="nav-controls">
                         <button class="btn btn-secondary" style="width:120px;" id="prev-btn" onclick="prevCard()">Prev</button>
                         <button class="btn btn-primary" style="width:160px;" onclick="flipCard()">Flip</button>
                         <button class="btn btn-secondary" style="width:120px;" id="next-btn" onclick="nextCard()">Next</button>
