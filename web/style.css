@@ -846,31 +846,64 @@ body {
     color: #FF554A;
 }
 
-/* Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Vocabulary Module Enhancements */
+.progress-container {
+    padding: 10px 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-sub);
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+.rating-bar {
+    display: none;
+    gap: 16px;
+    margin-top: 20px;
+    animation: fadeIn 0.3s ease;
 }
 
-/* Responsive */
+.card.flipped~.rating-bar {
+    display: flex;
+}
+
+.control-btn {
+    padding: 12px 24px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+}
+
+.control-btn.outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+}
+
+.control-btn.primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.control-btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.control-btn.primary:hover {
+    background: #1a8aff;
+}
+
 @media (max-width: 768px) {
+
+    /* ... (rest of the existing media query) */
     .dashboard-hero {
         padding: 30px 20px;
         gap: 24px;

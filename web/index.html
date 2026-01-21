@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GreekLingua Dashboard</title>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-body: #0F0F11;
@@ -443,7 +445,8 @@
         <!-- VOKABELN VIEW -->
         <div id="vokabeln-view" class="view">
             <div class="module-header">
-                <button class="back-btn" onclick="openView('dashboard-view')">← Dashboard</button>
+                <button class="back-btn" onclick="openDashboard()">← Dashboard</button>
+                <div class="progress-container" id="vocab-progress">Lade Daten...</div>
                 <div style="font-weight:600">Vocabulary Flashcards</div>
             </div>
             <div class="module-content">
@@ -452,21 +455,27 @@
                         <div class="card" id="flashcard" onclick="flipCard()">
                             <div class="card-face card-front">
                                 <span class="lang-label">ENGLISH</span>
-                                <div class="main-word" id="word-front">Hello</div>
+                                <div class="main-word" id="word-front">...</div>
                                 <div class="example-sentence" id="example-front">...</div>
                                 <div class="flip-hint">Click to flip</div>
                             </div>
                             <div class="card-face card-back">
                                 <span class="lang-label">ΕΛΛΗΝΙΚΑ</span>
-                                <div class="main-word" id="word-back">Γεια σου</div>
+                                <div class="main-word" id="word-back">...</div>
                                 <div class="example-sentence" id="example-back">...</div>
                             </div>
                         </div>
+
+                        <div class="rating-bar">
+                            <button class="control-btn outline" onclick="rateVocab(1)">🔴 Schwer</button>
+                            <button class="control-btn primary" onclick="rateVocab(2.5)">🟡 Gut</button>
+                            <button class="control-btn primary" style="background:#34C759;" onclick="rateVocab(3)">🟢 Sehr gut</button>
+                        </div>
                     </div>
-                    <div class="controls-bar">
-                        <button class="btn btn-secondary" style="width:120px;" onclick="prevCard()">Prev</button>
+                    <div class="controls-bar" id="nav-controls">
+                        <button class="btn btn-secondary" style="width:120px;" id="prev-btn" onclick="prevCard()">Prev</button>
                         <button class="btn btn-primary" style="width:160px;" onclick="flipCard()">Flip</button>
-                        <button class="btn btn-secondary" style="width:120px;" onclick="nextCard()">Next</button>
+                        <button class="btn btn-secondary" style="width:120px;" id="next-btn" onclick="nextCard()">Next</button>
                     </div>
                 </div>
             </div>
