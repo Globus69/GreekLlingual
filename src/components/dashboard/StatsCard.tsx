@@ -18,7 +18,7 @@ export default function StatsCard({
     dailyGoalText = "12 new vocabs & 1 short text."
 }: StatsCardProps) {
     return (
-        <div className="stats-card debug-flex">
+        <div className="stats-card debug-box">
             <div className="stats-top">
                 <div>
                     <div className="level-label">Current Level</div>

@@ -27,7 +27,7 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
     }, []);
 
     return (
-        <header className="debug-flex">
+        <header className="debug-box">
             <div className="brand">
                 <span className="brand-icon">🏛️</span>
                 GreekLingua {studentName && <span style={{ opacity: 0.6, fontSize: '0.8em', marginLeft: '8px' }}>• {studentName}'s Hub</span>}

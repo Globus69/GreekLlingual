@@ -8,6 +8,7 @@ import StatsCard from '@/components/dashboard/StatsCard';
 import ActionGrid from '@/components/dashboard/ActionGrid';
 import ModuleGrid from '@/components/dashboard/ModuleGrid';
 import '@/styles/liquid-glass.css';
+import VocabularyDialog from '@/components/learning/VocabularyDialog';
 
 interface ActionTileProps {
     icon: string;
@@ -33,6 +34,7 @@ export default function DashboardPage() {
     const { user, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const [isVocabDialogOpen, setIsVocabDialogOpen] = useState(false);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -57,12 +59,12 @@ export default function DashboardPage() {
     return (
         <div id="app" className="dashboard-layout">
             <DashboardHeader />
-            <main className="dashboard-content debug-box">
+            <main className="dashboard-content">
                 <div className="hero-section debug-box" style={{ height: 'auto', flex: '0 0 auto' }}>
                     <StatsCard />
                     {/* Hero Right Side (Welcome / quick info) can go here if needed, 
                         or we can keep it cleaner as per new design focus on footer */}
-                    <div className="action-area debug-box" style={{ alignItems: 'flex-start', paddingLeft: '20px' }}>
+                    <div className="action-area" style={{ alignItems: 'flex-start', paddingLeft: '20px' }}>
                         <h2 className="debug-text" style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#fff' }}>Welcome back, SWS! 🏛️</h2>
                         <p className="debug-text" style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}>
                             Ready to continue your journey? You have <b>12 new vocabulary cards</b> waiting for review today.
@@ -84,7 +86,7 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        <div className="performance-mini-tiles debug-box">
+                        <div className="performance-mini-tiles">
                             <div className="mini-tile">
                                 <span className="m-val">🔥 5 Days</span>
                                 <span className="m-lbl">Current Streak</span>
@@ -108,7 +110,7 @@ export default function DashboardPage() {
                     <div className="quick-actions-grid debug-box">
                         <ActionTile icon="✨" label="Magic Round" primary />
                         <ActionTile icon="⚡" label="20 min Quick Lesson" />
-                        <ActionTile icon="🔄" label="Review Vocabulary" onClick={() => router.push('/vokabeln')} />
+                        <ActionTile icon="🔄" label="Review Vocabulary" onClick={() => setIsVocabDialogOpen(true)} />
                         <ActionTile icon="📅" label="Due Cards Today" />
 
                         <ActionTile icon="⚠️" label="Train Weak Words" />
@@ -128,6 +130,12 @@ export default function DashboardPage() {
                     </div>
                 </div>
             </main>
+
+            {/* Vocabulary Dialog */}
+            <VocabularyDialog
+                isOpen={isVocabDialogOpen}
+                onClose={() => setIsVocabDialogOpen(false)}
+            />
         </div>
     );
 }
