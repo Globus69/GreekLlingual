@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npx serve web -l 3000",
-    "dev:next": "next dev",
+    "dev": "next dev",
+    "dev:static": "npx serve web -l 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.91.0",
     "next": "16.1.3",
     "react": "19.2.3",
     "react-dom": "19.2.3"
