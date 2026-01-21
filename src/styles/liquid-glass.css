@@ -12,7 +12,10 @@
     --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-body {
+body,
+html,
+#app,
+.view {
     margin: 0;
     padding: 0;
     background-color: var(--bg-body);
@@ -20,9 +23,185 @@ body {
     font-family: var(--font-family);
     height: 100vh;
     overflow: hidden;
+    /* Lock Viewport */
     display: flex;
     flex-direction: column;
     -webkit-font-smoothing: antialiased;
+}
+
+/* Dashboard Content Refinement */
+.dashboard-content {
+    /* Updated padding for fixed layout */
+    padding: 24px 60px 40px 60px;
+    gap: 32px;
+    max-width: 100%;
+    margin: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* New Dashboard Footer Layout */
+.dashboard-footer-area {
+    display: flex;
+    gap: 32px;
+    flex: 1;
+    min-height: 0;
+    /* Important for flex overflow handling */
+    width: 100%;
+}
+
+.mastery-box {
+    flex: 0 0 62%;
+    background: var(--bg-card);
+    border-radius: 28px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.mastery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+
+.mastery-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+}
+
+.progress-ring-container {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-ring-bg {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) 38%, rgba(255, 255, 255, 0.05) 0%);
+    mask: radial-gradient(transparent 55%, black 56%);
+    -webkit-mask: radial-gradient(transparent 55%, black 56%);
+}
+
+.progress-val {
+    position: absolute;
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.performance-mini-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.mini-tile {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px 20px;
+    border-radius: 18px;
+    flex: 1;
+    min-width: 140px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mini-tile .m-val {
+    font-size: 20px;
+    font-weight: 700;
+    display: block;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.mini-tile .m-lbl {
+    font-size: 12px;
+    color: var(--text-sub);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.mastery-suggestion {
+    margin-top: auto;
+    font-size: 14px;
+    color: var(--text-sub);
+    font-style: italic;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Quick Actions Grid (3x3) */
+.quick-actions-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+    height: 100%;
+}
+
+.action-tile-clean {
+    background: var(--bg-card);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    height: 100%;
+    width: 100%;
+}
+
+.action-tile-clean:hover {
+    transform: scale(1.03);
+    background: var(--bg-card-hover);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+.at-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+}
+
+.at-label {
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    color: #EDEDED;
+    padding: 0 8px;
+    line-height: 1.2;
+}
+
+@media (max-width: 1000px) {
+    .dashboard-footer-area {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .mastery-box,
+    .quick-actions-grid {
+        flex: none;
+        width: 100%;
+        min-height: 400px;
+        /* fallback height */
+    }
 }
 
 /* Glassmorphism Classes */
