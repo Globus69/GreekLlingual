@@ -9,7 +9,10 @@ früfe, ob die folgenden .md Dateinen im Projkt vollständig umgesetzt sind.
 - **3. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/prompts-overview.md**
 - **4. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/vocabulary-srs-supabase.md**
 5. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/vocabulary-dialog-compact-srs-improvements.md
-6. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/ocabulary-dialog-improvements-v2.md
+- **!!! nicht gut umgesetzt !!! 6. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/ocabulary-dialog-improvements-v2.md**
+7. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/ocabulary-dialog-improvements-v3.md
+8. /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/_PROMPTS_/dashboard-mastery-box-improvements.md
+
 
 Erstelle eine Übersicht. 
 

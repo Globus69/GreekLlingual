@@ -235,33 +235,37 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
         );
     }
 
+    const currentVocab = vocabulary[currentIndex];
+    const progressPercent = total > 0 ? Math.round((correct / total) * 100) : 0;
+
     // Summary Screen
     if (showSummary || vocabulary.length === 0) {
-        // handle empty vocab as finished for simplicity
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>🎉 Session Complete!</h2>
-                    <p style={{ color: '#8E8E93', marginBottom: '30px' }}>Great work reviewing your cards.</p>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>🎉 Session beendet!</h2>
+                    <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
+                        {correct} richtig / {total - correct} falsch ({progressPercent} %)
+                    </p>
 
                     <div className="summary-stats" style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '40px' }}>
                         <div className="stat-circle">
                             <span style={{ fontSize: '24px', color: '#34C759', fontWeight: 'bold' }}>{correct}</span>
-                            <span style={{ fontSize: '12px', color: '#8E8E93' }}>Correct</span>
+                            <span style={{ fontSize: '12px', color: '#8E8E93' }}>Richtig</span>
                         </div>
                         <div className="stat-circle">
                             <span style={{ fontSize: '24px', color: '#FF453A', fontWeight: 'bold' }}>{total - correct}</span>
-                            <span style={{ fontSize: '12px', color: '#8E8E93' }}>Wrong</span>
+                            <span style={{ fontSize: '12px', color: '#8E8E93' }}>Falsch</span>
                         </div>
                     </div>
 
                     <button className="btn-primary" onClick={() => handleClose(true)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
-                        Back to Dashboard
+                        Zurück zum Dashboard
                     </button>
 
                     {showToast && (
                         <div className="save-toast">
-                            ✅ Result saved - well done!
+                            ✅ Fortschritt gespeichert – super gemacht!
                         </div>
                     )}
                 </div>
@@ -269,29 +273,22 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
         );
     }
 
-    const currentVocab = vocabulary[currentIndex];
-    const progressPercent = total > 0 ? Math.round((correct / total) * 100) : 0;
-
     return (
         <div className="vocabulary-dialog-overlay" onClick={() => handleClose(false)}>
             <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()}>
                 {/* Close Button */}
                 <button className="dialog-close-btn" onClick={() => handleClose(false)}>×</button>
 
-                {/* Header: Compact Stats */}
+                {/* Header: Just Counter & Progress */}
                 <div className="dialog-header compact-header">
                     <div className="header-left">
                         <span className="card-counter">Card {currentIndex + 1} / {vocabulary.length}</span>
-                        <div className="rating-stats-mini">
-                            <span className="dot hard" title="Hard"></span>{ratings.hard}
-                            <span className="dot good" title="Good"></span>{ratings.good}
-                            <span className="dot easy" title="Easy"></span>{ratings.easy}
-                        </div>
                     </div>
                     <div className="header-right">
                         <div className="progress-bar-mini">
                             <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
                         </div>
+                        <span style={{ fontSize: '12px', color: '#8E8E93', marginLeft: '8px', fontWeight: 600 }}>{progressPercent}%</span>
                     </div>
                 </div>
 

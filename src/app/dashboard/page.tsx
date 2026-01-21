@@ -9,6 +9,7 @@ import ActionGrid from '@/components/dashboard/ActionGrid';
 import ModuleGrid from '@/components/dashboard/ModuleGrid';
 import '@/styles/liquid-glass.css';
 import VocabularyDialog from '@/components/learning/VocabularyDialog';
+import { supabase } from '@/db/supabase';
 
 interface ActionTileProps {
     icon: string;
@@ -35,18 +36,41 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isVocabDialogOpen, setIsVocabDialogOpen] = useState(false);
+    const [masteryProgress, setMasteryProgress] = useState(38);
+    const [stats, setStats] = useState({ streak: 5, words: 47, weak: 'Verbs' });
 
     useEffect(() => {
-        if (!authLoading && !user) {
-            router.push('/login');
-        } else if (!authLoading && user) {
-            // Simulate initial page load animation
-            const timer = setTimeout(() => {
-                setLoading(false);
-            }, 800);
-            return () => clearTimeout(timer);
+        if (!authLoading) {
+            if (!user) {
+                router.push('/login');
+            } else {
+                fetchStats();
+                const timer = setTimeout(() => {
+                    setLoading(false);
+                }, 800);
+                return () => clearTimeout(timer);
+            }
         }
     }, [user, authLoading, router]);
+
+    const fetchStats = async () => {
+        try {
+            const { data: progressData } = await supabase
+                .from('student_progress')
+                .select('correct_count, attempts')
+                .eq('student_id', 'demo-student-id');
+
+            if (progressData && progressData.length > 0) {
+                const totalCorrect = progressData.reduce((sum: number, p: any) => sum + (p.correct_count || 0), 0);
+                const totalItems = 120; // Assume target is 120 words
+                const calculatedProgress = Math.min(100, Math.round((totalCorrect / totalItems) * 100));
+                setMasteryProgress(calculatedProgress || 38);
+                setStats(prev => ({ ...prev, words: totalCorrect }));
+            }
+        } catch (err) {
+            console.error("Stats fetching error:", err);
+        }
+    };
 
     if (authLoading || loading) {
         return (
@@ -73,35 +97,61 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="dashboard-footer-area debug-box">
-                    {/* LEFT: MASTERY BOX */}
+                    {/* LEFT: MASTERY BOX (PIMPED) */}
                     <div className="mastery-box debug-box">
-                        <div className="mastery-header">
-                            <div>
-                                <div className="mastery-title debug-text">Learning Mastery</div>
-                                <div className="debug-text" style={{ color: '#8E8E93', marginTop: '4px', fontSize: '15px' }}>Performance Hub Overview</div>
+                        <div className="mastery-title-v3 debug-text">Learning Mastery</div>
+                        <div className="mastery-total-time debug-text">Gesamt gelernt: 14.5 Stunden</div>
+
+                        <div className="mastery-stats-row">
+                            <div className="mastery-bar-container">
+                                <span className="mastery-bar-icon">📖</span>
+                                <div className="mastery-bar-wrapper">
+                                    <div className="mastery-bar-fill" style={{ width: '62%', background: 'linear-gradient(90deg, #007AFF 0%, #00C6FF 100%)' }}></div>
+                                </div>
+                                <span className="mastery-bar-label">62 %</span>
                             </div>
-                            <div className="progress-ring-container">
-                                <div className="progress-ring-bg"></div>
-                                <span className="progress-val">38%</span>
+                            <div className="mastery-bar-container">
+                                <span className="mastery-bar-icon">👁️</span>
+                                <div className="mastery-bar-wrapper">
+                                    <div className="mastery-bar-fill" style={{ width: '28%', background: 'linear-gradient(90deg, #FFCC00 0%, #FFD633 100%)' }}></div>
+                                </div>
+                                <span className="mastery-bar-label">28 %</span>
+                            </div>
+                            <div className="mastery-bar-container">
+                                <span className="mastery-bar-icon">👂</span>
+                                <div className="mastery-bar-wrapper">
+                                    <div className="mastery-bar-fill" style={{ width: '10%', background: 'linear-gradient(90deg, #34C759 0%, #30D158 100%)' }}></div>
+                                </div>
+                                <span className="mastery-bar-label">10 %</span>
                             </div>
                         </div>
 
-                        <div className="performance-mini-tiles">
-                            <div className="mini-tile">
-                                <span className="m-val">🔥 5 Days</span>
-                                <span className="m-lbl">Current Streak</span>
+                        <div className="rating-tiles-grid">
+                            <div className="rating-tile">
+                                <span className="rating-tile-val" style={{ color: '#34C759' }}>78%</span>
+                                <span className="rating-tile-lbl">Last Test</span>
                             </div>
-                            <div className="mini-tile">
-                                <span className="m-val">📚 47</span>
-                                <span className="m-lbl">Words this week</span>
+                            <div className="rating-tile">
+                                <span className="rating-tile-val" style={{ color: '#007AFF' }}>85%</span>
+                                <span className="rating-tile-lbl">Actual Test</span>
                             </div>
-                            <div className="mini-tile">
-                                <span className="m-val">⚠️ Verbs</span>
-                                <span className="m-lbl">Weak Point</span>
+                            <div className="rating-tile">
+                                <span className="rating-tile-val" style={{ color: '#FFCC00' }}>92%</span>
+                                <span className="rating-tile-lbl">Last Exam</span>
                             </div>
                         </div>
 
-                        <div className="mastery-suggestion">
+                        <div className="vocab-progress-section">
+                            <div className="vocab-status-text debug-text">
+                                <b>187 / 600</b> Vokabeln sicher – 413 brauchen Aufmerksamkeit
+                            </div>
+                            <div className="vocab-bar-dual">
+                                <div className="vocab-bar-learned" style={{ width: '31%' }}></div>
+                                <div className="vocab-bar-repeat" style={{ width: '69%' }}></div>
+                            </div>
+                        </div>
+
+                        <div className="mastery-suggestion debug-text">
                             Suggestion for today: 12 new vocabulary cards + 1 short text about Cyprus.
                         </div>
                     </div>
@@ -118,14 +168,14 @@ export default function DashboardPage() {
                         <ActionTile icon="💬" label="Daily Phrases" />
                         <ActionTile icon="🎧" label="Audio Immersion" />
 
-                        <ActionTile icon="📖" label="Read & Write" />
+                        <ActionTile icon="📖✍️" label="Read & Write" />
                         <ActionTile icon="📚" label="Short Stories" />
                         <ActionTile icon="👂" label="Listening Practice" />
-                        <ActionTile icon="🗣️" label="Pronunciation" />
+                        <ActionTile icon="🗣️" label="Pronunciation Trainer" />
 
-                        <ActionTile icon="📐" label="Grammar Hints" />
-                        <ActionTile icon="🗨️" label="Conv. Starters" />
-                        <ActionTile icon="📕" label="Book Recs" />
+                        <ActionTile icon="📐" label="Grammar Quick Hits" />
+                        <ActionTile icon="🗨️" label="Conversation Starters" />
+                        <ActionTile icon="📕" label="Book Recommendations" />
                         <ActionTile icon="📊" label="Progress History" />
                     </div>
                 </div>
