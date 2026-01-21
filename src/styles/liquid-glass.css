@@ -144,13 +144,14 @@ html,
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Quick Actions Grid (3x3) */
+/* Quick Actions Grid (4x4) */
 .quick-actions-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 16px;
+    /* Reduced gap slightly for 4x4 */
     height: 100%;
 }
 

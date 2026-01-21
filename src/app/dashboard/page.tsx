@@ -104,17 +104,27 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    {/* RIGHT: 3x3 QUICK ACTIONS GRID */}
+                    {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
                     <div className="quick-actions-grid debug-grid">
                         <ActionTile icon="✨" label="Magic Round" primary />
-                        <ActionTile icon="⚡️" label="20 min Quick Lesson" />
-                        <ActionTile icon="🔁" label="Review Vocabulary" onClick={() => router.push('/vokabeln')} />
+                        <ActionTile icon="⚡" label="20 min Quick Lesson" />
+                        <ActionTile icon="🔄" label="Review Vocabulary" onClick={() => router.push('/vokabeln')} />
                         <ActionTile icon="📅" label="Due Cards Today" />
+
                         <ActionTile icon="⚠️" label="Train Weak Words" />
                         <ActionTile icon="🏛️" label="Cyprus Exam Sim" />
                         <ActionTile icon="💬" label="Daily Phrases" />
                         <ActionTile icon="🎧" label="Audio Immersion" />
-                        <ActionTile icon="📚" label="Read & Write" />
+
+                        <ActionTile icon="📖" label="Read & Write" />
+                        <ActionTile icon="📚" label="Short Stories" />
+                        <ActionTile icon="👂" label="Listening Practice" />
+                        <ActionTile icon="🗣️" label="Pronunciation" />
+
+                        <ActionTile icon="📐" label="Grammar Hints" />
+                        <ActionTile icon="🗨️" label="Conv. Starters" />
+                        <ActionTile icon="📕" label="Book Recs" />
+                        <ActionTile icon="📊" label="Progress History" />
                     </div>
                 </div>
             </main>
