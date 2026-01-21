@@ -901,59 +901,7 @@ body {
     background: #1a8aff;
 }
 
-/* Debug Visualizer */
-:root {
-    --debug-flex: #FF3B30;
-    --debug-grid: #34C759;
-}
 
-body {
-    counter-reset: flex-id grid-id;
-}
-
-.debug-flex {
-    outline: 2px solid var(--debug-flex) !important;
-    position: relative;
-    counter-increment: flex-id;
-}
-
-.debug-flex::after {
-    content: "F" counter(flex-id);
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: var(--debug-flex);
-    color: white;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 2px 6px;
-    z-index: 9999;
-    border-bottom-left-radius: 6px;
-    pointer-events: none;
-    line-height: 1;
-}
-
-.debug-grid {
-    outline: 2px solid var(--debug-grid) !important;
-    position: relative;
-    counter-increment: grid-id;
-}
-
-.debug-grid::after {
-    content: "G" counter(grid-id);
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: var(--debug-grid);
-    color: white;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 2px 6px;
-    z-index: 9999;
-    border-bottom-right-radius: 6px;
-    pointer-events: none;
-    line-height: 1;
-}
 
 @media (max-width: 768px) {
 
