@@ -1,0 +1,27 @@
+Vokalbel- Dialog - Flipcard
+
+
+
+
+Which version of the app should I create the flashcard component for?
+1/3
+
+Static HTML App (/web/) - Pure vanilla JS (Recommended)
+Create standalone HTML/CSS/JS files in the /web/ folder. No build step, works immediately, can be served with 'npm run dev:static'. Perfect for your requirements of pure vanilla code.
+1
+
+Next.js React App (/src/) - TypeScript/React
+Create a React component in /src/components/learning/. Integrates with existing Supabase, auth, and dashboard. Requires converting to React/TypeScript but production-ready.
+2
+
+Both - Create standalone first, then React version
+Start with vanilla HTML/CSS/JS for quick iteration, then convert to React component. Best of both worlds but takes longer.
+3
+
+Completely standalone - New separate files
+Create independent index.html, style.css, script.js files outside the project structure. Can be opened directly in browser without any server.
+4
+
+Gib etwas anderes ein...
+5
+Überspringen
