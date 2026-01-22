@@ -398,13 +398,13 @@
                                 <button class="btn btn-secondary" onclick="showToast('🧪 Running Test...')"><span>🧪</span> Test</button>
                             </div>
                             <div class="grid-cell">
-                                <button class="btn btn-primary" style="background:#34C759;" onclick="showToast('📅 Lesson Started')"><span>📅</span> Lesson Today</button>
+                                <button class="btn btn-tertiary" id="train-weak-btn" onclick="openFlashcardMode('weak')"><span>💪</span> Train Weak Words</button>
                             </div>
                             <div class="grid-cell">
-                                <button class="btn btn-tertiary" onclick="openView('vokabeln-view')"><span>🔁</span> Vokabeln wiederholen</button>
+                                <button class="btn btn-secondary" id="review-vocab-btn" onclick="openFlashcardMode('review')"><span>🔄</span> Review Vocabulary</button>
                             </div>
                             <div class="grid-cell">
-                                <button class="btn btn-secondary" onclick="window.print()"><span>🖨️</span> Print</button>
+                                <button class="btn btn-primary" id="due-cards-btn" onclick="openFlashcardMode('due')"><span>📚</span> Due Cards Today</button>
                             </div>
                         </div>
                     </div>
@@ -533,8 +533,32 @@
 
     </div>
 
+    <!-- Shared Flashcard Data (Fallback for testing without Supabase) -->
+    <script src="../shared-data.js"></script>
+
     <script>
-        // DATA
+        // ========================================
+        // SUPABASE CONFIGURATION
+        // ========================================
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // TODO: Replace with your Supabase URL
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // TODO: Replace with your Supabase Anon Key
+
+        let supabase = null;
+        let currentUser = null;
+        let useSupabase = false; // Set to true when Supabase is configured
+
+        // Initialize Supabase (only if configured)
+        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && typeof window.supabase !== 'undefined') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            useSupabase = true;
+            console.log('✅ Supabase initialized');
+        } else {
+            console.log('⚠️ Using LocalStorage mode (Supabase not configured)');
+        }
+
+        // ========================================
+        // LEGACY DATA (for backward compatibility)
+        // ========================================
         const vocab = [
             { en: "Hello", gr: "Γεια σου", ex_en: "Hello friend", ex_gr: "Γεια σου φίλε" },
             { en: "Thank you", gr: "Ευχαριστώ", ex_en: "Thank you very much", ex_gr: "Ευχαριστώ πολύ" },
@@ -551,8 +575,10 @@
         let currentVocabIdx = 0;
         let isFlipped = false;
 
-        // INIT
-        window.onload = () => {
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+        window.onload = async () => {
             // Login Animation
             setTimeout(() => {
                 const overlay = document.getElementById('login-overlay');
@@ -560,11 +586,21 @@
                 setTimeout(() => overlay.remove(), 500);
             }, 1000);
 
+            // Check Supabase authentication
+            if (useSupabase) {
+                const { data: { user } } = await supabase.auth.getUser();
+                currentUser = user;
+                console.log('👤 Current user:', user?.email || 'Not logged in');
+            }
+
             // Load Data
             loadPhrases();
             document.getElementById('quiz-content').innerHTML = quizText;
             updateCard();
-            
+
+            // Update Flashcard Buttons with counts (Supabase or LocalStorage)
+            await updateFlashcardButtons();
+
             // Start live datetime
             updateDateTime();
             setInterval(updateDateTime, 1000);
@@ -641,6 +677,128 @@
             isFlipped = false;
             document.getElementById('flashcard').classList.remove('flipped');
             setTimeout(updateCard, 300);
+        }
+
+        // ========================================
+        // FLASHCARD MODE NAVIGATION
+        // ========================================
+
+        /**
+         * Öffnet die Flashcard-Seite mit dem gewünschten Modus
+         * @param {string} mode - 'weak', 'review', oder 'due'
+         */
+        function openFlashcardMode(mode) {
+            window.location.href = `../flashcards.html?mode=${mode}`;
+        }
+
+        /**
+         * Berechnet die Anzahl der Karten basierend auf dem Modus (Supabase oder LocalStorage)
+         */
+        async function getCardCounts() {
+            if (useSupabase && currentUser) {
+                // Use Supabase to get card counts
+                try {
+                    const today = new Date().toISOString().split('T')[0];
+
+                    // Count weak cards (ease < 2.3)
+                    const { count: weakCount, error: weakError } = await supabase
+                        .from('flashcard_progress')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', currentUser.id)
+                        .lt('ease', 2.3);
+
+                    if (weakError) {
+                        console.error('Error counting weak cards:', weakError);
+                    }
+
+                    // Count due cards (due_date <= today)
+                    const { count: dueCount, error: dueError } = await supabase
+                        .from('flashcard_progress')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', currentUser.id)
+                        .lte('due_date', today);
+
+                    if (dueError) {
+                        console.error('Error counting due cards:', dueError);
+                    }
+
+                    // Count all cards
+                    const { count: totalCount, error: totalError } = await supabase
+                        .from('flashcard_progress')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', currentUser.id);
+
+                    if (totalError) {
+                        console.error('Error counting total cards:', totalError);
+                    }
+
+                    console.log('📊 Card counts from Supabase:', {
+                        weak: weakCount || 0,
+                        due: dueCount || 0,
+                        total: totalCount || 0
+                    });
+
+                    return {
+                        weak: weakCount || 0,
+                        review: totalCount || 0,
+                        due: dueCount || 0,
+                        total: totalCount || 0
+                    };
+                } catch (error) {
+                    console.error('Error fetching card counts:', error);
+                    return { weak: 0, review: 0, due: 0, total: 0 };
+                }
+            } else {
+                // Fallback: Use shared-data.js (LocalStorage mode)
+                if (typeof allFlashcards === 'undefined') {
+                    return { weak: 0, review: 0, due: 0, total: 0 };
+                }
+
+                const today = getTodayDateString();
+
+                // Due cards: dueDate <= heute
+                const dueCards = allFlashcards.filter(card => card.dueDate <= today);
+
+                // Weak words: ease < 2.3 (schwierige Karten)
+                const weakCards = allFlashcards.filter(card => card.ease < 2.3);
+
+                // Review: alle Karten
+                const reviewCards = allFlashcards;
+
+                return {
+                    weak: weakCards.length,
+                    review: reviewCards.length,
+                    due: dueCards.length,
+                    total: allFlashcards.length
+                };
+            }
+        }
+
+        /**
+         * Aktualisiert alle Flashcard-Buttons mit Anzahlen
+         */
+        async function updateFlashcardButtons() {
+            const counts = await getCardCounts();
+
+            // Train Weak Words Button
+            const weakBtn = document.getElementById('train-weak-btn');
+            if (weakBtn) {
+                weakBtn.innerHTML = `<span>💪</span> Train Weak Words (${counts.weak})`;
+            }
+
+            // Review Vocabulary Button
+            const reviewBtn = document.getElementById('review-vocab-btn');
+            if (reviewBtn) {
+                reviewBtn.innerHTML = `<span>🔄</span> Review Vocabulary (${counts.review})`;
+            }
+
+            // Due Cards Today Button
+            const dueBtn = document.getElementById('due-cards-btn');
+            if (dueBtn) {
+                dueBtn.innerHTML = `<span>📚</span> Due Cards Today (${counts.due})`;
+            }
+
+            console.log('🔄 Flashcard buttons updated:', counts);
         }
     </script>
 </body>

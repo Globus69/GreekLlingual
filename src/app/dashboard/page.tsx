@@ -10,6 +10,7 @@ import ModuleGrid from '@/components/dashboard/ModuleGrid';
 import '@/styles/liquid-glass.css';
 import VocabularyDialog from '@/components/learning/VocabularyDialog';
 import { supabase } from '@/db/supabase';
+import Link from 'next/link';
 
 interface ActionTileProps {
     icon: string;
@@ -163,9 +164,18 @@ export default function DashboardPage() {
                         <ActionTile icon="💬" label="Daily Phrases" />
                         <ActionTile icon="📚" label="Short Stories" />
 
-                        <ActionTile icon="⚠️" label="Train Weak Words" />
-                        <ActionTile icon="🔄" label="Review Vocabulary" onClick={() => setIsVocabDialogOpen(true)} />
-                        <ActionTile icon="📅" label="Due Cards Today" />
+                        <Link href="/flashcards/flashcards.html?mode=weak" passHref>
+                            <ActionTile icon="⚠️" label="Train Weak Words" />
+                        </Link>
+
+                        <Link href="/flashcards/flashcards.html?mode=review" passHref>
+                            <ActionTile icon="🔄" label="Review Vocabulary" />
+                        </Link>
+
+                        <Link href="/flashcards/flashcards.html?mode=due" passHref>
+                            <ActionTile icon="📅" label="Due Cards Today" />
+                        </Link>
+
                         <ActionTile icon="📐" label="Grammar Quick Hits" />
 
                         <ActionTile icon="👂" label="Listening Practice" />
