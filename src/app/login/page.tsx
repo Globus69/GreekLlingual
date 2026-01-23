@@ -13,23 +13,14 @@ export default function LoginPage() {
     const { login, user } = useAuth();
     const router = useRouter();
 
-    // Auto-redirect to dashboard after 1 second (for development before app completion)
+    // DEVELOPMENT MODE: Auto-redirect to dashboard (no login required during development)
     useEffect(() => {
-        // Only redirect if user is already logged in or if we have a stored user
-        const storedUser = localStorage.getItem('greeklingua_user');
-        const hasUser = user || storedUser;
-        
-        if (!hasUser) {
-            // No user found - don't redirect to avoid infinite loop
-            return;
-        }
-
         const timer = setTimeout(() => {
             router.push('/dashboard');
-        }, 1000); // 1 second delay
+        }, 500); // Short delay for smooth transition
 
         return () => clearTimeout(timer);
-    }, [user, router]);
+    }, [router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

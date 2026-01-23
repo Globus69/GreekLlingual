@@ -54,7 +54,9 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
     const STUDENT_ID = user?.id || '';
 
     useEffect(() => {
-        if (isOpen && user?.id) {
+        if (isOpen) {
+            // DEVELOPMENT MODE: Allow fetching vocabulary even with demo user
+            // The AuthContext will provide a demo user if no real user exists
             fetchVocabulary();
             setShowSummary(false);
             setFlipped(false);
@@ -149,9 +151,16 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         }
 
         setLoading(true);
+        console.log(`🔄 Fetching vocabulary for mode: ${mode}, student: ${STUDENT_ID}`);
+        
         try {
+            // Add timeout to prevent hanging
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Database query timeout')), 10000)
+            );
+
             // Fetch learning_items with student_progress (LEFT JOIN)
-            const { data, error } = await supabase
+            const queryPromise = supabase
                 .from('learning_items')
                 .select(`
                     *,
@@ -159,12 +168,18 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                 `)
                 .eq('type', 'vocabulary')
                 .order('next_review', { foreignTable: 'student_progress', ascending: true, nullsFirst: true })
-                .limit(100); // Fetch more to allow filtering
+                .limit(100);
+
+            const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
             if (error) {
                 console.error("❌ Error fetching vocabs:", error);
                 setVocabulary([]);
-            } else if (data && data.length > 0) {
+                setLoading(false);
+                return;
+            }
+
+            if (data && data.length > 0) {
                 // Filter student_progress to only include entries for current student
                 const processedData = data.map((item: any) => ({
                     ...item,
@@ -180,11 +195,15 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                 console.log("⚠️ No vocabulary items found in database");
                 setVocabulary([]);
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("❌ Fetch error:", err);
+            if (err.message === 'Database query timeout') {
+                console.error("⏱️ Database query timed out after 10 seconds");
+            }
             setVocabulary([]);
         } finally {
             setLoading(false);
+            console.log(`✅ Loading complete for mode: ${mode}`);
         }
     };
 
@@ -253,11 +272,17 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
 
     const handleScore = async (quality: number) => {
         const item = vocabulary[currentIndex];
-        const progress = item.student_progress?.[0] || {
+        const existingProgress = item.student_progress?.[0];
+        const progress: StudentProgress = existingProgress || {
+            id: 0,
+            student_id: STUDENT_ID,
+            item_id: item.id,
             interval_days: 1.0,
             ease_factor: 2.5,
             attempts: 0,
-            correct_count: 0
+            correct_count: 0,
+            last_attempt: null,
+            next_review: null
         };
 
         let newInterval = progress.interval_days;
@@ -313,17 +338,20 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                 
                 // Update local state to reflect the change immediately
                 const updatedVocabulary = [...vocabulary];
+                const updatedProgress: StudentProgress = {
+                    id: existingProgress?.id || 0,
+                    student_id: STUDENT_ID,
+                    item_id: item.id,
+                    attempts: progress.attempts + 1,
+                    correct_count: quality > 1 ? progress.correct_count + 1 : progress.correct_count,
+                    last_attempt: new Date().toISOString(),
+                    next_review: nextReview.toISOString(),
+                    interval_days: newInterval,
+                    ease_factor: newEase
+                };
                 updatedVocabulary[currentIndex] = {
                     ...item,
-                    student_progress: [{
-                        ...progress,
-                        attempts: progress.attempts + 1,
-                        correct_count: quality > 1 ? progress.correct_count + 1 : progress.correct_count,
-                        last_attempt: new Date().toISOString(),
-                        next_review: nextReview.toISOString(),
-                        interval_days: newInterval,
-                        ease_factor: newEase
-                    }]
+                    student_progress: [updatedProgress]
                 };
                 setVocabulary(updatedVocabulary);
             }
@@ -394,17 +422,75 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                 <div className="vocabulary-dialog compact">
                     <div style={{ textAlign: 'center', padding: '60px', color: '#fff' }}>
                         <h2>🏛️ Loading...</h2>
+                        <p style={{ color: '#8E8E93', marginTop: '12px', fontSize: '14px' }}>
+                            Fetching vocabulary from database...
+                        </p>
                     </div>
                 </div>
             </div>
         );
     }
 
+    // Show empty state if no vocabulary and no user
+    if (vocabulary.length === 0 && !user?.id) {
+        return (
+            <div className="vocabulary-dialog-overlay" onClick={() => handleClose(false)}>
+                <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
+                    <button className="dialog-close-btn" onClick={() => handleClose(false)}>×</button>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ Login Required</h2>
+                    <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
+                        Please log in to access vocabulary learning features.
+                    </p>
+                    <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
+                        Close
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Check if we have vocabulary to display
+    if (vocabulary.length === 0 && user?.id) {
+        // User is logged in but no vocabulary found
+        return (
+            <div className="vocabulary-dialog-overlay" onClick={() => handleClose(false)}>
+                <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
+                    <button className="dialog-close-btn" onClick={() => handleClose(false)}>×</button>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>📚 No Vocabulary Found</h2>
+                    <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
+                        No vocabulary items available for this mode. Please add vocabulary to the database.
+                    </p>
+                    <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
+                        Close
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     const currentVocab = vocabulary[currentIndex];
+    if (!currentVocab) {
+        // Safety check - should not happen but prevents crashes
+        return (
+            <div className="vocabulary-dialog-overlay" onClick={() => handleClose(false)}>
+                <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
+                    <button className="dialog-close-btn" onClick={() => handleClose(false)}>×</button>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ Error</h2>
+                    <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
+                        Unable to load vocabulary card.
+                    </p>
+                    <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
+                        Close
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     const progressPercent = total > 0 ? Math.round((correct / total) * 100) : 0;
 
     // Summary Screen
-    if (showSummary || vocabulary.length === 0) {
+    if (showSummary) {
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" style={{ textAlign: 'center', padding: '40px' }}>

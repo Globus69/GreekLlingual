@@ -46,9 +46,9 @@ export default function VokabelnPage() {
     const STUDENT_ID = user?.id || '';
 
     useEffect(() => {
-        if (user?.id) {
-            fetchVocabulary();
-        }
+        // DEVELOPMENT MODE: Allow fetching vocabulary even without real user
+        // The AuthContext will provide a demo user if no real user exists
+        fetchVocabulary();
     }, [user?.id]);
 
     const fetchVocabulary = async () => {

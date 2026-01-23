@@ -31,18 +31,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (storedUser) {
             try {
                 const parsedUser = JSON.parse(storedUser);
-                // Only set user if it's a valid user object with an id
-                if (parsedUser && parsedUser.id && parsedUser.id !== 'demo-user-id') {
+                // Accept both real users and demo users
+                if (parsedUser && parsedUser.id) {
                     setUser(parsedUser);
-                } else {
-                    // Clear invalid demo user
-                    localStorage.removeItem('greeklingua_user');
+                    setLoading(false);
+                    return;
                 }
             } catch (err) {
                 console.error("Error parsing stored user:", err);
                 localStorage.removeItem('greeklingua_user');
             }
         }
+        
+        // DEVELOPMENT MODE: Auto-create demo user if no user exists
+        // This allows the app to work without login during development
+        const demoUser: User = {
+            id: 'demo-user-id',
+            email: 'demo@hellenichorizons.com',
+            name: 'Demo User'
+        };
+        setUser(demoUser);
+        localStorage.setItem('greeklingua_user', JSON.stringify(demoUser));
         setLoading(false);
     }, []);
 
