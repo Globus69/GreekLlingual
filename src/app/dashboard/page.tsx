@@ -162,7 +162,13 @@ export default function DashboardPage() {
                     <div className="quick-actions-grid">
                         <ActionTile icon="✨" label="Magic Round" primary />
                         <ActionTile icon="⚡" label="20 min Quick Lesson" />
-                        <ActionTile icon="💬" label="Daily Phrases" />
+                        <ActionTile 
+                            icon="💬" 
+                            label="Daily Phrases" 
+                            onClick={() => {
+                                window.location.href = '/daily-phrases/daily-phrases.html';
+                            }}
+                        />
                         <ActionTile icon="📚" label="Short Stories" />
 
                         <ActionTile 
@@ -174,13 +180,23 @@ export default function DashboardPage() {
                             }}
                         />
 
-                        <Link href="/flashcards/flashcards.html?mode=review" passHref>
-                            <ActionTile icon="🔄" label="Review Vocabulary" />
-                        </Link>
+                        <ActionTile 
+                            icon="🔄" 
+                            label="Review Vocabulary" 
+                            onClick={() => {
+                                setVocabDialogMode('review');
+                                setIsVocabDialogOpen(true);
+                            }}
+                        />
 
-                        <Link href="/flashcards/flashcards.html?mode=due" passHref>
-                            <ActionTile icon="📅" label="Due Cards Today" />
-                        </Link>
+                        <ActionTile 
+                            icon="📅" 
+                            label="Due Cards Today" 
+                            onClick={() => {
+                                setVocabDialogMode('due');
+                                setIsVocabDialogOpen(true);
+                            }}
+                        />
 
                         <ActionTile icon="📐" label="Grammar Quick Hits" />
 
