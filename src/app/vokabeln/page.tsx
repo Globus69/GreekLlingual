@@ -34,6 +34,20 @@ interface VocabWithProgress extends LearningItem {
     student_progress?: StudentProgress[];
 }
 
+// Fallback vocabulary data if Supabase is not available
+const FALLBACK_VOCABULARY: VocabWithProgress[] = [
+    { id: 1, type: 'vocabulary', english: 'Hello', greek: 'Γεια σου', example_en: 'Hello friend', example_gr: 'Γεια σου φίλε', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 2, type: 'vocabulary', english: 'Thank you', greek: 'Ευχαριστώ', example_en: 'Thank you very much', example_gr: 'Ευχαριστώ πολύ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 3, type: 'vocabulary', english: 'Please', greek: 'Παρακαλώ', example_en: 'Please help me', example_gr: 'Παρακαλώ βοήθησέ με', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 4, type: 'vocabulary', english: 'Yes', greek: 'Ναι', example_en: 'Yes, I agree', example_gr: 'Ναι, συμφωνώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 5, type: 'vocabulary', english: 'No', greek: 'Όχι', example_en: 'No, thank you', example_gr: 'Όχι, ευχαριστώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 6, type: 'vocabulary', english: 'Water', greek: 'Νερό', example_en: 'I want water', example_gr: 'Θέλω νερό', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 7, type: 'vocabulary', english: 'Coffee', greek: 'Καφές', example_en: 'Drink coffee', example_gr: 'Πίνω καφέ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 8, type: 'vocabulary', english: 'Friend', greek: 'Φίλος', example_en: 'Best friend', example_gr: 'Καλύτερος φίλος', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 9, type: 'vocabulary', english: 'Good morning', greek: 'Καλημέρα', example_en: 'Good morning!', example_gr: 'Καλημέρα!', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 10, type: 'vocabulary', english: 'Goodbye', greek: 'Αντίο', example_en: 'Goodbye for now', example_gr: 'Αντίο προς το παρόν', audio_url: null, created_at: new Date().toISOString(), student_progress: [] }
+];
+
 export default function VokabelnPage() {
     const router = useRouter();
     const { user } = useAuth();
@@ -73,7 +87,21 @@ export default function VokabelnPage() {
 
             if (error) {
                 console.error("❌ Error fetching vocabs:", error);
-                setVocabulary([]);
+                console.error("Error details:", JSON.stringify(error, null, 2));
+                
+                // If table doesn't exist or API key invalid, use fallback
+                if (error.code === '42P01' || error.message?.includes('does not exist') || 
+                    error.message?.includes('Invalid API key') || error.message?.includes('401')) {
+                    console.error("⚠️ Supabase error. Using fallback vocabulary data.");
+                    console.log(`💡 Loaded ${FALLBACK_VOCABULARY.length} fallback vocabulary items`);
+                    setVocabulary(FALLBACK_VOCABULARY);
+                    setTotalDue(FALLBACK_VOCABULARY.length);
+                } else {
+                    // For other errors, try fallback
+                    console.warn("⚠️ Error accessing Supabase. Using fallback vocabulary data.");
+                    setVocabulary(FALLBACK_VOCABULARY);
+                    setTotalDue(FALLBACK_VOCABULARY.length);
+                }
             } else if (data && data.length > 0) {
                 // Filter student_progress to only include entries for current student
                 const processedData = data.map((item: any) => ({
@@ -87,11 +115,15 @@ export default function VokabelnPage() {
                 setTotalDue(processedData.length);
             } else {
                 console.log("⚠️ No vocabulary items found in database");
-                setVocabulary([]);
+                console.log("💡 Using fallback vocabulary data");
+                setVocabulary(FALLBACK_VOCABULARY);
+                setTotalDue(FALLBACK_VOCABULARY.length);
             }
         } catch (err) {
             console.error("❌ Fetch error:", err);
-            setVocabulary([]);
+            console.log("💡 Using fallback vocabulary data due to error");
+            setVocabulary(FALLBACK_VOCABULARY);
+            setTotalDue(FALLBACK_VOCABULARY.length);
         } finally {
             setLoading(false);
         }
