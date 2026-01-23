@@ -3,6 +3,9 @@
 -- ========================================
 -- This script creates the daily_phrases table (if it doesn't exist) and inserts test data
 -- Run this in your Supabase SQL editor to populate the database with test data
+--
+-- IMPORTANT: If you get errors about student_id or student_progress table,
+-- first run: supabase/setup_student_progress_for_phrases.sql
 -- ========================================
 
 -- Create the daily_phrases table if it doesn't exist
