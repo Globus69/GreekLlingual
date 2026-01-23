@@ -37,6 +37,7 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isVocabDialogOpen, setIsVocabDialogOpen] = useState(false);
+    const [vocabDialogMode, setVocabDialogMode] = useState<'weak' | 'review' | 'due'>('review');
     const [masteryProgress, setMasteryProgress] = useState(38);
     const [stats, setStats] = useState({ streak: 5, words: 47, weak: 'Verbs' });
 
@@ -164,9 +165,14 @@ export default function DashboardPage() {
                         <ActionTile icon="💬" label="Daily Phrases" />
                         <ActionTile icon="📚" label="Short Stories" />
 
-                        <Link href="/flashcards/flashcards.html?mode=weak" passHref>
-                            <ActionTile icon="⚠️" label="Train Weak Words" />
-                        </Link>
+                        <ActionTile 
+                            icon="⚠️" 
+                            label="Train Weak Words" 
+                            onClick={() => {
+                                setVocabDialogMode('weak');
+                                setIsVocabDialogOpen(true);
+                            }}
+                        />
 
                         <Link href="/flashcards/flashcards.html?mode=review" passHref>
                             <ActionTile icon="🔄" label="Review Vocabulary" />
@@ -195,6 +201,7 @@ export default function DashboardPage() {
             <VocabularyDialog
                 isOpen={isVocabDialogOpen}
                 onClose={() => setIsVocabDialogOpen(false)}
+                mode={vocabDialogMode}
             />
         </div>
     );
