@@ -26,29 +26,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        // Check for session in local storage or cookies if needed
+        // Check for session in local storage
         const storedUser = localStorage.getItem('greeklingua_user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        } else {
-            // Auto-login for now as requested
-            const demoUser = { id: 'demo-user-id', email: 'admin@greeklingua.com' };
-            setUser(demoUser);
-            localStorage.setItem('greeklingua_user', JSON.stringify(demoUser));
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                // Only set user if it's a valid user object with an id
+                if (parsedUser && parsedUser.id && parsedUser.id !== 'demo-user-id') {
+                    setUser(parsedUser);
+                } else {
+                    // Clear invalid demo user
+                    localStorage.removeItem('greeklingua_user');
+                }
+            } catch (err) {
+                console.error("Error parsing stored user:", err);
+                localStorage.removeItem('greeklingua_user');
+            }
         }
         setLoading(false);
     }, []);
 
     const login = async (email: string, pin: string) => {
-        // Demo Fallback
-        if (email === 'admin@greeklingua.com' && pin === '123456') {
-            const userData = { id: 'demo-user-id', email: 'admin@greeklingua.com' };
-            setUser(userData);
-            localStorage.setItem('greeklingua_user', JSON.stringify(userData));
-            router.push('/dashboard');
-            return true;
-        }
-
         try {
             const { data, error } = await supabase
                 .from('users')
@@ -58,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 .single();
 
             if (error || !data) {
-                console.error("Login failed:", error);
+                console.error("❌ Login failed:", error);
                 return false;
             }
 
@@ -68,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             router.push('/dashboard');
             return true;
         } catch (err) {
-            console.error("Auth error:", err);
+            console.error("❌ Auth error:", err);
             return false;
         }
     };
