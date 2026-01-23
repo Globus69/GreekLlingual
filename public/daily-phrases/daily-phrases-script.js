@@ -53,6 +53,9 @@ const mainCardArea = document.querySelector('.main-card-area');
 // INITIALIZATION
 // ========================================
 async function init() {
+    // Attach event listeners FIRST, so cancel button always works
+    attachEventListeners();
+
     // Get Supabase user
     if (useSupabase) {
         const { data: { user } } = await supabase.auth.getUser();
@@ -72,7 +75,6 @@ async function init() {
     totalCards.textContent = phrases.length;
     loadPhrase(currentPhraseIndex);
     updateProgress();
-    attachEventListeners();
 
     console.log(`💬 Daily Phrases | Phrases: ${phrases.length}`);
 }
@@ -119,8 +121,13 @@ async function loadPhrasesFromSupabase() {
 // SHOW NO PHRASES MESSAGE
 // ========================================
 function showNoPhrasesMessage() {
-    mainCardArea.style.display = 'none';
-    document.querySelector('.progress-wrapper').style.display = 'none';
+    if (mainCardArea) {
+        mainCardArea.style.display = 'none';
+    }
+    const progressWrapper = document.querySelector('.progress-wrapper');
+    if (progressWrapper) {
+        progressWrapper.style.display = 'none';
+    }
 
     const message = document.createElement('div');
     message.className = 'completion-screen active';
@@ -129,7 +136,7 @@ function showNoPhrasesMessage() {
             <div class="completion-icon">💬</div>
             <h2 class="completion-title">No phrases available!</h2>
             <p class="completion-text">Check back later for daily phrases.</p>
-            <button class="back-to-dashboard-btn" onclick="window.location.href='/dashboard'">
+            <button class="back-to-dashboard-btn" id="noPhrasesBackBtn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 </svg>
@@ -138,6 +145,14 @@ function showNoPhrasesMessage() {
         </div>
     `;
     document.querySelector('.app-container').appendChild(message);
+    
+    // Add event listener to back button
+    const backBtn = document.getElementById('noPhrasesBackBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            window.location.href = '/dashboard';
+        });
+    }
 }
 
 // ========================================
@@ -158,12 +173,26 @@ function attachEventListeners() {
 
     // Cancel button - return to dashboard
     if (cancelBtn) {
-        cancelBtn.addEventListener('click', (e) => {
+        // Remove any existing listeners to avoid duplicates
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        
+        // Add fresh event listener
+        newCancelBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             e.preventDefault();
             console.log('🚪 Cancel button clicked - returning to dashboard');
-            window.location.href = '/dashboard';
+            // Use window.location for reliable navigation
+            if (window.location.pathname.includes('/daily-phrases')) {
+                window.location.href = '/dashboard';
+            } else {
+                window.location.href = '/dashboard';
+            }
         });
+        
+        // Also handle form submission prevention if inside a form
+        newCancelBtn.type = 'button';
+        console.log('✅ Cancel button event listener attached');
     } else {
         console.error('❌ Cancel button not found!');
     }
