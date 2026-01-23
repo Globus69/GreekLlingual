@@ -24,12 +24,8 @@ export default function StudentDashboardPage({ params }: { params: Promise<{ slu
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!authLoading && !user) {
-            router.push('/login');
-            return;
-        }
-
-        if (user) {
+        // DEVELOPMENT MODE: No login required - allow access even without user
+        if (!authLoading) {
             fetchStudentData();
         }
     }, [user, authLoading, slug]);
