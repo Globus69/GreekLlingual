@@ -8,13 +8,81 @@ let supabase = null;
 let currentUser = null;
 let useSupabase = false;
 
-// Initialize Supabase
-if (typeof window.supabase !== 'undefined') {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    useSupabase = true;
-    console.log('✅ Supabase initialized');
+// Initialize Supabase - wait for script to load
+function initializeSupabase() {
+    try {
+        // The CDN script exposes supabase as a global variable
+        // Check multiple possible locations
+        let SupabaseClient = null;
+        
+        // Check global supabase variable (from CDN)
+        if (typeof supabase !== 'undefined') {
+            if (supabase.createClient) {
+                SupabaseClient = supabase;
+            } else if (supabase.default && supabase.default.createClient) {
+                SupabaseClient = supabase.default;
+            }
+        }
+        
+        // Check window.supabase
+        if (!SupabaseClient && window.supabase) {
+            if (window.supabase.createClient) {
+                SupabaseClient = window.supabase;
+            } else if (window.supabase.default && window.supabase.default.createClient) {
+                SupabaseClient = window.supabase.default;
+            }
+        }
+        
+        if (SupabaseClient && SupabaseClient.createClient) {
+            supabase = SupabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            useSupabase = true;
+            console.log('✅ Supabase initialized successfully');
+            console.log('   URL:', SUPABASE_URL);
+            return true;
+        } else {
+            console.warn('⚠️ Supabase library not found. Available globals:', Object.keys(window).filter(k => k.toLowerCase().includes('supabase')));
+            return false;
+        }
+    } catch (err) {
+        console.error('❌ Error initializing Supabase:', err);
+        return false;
+    }
+}
+
+// Listen for Supabase loaded event
+window.addEventListener('supabase-loaded', function() {
+    if (!useSupabase) {
+        initializeSupabase();
+    }
+});
+
+// Try to initialize Supabase when script loads
+// Wait for CDN to load if needed
+let initAttempts = 0;
+const maxAttempts = 10;
+
+function tryInitializeSupabase() {
+    initAttempts++;
+    if (initializeSupabase()) {
+        return true;
+    }
+    
+    if (initAttempts < maxAttempts) {
+        setTimeout(tryInitializeSupabase, 200);
+    } else {
+        console.error('❌ Failed to initialize Supabase after', maxAttempts, 'attempts');
+        console.log('💡 Make sure the Supabase CDN script is loaded in the HTML');
+    }
+    return false;
+}
+
+// Start initialization
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(tryInitializeSupabase, 100);
+    });
 } else {
-    console.log('⚠️ LocalStorage mode');
+    setTimeout(tryInitializeSupabase, 100);
 }
 
 // ========================================
@@ -53,15 +121,27 @@ const mainCardArea = document.querySelector('.main-card-area');
 // INITIALIZATION
 // ========================================
 async function init() {
-    // Attach event listeners FIRST, so cancel button always works
-    attachEventListeners();
-
-    // Get Supabase user
-    if (useSupabase) {
-        const { data: { user } } = await supabase.auth.getUser();
-        currentUser = user;
-        console.log('👤 User:', user?.email || 'Not logged in');
+    // Ensure Supabase is initialized
+    if (!useSupabase) {
+        initializeSupabase();
+        // Wait a bit for initialization
+        await new Promise(resolve => setTimeout(resolve, 200));
     }
+
+    // Get Supabase user (but don't require it for development)
+    if (useSupabase && supabase) {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            currentUser = user;
+            console.log('👤 User:', user?.email || 'Not logged in (using demo mode)');
+        } catch (err) {
+            console.log('⚠️ Could not get user, continuing in demo mode:', err);
+            currentUser = null;
+        }
+    }
+
+    // Attach event listeners AFTER DOM is ready
+    attachEventListeners();
 
     // Load phrases from Supabase
     phrases = await loadPhrasesFromSupabase();
@@ -83,13 +163,25 @@ async function init() {
 // LOAD PHRASES FROM SUPABASE
 // ========================================
 async function loadPhrasesFromSupabase() {
-    if (!useSupabase || !currentUser) {
-        console.log('⚠️ Supabase unavailable or no user');
-        return [];
+    // Ensure Supabase is initialized
+    if (!useSupabase || !supabase) {
+        console.log('⚠️ Supabase not initialized, attempting to initialize...');
+        initializeSupabase();
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        if (!useSupabase || !supabase) {
+            console.error('❌ Supabase still unavailable after retry');
+            return [];
+        }
     }
 
     try {
+        console.log('🔄 Attempting to load phrases from daily_phrases table...');
+        console.log('   Deck ID:', DECK_ID);
+        console.log('   Supabase client:', supabase ? 'available' : 'missing');
+        
         // Load phrases from the 'daily_phrases' table
+        // Don't require user authentication - allow demo access
         const { data: phrasesData, error } = await supabase
             .from('daily_phrases')
             .select('*')
@@ -98,11 +190,19 @@ async function loadPhrasesFromSupabase() {
 
         if (error) {
             console.error('❌ Phrases error:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
+            
+            // If table doesn't exist, show helpful message
+            if (error.code === '42P01' || error.message?.includes('does not exist')) {
+                console.error('⚠️ daily_phrases table does not exist. Please run supabase/insert_test_daily_phrases.sql');
+            }
+            
             return [];
         }
 
         if (!phrasesData || phrasesData.length === 0) {
             console.log('⚠️ No phrases found for deck');
+            console.log('💡 Tip: Run supabase/insert_test_daily_phrases.sql to add test data');
             return [];
         }
 
@@ -149,7 +249,10 @@ function showNoPhrasesMessage() {
     // Add event listener to back button
     const backBtn = document.getElementById('noPhrasesBackBtn');
     if (backBtn) {
+        backBtn.setAttribute('data-debug', '8');
+        backBtn.innerHTML = backBtn.innerHTML.replace('Back to Dashboard', '[8] Back to Dashboard');
         backBtn.addEventListener('click', () => {
+            console.log('🔘 [DEBUG 8] No phrases back button clicked');
             window.location.href = '/dashboard';
         });
     }
@@ -165,48 +268,59 @@ function attachEventListeners() {
     // Audio button - play Greek phrase
     audioBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('🔘 [DEBUG 4] Audio button clicked');
         const currentPhrase = phrases[currentPhraseIndex];
         if (currentPhrase) {
             playAudio(currentPhrase.greek_phrase, 'el-GR');
         }
     });
 
-    // Cancel button - return to dashboard
-    if (cancelBtn) {
-        // Remove any existing listeners to avoid duplicates
-        const newCancelBtn = cancelBtn.cloneNode(true);
-        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
-        
-        // Add fresh event listener
-        newCancelBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+    // Cancel button - return to dashboard (MULTIPLE METHODS FOR RELIABILITY)
+    const cancelButton = document.getElementById('cancelBtn');
+    if (cancelButton) {
+        // Method 1: Inline onclick (already in HTML) - most reliable
+        // Method 2: Add event listener as backup
+        cancelButton.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('🚪 Cancel button clicked - returning to dashboard');
-            // Use window.location for reliable navigation
-            if (window.location.pathname.includes('/daily-phrases')) {
-                window.location.href = '/dashboard';
-            } else {
-                window.location.href = '/dashboard';
-            }
+            e.stopPropagation();
+            console.log('🔘 [DEBUG 6] Cancel button clicked (event listener) - navigating to dashboard');
+            window.location.href = '/dashboard';
         });
         
-        // Also handle form submission prevention if inside a form
-        newCancelBtn.type = 'button';
-        console.log('✅ Cancel button event listener attached');
+        // Method 3: Also handle via onclick property
+        const originalOnclick = cancelButton.onclick;
+        cancelButton.onclick = function(e) {
+            if (originalOnclick) {
+                originalOnclick.call(this, e);
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔘 [DEBUG 6] Cancel button clicked (onclick property) - navigating to dashboard');
+            window.location.href = '/dashboard';
+            return false;
+        };
+        
+        // Ensure button type
+        cancelButton.type = 'button';
+        
+        console.log('✅ Cancel button handlers attached (multiple methods)');
     } else {
-        console.error('❌ Cancel button not found!');
+        console.error('❌ Cancel button not found in DOM!');
     }
 
     // Restart button - reload phrases
     restartBtn?.addEventListener('click', async (e) => {
         e.stopPropagation();
+        console.log('🔘 [DEBUG 5] Restart button clicked');
         await restartSession();
     });
 
     // Rating buttons - trigger handleRating with dataset.rating
-    ratingButtons.forEach(btn => {
+    ratingButtons.forEach((btn, index) => {
+        const debugNum = btn.dataset.debug || (index + 1);
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
+            console.log(`🔘 [DEBUG ${debugNum}] Rating button clicked: ${btn.dataset.rating}`);
             const rating = btn.dataset.rating;
             if (rating) {
                 handleRating(rating);
@@ -291,8 +405,10 @@ async function handleRating(rating) {
 // SAVE PROGRESS TO STUDENT_PROGRESS TABLE
 // ========================================
 async function savePhraseProgress(phrase, rating) {
-    const qualityMap = { 'good': 3, 'very-good': 4, 'easy': 5 };
-    const quality = qualityMap[rating] || 3;
+    // Map ratings to quality scores (matching Vocabulary Dialog)
+    // Hard (1) -> quality 1, Good (2) -> quality 2.5, Easy (3) -> quality 3
+    const qualityMap = { 'hard': 1, 'good': 2.5, 'easy': 3, 'very-good': 4 };
+    const quality = qualityMap[rating] || 2.5;
 
     // SM-2 Algorithm
     const currentEase = phrase.ease || 2.5;
@@ -453,9 +569,9 @@ function shuffleArray(array) {
 // KEYBOARD SHORTCUTS
 // ========================================
 function handleKeyPress(e) {
-    // Rating buttons
-    if (e.key === '1') handleRating('good');
-    if (e.key === '2') handleRating('very-good');
+    // Rating buttons (matching Vocabulary Dialog)
+    if (e.key === '1') handleRating('hard');
+    if (e.key === '2') handleRating('good');
     if (e.key === '3') handleRating('easy');
 
     // Audio
@@ -471,9 +587,37 @@ function handleKeyPress(e) {
 }
 
 // ========================================
-// START
+// START - Wait for Supabase CDN to load
 // ========================================
-init();
+// Wait for DOM and Supabase CDN to be ready
+function startApp() {
+    // Check if Supabase is available
+    if (!useSupabase) {
+        const supabaseAvailable = initializeSupabase();
+        if (!supabaseAvailable) {
+            // Wait a bit more and try again
+            setTimeout(() => {
+                if (!useSupabase) {
+                    initializeSupabase();
+                }
+                init();
+            }, 500);
+            return;
+        }
+    }
+    
+    // Initialize the app
+    init();
+}
 
-console.log('💬 Daily Phrases System loaded');
-console.log('⌨️ Shortcuts: Space=Reveal, 1/2/3=Rate, A=Audio, Esc=Exit');
+// Start when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(startApp, 300);
+    });
+} else {
+    setTimeout(startApp, 300);
+}
+
+console.log('💬 Daily Phrases System loading...');
+console.log('⌨️ Shortcuts: 1/2/3=Rate, A=Audio, Esc=Exit');
