@@ -406,7 +406,9 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         // Move to next card with animation
         setFlipped(false); // Reset flip state
         if (currentIndex < vocabulary.length - 1) {
-            setTimeout(() => setCurrentIndex(currentIndex + 1), 300);
+            setTimeout(() => {
+                setCurrentIndex(currentIndex + 1);
+            }, 300);
         } else {
             // Show summary instead of auto-close
             setTimeout(() => setShowSummary(true), 300);
@@ -425,6 +427,20 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
             setFlipped(false); // Reset flip when changing cards
             setCurrentIndex(currentIndex + 1);
         }
+    };
+
+    const handleRestart = async () => {
+        console.log('🔄 Restarting vocabulary session...');
+        // Reset to first card
+        setCurrentIndex(0);
+        setFlipped(false);
+        setRatings({ hard: 0, good: 0, easy: 0 });
+        setCorrect(0);
+        setTotal(0);
+        setShowSummary(false);
+        
+        // Reload vocabulary
+        await fetchVocabulary();
     };
 
     const handleClose = (withToast = false) => {
@@ -536,33 +552,130 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
 
     const progressPercent = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-    // Summary Screen
+    // Summary Screen - Daily Phrases Style
     if (showSummary) {
         return (
             <div className="vocabulary-dialog-overlay">
-                <div className="vocabulary-dialog compact" style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>🎉 Session beendet!</h2>
-                    <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
+                <div className="vocabulary-dialog compact" style={{ 
+                    textAlign: 'center', 
+                    padding: 'calc(var(--spacing-3xl) * 0.525)',
+                    background: 'var(--bg-glass)',
+                    backdropFilter: 'blur(40px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                    border: '1px solid var(--border-glass)',
+                    boxShadow: 'var(--shadow-float)'
+                }}>
+                    <button className="dialog-close-btn" onClick={() => handleClose(false)}>×</button>
+                    <div style={{ fontSize: '3.5rem', marginBottom: 'calc(var(--spacing-lg) * 0.75)' }}>🎉</div>
+                    <h2 style={{ 
+                        fontSize: '1.875rem', 
+                        fontWeight: 700,
+                        marginBottom: 'calc(var(--spacing-sm) * 0.75)',
+                        color: 'var(--text-primary)',
+                        letterSpacing: '-0.5px'
+                    }}>Session beendet!</h2>
+                    <p style={{ 
+                        color: 'var(--text-secondary)', 
+                        marginBottom: 'calc(var(--spacing-xl) * 0.75)',
+                        fontSize: '1rem',
+                        letterSpacing: '-0.1px'
+                    }}>
                         {correct} richtig / {total - correct} falsch ({progressPercent} %)
                     </p>
 
-                    <div className="summary-stats" style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '40px' }}>
+                    <div className="summary-stats" style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        gap: 'calc(var(--spacing-xl) * 0.75)', 
+                        marginBottom: 'calc(var(--spacing-xl) * 0.75)' 
+                    }}>
                         <div className="stat-circle">
-                            <span style={{ fontSize: '24px', color: '#34C759', fontWeight: 'bold' }}>{correct}</span>
-                            <span style={{ fontSize: '12px', color: '#8E8E93' }}>Richtig</span>
+                            <span style={{ 
+                                fontSize: '1.875rem', 
+                                color: '#34c759', 
+                                fontWeight: 700,
+                                letterSpacing: '-0.5px'
+                            }}>{correct}</span>
+                            <span style={{ 
+                                fontSize: '0.75rem', 
+                                color: 'var(--text-tertiary)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.8px',
+                                marginTop: 'calc(var(--spacing-xs) * 0.75)'
+                            }}>Richtig</span>
                         </div>
+                        <div style={{
+                            width: '1px',
+                            height: '36px',
+                            background: 'var(--border-medium)'
+                        }}></div>
                         <div className="stat-circle">
-                            <span style={{ fontSize: '24px', color: '#FF453A', fontWeight: 'bold' }}>{total - correct}</span>
-                            <span style={{ fontSize: '12px', color: '#8E8E93' }}>Falsch</span>
+                            <span style={{ 
+                                fontSize: '1.875rem', 
+                                color: '#ef4444', 
+                                fontWeight: 700,
+                                letterSpacing: '-0.5px'
+                            }}>{total - correct}</span>
+                            <span style={{ 
+                                fontSize: '0.75rem', 
+                                color: 'var(--text-tertiary)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.8px',
+                                marginTop: 'calc(var(--spacing-xs) * 0.75)'
+                            }}>Falsch</span>
                         </div>
                     </div>
 
-                    <button className="btn-primary" onClick={() => handleClose(true)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
+                    <button 
+                        className="btn-primary" 
+                        onClick={() => handleClose(true)} 
+                        style={{ 
+                            width: '100%', 
+                            padding: '12px 24px', 
+                            borderRadius: 'var(--radius-md)', 
+                            fontSize: '0.875rem',
+                            fontWeight: 600,
+                            background: 'rgba(99, 102, 241, 0.15)',
+                            backdropFilter: 'blur(20px) saturate(150%)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+                            border: '1px solid rgba(99, 102, 241, 0.2)',
+                            color: '#6366f1',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s var(--transition-smooth)',
+                            boxShadow: 'var(--shadow-inner)',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+                            letterSpacing: '-0.1px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(99, 102, 241, 0.25)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = 'var(--shadow-inner), var(--glow-hard)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(99, 102, 241, 0.15)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'var(--shadow-inner)';
+                        }}
+                    >
                         Zurück zum Dashboard
                     </button>
 
                     {showToast && (
-                        <div className="save-toast">
+                        <div className="save-toast" style={{
+                            position: 'absolute',
+                            bottom: 'calc(var(--spacing-lg) * 0.7)',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            background: 'rgba(44, 44, 46, 0.9)',
+                            backdropFilter: 'blur(20px)',
+                            padding: 'calc(var(--spacing-md) * 0.7) calc(var(--spacing-lg) * 0.7)',
+                            borderRadius: 'var(--radius-md)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.875rem',
+                            fontWeight: 600,
+                            boxShadow: 'var(--shadow-frosted)',
+                            border: '1px solid var(--border-soft)'
+                        }}>
                             ✅ Fortschritt gespeichert – super gemacht!
                         </div>
                     )}
@@ -571,79 +684,174 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         );
     }
 
+    // Get mode title and subtitle
+    const getModeConfig = () => {
+        switch (mode) {
+            case 'weak':
+                return { title: '💪 Train Weak Words', subtitle: 'Lass uns diese stärken' };
+            case 'due':
+                return { title: '📚 Due Cards Today', subtitle: 'Deine täglichen Wiederholungen' };
+            case 'review':
+            default:
+                return { title: '🔄 Review Vocabulary', subtitle: 'Dein Wissen auffrischen' };
+        }
+    };
+
+    const modeConfig = getModeConfig();
+
     return (
         <div className="vocabulary-dialog-overlay" onClick={() => handleClose(false)}>
-            <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()}>
+            <div className="vocabulary-dialog daily-phrases-layout" onClick={(e) => e.stopPropagation()}>
                 {/* Close Button */}
                 <button className="dialog-close-btn" onClick={() => handleClose(false)}>×</button>
 
-                {/* Header: Just Counter & Progress */}
-                <div className="dialog-header compact-header">
-                    <div className="header-left">
-                        <span className="card-counter">Card {currentIndex + 1} / {vocabulary.length}</span>
+                {/* Header: Mode Title & Subtitle - Daily Phrases Style */}
+                <div className="mode-header">
+                    <div className="mode-header-frame">
+                        <h1>{modeConfig.title}</h1>
+                        <p>{modeConfig.subtitle}</p>
                     </div>
-                    <div className="header-right">
-                        <div className="progress-bar-mini">
-                            <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
+                </div>
+
+                {/* Progress Bar - Daily Phrases Style */}
+                <div className="progress-wrapper">
+                    <div className="progress-info">
+                        <div className="progress-text">
+                            <span>{currentIndex + 1}</span> / <span>{vocabulary.length}</span>
                         </div>
-                        <span style={{ fontSize: '12px', color: '#8E8E93', marginLeft: '8px', fontWeight: 600 }}>{progressPercent}%</span>
+                    </div>
+                    <div className="progress-track">
+                        <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
                     </div>
                 </div>
 
-                {/* Content Area with Arrows */}
-                <div className="dialog-body-row">
-                    <button
-                        className="nav-arrow-btn prev"
-                        onClick={handlePrevious}
-                        disabled={currentIndex === 0}
+                {/* Main Card Area - Daily Phrases Style */}
+                <div className="main-card-area">
+                    {/* Phrase Card with Flip Functionality */}
+                    <div 
+                        className={`phrase-card ${flipped ? 'flipped' : ''}`}
+                        onClick={() => setFlipped(!flipped)}
+                        style={{ cursor: 'pointer' }}
                     >
-                        ‹
-                    </button>
+                        <div className="card-content">
+                            {/* Front: English (always visible) */}
+                            <div className={`english-translation-container ${!flipped ? 'active' : ''}`}>
+                                <div className="field-label">ENGLISH</div>
+                                <p className="english-translation">{currentVocab.english}</p>
+                                {currentVocab.example_en && (
+                                    <p style={{ 
+                                        fontSize: '1rem', 
+                                        color: 'var(--text-secondary)', 
+                                        marginTop: 'calc(var(--spacing-sm) * 0.7)',
+                                        fontStyle: 'italic'
+                                    }}>{currentVocab.example_en}</p>
+                                )}
+                            </div>
 
-                    <div className="flashcard-wrapper">
-                        <Flashcard
-                            term={currentVocab.english}
-                            translation={currentVocab.greek}
-                            exampleTerm={currentVocab.example_en || ''}
-                            exampleTranslation={currentVocab.example_gr || ''}
-                            onScore={handleScore}
-                            onAudio={playAudio}
-                        />
+                            {/* Back: Greek (shown when flipped) */}
+                            <div className={`greek-phrase-container ${flipped ? 'active' : ''}`}>
+                                <div className="field-label">ΕΛΛΗΝΙΚΑ</div>
+                                <h2 className="greek-phrase">{currentVocab.greek}</h2>
+                                {currentVocab.example_gr && (
+                                    <p style={{ 
+                                        fontSize: '1rem', 
+                                        color: 'var(--text-secondary)', 
+                                        marginTop: 'calc(var(--spacing-sm) * 0.7)',
+                                        fontStyle: 'italic'
+                                    }}>{currentVocab.example_gr}</p>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
-                    <button
-                        className="nav-arrow-btn next"
-                        onClick={handleNext}
-                        disabled={currentIndex === vocabulary.length - 1}
-                    >
-                        ›
-                    </button>
-                </div>
+                    {/* Button Bar - Daily Phrases Style */}
+                    <div className="button-bar">
+                        {/* Left: Rating Buttons (shown only when flipped) */}
+                        {flipped ? (
+                            <div className="rating-group">
+                                <button 
+                                    className="rating-btn rating-hard" 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleScore(1);
+                                    }}
+                                >
+                                    Hard
+                                </button>
+                                <button 
+                                    className="rating-btn rating-good" 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleScore(2.5);
+                                    }}
+                                >
+                                    Good
+                                </button>
+                                <button 
+                                    className="rating-btn rating-easy" 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleScore(3);
+                                    }}
+                                >
+                                    Easy
+                                </button>
+                            </div>
+                        ) : (
+                            <div style={{ flex: 1 }}></div>
+                        )}
 
-                {/* Footer: Rating Buttons */}
-                <div className="dialog-footer compact-footer" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                    <button className="rating-btn rating-hard" onClick={() => handleScore(1)}>
-                        Hard (1)
-                    </button>
-                    <button className="rating-btn rating-good" onClick={() => handleScore(2.5)}>
-                        Good (2)
-                    </button>
-                    <button className="rating-btn rating-easy" onClick={() => handleScore(3)}>
-                        Easy (3)
-                    </button>
-                </div>
-
-                {/* Keyboard Shortcuts Hint */}
-                <div style={{ 
-                    textAlign: 'center', 
-                    marginTop: '12px', 
-                    fontSize: '11px', 
-                    color: '#8E8E93',
-                    padding: '8px',
-                    background: 'rgba(255,255,255,0.03)',
-                    borderRadius: '8px'
-                }}>
-                    ⌨️ Shortcuts: Space=Flip • 1/2/3=Rate • A=Audio • ←/→=Navigate • Esc=Close
+                        {/* Right: Action Buttons */}
+                        <div className="action-group">
+                            {flipped && (
+                                <button 
+                                    id="audioBtn" 
+                                    className="action-btn audio-btn" 
+                                    title="Griechische Aussprache anhören"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        playAudio();
+                                    }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                    </svg>
+                                    Audio
+                                </button>
+                            )}
+                            {/* Vertical Stack: Wiederholen and Abbrechen (always visible) */}
+                            <div className="action-buttons-vertical">
+                                <button 
+                                    className="action-btn restart-btn vertical-btn"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRestart();
+                                    }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                    </svg>
+                                    Wiederholen
+                                </button>
+                                <button 
+                                    className="action-btn cancel-btn vertical-btn" 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleClose(false);
+                                    }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                    Abbrechen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {showToast && (
