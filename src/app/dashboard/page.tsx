@@ -126,14 +126,14 @@ export default function DashboardPage() {
                             <div className="mastery-bar-container">
                                 <span className="mastery-bar-icon">👁️</span>
                                 <div className="mastery-bar-wrapper">
-                                    <div className="mastery-bar-fill" style={{ width: '28%', background: 'linear-gradient(90deg, #FFCC00 0%, #FFD633 100%)' }}></div>
+                                    <div className="mastery-bar-fill" style={{ width: '28%', background: 'linear-gradient(90deg, #007AFF 0%, #00C6FF 100%)' }}></div>
                                 </div>
                                 <span className="mastery-bar-label">28 %</span>
                             </div>
                             <div className="mastery-bar-container">
                                 <span className="mastery-bar-icon">👂</span>
                                 <div className="mastery-bar-wrapper">
-                                    <div className="mastery-bar-fill" style={{ width: '10%', background: 'linear-gradient(90deg, #34C759 0%, #30D158 100%)' }}></div>
+                                    <div className="mastery-bar-fill" style={{ width: '10%', background: 'linear-gradient(90deg, #007AFF 0%, #00C6FF 100%)' }}></div>
                                 </div>
                                 <span className="mastery-bar-label">10 %</span>
                             </div>
@@ -141,7 +141,7 @@ export default function DashboardPage() {
 
                         <div className="rating-tiles-grid">
                             <div className="rating-tile">
-                                <span className="rating-tile-val" style={{ color: '#34C759' }}>78%</span>
+                                <span className="rating-tile-val" style={{ color: '#007AFF' }}>78%</span>
                                 <span className="rating-tile-lbl">Last Test</span>
                             </div>
                             <div className="rating-tile">
@@ -149,7 +149,7 @@ export default function DashboardPage() {
                                 <span className="rating-tile-lbl">Actual Test</span>
                             </div>
                             <div className="rating-tile">
-                                <span className="rating-tile-val" style={{ color: '#FFCC00' }}>92%</span>
+                                <span className="rating-tile-val" style={{ color: '#007AFF' }}>92%</span>
                                 <span className="rating-tile-lbl">Last Exam</span>
                             </div>
                         </div>
