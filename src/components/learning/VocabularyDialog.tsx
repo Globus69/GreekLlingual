@@ -487,43 +487,16 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                     </button>
                 </div>
 
-                {/* Footer: Rating Buttons + Audio */}
-                <div className="dialog-footer compact-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ display: 'flex', gap: '8px', flex: 1, justifyContent: 'center' }}>
-                        <button className="rating-btn rating-hard" onClick={() => handleScore(1)}>
-                            Hard (1)
-                        </button>
-                        <button className="rating-btn rating-good" onClick={() => handleScore(2.5)}>
-                            Good (2)
-                        </button>
-                        <button className="rating-btn rating-easy" onClick={() => handleScore(3)}>
-                            Easy (3)
-                        </button>
-                    </div>
-                    <button 
-                        onClick={playAudio}
-                        style={{
-                            padding: '10px 16px',
-                            background: 'rgba(0, 122, 255, 0.15)',
-                            border: '1px solid rgba(0, 122, 255, 0.3)',
-                            borderRadius: '12px',
-                            color: '#007AFF',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            transition: 'all 0.2s'
-                        }}
-                        title="Audio abspielen (A)"
-                    >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                        </svg>
-                        Audio
+                {/* Footer: Rating Buttons */}
+                <div className="dialog-footer compact-footer" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                    <button className="rating-btn rating-hard" onClick={() => handleScore(1)}>
+                        Hard (1)
+                    </button>
+                    <button className="rating-btn rating-good" onClick={() => handleScore(2.5)}>
+                        Good (2)
+                    </button>
+                    <button className="rating-btn rating-easy" onClick={() => handleScore(3)}>
+                        Easy (3)
                     </button>
                 </div>
 

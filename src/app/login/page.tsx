@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import '@/styles/liquid-glass.css';
 
 export default function LoginPage() {
@@ -9,7 +10,26 @@ export default function LoginPage() {
     const [pin, setPin] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
-    const { login } = useAuth();
+    const { login, user } = useAuth();
+    const router = useRouter();
+
+    // Auto-redirect to dashboard after 1 second (for development before app completion)
+    useEffect(() => {
+        // Only redirect if user is already logged in or if we have a stored user
+        const storedUser = localStorage.getItem('greeklingua_user');
+        const hasUser = user || storedUser;
+        
+        if (!hasUser) {
+            // No user found - don't redirect to avoid infinite loop
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            router.push('/dashboard');
+        }, 1000); // 1 second delay
+
+        return () => clearTimeout(timer);
+    }, [user, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
