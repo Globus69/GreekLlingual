@@ -21,6 +21,7 @@ if (typeof window.supabase !== 'undefined') {
 // VOCABULARY DATA
 // ========================================
 let vocabulary = [];
+let vocabularyWithProgress = []; // Cards merged with progress data
 let currentMode = 'review';
 const DECK_ID = 'c8852ed2-ebb9-414c-ac90-4867c562561e';
 
@@ -76,7 +77,7 @@ async function init() {
     // Update mode header
     updateModeHeader(currentMode);
 
-    // Load cards from Supabase
+    // Load cards from Supabase based on mode
     vocabulary = await loadCardsFromSupabase(currentMode);
 
     // Fallback to shared-data.js
@@ -127,41 +128,110 @@ function updateModeHeader(mode) {
 }
 
 // ========================================
-// LOAD CARDS FROM SUPABASE
+// LOAD CARDS FROM SUPABASE WITH PROGRESS
 // ========================================
 async function loadCardsFromSupabase(mode) {
     if (!useSupabase || !currentUser) {
-        console.log('⚠️ Supabase unavailable');
+        console.log('⚠️ Supabase unavailable or no user');
         return [];
     }
 
     try {
         const today = new Date().toISOString().split('T')[0];
-        let query = supabase.from('vocabs').select('*').eq('deck_id', DECK_ID);
 
-        switch (mode) {
-            case 'weak':
-                query = query.or('difficulty.eq.hard,ease.lt.2.3');
-                break;
-            case 'due':
-                query = query.lte('due_date', today);
-                break;
-            case 'review':
-            default:
-                break;
-        }
+        // Step 1: Load all vocabs for this deck
+        const { data: vocabs, error: vocabError } = await supabase
+            .from('vocabs')
+            .select('*')
+            .eq('deck_id', DECK_ID)
+            .order('created_at', { ascending: true });
 
-        const { data, error } = await query.order('created_at', { ascending: true });
-
-        if (error) {
-            console.error('❌ Supabase error:', error);
+        if (vocabError) {
+            console.error('❌ Vocab error:', vocabError);
             return [];
         }
 
-        console.log(`✅ ${data.length} cards (mode: ${mode})`);
-        return data;
+        if (!vocabs || vocabs.length === 0) {
+            console.log('⚠️ No vocabs found for deck');
+            return [];
+        }
+
+        console.log(`📦 Loaded ${vocabs.length} vocabs from deck`);
+
+        // Step 2: Load student progress for these vocabs
+        const vocabIds = vocabs.map(v => v.id);
+        const { data: progressData, error: progressError } = await supabase
+            .from('student_progress')
+            .select('*')
+            .eq('student_id', currentUser.id)
+            .in('vocab_id', vocabIds);
+
+        if (progressError) {
+            console.error('❌ Progress error:', progressError);
+            // Continue without progress data
+        }
+
+        console.log(`📊 Loaded ${progressData?.length || 0} progress records`);
+
+        // Step 3: Merge vocabs with progress
+        const progressMap = {};
+        if (progressData) {
+            progressData.forEach(p => {
+                progressMap[p.vocab_id] = p;
+            });
+        }
+
+        vocabularyWithProgress = vocabs.map(vocab => {
+            const progress = progressMap[vocab.id] || {
+                ease: 2.5,
+                interval: 1,
+                due_date: today,
+                last_reviewed: null
+            };
+
+            return {
+                ...vocab,
+                ease: progress.ease,
+                interval: progress.interval,
+                due_date: progress.due_date,
+                last_reviewed: progress.last_reviewed,
+                progress_id: progress.id // Keep track of progress record ID
+            };
+        });
+
+        // Step 4: Filter based on mode
+        let filteredCards = [];
+
+        switch (mode) {
+            case 'weak':
+                // Cards with difficulty='hard' OR ease < 2.3
+                filteredCards = vocabularyWithProgress.filter(card =>
+                    card.difficulty === 'hard' || card.ease < 2.3
+                );
+                console.log(`🎯 Weak mode: ${filteredCards.length} cards (difficulty=hard OR ease<2.3)`);
+                break;
+
+            case 'due':
+                // Cards with due_date <= today
+                filteredCards = vocabularyWithProgress.filter(card =>
+                    card.due_date <= today
+                );
+                console.log(`📅 Due mode: ${filteredCards.length} cards (due_date<=${today})`);
+                break;
+
+            case 'review':
+            default:
+                // All cards
+                filteredCards = vocabularyWithProgress;
+                console.log(`🔄 Review mode: ${filteredCards.length} cards (all)`);
+                break;
+        }
+
+        console.log(`✅ Loaded ${filteredCards.length} cards for mode: ${mode}`);
+        return filteredCards;
+
     } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('❌ Error loading cards:', error);
         return [];
     }
 }
@@ -195,14 +265,12 @@ function showNoCardsMessage() {
 // EVENT LISTENERS
 // ========================================
 function attachEventListeners() {
-    // CRITICAL: Flip ONLY when clicking on card-inner itself
-    // Ignore clicks that originate from buttons in the button-bar
+    // CRITICAL: Flip when clicking on the card (not on buttons)
+    // The button-bar is outside the flashcard element in the DOM
+
+    // Add click listener to card-inner (the actual card)
     cardInner?.addEventListener('click', (e) => {
-        // Check if click originated from button-bar or its children
-        if (e.target.closest('.button-bar')) {
-            console.log('❌ Click on button-bar - no flip');
-            return;
-        }
+        console.log('🖱️ Card clicked', e.target);
 
         // Check if click originated from audio button
         if (e.target.closest('.audio-btn-back')) {
@@ -210,10 +278,12 @@ function attachEventListeners() {
             return;
         }
 
-        // Only flip if not already flipped
+        // Flip the card
         if (!isFlipped) {
-            console.log('✅ Flip card');
+            console.log('✅ Flipping card to back');
             flipCard();
+        } else {
+            console.log('ℹ️ Card already flipped (rating buttons should be used)');
         }
     });
 
@@ -274,8 +344,15 @@ function loadCard(index) {
 // FLIP CARD
 // ========================================
 function flipCard() {
+    console.log('🔄 flipCard() called');
+    console.log('  flashcard element:', flashcard);
+    console.log('  Current classes:', flashcard?.className);
+
     flashcard.classList.add('flipped');
     isFlipped = true;
+
+    console.log('  New classes:', flashcard?.className);
+    console.log('  isFlipped:', isFlipped);
 }
 
 // ========================================
@@ -336,6 +413,7 @@ async function updateCardSRS(card, rating) {
     const qualityMap = { 'good': 3, 'very-good': 4, 'easy': 5 };
     const quality = qualityMap[rating] || 3;
 
+    // SM-2 Algorithm
     let newEase = (card.ease || 2.5) + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
     newEase = Math.max(1.3, Math.min(3.0, newEase));
 
@@ -346,38 +424,48 @@ async function updateCardSRS(card, rating) {
     newDueDate.setDate(newDueDate.getDate() + newInterval);
     const formattedDueDate = newDueDate.toISOString().split('T')[0];
 
-    console.log(`SRS: ease ${(card.ease || 2.5).toFixed(2)} → ${newEase.toFixed(2)}, interval ${newInterval}d`);
+    console.log(`SRS: ease ${(card.ease || 2.5).toFixed(2)} → ${newEase.toFixed(2)}, interval ${newInterval}d, due ${formattedDueDate}`);
 
+    // Update card object
     card.ease = newEase;
     card.interval = newInterval;
     card.due_date = formattedDueDate;
 
+    // Save to student_progress table
     await saveCardProgress(card);
 }
 
 // ========================================
-// SAVE PROGRESS
+// SAVE PROGRESS TO STUDENT_PROGRESS TABLE
 // ========================================
 async function saveCardProgress(card) {
     if (useSupabase && currentUser && card.id) {
         try {
+            const progressRecord = {
+                student_id: currentUser.id,
+                vocab_id: card.id,
+                ease: card.ease,
+                interval: card.interval,
+                due_date: card.due_date,
+                last_reviewed: new Date().toISOString(),
+                correct_count: (card.correct_count || 0) + 1,
+                attempts: (card.attempts || 0) + 1
+            };
+
+            // Upsert: Insert if not exists, Update if exists
             const { error } = await supabase
-                .from('vocabs')
-                .update({
-                    ease: card.ease,
-                    interval: card.interval,
-                    due_date: card.due_date,
-                    last_reviewed: new Date().toISOString()
-                })
-                .eq('id', card.id);
+                .from('student_progress')
+                .upsert(progressRecord, {
+                    onConflict: 'student_id,vocab_id'
+                });
 
             if (error) {
                 console.error('❌ Save error:', error);
             } else {
-                console.log('💾 Saved to Supabase');
+                console.log('💾 Progress saved to student_progress');
             }
         } catch (e) {
-            console.error('❌ Error:', e);
+            console.error('❌ Error saving progress:', e);
         }
     } else {
         // LocalStorage fallback
