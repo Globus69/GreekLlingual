@@ -6,13 +6,33 @@
     <title>Daily Phrases - Greek Learning</title>
     <link rel="stylesheet" href="/daily-phrases/daily-phrases-style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Make Supabase available globally after CDN loads
+        (function() {
+            function checkSupabase() {
+                if (typeof supabase !== 'undefined') {
+                    window.supabase = supabase;
+                    window.supabaseLoaded = true;
+                    console.log('✅ Supabase CDN loaded and available');
+                    // Dispatch custom event
+                    window.dispatchEvent(new Event('supabase-loaded'));
+                } else {
+                    // Retry after a short delay
+                    setTimeout(checkSupabase, 100);
+                }
+            }
+            checkSupabase();
+        })();
+    </script>
 </head>
 <body>
     <div class="app-container">
-        <!-- Mode Header (Top) -->
+        <!-- Mode Header (Top) - Left Aligned with Frame -->
         <div class="mode-header">
-            <h1 id="modeTitle">💬 Daily Phrases</h1>
-            <p id="modeSubtitle">Übe tägliche Sätze auf Griechisch</p>
+            <div class="mode-header-frame">
+                <h1 id="modeTitle">💬 Daily Phrases</h1>
+                <p id="modeSubtitle">Übe tägliche Sätze auf Griechisch</p>
+            </div>
         </div>
 
         <!-- Progress Bar -->
@@ -48,52 +68,46 @@
 
             <!-- Bottom Button Bar -->
             <div class="button-bar">
-                <!-- Left: Rating Buttons -->
+                <!-- Left: Rating Buttons (matching Vocabulary Dialog style) -->
                 <div class="rating-group">
-                    <button class="rating-btn btn-good" data-rating="good">
-                        <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Good
+                    <button class="rating-btn rating-hard" data-rating="hard" data-debug="1">
+                        [1] Hard (1)
                     </button>
-                    <button class="rating-btn btn-very-good" data-rating="very-good">
-                        <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Very Good
+                    <button class="rating-btn rating-good" data-rating="good" data-debug="2">
+                        [2] Good (2)
                     </button>
-                    <button class="rating-btn btn-easy" data-rating="easy">
-                        <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        Easy
+                    <button class="rating-btn rating-easy" data-rating="easy" data-debug="3">
+                        [3] Easy (3)
                     </button>
                 </div>
 
                 <!-- Right: Action Buttons -->
                 <div class="action-group">
-                    <button id="audioBtn" class="action-btn audio-btn" title="Griechische Aussprache anhören">
+                    <button id="audioBtn" class="action-btn audio-btn" title="Griechische Aussprache anhören" data-debug="4">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
                             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
                             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                         </svg>
-                        Audio
+                        [4] Audio
                     </button>
-                    <button id="restartBtn" class="action-btn restart-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="23 4 23 10 17 10"></polyline>
-                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                        </svg>
-                        Wiederholen
-                    </button>
-                    <button id="cancelBtn" class="action-btn cancel-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                        Abbrechen
-                    </button>
+                    <!-- Vertical Stack: Wiederholen and Abbrechen -->
+                    <div class="action-buttons-vertical">
+                        <button id="restartBtn" class="action-btn restart-btn vertical-btn" data-debug="5">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                            [5] Wiederholen
+                        </button>
+                        <button id="cancelBtn" class="action-btn cancel-btn vertical-btn" type="button" onclick="window.location.href='/dashboard'; return false;" data-debug="6">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            [6] Abbrechen
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -117,11 +131,11 @@
                     </div>
                 </div>
 
-                <button class="back-to-dashboard-btn" onclick="window.location.href='/dashboard'">
+                <button class="back-to-dashboard-btn" onclick="window.location.href='/dashboard'" data-debug="7">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                     </svg>
-                    Back to Dashboard
+                    [7] Back to Dashboard
                 </button>
             </div>
         </div>
