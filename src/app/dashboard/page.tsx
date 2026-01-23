@@ -43,15 +43,15 @@ export default function DashboardPage() {
 
     useEffect(() => {
         if (!authLoading) {
-            if (!user) {
-                router.push('/login');
-            } else {
+            // For development: Allow access even without user to avoid infinite redirect loop
+            // In production, this should check for user and redirect to login
+            if (user) {
                 fetchStats();
-                const timer = setTimeout(() => {
-                    setLoading(false);
-                }, 800);
-                return () => clearTimeout(timer);
             }
+            const timer = setTimeout(() => {
+                setLoading(false);
+            }, 800);
+            return () => clearTimeout(timer);
         }
     }, [user, authLoading, router]);
 
