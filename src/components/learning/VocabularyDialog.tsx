@@ -143,15 +143,8 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
     }, [isOpen, flipped, currentIndex, vocabulary.length]);
 
     const fetchVocabulary = async () => {
-        if (!STUDENT_ID) {
-            console.error("❌ No student ID available");
-            setVocabulary([]);
-            setLoading(false);
-            return;
-        }
-
         setLoading(true);
-        console.log(`🔄 Fetching vocabulary for mode: ${mode}, student: ${STUDENT_ID}`);
+        console.log(`🔄 Fetching vocabulary for mode: ${mode}, student: ${STUDENT_ID || 'demo'}`);
         
         try {
             // Add timeout to prevent hanging
@@ -160,6 +153,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
             );
 
             // Fetch learning_items with student_progress (LEFT JOIN)
+            // Even if no student_id, we can still load vocabulary items
             const queryPromise = supabase
                 .from('learning_items')
                 .select(`
@@ -167,25 +161,34 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                     student_progress!left(*)
                 `)
                 .eq('type', 'vocabulary')
-                .order('next_review', { foreignTable: 'student_progress', ascending: true, nullsFirst: true })
+                .order('created_at', { ascending: false })
                 .limit(100);
 
             const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
             if (error) {
                 console.error("❌ Error fetching vocabs:", error);
+                console.error("Error details:", JSON.stringify(error, null, 2));
+                
+                // If table doesn't exist, show helpful message
+                if (error.code === '42P01' || error.message?.includes('does not exist')) {
+                    console.error("⚠️ learning_items table does not exist. Please run the setup SQL scripts.");
+                }
+                
                 setVocabulary([]);
                 setLoading(false);
                 return;
             }
 
             if (data && data.length > 0) {
-                // Filter student_progress to only include entries for current student
+                // Filter student_progress to only include entries for current student (if student_id exists)
                 const processedData = data.map((item: any) => ({
                     ...item,
-                    student_progress: item.student_progress?.filter(
-                        (p: any) => p?.student_id === STUDENT_ID
-                    ) || []
+                    student_progress: STUDENT_ID 
+                        ? (item.student_progress?.filter(
+                            (p: any) => p?.student_id === STUDENT_ID
+                        ) || [])
+                        : [] // No student_id = no progress data
                 })) as VocabWithProgress[];
                 
                 const filtered = filterVocabsByMode(processedData, mode);
@@ -193,6 +196,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                 setVocabulary(filtered);
             } else {
                 console.log("⚠️ No vocabulary items found in database");
+                console.log("💡 Tip: Run supabase/insert_test_vocabulary.sql to add test data");
                 setVocabulary([]);
             }
         } catch (err: any) {
@@ -449,16 +453,19 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         );
     }
 
-    // Check if we have vocabulary to display
-    if (vocabulary.length === 0 && user?.id) {
-        // User is logged in but no vocabulary found
+    // Check if we have vocabulary to display (after loading is complete)
+    if (!loading && vocabulary.length === 0) {
+        // No vocabulary found (for any user, including demo)
         return (
             <div className="vocabulary-dialog-overlay" onClick={() => handleClose(false)}>
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
                     <button className="dialog-close-btn" onClick={() => handleClose(false)}>×</button>
                     <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>📚 No Vocabulary Found</h2>
-                    <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
-                        No vocabulary items available for this mode. Please add vocabulary to the database.
+                    <p style={{ color: '#8E8E93', marginBottom: '20px' }}>
+                        No vocabulary items available for this mode.
+                    </p>
+                    <p style={{ color: '#8E8E93', fontSize: '14px', marginBottom: '30px' }}>
+                        💡 <strong>Tip:</strong> Run <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>supabase/insert_test_vocabulary.sql</code> in your Supabase SQL editor to add test vocabulary.
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
                         Close
