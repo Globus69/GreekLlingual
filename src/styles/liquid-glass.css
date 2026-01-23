@@ -123,7 +123,7 @@ html,
 }
 
 .mastery-title-v3 {
-    color: #FFCC00;
+    color: #007AFF;
     font-size: 14px;
     font-weight: 800;
     text-transform: uppercase;
@@ -229,11 +229,15 @@ html,
 }
 
 .vocab-bar-learned {
-    background: #34C759;
+    background: rgba(176, 255, 176, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .vocab-bar-repeat {
-    background: #FF453A;
+    background: rgba(255, 153, 153, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .mastery-suggestion {
