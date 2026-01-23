@@ -3,10 +3,7 @@
 // ========================================
 const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // TODO: Replace with your Supabase URL
 const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // TODO: Replace with your Supabase Anon Key
-// Chrome braucht manchmal einen Kick, um Stimmen zu laden
-setTimeout(() => {
-    window.speechSynthesis.getVoices();
-}, 500);
+
 let supabase = null;
 let currentUser = null;
 let useSupabase = false;
@@ -27,7 +24,14 @@ let vocabulary = [];
 let currentMode = 'review'; // 'weak', 'review', or 'due'
 
 // ========================================
-// Lade Karten aus shared-data.js (Fallback)
+// STIMMEN LADEN WARTEN (wichtig für Audio)
+// ========================================
+window.speechSynthesis.onvoiceschanged = () => {
+    console.log('Stimmen geladen:', window.speechSynthesis.getVoices().map(v => `${v.name} (${v.lang})`));
+};
+
+// ========================================
+// Lade Karten – TEST-MODUS: immer alle anzeigen + Fallback
 // ========================================
 if (typeof window.allFlashcards !== 'undefined' && Array.isArray(window.allFlashcards) && window.allFlashcards.length > 0) {
     vocabulary = window.allFlashcards;
@@ -36,9 +40,7 @@ if (typeof window.allFlashcards !== 'undefined' && Array.isArray(window.allFlash
     console.warn('⚠️ Keine Karten in shared-data.js gefunden');
 }
 
-// ========================================
-// Oder aus Supabase (wenn konfiguriert)
-// ========================================
+// Supabase-Laden (optional)
 if (useSupabase) {
     async function loadFromSupabase() {
         try {
@@ -62,6 +64,18 @@ if (useSupabase) {
 }
 
 // ========================================
+// TEST-FALLBACK: 3 Karten erzwingen, falls nichts da ist
+// ========================================
+if (vocabulary.length === 0) {
+    vocabulary = [
+        { english: "Hello", greek: "Γεια σου", translit: "Geia sou", context_en: "A common greeting", difficulty: "easy" },
+        { english: "Thank you", greek: "Ευχαριστώ", translit: "Efcharistó", context_en: "Expressing gratitude", difficulty: "hard" },
+        { english: "Water", greek: "Νερό", translit: "Neró", context_en: "Something to drink", difficulty: "easy" }
+    ];
+    console.log('⚠️ TEST-FALLBACK: 3 Karten erzwungen');
+}
+
+// ========================================
 // STATE MANAGEMENT
 // ========================================
 let currentCardIndex = 0;
@@ -72,12 +86,11 @@ let cardsReviewed = 0;
 // DOM ELEMENTS
 // ========================================
 const flashcard = document.getElementById('flashcard');
-const cardContainer = document.getElementById('cardContainer');
+const cardContainer = document.querySelector('.card-container');
 const wordFront = document.getElementById('wordFront');
 const contextFront = document.getElementById('contextFront');
 const wordBack = document.getElementById('wordBack');
 const contextBack = document.getElementById('contextBack');
-const audioFrontBtn = document.getElementById('audioFront');
 const audioBackBtn = document.getElementById('audioBack');
 const ratingButtons = document.querySelectorAll('.rating-btn');
 const progressFill = document.getElementById('progressFill');
@@ -85,14 +98,6 @@ const currentCardNum = document.getElementById('currentCardNum');
 const totalCards = document.getElementById('totalCards');
 const completionScreen = document.getElementById('completionScreen');
 const cardsReviewedSpan = document.getElementById('cardsReviewed');
-const backToDashboardBtn = document.getElementById('backToDashboard');
-
-// ========================================
-// STIMMEN LADEN WARTEN (wichtig für bessere Audio)
-// ========================================
-window.speechSynthesis.onvoiceschanged = () => {
-    console.log('Stimmen geladen:', window.speechSynthesis.getVoices().map(v => `${v.name} (${v.lang})`));
-};
 
 // ========================================
 // INITIALIZATION
@@ -112,8 +117,7 @@ async function init() {
     // Update mode header
     updateModeHeader(currentMode);
 
-    // Lade Karten – TEST-MODUS: immer alle anzeigen
-    vocabulary = await getCardsForMode(currentMode);
+    // Karten sind bereits geladen (siehe oben)
 
     // Check if there are cards to review
     if (vocabulary.length === 0) {
@@ -167,54 +171,6 @@ function updateModeHeader(mode) {
 }
 
 // ========================================
-// GET CARDS BASED ON MODE (TEST: immer alle anzeigen)
-// ========================================
-async function getCardsForMode(mode) {
-    console.log(`Modus: ${mode} – TEST-MODUS: Zeige ALLE Karten`);
-
-    let cards = [];
-
-    // 1. shared-data.js (Fallback)
-    if (typeof window.allFlashcards !== 'undefined' && Array.isArray(window.allFlashcards) && window.allFlashcards.length > 0) {
-        cards = window.allFlashcards;
-        console.log(`✅ ${cards.length} Karten aus shared-data.js geladen`);
-    } else {
-        console.warn('⚠️ Keine Karten in shared-data.js gefunden');
-    }
-
-    // 2. Supabase (falls konfiguriert)
-    if (useSupabase && currentUser) {
-        try {
-            const { data, error } = await supabase
-                .from('vocabs')
-                .select('*')
-                .eq('deck_id', 'c8852ed2-ebb9-414c-ac90-4867c562561e');
-
-            if (error) {
-                console.error('Supabase Fehler:', error);
-            } else if (data && data.length > 0) {
-                cards = data;
-                console.log(`✅ ${cards.length} Karten aus Supabase geladen`);
-            }
-        } catch (e) {
-            console.error('❌ Fehler beim Supabase-Laden:', e);
-        }
-    }
-
-    // 3. Harter Test-Fallback, falls wirklich nichts da ist
-    if (cards.length === 0) {
-        cards = [
-            { english: "Hello", greek: "Γεια σου", translit: "Geia sou", context_en: "Greeting", difficulty: "easy" },
-            { english: "Thank you", greek: "Ευχαριστώ", translit: "Efcharistó", context_en: "Gratitude", difficulty: "hard" },
-            { english: "Water", greek: "Νερό", translit: "Neró", context_en: "Drink", difficulty: "easy" }
-        ];
-        console.log('⚠️ TEST-FALLBACK: 3 Karten erzwungen');
-    }
-
-    return cards;
-}
-
-// ========================================
 // HELPER: Get Today's Date String
 // ========================================
 function getTodayDateString() {
@@ -256,6 +212,7 @@ function showNoCardsMessage() {
 function attachEventListeners() {
     // Card flip on click
     flashcard.addEventListener('click', (e) => {
+        // Prevent flip if clicking audio button or rating button
         if (e.target.closest('.audio-btn-large') || e.target.closest('.rating-btn')) {
             return;
         }
@@ -265,13 +222,8 @@ function attachEventListeners() {
         }
     });
 
-    // Audio buttons
-    audioFrontBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        playAudio(vocabulary[currentCardIndex]?.audioEn, vocabulary[currentCardIndex]?.english);
-    });
-
-    audioBackBtn.addEventListener('click', (e) => {
+    // Audio button (Back)
+    audioBackBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
         playAudio(vocabulary[currentCardIndex]?.audioGr, vocabulary[currentCardIndex]?.greek);
     });
@@ -285,11 +237,6 @@ function attachEventListeners() {
         });
     });
 
-    // Back to Dashboard button
-    backToDashboardBtn.addEventListener('click', () => {
-        window.location.href = '/dashboard';
-    });
-
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyPress);
 }
@@ -298,13 +245,13 @@ function attachEventListeners() {
 // CARD LOADING
 // ========================================
 function loadCard(index) {
-    const card = vocabulary[index];
+    const card = vocabulary[index] || { english: '—', greek: '—', context_en: '', context_gr: '' };
 
-    wordFront.textContent = card?.english || '—';
-    contextFront.textContent = card?.context_en || '';
+    wordFront.textContent = card.english || '—';
+    contextFront.textContent = card.context_en || '';
 
-    wordBack.textContent = card?.greek || '—';
-    contextBack.textContent = card?.context_gr || '';
+    wordBack.textContent = card.greek || '—';
+    contextBack.textContent = card.context_gr || '';
 
     isFlipped = false;
     flashcard.classList.remove('flipped');
@@ -333,20 +280,16 @@ function playAudio(audioFile, text) {
         const utterance = new SpeechSynthesisUtterance(text || 'No text available');
 
         utterance.lang = /[\u0370-\u03FF]/.test(text) ? 'el-GR' : 'en-US';
-        utterance.rate = 0.78;  // leicht angepasst für Chrome
-        utterance.pitch = 1.1;  // etwas heller → oft klarer
+        utterance.rate = 0.78;   // langsamer = deutlich besser verständlich
+        utterance.pitch = 1.08;  // leicht höher = natürlicher Klang
         utterance.volume = 1.0;
 
         // Beste englische Stimme wählen
         const voices = window.speechSynthesis.getVoices();
-        const bestEnVoice = voices.find(v =>
-            v.lang === 'en-US' &&
-            (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Premium'))
-        ) || voices.find(v => v.lang === 'en-US');
-
-        if (bestEnVoice) {
-            utterance.voice = bestEnVoice;
-            console.log(`Chrome Stimme: ${bestEnVoice.name} (${bestEnVoice.lang})`);
+        const enVoice = voices.find(v => v.lang === 'en-US' || v.lang === 'en-GB');
+        if (enVoice) {
+            utterance.voice = enVoice;
+            console.log(`Verwende Stimme: ${enVoice.name} (${enVoice.lang})`);
         } else {
             console.log('Keine spezielle englische Stimme gefunden – Standard wird verwendet');
         }
@@ -448,8 +391,18 @@ function showCompletionScreen() {
     flashcard.classList.add('fade-out');
 
     setTimeout(() => {
-        cardContainer.style.display = 'none';
+        if (cardContainer) cardContainer.style.display = 'none';
+
+        const ratingContainer = document.querySelector('.rating-buttons');
+        if (ratingContainer) ratingContainer.style.display = 'none';
+
         document.querySelector('.progress-wrapper').style.display = 'none';
+
+        // Update stats
+        if (cardsReviewedSpan) {
+            cardsReviewedSpan.textContent = cardsReviewed;
+        }
+
         completionScreen.classList.add('active');
     }, 500);
 }
