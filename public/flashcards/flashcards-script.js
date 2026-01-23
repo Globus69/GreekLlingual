@@ -1,15 +1,15 @@
 // ========================================
 // SUPABASE CONFIGURATION
 // ========================================
-const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // TODO: Replace with your Supabase URL
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // TODO: Replace with your Supabase Anon Key
+const SUPABASE_URL = 'https://bzdzqmnxycnudflcnmzj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6ZHpxbW54eWNudWRmbGNubXpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc0NTU1ODQsImV4cCI6MjA1MzAzMTU4NH0.Ug6iHZJZLdTgzQZW7GRxe-rZZwu2LlraBGBGf-kOC8I';
 
 let supabase = null;
 let currentUser = null;
 let useSupabase = false;
 
-// Initialize Supabase (only if configured)
-if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && typeof window.supabase !== 'undefined') {
+// Initialize Supabase
+if (typeof window.supabase !== 'undefined') {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     useSupabase = true;
     console.log('✅ Supabase initialized in flashcards');
@@ -18,62 +18,18 @@ if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && typeof window.supabase !== 'undefine
 }
 
 // ========================================
-// VOCABULARY DATA - Uses shared-data.js or Supabase
+// VOCABULARY DATA
 // ========================================
 let vocabulary = [];
 let currentMode = 'review'; // 'weak', 'review', or 'due'
+const DECK_ID = 'c8852ed2-ebb9-414c-ac90-4867c562561e'; // Main Greek deck
 
 // ========================================
-// STIMMEN LADEN WARTEN (wichtig für Audio)
+// SPEECH SYNTHESIS SETUP
 // ========================================
 window.speechSynthesis.onvoiceschanged = () => {
-    console.log('Stimmen geladen:', window.speechSynthesis.getVoices().map(v => `${v.name} (${v.lang})`));
+    console.log('✅ Voices loaded:', window.speechSynthesis.getVoices().length);
 };
-
-// ========================================
-// Lade Karten – TEST-MODUS: immer alle anzeigen + Fallback
-// ========================================
-if (typeof window.allFlashcards !== 'undefined' && Array.isArray(window.allFlashcards) && window.allFlashcards.length > 0) {
-    vocabulary = window.allFlashcards;
-    console.log(`✅ ${vocabulary.length} Karten aus shared-data.js geladen`);
-} else {
-    console.warn('⚠️ Keine Karten in shared-data.js gefunden');
-}
-
-// Supabase-Laden (optional)
-if (useSupabase) {
-    async function loadFromSupabase() {
-        try {
-            const { data, error } = await supabase
-                .from('vocabs')
-                .select('*')
-                .eq('deck_id', 'c8852ed2-ebb9-414c-ac90-4867c562561e');
-
-            if (error) {
-                console.error('Supabase Fehler:', error);
-            } else if (data && data.length > 0) {
-                vocabulary = data;
-                console.log(`✅ ${vocabulary.length} Karten aus Supabase geladen`);
-            }
-        } catch (e) {
-            console.error('❌ Fehler beim Supabase-Laden:', e);
-        }
-    }
-
-    loadFromSupabase();
-}
-
-// ========================================
-// TEST-FALLBACK: 3 Karten erzwingen, falls nichts da ist
-// ========================================
-if (vocabulary.length === 0) {
-    vocabulary = [
-        { english: "Hello", greek: "Γεια σου", translit: "Geia sou", context_en: "A common greeting", difficulty: "easy" },
-        { english: "Thank you", greek: "Ευχαριστώ", translit: "Efcharistó", context_en: "Expressing gratitude", difficulty: "hard" },
-        { english: "Water", greek: "Νερό", translit: "Neró", context_en: "Something to drink", difficulty: "easy" }
-    ];
-    console.log('⚠️ TEST-FALLBACK: 3 Karten erzwungen');
-}
 
 // ========================================
 // STATE MANAGEMENT
@@ -86,12 +42,15 @@ let cardsReviewed = 0;
 // DOM ELEMENTS
 // ========================================
 const flashcard = document.getElementById('flashcard');
-const cardContainer = document.querySelector('.card-container');
+const cardContainer = document.getElementById('cardContainer');
 const wordFront = document.getElementById('wordFront');
 const contextFront = document.getElementById('contextFront');
 const wordBack = document.getElementById('wordBack');
 const contextBack = document.getElementById('contextBack');
+const audioFrontBtn = document.getElementById('audioFront');
 const audioBackBtn = document.getElementById('audioBack');
+const cancelBtn = document.getElementById('cancelBtn');
+const restartBtn = document.getElementById('restartBtn');
 const ratingButtons = document.querySelectorAll('.rating-btn');
 const progressFill = document.getElementById('progressFill');
 const currentCardNum = document.getElementById('currentCardNum');
@@ -103,23 +62,40 @@ const cardsReviewedSpan = document.getElementById('cardsReviewed');
 // INITIALIZATION
 // ========================================
 async function init() {
-    // Check Supabase authentication
+    // Get Supabase user
     if (useSupabase) {
         const { data: { user } } = await supabase.auth.getUser();
         currentUser = user;
         console.log('👤 Current user:', user?.email || 'Not logged in');
     }
 
-    // Get mode from URL parameters
+    // Get mode from URL
     const urlParams = new URLSearchParams(window.location.search);
     currentMode = urlParams.get('mode') || 'review';
 
     // Update mode header
     updateModeHeader(currentMode);
 
-    // Karten sind bereits geladen (siehe oben)
+    // Load cards from Supabase based on mode
+    vocabulary = await loadCardsFromSupabase(currentMode);
 
-    // Check if there are cards to review
+    // Fallback: Load from shared-data.js if no Supabase data
+    if (vocabulary.length === 0 && typeof window.allFlashcards !== 'undefined') {
+        vocabulary = window.allFlashcards;
+        console.log(`📦 Fallback: ${vocabulary.length} cards loaded from shared-data.js`);
+    }
+
+    // Final fallback: Demo cards
+    if (vocabulary.length === 0) {
+        vocabulary = [
+            { english: "Hello", greek: "Γεια σου", context_en: "Common greeting", context_gr: "Κοινός χαιρετισμός" },
+            { english: "Thank you", greek: "Ευχαριστώ", context_en: "Expressing gratitude", context_gr: "Εκφράζοντας ευγνωμοσύνη" },
+            { english: "Water", greek: "Νερό", context_en: "Something to drink", context_gr: "Κάτι για να πιεις" }
+        ];
+        console.log('⚠️ Demo mode: 3 fallback cards');
+    }
+
+    // Check if cards exist
     if (vocabulary.length === 0) {
         showNoCardsMessage();
         return;
@@ -130,17 +106,12 @@ async function init() {
 
     // Load first card
     loadCard(currentCardIndex);
-
-    // Update progress bar
     updateProgress();
 
     // Attach event listeners
     attachEventListeners();
 
-    // Log mode info
-    console.log(`📚 Mode: ${currentMode}`);
-    console.log(`🔢 Cards loaded: ${vocabulary.length}`);
-    console.log(`🔄 Data source: ${useSupabase && currentUser ? 'Supabase' : 'LocalStorage'}`);
+    console.log(`📚 Mode: ${currentMode} | Cards: ${vocabulary.length}`);
 }
 
 // ========================================
@@ -153,15 +124,15 @@ function updateModeHeader(mode) {
     const modeConfig = {
         weak: {
             title: '💪 Train Weak Words',
-            subtitle: "Let's strengthen these!"
+            subtitle: 'Lass uns diese stärken'
         },
         review: {
             title: '🔄 Review Vocabulary',
-            subtitle: 'Refresh your knowledge ♡'
+            subtitle: 'Dein Wissen auffrischen'
         },
         due: {
             title: '📚 Due Cards Today',
-            subtitle: 'Your daily repeats'
+            subtitle: 'Deine täglichen Wiederholungen'
         }
     };
 
@@ -171,14 +142,52 @@ function updateModeHeader(mode) {
 }
 
 // ========================================
-// HELPER: Get Today's Date String
+// LOAD CARDS FROM SUPABASE
 // ========================================
-function getTodayDateString() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+async function loadCardsFromSupabase(mode) {
+    if (!useSupabase || !currentUser) {
+        console.log('⚠️ Supabase not available or user not logged in');
+        return [];
+    }
+
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        let query = supabase
+            .from('vocabs')
+            .select('*')
+            .eq('deck_id', DECK_ID);
+
+        // Filter based on mode
+        switch (mode) {
+            case 'weak':
+                // Get cards with difficulty='hard' or low ease score
+                query = query.or('difficulty.eq.hard,ease.lt.2.3');
+                break;
+
+            case 'due':
+                // Get cards due today or earlier
+                query = query.lte('due_date', today);
+                break;
+
+            case 'review':
+            default:
+                // Get all cards for review
+                break;
+        }
+
+        const { data, error } = await query.order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('❌ Supabase error:', error);
+            return [];
+        }
+
+        console.log(`✅ Loaded ${data.length} cards from Supabase (mode: ${mode})`);
+        return data;
+    } catch (error) {
+        console.error('❌ Error fetching cards:', error);
+        return [];
+    }
 }
 
 // ========================================
@@ -187,6 +196,7 @@ function getTodayDateString() {
 function showNoCardsMessage() {
     cardContainer.style.display = 'none';
     document.querySelector('.progress-wrapper').style.display = 'none';
+    document.querySelector('.rating-buttons').style.display = 'none';
 
     const message = document.createElement('div');
     message.className = 'no-cards-message';
@@ -210,22 +220,37 @@ function showNoCardsMessage() {
 // EVENT LISTENERS
 // ========================================
 function attachEventListeners() {
-    // Card flip on click
+    // Card flip on click (not on buttons)
     flashcard.addEventListener('click', (e) => {
-        // Prevent flip if clicking audio button or rating button
         if (e.target.closest('.audio-btn-large') || e.target.closest('.rating-btn')) {
             return;
         }
-
         if (!isFlipped) {
             flipCard();
         }
     });
 
-    // Audio button (Back)
+    // Audio buttons
+    audioFrontBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playAudio(vocabulary[currentCardIndex]?.english, 'en-US');
+    });
+
     audioBackBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
-        playAudio(vocabulary[currentCardIndex]?.audioGr, vocabulary[currentCardIndex]?.greek);
+        playAudio(vocabulary[currentCardIndex]?.greek, 'el-GR');
+    });
+
+    // Cancel button
+    cancelBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = '/dashboard';
+    });
+
+    // Restart button
+    restartBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        restartSession();
     });
 
     // Rating buttons
@@ -245,7 +270,7 @@ function attachEventListeners() {
 // CARD LOADING
 // ========================================
 function loadCard(index) {
-    const card = vocabulary[index] || { english: '—', greek: '—', context_en: '', context_gr: '' };
+    const card = vocabulary[index] || {};
 
     wordFront.textContent = card.english || '—';
     contextFront.textContent = card.context_en || '';
@@ -260,43 +285,42 @@ function loadCard(index) {
 }
 
 // ========================================
-// FLIP ANIMATION
+// FLIP CARD
 // ========================================
 function flipCard() {
     flashcard.classList.add('flipped');
     isFlipped = true;
-    console.log('Karte geflippt');
 }
 
 // ========================================
-// AUDIO PLAYBACK – VERBESSERT
+// AUDIO PLAYBACK (SPEECH SYNTHESIS)
 // ========================================
-function playAudio(audioFile, text) {
-    console.log(`Spiele Audio: ${text || '(kein Text)'}`);
+function playAudio(text, lang) {
+    if (!text) {
+        console.warn('No text to speak');
+        return;
+    }
 
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
 
-        const utterance = new SpeechSynthesisUtterance(text || 'No text available');
-
-        utterance.lang = /[\u0370-\u03FF]/.test(text) ? 'el-GR' : 'en-US';
-        utterance.rate = 0.78;   // langsamer = deutlich besser verständlich
-        utterance.pitch = 1.08;  // leicht höher = natürlicher Klang
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+        utterance.rate = 0.82;  // Slower for better comprehension
+        utterance.pitch = 1.0;
         utterance.volume = 1.0;
 
-        // Beste englische Stimme wählen
+        // Try to select best voice for language
         const voices = window.speechSynthesis.getVoices();
-        const enVoice = voices.find(v => v.lang === 'en-US' || v.lang === 'en-GB');
-        if (enVoice) {
-            utterance.voice = enVoice;
-            console.log(`Verwende Stimme: ${enVoice.name} (${enVoice.lang})`);
-        } else {
-            console.log('Keine spezielle englische Stimme gefunden – Standard wird verwendet');
+        const voice = voices.find(v => v.lang === lang || v.lang.startsWith(lang.split('-')[0]));
+        if (voice) {
+            utterance.voice = voice;
+            console.log(`🔊 Using voice: ${voice.name} (${voice.lang})`);
         }
 
         window.speechSynthesis.speak(utterance);
     } else {
-        console.warn('Sprachausgabe nicht unterstützt');
+        console.warn('Speech synthesis not supported');
     }
 }
 
@@ -308,7 +332,7 @@ async function handleRating(rating) {
 
     if (!card) return;
 
-    console.log(`Card rated: ${rating} – ${card.english} → ${card.greek}`);
+    console.log(`✅ Rated: ${rating} – ${card.english} → ${card.greek}`);
 
     await updateCardSRS(card, rating);
 
@@ -323,7 +347,7 @@ async function handleRating(rating) {
 }
 
 // ========================================
-// UPDATE SRS DATA (Spaced Repetition)
+// UPDATE SRS DATA (Spaced Repetition System)
 // ========================================
 async function updateCardSRS(card, rating) {
     const qualityMap = { 'good': 3, 'very-good': 4, 'easy': 5 };
@@ -339,34 +363,61 @@ async function updateCardSRS(card, rating) {
     newDueDate.setDate(newDueDate.getDate() + newInterval);
     const formattedDueDate = newDueDate.toISOString().split('T')[0];
 
-    console.log(`SRS Update: ease ${card.ease || 2.5} → ${newEase.toFixed(2)}, interval → ${newInterval}d, due → ${formattedDueDate}`);
+    console.log(`SRS: ease ${(card.ease || 2.5).toFixed(2)} → ${newEase.toFixed(2)}, interval → ${newInterval}d, due → ${formattedDueDate}`);
 
+    // Update card object
     card.ease = newEase;
     card.interval = newInterval;
-    card.dueDate = formattedDueDate;
+    card.due_date = formattedDueDate;
 
     await saveCardProgress(card);
 }
 
 // ========================================
-// SAVE CARD PROGRESS
+// SAVE CARD PROGRESS TO SUPABASE
 // ========================================
 async function saveCardProgress(card) {
-    try {
-        const progressData = JSON.parse(localStorage.getItem('flashcard_progress') || '{}');
-        progressData[card.english] = {
-            ease: card.ease,
-            interval: card.interval,
-            dueDate: card.dueDate,
-            lastReviewed: new Date().toISOString()
-        };
-        localStorage.setItem('flashcard_progress', JSON.stringify(progressData));
-        console.log('💾 Progress saved to localStorage');
-    } catch (e) {
-        console.warn('Failed to save progress:', e);
+    if (useSupabase && currentUser && card.id) {
+        try {
+            const { error } = await supabase
+                .from('vocabs')
+                .update({
+                    ease: card.ease,
+                    interval: card.interval,
+                    due_date: card.due_date,
+                    last_reviewed: new Date().toISOString()
+                })
+                .eq('id', card.id);
+
+            if (error) {
+                console.error('❌ Supabase save error:', error);
+            } else {
+                console.log('💾 Progress saved to Supabase');
+            }
+        } catch (e) {
+            console.error('❌ Save error:', e);
+        }
+    } else {
+        // Fallback: Save to localStorage
+        try {
+            const progressData = JSON.parse(localStorage.getItem('flashcard_progress') || '{}');
+            progressData[card.english] = {
+                ease: card.ease,
+                interval: card.interval,
+                due_date: card.due_date,
+                last_reviewed: new Date().toISOString()
+            };
+            localStorage.setItem('flashcard_progress', JSON.stringify(progressData));
+            console.log('💾 Progress saved to localStorage');
+        } catch (e) {
+            console.warn('Failed to save to localStorage:', e);
+        }
     }
 }
 
+// ========================================
+// NEXT CARD
+// ========================================
 function nextCard() {
     flashcard.classList.add('fade-out');
 
@@ -382,50 +433,79 @@ function nextCard() {
     }, 500);
 }
 
+// ========================================
+// UPDATE PROGRESS BAR
+// ========================================
 function updateProgress() {
     const progress = ((currentCardIndex + 1) / vocabulary.length) * 100;
     progressFill.style.width = `${progress}%`;
 }
 
+// ========================================
+// SHOW COMPLETION SCREEN
+// ========================================
 function showCompletionScreen() {
     flashcard.classList.add('fade-out');
 
     setTimeout(() => {
-        if (cardContainer) cardContainer.style.display = 'none';
-
-        const ratingContainer = document.querySelector('.rating-buttons');
-        if (ratingContainer) ratingContainer.style.display = 'none';
-
+        cardContainer.style.display = 'none';
+        document.querySelector('.rating-buttons').style.display = 'none';
         document.querySelector('.progress-wrapper').style.display = 'none';
 
-        // Update stats
-        if (cardsReviewedSpan) {
-            cardsReviewedSpan.textContent = cardsReviewed;
-        }
-
+        cardsReviewedSpan.textContent = cardsReviewed;
         completionScreen.classList.add('active');
     }, 500);
 }
 
+// ========================================
+// RESTART SESSION
+// ========================================
+function restartSession() {
+    currentCardIndex = 0;
+    cardsReviewed = 0;
+    isFlipped = false;
+
+    completionScreen.classList.remove('active');
+    cardContainer.style.display = 'block';
+    document.querySelector('.rating-buttons').style.display = 'flex';
+    document.querySelector('.progress-wrapper').style.display = 'block';
+
+    loadCard(currentCardIndex);
+    updateProgress();
+
+    console.log('🔄 Session restarted');
+}
+
+// ========================================
+// KEYBOARD SHORTCUTS
+// ========================================
 function handleKeyPress(e) {
-    if (e.key === ' ' || e.key === 'Spacebar') {
+    // Space or Enter to flip
+    if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         if (!isFlipped) flipCard();
     }
 
+    // Rating shortcuts (when flipped)
     if (isFlipped) {
         if (e.key === '1') handleRating('good');
         if (e.key === '2') handleRating('very-good');
         if (e.key === '3') handleRating('easy');
     }
 
-    if (e.key === 'ArrowUp') {
+    // Audio shortcut
+    if (e.key === 'a' || e.key === 'A') {
         e.preventDefault();
         if (!isFlipped) {
-            playAudio(vocabulary[currentCardIndex]?.audioEn, vocabulary[currentCardIndex]?.english);
+            playAudio(vocabulary[currentCardIndex]?.english, 'en-US');
         } else {
-            playAudio(vocabulary[currentCardIndex]?.audioGr, vocabulary[currentCardIndex]?.greek);
+            playAudio(vocabulary[currentCardIndex]?.greek, 'el-GR');
         }
+    }
+
+    // Escape to cancel
+    if (e.key === 'Escape') {
+        window.location.href = '/dashboard';
     }
 }
 
@@ -434,6 +514,5 @@ function handleKeyPress(e) {
 // ========================================
 init();
 
-console.log('🏛️ Greek Flashcards loaded');
-console.log(`📚 ${vocabulary.length} cards ready for review`);
-console.log('⌨️ Tasten: Space = Flip, 1/2/3 = Bewerten, ↑ = Audio');
+console.log('🏛️ Greek Flashcards System loaded');
+console.log('⌨️ Shortcuts: Space=Flip, 1/2/3=Rate, A=Audio, Esc=Exit');

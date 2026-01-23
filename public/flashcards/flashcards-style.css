@@ -170,6 +170,59 @@ body {
     perspective: 1200px;
     width: 100%;
     max-width: 520px;
+    position: relative;
+}
+
+/* ========================================
+   TOP ACTION BUTTONS (Cancel & Restart)
+   ======================================== */
+.top-action-buttons {
+    position: absolute;
+    top: -52px;
+    right: 0;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.top-action-btn {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font-system);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(10px);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.3s var(--transition-smooth);
+}
+
+.top-action-btn:hover {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(148, 163, 184, 0.25);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.top-action-btn:active {
+    transform: translateY(0);
+}
+
+.cancel-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.restart-btn:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
 }
 
 /* ========================================

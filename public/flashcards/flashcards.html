@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Greek Flashcards</title>
     <link rel="stylesheet" href="/flashcards/flashcards-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="app-container">
@@ -27,24 +28,51 @@
         </div>
 
         <!-- Card Container -->
-        <div class="card-container">
+        <div class="card-container" id="cardContainer">
+            <!-- Top Action Buttons -->
+            <div class="top-action-buttons">
+                <button id="cancelBtn" class="top-action-btn cancel-btn" title="Cancel and return to dashboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Abbrechen
+                </button>
+                <button id="restartBtn" class="top-action-btn restart-btn" title="Restart session">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                    Wiederholen
+                </button>
+            </div>
+
             <div id="flashcard" class="flashcard">
-                <!-- Front Face -->
+                <!-- Front Face (English) -->
                 <div class="card-face card-front">
                     <div class="card-content">
                         <h2 id="wordFront" class="main-word"></h2>
                         <p id="contextFront" class="context-text"></p>
+
+                        <!-- Audio button for English (front) -->
+                        <button id="audioFront" class="audio-btn-large" title="Listen to English pronunciation">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                        </button>
                     </div>
                     <div class="flip-hint">Click to flip</div>
                 </div>
 
-                <!-- Back Face -->
+                <!-- Back Face (Greek) -->
                 <div class="card-face card-back">
                     <div class="card-content">
                         <h2 id="wordBack" class="main-word greek"></h2>
                         <p id="contextBack" class="context-text"></p>
-                        
-                        <button id="audioBack" class="audio-btn-large" title="Listen to pronunciation">
+
+                        <button id="audioBack" class="audio-btn-large" title="Listen to Greek pronunciation">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
                                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
@@ -56,7 +84,7 @@
             </div>
         </div>
 
-        <!-- Rating Buttons -->
+        <!-- Rating Buttons (only visible on back) -->
         <div class="rating-buttons">
             <button class="rating-btn btn-good" data-rating="good">
                 <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -84,7 +112,7 @@
                 <div class="completion-icon">🎉</div>
                 <h2 class="completion-title">Excellent Work!</h2>
                 <p class="completion-text">You've completed your review session.</p>
-                
+
                 <div class="completion-stats">
                     <div class="stat-item">
                         <span id="cardsReviewed" class="stat-value">0</span>
