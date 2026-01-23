@@ -35,11 +35,12 @@ interface VocabWithProgress extends LearningItem {
 interface VocabularyDialogProps {
     isOpen: boolean;
     onClose: () => void;
+    mode?: 'weak' | 'review' | 'due'; // Optional mode parameter
 }
 
 const STUDENT_ID = 'demo-student-id';
 
-export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogProps) {
+export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: VocabularyDialogProps) {
     const [vocabulary, setVocabulary] = useState<VocabWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -54,7 +55,7 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
             fetchVocabulary();
             setShowSummary(false);
         }
-    }, [isOpen]);
+    }, [isOpen, mode]);
 
     const fetchVocabulary = async () => {
         setLoading(true);
@@ -67,21 +68,80 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
                 `)
                 .eq('type', 'vocabulary')
                 .order('next_review', { foreignTable: 'student_progress', ascending: true, nullsFirst: true })
-                .limit(20);
+                .limit(50); // Fetch more to allow filtering
 
             if (error) {
                 console.error("Error fetching vocabs:", error);
-                setVocabulary(getDemoVocabs());
+                setVocabulary(filterVocabsByMode(getDemoVocabs(), mode));
             } else if (data && data.length > 0) {
-                setVocabulary(data as VocabWithProgress[]);
+                const filtered = filterVocabsByMode(data as VocabWithProgress[], mode);
+                setVocabulary(filtered);
             } else {
-                setVocabulary(getDemoVocabs()); // Fallback if empty
+                setVocabulary(filterVocabsByMode(getDemoVocabs(), mode)); // Fallback if empty
             }
         } catch (err) {
             console.error("Fetch error:", err);
-            setVocabulary(getDemoVocabs());
+            setVocabulary(filterVocabsByMode(getDemoVocabs(), mode));
         } finally {
             setLoading(false);
+        }
+    };
+
+    const filterVocabsByMode = (vocabs: VocabWithProgress[], filterMode: string): VocabWithProgress[] => {
+        const today = new Date().toISOString().split('T')[0];
+        
+        switch (filterMode) {
+            case 'weak':
+                // Filter: ease_factor < 2.3 (schwierige Karten)
+                return vocabs
+                    .filter(vocab => {
+                        const progress = vocab.student_progress?.[0];
+                        const ease = progress?.ease_factor ?? 2.5;
+                        return ease < 2.3;
+                    })
+                    .sort((a, b) => {
+                        const easeA = a.student_progress?.[0]?.ease_factor ?? 2.5;
+                        const easeB = b.student_progress?.[0]?.ease_factor ?? 2.5;
+                        return easeA - easeB; // Niedrigste zuerst (schwerste zuerst)
+                    });
+            
+            case 'due':
+                // Filter: next_review <= heute
+                return vocabs
+                    .filter(vocab => {
+                        const progress = vocab.student_progress?.[0];
+                        if (!progress?.next_review) return true; // No review date = due
+                        const reviewDate = progress.next_review.split('T')[0];
+                        return reviewDate <= today;
+                    })
+                    .sort((a, b) => {
+                        const dateA = a.student_progress?.[0]?.next_review || '';
+                        const dateB = b.student_progress?.[0]?.next_review || '';
+                        return dateA.localeCompare(dateB); // Älteste zuerst
+                    });
+            
+            case 'review':
+            default:
+                // Alle Karten, priorisiert: weak → due → rest
+                return vocabs.sort((a, b) => {
+                    const progressA = a.student_progress?.[0];
+                    const progressB = b.student_progress?.[0];
+                    const easeA = progressA?.ease_factor ?? 2.5;
+                    const easeB = progressB?.ease_factor ?? 2.5;
+                    const dateA = progressA?.next_review || '';
+                    const dateB = progressB?.next_review || '';
+                    
+                    // Weak cards first
+                    if (easeA < 2.3 && easeB >= 2.3) return -1;
+                    if (easeA >= 2.3 && easeB < 2.3) return 1;
+                    
+                    // Due cards next
+                    if (dateA && dateA <= today && (!dateB || dateB > today)) return -1;
+                    if (dateB && dateB <= today && (!dateA || dateA > today)) return 1;
+                    
+                    // Sort by ease (harder first)
+                    return easeA - easeB;
+                });
         }
     };
 
@@ -94,7 +154,18 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
             example_en: 'Hello friend',
             example_gr: 'Γεια σου φίλε',
             audio_url: null,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            student_progress: [{
+                id: 1,
+                student_id: STUDENT_ID,
+                item_id: 1,
+                interval_days: 2,
+                ease_factor: 2.5,
+                attempts: 3,
+                correct_count: 2,
+                last_attempt: new Date().toISOString(),
+                next_review: new Date().toISOString()
+            }]
         },
         {
             id: 2,
@@ -104,7 +175,18 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
             example_en: 'Thank you very much',
             example_gr: 'Ευχαριστώ πολύ',
             audio_url: null,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            student_progress: [{
+                id: 2,
+                student_id: STUDENT_ID,
+                item_id: 2,
+                interval_days: 1,
+                ease_factor: 2.0, // Weak word (ease < 2.3)
+                attempts: 2,
+                correct_count: 1,
+                last_attempt: new Date().toISOString(),
+                next_review: new Date().toISOString()
+            }]
         },
         {
             id: 3,
@@ -114,7 +196,60 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
             example_en: 'I want water',
             example_gr: 'Θέλω νερό',
             audio_url: null,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            student_progress: [{
+                id: 3,
+                student_id: STUDENT_ID,
+                item_id: 3,
+                interval_days: 1,
+                ease_factor: 2.1, // Weak word (ease < 2.3)
+                attempts: 1,
+                correct_count: 0,
+                last_attempt: new Date().toISOString(),
+                next_review: new Date().toISOString()
+            }]
+        },
+        {
+            id: 4,
+            type: 'vocabulary',
+            english: 'Please',
+            greek: 'Παρακαλώ',
+            example_en: 'Please help me',
+            example_gr: 'Παρακαλώ βοήθησέ με',
+            audio_url: null,
+            created_at: new Date().toISOString(),
+            student_progress: [{
+                id: 4,
+                student_id: STUDENT_ID,
+                item_id: 4,
+                interval_days: 1,
+                ease_factor: 1.9, // Very weak word
+                attempts: 1,
+                correct_count: 0,
+                last_attempt: new Date().toISOString(),
+                next_review: new Date().toISOString()
+            }]
+        },
+        {
+            id: 5,
+            type: 'vocabulary',
+            english: 'Good morning',
+            greek: 'Καλημέρα',
+            example_en: 'Good morning, how are you?',
+            example_gr: 'Καλημέρα, πώς είσαι;',
+            audio_url: null,
+            created_at: new Date().toISOString(),
+            student_progress: [{
+                id: 5,
+                student_id: STUDENT_ID,
+                item_id: 5,
+                interval_days: 5,
+                ease_factor: 2.8, // Good word (ease >= 2.3)
+                attempts: 5,
+                correct_count: 4,
+                last_attempt: new Date().toISOString(),
+                next_review: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
+            }]
         }
     ];
 
