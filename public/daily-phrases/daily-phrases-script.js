@@ -22,7 +22,6 @@ if (typeof window.supabase !== 'undefined') {
 // ========================================
 let phrases = [];
 let currentPhraseIndex = 0;
-let isRevealed = false;
 let phrasesReviewed = 0;
 const DECK_ID = 'c8852ed2-ebb9-414c-ac90-4867c562561e';
 
@@ -381,7 +380,6 @@ async function restartSession() {
     // Reset counters
     currentPhraseIndex = 0;
     phrasesReviewed = 0;
-    isRevealed = false;
 
     // Reload phrases from Supabase
     const reloadedPhrases = await loadPhrasesFromSupabase();
@@ -426,18 +424,10 @@ function shuffleArray(array) {
 // KEYBOARD SHORTCUTS
 // ========================================
 function handleKeyPress(e) {
-    // Space or Enter to reveal
-    if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        if (!isRevealed) revealTranslation();
-    }
-
-    // Rating (when revealed)
-    if (isRevealed) {
-        if (e.key === '1') handleRating('good');
-        if (e.key === '2') handleRating('very-good');
-        if (e.key === '3') handleRating('easy');
-    }
+    // Rating buttons
+    if (e.key === '1') handleRating('good');
+    if (e.key === '2') handleRating('very-good');
+    if (e.key === '3') handleRating('easy');
 
     // Audio
     if (e.key === 'a' || e.key === 'A') {
@@ -445,7 +435,7 @@ function handleKeyPress(e) {
         playAudio(phrases[currentPhraseIndex]?.greek_phrase, 'el-GR');
     }
 
-    // Escape to cancel
+    // Escape to cancel - return to dashboard
     if (e.key === 'Escape') {
         window.location.href = '/dashboard';
     }
