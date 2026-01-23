@@ -12,27 +12,27 @@ let useSupabase = false;
 if (typeof window.supabase !== 'undefined') {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     useSupabase = true;
-    console.log('✅ Supabase initialized in flashcards');
+    console.log('✅ Supabase initialized');
 } else {
-    console.log('⚠️ Using LocalStorage mode (Supabase not configured)');
+    console.log('⚠️ LocalStorage mode');
 }
 
 // ========================================
 // VOCABULARY DATA
 // ========================================
 let vocabulary = [];
-let currentMode = 'review'; // 'weak', 'review', or 'due'
-const DECK_ID = 'c8852ed2-ebb9-414c-ac90-4867c562561e'; // Main Greek deck
+let currentMode = 'review';
+const DECK_ID = 'c8852ed2-ebb9-414c-ac90-4867c562561e';
 
 // ========================================
-// SPEECH SYNTHESIS SETUP
+// SPEECH SYNTHESIS
 // ========================================
 window.speechSynthesis.onvoiceschanged = () => {
     console.log('✅ Voices loaded:', window.speechSynthesis.getVoices().length);
 };
 
 // ========================================
-// STATE MANAGEMENT
+// STATE
 // ========================================
 let currentCardIndex = 0;
 let isFlipped = false;
@@ -42,12 +42,12 @@ let cardsReviewed = 0;
 // DOM ELEMENTS
 // ========================================
 const flashcard = document.getElementById('flashcard');
-const cardContainer = document.getElementById('cardContainer');
+const cardInner = document.querySelector('.card-inner');
+const mainCardArea = document.querySelector('.main-card-area');
 const wordFront = document.getElementById('wordFront');
 const contextFront = document.getElementById('contextFront');
 const wordBack = document.getElementById('wordBack');
 const contextBack = document.getElementById('contextBack');
-const audioFrontBtn = document.getElementById('audioFront');
 const audioBackBtn = document.getElementById('audioBack');
 const cancelBtn = document.getElementById('cancelBtn');
 const restartBtn = document.getElementById('restartBtn');
@@ -66,7 +66,7 @@ async function init() {
     if (useSupabase) {
         const { data: { user } } = await supabase.auth.getUser();
         currentUser = user;
-        console.log('👤 Current user:', user?.email || 'Not logged in');
+        console.log('👤 User:', user?.email || 'Not logged in');
     }
 
     // Get mode from URL
@@ -76,39 +76,33 @@ async function init() {
     // Update mode header
     updateModeHeader(currentMode);
 
-    // Load cards from Supabase based on mode
+    // Load cards from Supabase
     vocabulary = await loadCardsFromSupabase(currentMode);
 
-    // Fallback: Load from shared-data.js if no Supabase data
+    // Fallback to shared-data.js
     if (vocabulary.length === 0 && typeof window.allFlashcards !== 'undefined') {
         vocabulary = window.allFlashcards;
-        console.log(`📦 Fallback: ${vocabulary.length} cards loaded from shared-data.js`);
+        console.log(`📦 Fallback: ${vocabulary.length} cards from shared-data.js`);
     }
 
-    // Final fallback: Demo cards
+    // Demo cards
     if (vocabulary.length === 0) {
         vocabulary = [
             { english: "Hello", greek: "Γεια σου", context_en: "Common greeting", context_gr: "Κοινός χαιρετισμός" },
             { english: "Thank you", greek: "Ευχαριστώ", context_en: "Expressing gratitude", context_gr: "Εκφράζοντας ευγνωμοσύνη" },
             { english: "Water", greek: "Νερό", context_en: "Something to drink", context_gr: "Κάτι για να πιεις" }
         ];
-        console.log('⚠️ Demo mode: 3 fallback cards');
+        console.log('⚠️ Demo: 3 cards');
     }
 
-    // Check if cards exist
     if (vocabulary.length === 0) {
         showNoCardsMessage();
         return;
     }
 
-    // Set total cards
     totalCards.textContent = vocabulary.length;
-
-    // Load first card
     loadCard(currentCardIndex);
     updateProgress();
-
-    // Attach event listeners
     attachEventListeners();
 
     console.log(`📚 Mode: ${currentMode} | Cards: ${vocabulary.length}`);
@@ -121,24 +115,15 @@ function updateModeHeader(mode) {
     const modeTitle = document.getElementById('modeTitle');
     const modeSubtitle = document.getElementById('modeSubtitle');
 
-    const modeConfig = {
-        weak: {
-            title: '💪 Train Weak Words',
-            subtitle: 'Lass uns diese stärken'
-        },
-        review: {
-            title: '🔄 Review Vocabulary',
-            subtitle: 'Dein Wissen auffrischen'
-        },
-        due: {
-            title: '📚 Due Cards Today',
-            subtitle: 'Deine täglichen Wiederholungen'
-        }
+    const config = {
+        weak: { title: '💪 Train Weak Words', subtitle: 'Lass uns diese stärken' },
+        review: { title: '🔄 Review Vocabulary', subtitle: 'Dein Wissen auffrischen' },
+        due: { title: '📚 Due Cards Today', subtitle: 'Deine täglichen Wiederholungen' }
     };
 
-    const config = modeConfig[mode] || modeConfig.review;
-    modeTitle.textContent = config.title;
-    modeSubtitle.textContent = config.subtitle;
+    const selected = config[mode] || config.review;
+    modeTitle.textContent = selected.title;
+    modeSubtitle.textContent = selected.subtitle;
 }
 
 // ========================================
@@ -146,32 +131,23 @@ function updateModeHeader(mode) {
 // ========================================
 async function loadCardsFromSupabase(mode) {
     if (!useSupabase || !currentUser) {
-        console.log('⚠️ Supabase not available or user not logged in');
+        console.log('⚠️ Supabase unavailable');
         return [];
     }
 
     try {
         const today = new Date().toISOString().split('T')[0];
-        let query = supabase
-            .from('vocabs')
-            .select('*')
-            .eq('deck_id', DECK_ID);
+        let query = supabase.from('vocabs').select('*').eq('deck_id', DECK_ID);
 
-        // Filter based on mode
         switch (mode) {
             case 'weak':
-                // Get cards with difficulty='hard' or low ease score
                 query = query.or('difficulty.eq.hard,ease.lt.2.3');
                 break;
-
             case 'due':
-                // Get cards due today or earlier
                 query = query.lte('due_date', today);
                 break;
-
             case 'review':
             default:
-                // Get all cards for review
                 break;
         }
 
@@ -182,10 +158,10 @@ async function loadCardsFromSupabase(mode) {
             return [];
         }
 
-        console.log(`✅ Loaded ${data.length} cards from Supabase (mode: ${mode})`);
+        console.log(`✅ ${data.length} cards (mode: ${mode})`);
         return data;
     } catch (error) {
-        console.error('❌ Error fetching cards:', error);
+        console.error('❌ Error:', error);
         return [];
     }
 }
@@ -194,9 +170,8 @@ async function loadCardsFromSupabase(mode) {
 // SHOW NO CARDS MESSAGE
 // ========================================
 function showNoCardsMessage() {
-    cardContainer.style.display = 'none';
+    mainCardArea.style.display = 'none';
     document.querySelector('.progress-wrapper').style.display = 'none';
-    document.querySelector('.rating-buttons').style.display = 'none';
 
     const message = document.createElement('div');
     message.className = 'no-cards-message';
@@ -204,9 +179,9 @@ function showNoCardsMessage() {
         <div class="no-cards-content">
             <div class="no-cards-icon">🎉</div>
             <h2 class="no-cards-title">No cards to review!</h2>
-            <p class="no-cards-text">You're all caught up for now.</p>
+            <p class="no-cards-text">You're all caught up.</p>
             <button class="back-to-dashboard-btn" onclick="window.location.href='/dashboard'">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 </svg>
                 Back to Dashboard
@@ -220,44 +195,55 @@ function showNoCardsMessage() {
 // EVENT LISTENERS
 // ========================================
 function attachEventListeners() {
-    // Card flip on click (not on buttons)
-    flashcard.addEventListener('click', (e) => {
-        if (e.target.closest('.audio-btn-large') || e.target.closest('.rating-btn')) {
+    // CRITICAL: Flip ONLY when clicking on card-inner itself
+    // Ignore clicks that originate from buttons in the button-bar
+    cardInner?.addEventListener('click', (e) => {
+        // Check if click originated from button-bar or its children
+        if (e.target.closest('.button-bar')) {
+            console.log('❌ Click on button-bar - no flip');
             return;
         }
+
+        // Check if click originated from audio button
+        if (e.target.closest('.audio-btn-back')) {
+            console.log('❌ Click on audio button - no flip');
+            return;
+        }
+
+        // Only flip if not already flipped
         if (!isFlipped) {
+            console.log('✅ Flip card');
             flipCard();
         }
     });
 
-    // Audio buttons
-    audioFrontBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        playAudio(vocabulary[currentCardIndex]?.english, 'en-US');
-    });
-
+    // Audio button (only on back)
     audioBackBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('🔊 Playing audio');
         playAudio(vocabulary[currentCardIndex]?.greek, 'el-GR');
     });
 
-    // Cancel button
+    // Cancel button - return to dashboard
     cancelBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('❌ Cancel - returning to dashboard');
         window.location.href = '/dashboard';
     });
 
-    // Restart button
-    restartBtn?.addEventListener('click', (e) => {
+    // Restart button - reload current mode
+    restartBtn?.addEventListener('click', async (e) => {
         e.stopPropagation();
-        restartSession();
+        console.log('🔄 Restart session');
+        await restartSession();
     });
 
-    // Rating buttons
+    // Rating buttons - trigger handleRating with dataset.rating
     ratingButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const rating = btn.dataset.rating;
+            console.log(`⭐ Rating button clicked: ${rating}`);
             handleRating(rating);
         });
     });
@@ -267,7 +253,7 @@ function attachEventListeners() {
 }
 
 // ========================================
-// CARD LOADING
+// LOAD CARD
 // ========================================
 function loadCard(index) {
     const card = vocabulary[index] || {};
@@ -293,11 +279,11 @@ function flipCard() {
 }
 
 // ========================================
-// AUDIO PLAYBACK (SPEECH SYNTHESIS)
+// AUDIO (SPEECH SYNTHESIS)
 // ========================================
 function playAudio(text, lang) {
     if (!text) {
-        console.warn('No text to speak');
+        console.warn('No text');
         return;
     }
 
@@ -306,16 +292,15 @@ function playAudio(text, lang) {
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = lang;
-        utterance.rate = 0.82;  // Slower for better comprehension
+        utterance.rate = 0.82;
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
 
-        // Try to select best voice for language
         const voices = window.speechSynthesis.getVoices();
         const voice = voices.find(v => v.lang === lang || v.lang.startsWith(lang.split('-')[0]));
         if (voice) {
             utterance.voice = voice;
-            console.log(`🔊 Using voice: ${voice.name} (${voice.lang})`);
+            console.log(`🔊 Voice: ${voice.name}`);
         }
 
         window.speechSynthesis.speak(utterance);
@@ -329,13 +314,11 @@ function playAudio(text, lang) {
 // ========================================
 async function handleRating(rating) {
     const card = vocabulary[currentCardIndex];
-
     if (!card) return;
 
-    console.log(`✅ Rated: ${rating} – ${card.english} → ${card.greek}`);
+    console.log(`✅ Rated: ${rating} - ${card.english} → ${card.greek}`);
 
     await updateCardSRS(card, rating);
-
     cardsReviewed++;
 
     if (currentCardIndex >= vocabulary.length - 1) {
@@ -347,7 +330,7 @@ async function handleRating(rating) {
 }
 
 // ========================================
-// UPDATE SRS DATA (Spaced Repetition System)
+// SRS UPDATE
 // ========================================
 async function updateCardSRS(card, rating) {
     const qualityMap = { 'good': 3, 'very-good': 4, 'easy': 5 };
@@ -363,9 +346,8 @@ async function updateCardSRS(card, rating) {
     newDueDate.setDate(newDueDate.getDate() + newInterval);
     const formattedDueDate = newDueDate.toISOString().split('T')[0];
 
-    console.log(`SRS: ease ${(card.ease || 2.5).toFixed(2)} → ${newEase.toFixed(2)}, interval → ${newInterval}d, due → ${formattedDueDate}`);
+    console.log(`SRS: ease ${(card.ease || 2.5).toFixed(2)} → ${newEase.toFixed(2)}, interval ${newInterval}d`);
 
-    // Update card object
     card.ease = newEase;
     card.interval = newInterval;
     card.due_date = formattedDueDate;
@@ -374,7 +356,7 @@ async function updateCardSRS(card, rating) {
 }
 
 // ========================================
-// SAVE CARD PROGRESS TO SUPABASE
+// SAVE PROGRESS
 // ========================================
 async function saveCardProgress(card) {
     if (useSupabase && currentUser && card.id) {
@@ -390,15 +372,15 @@ async function saveCardProgress(card) {
                 .eq('id', card.id);
 
             if (error) {
-                console.error('❌ Supabase save error:', error);
+                console.error('❌ Save error:', error);
             } else {
-                console.log('💾 Progress saved to Supabase');
+                console.log('💾 Saved to Supabase');
             }
         } catch (e) {
-            console.error('❌ Save error:', e);
+            console.error('❌ Error:', e);
         }
     } else {
-        // Fallback: Save to localStorage
+        // LocalStorage fallback
         try {
             const progressData = JSON.parse(localStorage.getItem('flashcard_progress') || '{}');
             progressData[card.english] = {
@@ -408,9 +390,9 @@ async function saveCardProgress(card) {
                 last_reviewed: new Date().toISOString()
             };
             localStorage.setItem('flashcard_progress', JSON.stringify(progressData));
-            console.log('💾 Progress saved to localStorage');
+            console.log('💾 Saved to localStorage');
         } catch (e) {
-            console.warn('Failed to save to localStorage:', e);
+            console.warn('Failed to save:', e);
         }
     }
 }
@@ -434,7 +416,7 @@ function nextCard() {
 }
 
 // ========================================
-// UPDATE PROGRESS BAR
+// UPDATE PROGRESS
 // ========================================
 function updateProgress() {
     const progress = ((currentCardIndex + 1) / vocabulary.length) * 100;
@@ -442,14 +424,13 @@ function updateProgress() {
 }
 
 // ========================================
-// SHOW COMPLETION SCREEN
+// COMPLETION SCREEN
 // ========================================
 function showCompletionScreen() {
     flashcard.classList.add('fade-out');
 
     setTimeout(() => {
-        cardContainer.style.display = 'none';
-        document.querySelector('.rating-buttons').style.display = 'none';
+        mainCardArea.style.display = 'none';
         document.querySelector('.progress-wrapper').style.display = 'none';
 
         cardsReviewedSpan.textContent = cardsReviewed;
@@ -460,20 +441,51 @@ function showCompletionScreen() {
 // ========================================
 // RESTART SESSION
 // ========================================
-function restartSession() {
+async function restartSession() {
+    console.log('🔄 Restarting session...');
+
+    // Reset counters
     currentCardIndex = 0;
     cardsReviewed = 0;
     isFlipped = false;
 
+    // Reload cards from Supabase for current mode
+    const reloadedCards = await loadCardsFromSupabase(currentMode);
+
+    if (reloadedCards.length > 0) {
+        vocabulary = reloadedCards;
+        console.log(`✅ Reloaded ${vocabulary.length} cards`);
+    } else {
+        // If no cards from Supabase, shuffle existing vocabulary
+        vocabulary = shuffleArray([...vocabulary]);
+        console.log('🔀 Shuffled existing cards');
+    }
+
+    // Hide completion screen if visible
     completionScreen.classList.remove('active');
-    cardContainer.style.display = 'block';
-    document.querySelector('.rating-buttons').style.display = 'flex';
+
+    // Show main card area
+    mainCardArea.style.display = 'flex';
     document.querySelector('.progress-wrapper').style.display = 'block';
 
+    // Update UI
+    totalCards.textContent = vocabulary.length;
     loadCard(currentCardIndex);
     updateProgress();
 
-    console.log('🔄 Session restarted');
+    console.log('✅ Session restarted');
+}
+
+// ========================================
+// SHUFFLE ARRAY (Fisher-Yates)
+// ========================================
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
 }
 
 // ========================================
@@ -486,19 +498,17 @@ function handleKeyPress(e) {
         if (!isFlipped) flipCard();
     }
 
-    // Rating shortcuts (when flipped)
+    // Rating (when flipped)
     if (isFlipped) {
         if (e.key === '1') handleRating('good');
         if (e.key === '2') handleRating('very-good');
         if (e.key === '3') handleRating('easy');
     }
 
-    // Audio shortcut
+    // Audio
     if (e.key === 'a' || e.key === 'A') {
         e.preventDefault();
-        if (!isFlipped) {
-            playAudio(vocabulary[currentCardIndex]?.english, 'en-US');
-        } else {
+        if (isFlipped) {
             playAudio(vocabulary[currentCardIndex]?.greek, 'el-GR');
         }
     }
@@ -510,7 +520,7 @@ function handleKeyPress(e) {
 }
 
 // ========================================
-// START APP
+// START
 // ========================================
 init();
 
