@@ -80,22 +80,7 @@ async function init() {
     // Load cards from Supabase based on mode
     vocabulary = await loadCardsFromSupabase(currentMode);
 
-    // Fallback to shared-data.js
-    if (vocabulary.length === 0 && typeof window.allFlashcards !== 'undefined') {
-        vocabulary = window.allFlashcards;
-        console.log(`📦 Fallback: ${vocabulary.length} cards from shared-data.js`);
-    }
-
-    // Demo cards
-    if (vocabulary.length === 0) {
-        vocabulary = [
-            { english: "Hello", greek: "Γεια σου", context_en: "Common greeting", context_gr: "Κοινός χαιρετισμός" },
-            { english: "Thank you", greek: "Ευχαριστώ", context_en: "Expressing gratitude", context_gr: "Εκφράζοντας ευγνωμοσύνη" },
-            { english: "Water", greek: "Νερό", context_en: "Something to drink", context_gr: "Κάτι για να πιεις" }
-        ];
-        console.log('⚠️ Demo: 3 cards');
-    }
-
+    // Show message if no cards available
     if (vocabulary.length === 0) {
         showNoCardsMessage();
         return;
@@ -265,46 +250,49 @@ function showNoCardsMessage() {
 // EVENT LISTENERS
 // ========================================
 function attachEventListeners() {
+    console.log('🎯 Attaching event listeners...');
+    console.log('  flashcard:', flashcard);
+    console.log('  cardInner:', cardInner);
+    console.log('  ratingButtons:', ratingButtons.length);
+
     // CRITICAL: Flip when clicking on the card (not on buttons)
     // The button-bar is outside the flashcard element in the DOM
 
     // Add click listener to card-inner (the actual card)
-    cardInner?.addEventListener('click', (e) => {
-        console.log('🖱️ Card clicked', e.target);
+    if (!cardInner) {
+        console.error('❌ cardInner element not found!');
+        return;
+    }
+
+    cardInner.addEventListener('click', (e) => {
+        console.log('🖱️ Card clicked!');
 
         // Check if click originated from audio button
         if (e.target.closest('.audio-btn-back')) {
-            console.log('❌ Click on audio button - no flip');
             return;
         }
 
         // Flip the card
         if (!isFlipped) {
-            console.log('✅ Flipping card to back');
             flipCard();
-        } else {
-            console.log('ℹ️ Card already flipped (rating buttons should be used)');
         }
     });
 
     // Audio button (only on back)
     audioBackBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
-        console.log('🔊 Playing audio');
         playAudio(vocabulary[currentCardIndex]?.greek, 'el-GR');
     });
 
     // Cancel button - return to dashboard
     cancelBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
-        console.log('❌ Cancel - returning to dashboard');
         window.location.href = '/dashboard';
     });
 
     // Restart button - reload current mode
     restartBtn?.addEventListener('click', async (e) => {
         e.stopPropagation();
-        console.log('🔄 Restart session');
         await restartSession();
     });
 
@@ -313,8 +301,9 @@ function attachEventListeners() {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const rating = btn.dataset.rating;
-            console.log(`⭐ Rating button clicked: ${rating}`);
-            handleRating(rating);
+            if (rating) {
+                handleRating(rating);
+            }
         });
     });
 
@@ -344,15 +333,14 @@ function loadCard(index) {
 // FLIP CARD
 // ========================================
 function flipCard() {
-    console.log('🔄 flipCard() called');
-    console.log('  flashcard element:', flashcard);
-    console.log('  Current classes:', flashcard?.className);
+    if (!flashcard) {
+        console.error('❌ Flashcard element not found!');
+        return;
+    }
 
+    console.log('🔄 Flipping card');
     flashcard.classList.add('flipped');
     isFlipped = true;
-
-    console.log('  New classes:', flashcard?.className);
-    console.log('  isFlipped:', isFlipped);
 }
 
 // ========================================
@@ -614,3 +602,4 @@ init();
 
 console.log('🏛️ Greek Flashcards System loaded');
 console.log('⌨️ Shortcuts: Space=Flip, 1/2/3=Rate, A=Audio, Esc=Exit');
+console.log('✅ TEST: Änderung direkt im Hauptprojekt wirksam – ' + new Date().toISOString());
