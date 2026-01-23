@@ -121,33 +121,53 @@ const mainCardArea = document.querySelector('.main-card-area');
 // INITIALIZATION
 // ========================================
 async function init() {
+    console.log('🚀 Initializing Daily Phrases app...');
+    
     // Ensure Supabase is initialized
     if (!useSupabase) {
-        initializeSupabase();
+        console.log('🔄 Initializing Supabase...');
+        const initialized = initializeSupabase();
+        if (!initialized) {
+            // Wait a bit more for CDN to load
+            await new Promise(resolve => setTimeout(resolve, 500));
+            initializeSupabase();
+        }
         // Wait a bit for initialization
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 300));
     }
 
     // Get Supabase user (but don't require it for development)
     if (useSupabase && supabase) {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            currentUser = user;
-            console.log('👤 User:', user?.email || 'Not logged in (using demo mode)');
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            if (userError) {
+                console.log('⚠️ Could not get user:', userError.message);
+                console.log('   Continuing in anonymous mode (RLS should allow public access)');
+                currentUser = null;
+            } else {
+                currentUser = user;
+                console.log('👤 User:', user?.email || 'Anonymous (not logged in)');
+                console.log('   User ID:', user?.id || 'none');
+            }
         } catch (err) {
             console.log('⚠️ Could not get user, continuing in demo mode:', err);
             currentUser = null;
         }
+    } else {
+        console.log('👤 User: Not checked (Supabase not initialized)');
+        currentUser = null;
     }
 
     // Attach event listeners AFTER DOM is ready
     attachEventListeners();
 
     // Load phrases from Supabase
+    console.log('📥 Loading phrases...');
     phrases = await loadPhrasesFromSupabase();
 
     // Show message if no phrases available
     if (phrases.length === 0) {
+        console.warn('⚠️ No phrases loaded');
         showNoPhrasesMessage();
         return;
     }
@@ -156,7 +176,7 @@ async function init() {
     loadPhrase(currentPhraseIndex);
     updateProgress();
 
-    console.log(`💬 Daily Phrases | Phrases: ${phrases.length}`);
+    console.log(`✅ Daily Phrases initialized | Phrases: ${phrases.length}`);
 }
 
 // ========================================
@@ -166,11 +186,18 @@ async function loadPhrasesFromSupabase() {
     // Ensure Supabase is initialized
     if (!useSupabase || !supabase) {
         console.log('⚠️ Supabase not initialized, attempting to initialize...');
-        initializeSupabase();
+        const initialized = initializeSupabase();
+        if (!initialized) {
+            // Wait a bit more for CDN to load
+            await new Promise(resolve => setTimeout(resolve, 500));
+            initializeSupabase();
+        }
         await new Promise(resolve => setTimeout(resolve, 300));
         
         if (!useSupabase || !supabase) {
             console.error('❌ Supabase still unavailable after retry');
+            console.log('💡 Trying to use fallback data or check Supabase connection');
+            // Return empty array - will show "no phrases" message
             return [];
         }
     }
@@ -179,40 +206,122 @@ async function loadPhrasesFromSupabase() {
         console.log('🔄 Attempting to load phrases from daily_phrases table...');
         console.log('   Deck ID:', DECK_ID);
         console.log('   Supabase client:', supabase ? 'available' : 'missing');
+        console.log('   Current user:', currentUser ? currentUser.email : 'none (anonymous)');
         
-        // Load phrases from the 'daily_phrases' table
-        // Don't require user authentication - allow demo access
+        // First, try to load ALL phrases to check if table exists and has data
+        console.log('📊 Step 1: Checking if table exists and has any data...');
+        const { data: allPhrases, error: checkError } = await supabase
+            .from('daily_phrases')
+            .select('id, deck_id, greek_phrase, english_translation')
+            .limit(5);
+        
+        if (checkError) {
+            console.error('❌ Error checking table:', checkError);
+            console.error('Error code:', checkError.code);
+            console.error('Error message:', checkError.message);
+            console.error('Error details:', JSON.stringify(checkError, null, 2));
+            
+            // If table doesn't exist, show helpful message
+            if (checkError.code === '42P01' || checkError.message?.includes('does not exist')) {
+                console.error('⚠️ daily_phrases table does not exist. Please run supabase/insert_test_daily_phrases.sql');
+            }
+            
+            // If RLS error, try without authentication
+            if (checkError.code === '42501' || checkError.message?.includes('permission') || checkError.message?.includes('policy')) {
+                console.warn('⚠️ RLS policy might be blocking access. Checking policies...');
+            }
+            
+            return [];
+        }
+        
+        console.log(`📊 Found ${allPhrases?.length || 0} total phrases in table`);
+        if (allPhrases && allPhrases.length > 0) {
+            console.log('   Sample deck_ids:', [...new Set(allPhrases.map(p => p.deck_id))]);
+        }
+        
+        // Now load phrases filtered by deck_id
+        console.log('📊 Step 2: Loading phrases for deck_id:', DECK_ID);
         const { data: phrasesData, error } = await supabase
             .from('daily_phrases')
             .select('*')
             .eq('deck_id', DECK_ID)
-            .order('created_at', { ascending: true });
+            .order('created_at', { ascending: true })
+            .limit(100); // Increased limit
 
         if (error) {
             console.error('❌ Phrases error:', error);
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
             console.error('Error details:', JSON.stringify(error, null, 2));
             
-            // If table doesn't exist, show helpful message
-            if (error.code === '42P01' || error.message?.includes('does not exist')) {
-                console.error('⚠️ daily_phrases table does not exist. Please run supabase/insert_test_daily_phrases.sql');
+            // If no data found for this deck_id, try loading all phrases
+            if (error.code === 'PGRST116' || (phrasesData && phrasesData.length === 0)) {
+                console.log('⚠️ No phrases found for deck_id:', DECK_ID);
+                console.log('🔄 Trying to load phrases without deck_id filter...');
+                
+                const { data: allPhrasesData, error: allError } = await supabase
+                    .from('daily_phrases')
+                    .select('*')
+                    .order('created_at', { ascending: true })
+                    .limit(50);
+                
+                if (!allError && allPhrasesData && allPhrasesData.length > 0) {
+                    console.log(`📦 Loaded ${allPhrasesData.length} phrases (without deck filter)`);
+                    console.log('⚠️ Using all available phrases (deck_id filter removed)');
+                    return shuffleArray(allPhrasesData);
+                }
+            }
+            
+            // If network error, try one more time
+            if (error.message?.includes('fetch') || error.message?.includes('network')) {
+                console.log('🔄 Network error, retrying once...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                const retry = await supabase
+                    .from('daily_phrases')
+                    .select('*')
+                    .eq('deck_id', DECK_ID)
+                    .order('created_at', { ascending: true })
+                    .limit(100);
+                
+                if (!retry.error && retry.data) {
+                    console.log(`📦 Loaded ${retry.data.length} phrases from Supabase (retry)`);
+                    return shuffleArray(retry.data);
+                }
             }
             
             return [];
         }
 
         if (!phrasesData || phrasesData.length === 0) {
-            console.log('⚠️ No phrases found for deck');
+            console.log('⚠️ No phrases found for deck_id:', DECK_ID);
             console.log('💡 Tip: Run supabase/insert_test_daily_phrases.sql to add test data');
+            console.log('💡 Or check if the deck_id in the SQL matches:', DECK_ID);
+            
+            // Try loading without filter as fallback
+            console.log('🔄 Trying fallback: loading all phrases...');
+            const { data: fallbackData, error: fallbackError } = await supabase
+                .from('daily_phrases')
+                .select('*')
+                .order('created_at', { ascending: true })
+                .limit(50);
+            
+            if (!fallbackError && fallbackData && fallbackData.length > 0) {
+                console.log(`📦 Loaded ${fallbackData.length} phrases (fallback - no deck filter)`);
+                return shuffleArray(fallbackData);
+            }
+            
             return [];
         }
 
-        console.log(`📦 Loaded ${phrasesData.length} phrases from Supabase`);
+        console.log(`✅ Loaded ${phrasesData.length} phrases from Supabase`);
+        console.log('   Sample phrase:', phrasesData[0]?.greek_phrase || 'none');
 
         // Shuffle phrases for daily variety
         return shuffleArray(phrasesData);
 
     } catch (error) {
         console.error('❌ Error loading phrases:', error);
+        console.error('Error stack:', error.stack);
         return [];
     }
 }
@@ -330,6 +439,14 @@ function attachEventListeners() {
 
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyPress);
+
+    // English translation container - remove blur on click
+    const englishContainer = document.querySelector('.english-translation-container');
+    if (englishContainer) {
+        englishContainer.addEventListener('click', function() {
+            this.classList.remove('blurred');
+        });
+    }
 }
 
 // ========================================
@@ -343,6 +460,12 @@ function loadPhrase(index) {
     
     // Load English translation from database
     englishTranslation.textContent = phrase.english_translation || '—';
+
+    // Add blur to English translation container
+    const englishContainer = document.querySelector('.english-translation-container');
+    if (englishContainer) {
+        englishContainer.classList.add('blurred');
+    }
 
     currentCardNum.textContent = index + 1;
 }
