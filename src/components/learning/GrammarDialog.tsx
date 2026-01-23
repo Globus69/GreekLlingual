@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/context/AuthContext';
-import Flashcard from '@/components/learning/Flashcard';
 import '@/styles/liquid-glass.css';
 
 interface LearningItem {
@@ -29,34 +28,33 @@ interface StudentProgress {
     next_review: string | null;
 }
 
-interface VocabWithProgress extends LearningItem {
+interface GrammarWithProgress extends LearningItem {
     student_progress?: StudentProgress[];
 }
 
-interface VocabularyDialogProps {
+interface GrammarDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    mode?: 'weak' | 'review' | 'due'; // Optional mode parameter
+    mode?: 'weak' | 'review' | 'due';
 }
 
-// Fallback vocabulary data if Supabase is not available
-// Some items have low ease_factor to work with "weak" mode filter
-const FALLBACK_VOCABULARY: VocabWithProgress[] = [
-    { id: 1, type: 'vocabulary', english: 'Hello', greek: 'Γεια σου', example_en: 'Hello friend', example_gr: 'Γεια σου φίλε', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 1, student_id: 'demo', item_id: 1, interval_days: 1, ease_factor: 2.0, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 2, type: 'vocabulary', english: 'Thank you', greek: 'Ευχαριστώ', example_en: 'Thank you very much', example_gr: 'Ευχαριστώ πολύ', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 2, student_id: 'demo', item_id: 2, interval_days: 1, ease_factor: 2.1, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 3, type: 'vocabulary', english: 'Please', greek: 'Παρακαλώ', example_en: 'Please help me', example_gr: 'Παρακαλώ βοήθησέ με', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 3, student_id: 'demo', item_id: 3, interval_days: 1, ease_factor: 2.2, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 4, type: 'vocabulary', english: 'Yes', greek: 'Ναι', example_en: 'Yes, I agree', example_gr: 'Ναι, συμφωνώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 5, type: 'vocabulary', english: 'No', greek: 'Όχι', example_en: 'No, thank you', example_gr: 'Όχι, ευχαριστώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 6, type: 'vocabulary', english: 'Water', greek: 'Νερό', example_en: 'I want water', example_gr: 'Θέλω νερό', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 7, type: 'vocabulary', english: 'Coffee', greek: 'Καφές', example_en: 'Drink coffee', example_gr: 'Πίνω καφέ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 8, type: 'vocabulary', english: 'Friend', greek: 'Φίλος', example_en: 'Best friend', example_gr: 'Καλύτερος φίλος', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 9, type: 'vocabulary', english: 'Good morning', greek: 'Καλημέρα', example_en: 'Good morning!', example_gr: 'Καλημέρα!', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 10, type: 'vocabulary', english: 'Goodbye', greek: 'Αντίο', example_en: 'Goodbye for now', example_gr: 'Αντίο προς το παρόν', audio_url: null, created_at: new Date().toISOString(), student_progress: [] }
+// Fallback grammar data if Supabase is not available
+const FALLBACK_GRAMMAR: GrammarWithProgress[] = [
+    { id: 1, type: 'grammar', english: 'Present Tense - First Person', greek: 'Εγώ κάνω', example_en: 'I do / I make', example_gr: 'Εγώ κάνω την εργασία', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 1, student_id: 'demo', item_id: 1, interval_days: 1, ease_factor: 2.0, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 2, type: 'grammar', english: 'Present Tense - Second Person', greek: 'Εσύ κάνεις', example_en: 'You do / You make', example_gr: 'Εσύ κάνεις καλά', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 2, student_id: 'demo', item_id: 2, interval_days: 1, ease_factor: 2.1, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 3, type: 'grammar', english: 'Present Tense - Third Person', greek: 'Αυτός/Αυτή/Αυτό κάνει', example_en: 'He/She/It does', example_gr: 'Αυτός κάνει δουλειά', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 3, student_id: 'demo', item_id: 3, interval_days: 1, ease_factor: 2.2, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 4, type: 'grammar', english: 'Definite Article - Masculine', greek: 'Ο', example_en: 'The (masculine)', example_gr: 'Ο άνθρωπος', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 5, type: 'grammar', english: 'Definite Article - Feminine', greek: 'Η', example_en: 'The (feminine)', example_gr: 'Η γυναίκα', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 6, type: 'grammar', english: 'Definite Article - Neuter', greek: 'Το', example_en: 'The (neuter)', example_gr: 'Το παιδί', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 7, type: 'grammar', english: 'Plural - Masculine', greek: 'Οι', example_en: 'The (masculine plural)', example_gr: 'Οι άνθρωποι', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 8, type: 'grammar', english: 'Plural - Feminine', greek: 'Οι', example_en: 'The (feminine plural)', example_gr: 'Οι γυναίκες', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 9, type: 'grammar', english: 'Plural - Neuter', greek: 'Τα', example_en: 'The (neuter plural)', example_gr: 'Τα παιδιά', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 10, type: 'grammar', english: 'Verb "to be" - Present', greek: 'Είμαι, Είσαι, Είναι', example_en: 'I am, You are, He/She/It is', example_gr: 'Εγώ είμαι εδώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] }
 ];
 
-export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: VocabularyDialogProps) {
+export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: GrammarDialogProps) {
     const { user } = useAuth();
-    const [vocabulary, setVocabulary] = useState<VocabWithProgress[]>([]);
+    const [grammar, setGrammar] = useState<GrammarWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [ratings, setRatings] = useState({ hard: 0, good: 0, easy: 0 });
@@ -70,21 +68,19 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
 
     useEffect(() => {
         if (isOpen) {
-            // DEVELOPMENT MODE: Allow fetching vocabulary even with demo user
-            // The AuthContext will provide a demo user if no real user exists
-            fetchVocabulary();
+            fetchGrammar();
             setShowSummary(false);
             setFlipped(false);
         }
     }, [isOpen, mode, user?.id]);
 
     const playAudio = () => {
-        if (vocabulary.length === 0 || currentIndex >= vocabulary.length) return;
+        if (grammar.length === 0 || currentIndex >= grammar.length) return;
         
-        const currentVocab = vocabulary[currentIndex];
-        if (!currentVocab) return;
+        const currentItem = grammar[currentIndex];
+        if (!currentItem) return;
         
-        const text = currentVocab.greek;
+        const text = currentItem.greek;
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
@@ -92,7 +88,6 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
             utterance.rate = 0.9;
             utterance.pitch = 1;
             
-            // Try to find Greek voice
             const voices = window.speechSynthesis.getVoices();
             const greekVoice = voices.find(v => v.lang.startsWith('el')) || voices.find(v => v.lang.includes('Greek'));
             if (greekVoice) {
@@ -105,12 +100,10 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         }
     };
 
-    // Keyboard shortcuts
     useEffect(() => {
         if (!isOpen) return;
 
         const handleKeyPress = (e: KeyboardEvent) => {
-            // Don't handle shortcuts if user is typing in an input
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
                 return;
             }
@@ -149,119 +142,107 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                 case 'Escape':
                 case 'Esc':
                     e.preventDefault();
-                    // Dialog kann nur über Abbrechen-Button geschlossen werden
                     break;
             }
         };
 
         window.addEventListener('keydown', handleKeyPress);
         return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [isOpen, flipped, currentIndex, vocabulary.length]);
+    }, [isOpen, flipped, currentIndex, grammar.length]);
 
-    const fetchVocabulary = async () => {
+    const fetchGrammar = async () => {
         setLoading(true);
-        console.log(`🔄 Fetching vocabulary for mode: ${mode}, student: ${STUDENT_ID || 'demo'}`);
+        console.log(`🔄 Fetching grammar for mode: ${mode}, student: ${STUDENT_ID || 'demo'}`);
         
         try {
-            // Add timeout to prevent hanging
             const timeoutPromise = new Promise((_, reject) => 
                 setTimeout(() => reject(new Error('Database query timeout')), 10000)
             );
 
-            // Fetch learning_items with student_progress (LEFT JOIN)
-            // Even if no student_id, we can still load vocabulary items
             const queryPromise = supabase
                 .from('learning_items')
                 .select(`
                     *,
                     student_progress!left(*)
                 `)
-                .eq('type', 'vocabulary')
+                .eq('type', 'grammar')
                 .order('created_at', { ascending: false })
                 .limit(100);
 
             const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
             if (error) {
-                console.error("❌ Error fetching vocabs:", error);
-                console.error("Error details:", JSON.stringify(error, null, 2));
+                console.error("❌ Error fetching grammar:", error);
                 
-                // If table doesn't exist or API key invalid, use fallback
                 if (error.code === '42P01' || error.message?.includes('does not exist') || 
                     error.message?.includes('Invalid API key') || error.message?.includes('401')) {
-                    console.error("⚠️ Supabase error. Using fallback vocabulary data.");
-                    console.log(`💡 Loaded ${FALLBACK_VOCABULARY.length} fallback vocabulary items`);
-                    const filtered = filterVocabsByMode(FALLBACK_VOCABULARY, mode);
-                    setVocabulary(filtered);
+                    console.error("⚠️ Supabase error. Using fallback grammar data.");
+                    const filtered = filterGrammarByMode(FALLBACK_GRAMMAR, mode);
+                    setGrammar(filtered);
                     setLoading(false);
                     return;
                 }
                 
-                // For other errors, try fallback
-                console.warn("⚠️ Error accessing Supabase. Using fallback vocabulary data.");
-                const filtered = filterVocabsByMode(FALLBACK_VOCABULARY, mode);
-                setVocabulary(filtered);
+                console.warn("⚠️ Error accessing Supabase. Using fallback grammar data.");
+                const filtered = filterGrammarByMode(FALLBACK_GRAMMAR, mode);
+                setGrammar(filtered);
                 setLoading(false);
                 return;
             }
 
             if (data && data.length > 0) {
-                // Filter student_progress to only include entries for current student (if student_id exists)
                 const processedData = data.map((item: any) => ({
                     ...item,
                     student_progress: STUDENT_ID 
                         ? (item.student_progress?.filter(
                             (p: any) => p?.student_id === STUDENT_ID
                         ) || [])
-                        : [] // No student_id = no progress data
-                })) as VocabWithProgress[];
+                        : []
+                })) as GrammarWithProgress[];
                 
-                const filtered = filterVocabsByMode(processedData, mode);
-                console.log(`✅ Loaded ${filtered.length} cards for mode: ${mode} (from ${data.length} total items)`);
-                setVocabulary(filtered);
+                const filtered = filterGrammarByMode(processedData, mode);
+                console.log(`✅ Loaded ${filtered.length} grammar cards for mode: ${mode} (from ${data.length} total items)`);
+                setGrammar(filtered);
             } else {
-                console.log("⚠️ No vocabulary items found in database");
-                console.log("💡 Using fallback vocabulary data");
-                const filtered = filterVocabsByMode(FALLBACK_VOCABULARY, mode);
-                setVocabulary(filtered);
+                console.log("⚠️ No grammar items found in database");
+                console.log("💡 Using fallback grammar data");
+                const filtered = filterGrammarByMode(FALLBACK_GRAMMAR, mode);
+                setGrammar(filtered);
             }
         } catch (err: any) {
             console.error("❌ Fetch error:", err);
             if (err.message === 'Database query timeout') {
                 console.error("⏱️ Database query timed out after 10 seconds");
             }
-            console.log("💡 Using fallback vocabulary data due to error");
-            const filtered = filterVocabsByMode(FALLBACK_VOCABULARY, mode);
-            setVocabulary(filtered);
+            console.log("💡 Using fallback grammar data due to error");
+            const filtered = filterGrammarByMode(FALLBACK_GRAMMAR, mode);
+            setGrammar(filtered);
         } finally {
             setLoading(false);
             console.log(`✅ Loading complete for mode: ${mode}`);
         }
     };
 
-    const filterVocabsByMode = (vocabs: VocabWithProgress[], filterMode: string): VocabWithProgress[] => {
+    const filterGrammarByMode = (items: GrammarWithProgress[], filterMode: string): GrammarWithProgress[] => {
         const today = new Date().toISOString().split('T')[0];
         
         switch (filterMode) {
             case 'weak':
-                // Filter: ease_factor < 2.3 (schwierige Karten)
-                // If no weak cards found, show all cards (for fallback data)
-                const weakCards = vocabs
-                    .filter(vocab => {
-                        const progress = vocab.student_progress?.[0];
+                const weakCards = items
+                    .filter(item => {
+                        const progress = item.student_progress?.[0];
                         const ease = progress?.ease_factor ?? 2.5;
                         return ease < 2.3;
                     })
                     .sort((a, b) => {
                         const easeA = a.student_progress?.[0]?.ease_factor ?? 2.5;
                         const easeB = b.student_progress?.[0]?.ease_factor ?? 2.5;
-                        return easeA - easeB; // Niedrigste zuerst (schwerste zuerst)
+                        return easeA - easeB;
                     });
                 
-                // If no weak cards found, return all cards (especially for fallback data)
-                if (weakCards.length === 0 && vocabs.length > 0) {
+                if (weakCards.length === 0 && items.length > 0) {
                     console.log('⚠️ No weak cards found, showing all cards for weak mode');
-                    return vocabs.sort((a, b) => {
+                    return items.sort((a, b) => {
                         const easeA = a.student_progress?.[0]?.ease_factor ?? 2.5;
                         const easeB = b.student_progress?.[0]?.ease_factor ?? 2.5;
                         return easeA - easeB;
@@ -271,12 +252,11 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                 return weakCards;
             
             case 'due':
-                // Filter: next_review <= heute (or no review date = due)
                 const todayDate = new Date(today);
-                return vocabs
-                    .filter(vocab => {
-                        const progress = vocab.student_progress?.[0];
-                        if (!progress?.next_review) return true; // No review date = due
+                return items
+                    .filter(item => {
+                        const progress = item.student_progress?.[0];
+                        if (!progress?.next_review) return true;
                         const reviewDate = new Date(progress.next_review);
                         return reviewDate <= todayDate;
                     })
@@ -284,15 +264,14 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                         const dateA = a.student_progress?.[0]?.next_review;
                         const dateB = b.student_progress?.[0]?.next_review;
                         if (!dateA && !dateB) return 0;
-                        if (!dateA) return -1; // No date = most urgent
+                        if (!dateA) return -1;
                         if (!dateB) return 1;
-                        return new Date(dateA).getTime() - new Date(dateB).getTime(); // Älteste zuerst
+                        return new Date(dateA).getTime() - new Date(dateB).getTime();
                     });
             
             case 'review':
             default:
-                // Alle Karten, priorisiert: weak → due → rest
-                return vocabs.sort((a, b) => {
+                return items.sort((a, b) => {
                     const progressA = a.student_progress?.[0];
                     const progressB = b.student_progress?.[0];
                     const easeA = progressA?.ease_factor ?? 2.5;
@@ -300,23 +279,19 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                     const dateA = progressA?.next_review || '';
                     const dateB = progressB?.next_review || '';
                     
-                    // Weak cards first
                     if (easeA < 2.3 && easeB >= 2.3) return -1;
                     if (easeA >= 2.3 && easeB < 2.3) return 1;
                     
-                    // Due cards next
                     if (dateA && dateA <= today && (!dateB || dateB > today)) return -1;
                     if (dateB && dateB <= today && (!dateA || dateA > today)) return 1;
                     
-                    // Sort by ease (harder first)
                     return easeA - easeB;
                 });
         }
     };
 
-
     const handleScore = async (quality: number) => {
-        const item = vocabulary[currentIndex];
+        const item = grammar[currentIndex];
         const existingProgress = item.student_progress?.[0];
         const progress: StudentProgress = existingProgress || {
             id: 0,
@@ -333,25 +308,20 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         let newInterval = progress.interval_days;
         let newEase = progress.ease_factor;
 
-        // Update ratings counter and calculate new interval/ease
         if (quality === 1) {
-            // Hard - reset interval, decrease ease slightly
             setRatings(prev => ({ ...prev, hard: prev.hard + 1 }));
             newInterval = 1;
-            newEase = Math.max(1.3, progress.ease_factor - 0.15); // Minimum ease is 1.3
+            newEase = Math.max(1.3, progress.ease_factor - 0.15);
         } else if (quality === 2.5) {
-            // Good - increase interval, slight ease increase
             setRatings(prev => ({ ...prev, good: prev.good + 1 }));
             newInterval = Math.max(1, Math.round(progress.interval_days * 2.5));
-            newEase = Math.min(3.0, progress.ease_factor + 0.05); // Maximum ease is 3.0
+            newEase = Math.min(3.0, progress.ease_factor + 0.05);
         } else if (quality === 3) {
-            // Easy - larger interval increase, more ease increase
             setRatings(prev => ({ ...prev, easy: prev.easy + 1 }));
             newInterval = Math.max(1, Math.round(progress.interval_days * 3));
-            newEase = Math.min(3.0, progress.ease_factor + 0.1); // Maximum ease is 3.0
+            newEase = Math.min(3.0, progress.ease_factor + 0.1);
         }
 
-        // Update correct/total
         setTotal(prev => prev + 1);
         if (quality > 1) setCorrect(prev => prev + 1);
 
@@ -359,7 +329,6 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         nextReview.setDate(nextReview.getDate() + newInterval);
 
         try {
-            // Upsert with onConflict to handle unique constraint (item_id, student_id)
             const { data: upsertData, error } = await supabase
                 .from('student_progress')
                 .upsert({
@@ -377,12 +346,10 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
 
             if (error) {
                 console.error("❌ Update error:", error);
-                console.error("Failed to save progress for item:", item.id);
             } else {
                 console.log(`✅ Progress saved: ${item.english} → ease: ${progress.ease_factor.toFixed(2)} → ${newEase.toFixed(2)}, interval: ${newInterval}d`);
                 
-                // Update local state to reflect the change immediately
-                const updatedVocabulary = [...vocabulary];
+                const updatedGrammar = [...grammar];
                 const updatedProgress: StudentProgress = {
                     id: existingProgress?.id || 0,
                     student_id: STUDENT_ID,
@@ -394,54 +361,49 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                     interval_days: newInterval,
                     ease_factor: newEase
                 };
-                updatedVocabulary[currentIndex] = {
+                updatedGrammar[currentIndex] = {
                     ...item,
                     student_progress: [updatedProgress]
                 };
-                setVocabulary(updatedVocabulary);
+                setGrammar(updatedGrammar);
             }
         } catch (err) {
             console.error("❌ Failed to update SRT data:", err);
         }
 
-        // Move to next card with animation
-        setFlipped(false); // Reset flip state
-        if (currentIndex < vocabulary.length - 1) {
+        setFlipped(false);
+        if (currentIndex < grammar.length - 1) {
             setTimeout(() => {
                 setCurrentIndex(currentIndex + 1);
             }, 300);
         } else {
-            // Show summary instead of auto-close
             setTimeout(() => setShowSummary(true), 300);
         }
     };
 
     const handlePrevious = () => {
         if (currentIndex > 0) {
-            setFlipped(false); // Reset flip when changing cards
+            setFlipped(false);
             setCurrentIndex(currentIndex - 1);
         }
     };
 
     const handleNext = () => {
-        if (currentIndex < vocabulary.length - 1) {
-            setFlipped(false); // Reset flip when changing cards
+        if (currentIndex < grammar.length - 1) {
+            setFlipped(false);
             setCurrentIndex(currentIndex + 1);
         }
     };
 
     const handleRestart = async () => {
-        console.log('🔄 Restarting vocabulary session...');
-        // Reset to first card
+        console.log('🔄 Restarting grammar session...');
         setCurrentIndex(0);
         setFlipped(false);
         setRatings({ hard: 0, good: 0, easy: 0 });
         setCorrect(0);
         setTotal(0);
         setShowSummary(false);
-        
-        // Reload vocabulary
-        await fetchVocabulary();
+        await fetchGrammar();
     };
 
     const handleClose = (withToast = false) => {
@@ -450,14 +412,13 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
             setTimeout(() => {
                 setShowToast(false);
                 closeDialog();
-            }, 2000); // Wait for toast
+            }, 2000);
         } else {
             closeDialog();
         }
     };
 
     const closeDialog = () => {
-        // Reset state
         setCurrentIndex(0);
         setRatings({ hard: 0, good: 0, easy: 0 });
         setCorrect(0);
@@ -469,9 +430,6 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
 
     if (!isOpen) {
         if (showToast) {
-            // Keep component mounted briefly for toast if needed, 
-            // but here we are managing it inside.
-            // If isOpen becomes false from parent, we just return null.
             return null;
         }
         return null;
@@ -482,9 +440,9 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact">
                     <div style={{ textAlign: 'center', padding: '60px', color: '#fff' }}>
-                        <h2>🏛️ Loading...</h2>
+                        <h2>📐 Loading...</h2>
                         <p style={{ color: '#8E8E93', marginTop: '12px', fontSize: '14px' }}>
-                            Fetching vocabulary from database...
+                            Fetching grammar from database...
                         </p>
                     </div>
                 </div>
@@ -492,14 +450,13 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         );
     }
 
-    // Show empty state if no vocabulary and no user
-    if (vocabulary.length === 0 && !user?.id) {
+    if (grammar.length === 0 && !user?.id) {
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
                     <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ Login Required</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
-                        Please log in to access vocabulary learning features.
+                        Please log in to access grammar learning features.
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
                         Abbrechen
@@ -509,18 +466,16 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         );
     }
 
-    // Check if we have vocabulary to display (after loading is complete)
-    if (!loading && vocabulary.length === 0) {
-        // No vocabulary found (for any user, including demo)
+    if (!loading && grammar.length === 0) {
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>📚 No Vocabulary Found</h2>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>📐 No Grammar Found</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '20px' }}>
-                        No vocabulary items available for this mode.
+                        No grammar items available for this mode.
                     </p>
                     <p style={{ color: '#8E8E93', fontSize: '14px', marginBottom: '30px' }}>
-                        💡 <strong>Tip:</strong> Run <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>supabase/insert_test_vocabulary.sql</code> in your Supabase SQL editor to add test vocabulary.
+                        💡 <strong>Tip:</strong> Run <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>supabase/insert_test_grammar.sql</code> in your Supabase SQL editor to add test grammar.
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
                         Abbrechen
@@ -530,15 +485,14 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         );
     }
 
-    const currentVocab = vocabulary[currentIndex];
-    if (!currentVocab) {
-        // Safety check - should not happen but prevents crashes
+    const currentItem = grammar[currentIndex];
+    if (!currentItem) {
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
                     <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ Error</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
-                        Unable to load vocabulary card.
+                        Unable to load grammar card.
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
                         Abbrechen
@@ -550,7 +504,6 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
 
     const progressPercent = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-    // Summary Screen - Daily Phrases Style
     if (showSummary) {
         return (
             <div className="vocabulary-dialog-overlay">
@@ -563,7 +516,6 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                     border: '1px solid var(--border-glass)',
                     boxShadow: 'var(--shadow-float)'
                 }}>
-                    {/* Close button entfernt - nur Abbrechen-Button erlaubt */}
                     <div style={{ fontSize: '3.5rem', marginBottom: 'calc(var(--spacing-lg) * 0.75)' }}>🎉</div>
                     <h2 style={{ 
                         fontSize: '1.875rem', 
@@ -682,16 +634,15 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         );
     }
 
-    // Get mode title and subtitle
     const getModeConfig = () => {
         switch (mode) {
             case 'weak':
-                return { title: '💪 Train Weak Words', subtitle: 'Lass uns diese stärken' };
+                return { title: '💪 Train Weak Grammar', subtitle: 'Lass uns diese stärken' };
             case 'due':
-                return { title: '📚 Due Cards Today', subtitle: 'Deine täglichen Wiederholungen' };
+                return { title: '📚 Due Grammar Today', subtitle: 'Deine täglichen Wiederholungen' };
             case 'review':
             default:
-                return { title: '🔄 Review Vocabulary', subtitle: 'Dein Wissen auffrischen' };
+                return { title: '📐 Grammar Quick Hits', subtitle: 'Deine Grammatik auffrischen' };
         }
     };
 
@@ -700,9 +651,6 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
     return (
         <div className="vocabulary-dialog-overlay">
             <div className="vocabulary-dialog daily-phrases-layout" onClick={(e) => e.stopPropagation()}>
-                {/* Close Button entfernt - Dialog kann nur über Abbrechen-Button geschlossen werden */}
-
-                {/* Header: Mode Title & Subtitle - Daily Phrases Style */}
                 <div className="mode-header">
                     <div className="mode-header-frame">
                         <h1>{modeConfig.title}</h1>
@@ -710,11 +658,10 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                     </div>
                 </div>
 
-                {/* Progress Bar - Daily Phrases Style */}
                 <div className="progress-wrapper">
                     <div className="progress-info">
                         <div className="progress-text">
-                            <span>{currentIndex + 1}</span> / <span>{vocabulary.length}</span>
+                            <span>{currentIndex + 1}</span> / <span>{grammar.length}</span>
                         </div>
                     </div>
                     <div className="progress-track">
@@ -722,48 +669,42 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                     </div>
                 </div>
 
-                {/* Main Card Area - Daily Phrases Style */}
                 <div className="main-card-area">
-                    {/* Phrase Card with Flip Functionality */}
                     <div 
                         className={`phrase-card ${flipped ? 'flipped' : ''}`}
                         onClick={() => setFlipped(!flipped)}
                         style={{ cursor: 'pointer' }}
                     >
                         <div className="card-content">
-                            {/* Front: English (always visible) */}
                             <div className={`english-translation-container ${!flipped ? 'active' : ''}`}>
                                 <div className="field-label">ENGLISH</div>
-                                <p className="english-translation">{currentVocab.english}</p>
-                                {currentVocab.example_en && (
+                                <p className="english-translation">{currentItem.english}</p>
+                                {currentItem.example_en && (
                                     <p style={{ 
                                         fontSize: '1rem', 
                                         color: 'var(--text-secondary)', 
                                         marginTop: 'calc(var(--spacing-sm) * 0.7)',
                                         fontStyle: 'italic'
-                                    }}>{currentVocab.example_en}</p>
+                                    }}>{currentItem.example_en}</p>
                                 )}
                             </div>
 
-                            {/* Back: Greek (shown when flipped) */}
                             <div className={`greek-phrase-container ${flipped ? 'active' : ''}`}>
                                 <div className="field-label">ΕΛΛΗΝΙΚΑ</div>
-                                <h2 className="greek-phrase">{currentVocab.greek}</h2>
-                                {currentVocab.example_gr && (
+                                <h2 className="greek-phrase">{currentItem.greek}</h2>
+                                {currentItem.example_gr && (
                                     <p style={{ 
                                         fontSize: '1rem', 
                                         color: 'var(--text-secondary)', 
                                         marginTop: 'calc(var(--spacing-sm) * 0.7)',
                                         fontStyle: 'italic'
-                                    }}>{currentVocab.example_gr}</p>
+                                    }}>{currentItem.example_gr}</p>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Button Bar - Daily Phrases Style */}
                     <div className="button-bar">
-                        {/* Left: Rating Buttons (shown only when flipped) */}
                         {flipped ? (
                             <div className="rating-group">
                                 <button 
@@ -798,7 +739,6 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                             <div style={{ flex: 1 }}></div>
                         )}
 
-                        {/* Right: Action Buttons */}
                         <div className="action-group">
                             {flipped && (
                                 <button 
@@ -818,7 +758,6 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                                     Audio
                                 </button>
                             )}
-                            {/* Vertical Stack: Wiederholen and Abbrechen (always visible) */}
                             <div className="action-buttons-vertical">
                                 <button 
                                     className="action-btn restart-btn vertical-btn"

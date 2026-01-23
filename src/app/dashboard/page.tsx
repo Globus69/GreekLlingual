@@ -9,6 +9,9 @@ import ActionGrid from '@/components/dashboard/ActionGrid';
 import ModuleGrid from '@/components/dashboard/ModuleGrid';
 import '@/styles/liquid-glass.css';
 import VocabularyDialog from '@/components/learning/VocabularyDialog';
+import GrammarDialog from '@/components/learning/GrammarDialog';
+import ComprehensionDialog from '@/components/learning/ComprehensionDialog';
+import ListeningDialog from '@/components/learning/ListeningDialog';
 import { supabase } from '@/db/supabase';
 import Link from 'next/link';
 
@@ -38,6 +41,12 @@ export default function DashboardPage() {
     const router = useRouter();
     const [isVocabDialogOpen, setIsVocabDialogOpen] = useState(false);
     const [vocabDialogMode, setVocabDialogMode] = useState<'weak' | 'review' | 'due'>('review');
+    const [isGrammarDialogOpen, setIsGrammarDialogOpen] = useState(false);
+    const [grammarDialogMode, setGrammarDialogMode] = useState<'weak' | 'review' | 'due'>('review');
+    const [isComprehensionDialogOpen, setIsComprehensionDialogOpen] = useState(false);
+    const [comprehensionDialogMode, setComprehensionDialogMode] = useState<'weak' | 'review' | 'due'>('review');
+    const [isListeningDialogOpen, setIsListeningDialogOpen] = useState(false);
+    const [listeningDialogMode, setListeningDialogMode] = useState<'weak' | 'review' | 'due'>('review');
     const [masteryProgress, setMasteryProgress] = useState(38);
     const [stats, setStats] = useState({ streak: 5, words: 47, weak: 'Verbs' });
 
@@ -162,7 +171,7 @@ export default function DashboardPage() {
 
                     {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
                     <div className="quick-actions-grid">
-                        <ActionTile icon="✨" label="Magic Round" primary />
+                        <ActionTile icon="✨" label="Magic Round" />
                         <ActionTile icon="⚡" label="20 min Quick Lesson" />
                         <ActionTile 
                             icon="💬" 
@@ -200,11 +209,32 @@ export default function DashboardPage() {
                             }}
                         />
 
-                        <ActionTile icon="📐" label="Grammar Quick Hits" />
+                        <ActionTile 
+                            icon="📐" 
+                            label="Grammar Quick Hits" 
+                            onClick={() => {
+                                setGrammarDialogMode('review');
+                                setIsGrammarDialogOpen(true);
+                            }}
+                        />
 
-                        <ActionTile icon="👂" label="Listening Practice" />
+                        <ActionTile 
+                            icon="👂" 
+                            label="Listening Practice" 
+                            onClick={() => {
+                                setListeningDialogMode('review');
+                                setIsListeningDialogOpen(true);
+                            }}
+                        />
                         <ActionTile icon="🗣️" label="Pronunciation Trainer" />
-                        <ActionTile icon="🧠" label="Comprehension" />
+                        <ActionTile 
+                            icon="🧠" 
+                            label="Comprehension" 
+                            onClick={() => {
+                                setComprehensionDialogMode('review');
+                                setIsComprehensionDialogOpen(true);
+                            }}
+                        />
                         <ActionTile icon="🎧" label="Audio Immersion" />
 
                         <ActionTile icon="📝" label="Test" />
@@ -220,6 +250,27 @@ export default function DashboardPage() {
                 isOpen={isVocabDialogOpen}
                 onClose={() => setIsVocabDialogOpen(false)}
                 mode={vocabDialogMode}
+            />
+
+            {/* Grammar Dialog */}
+            <GrammarDialog
+                isOpen={isGrammarDialogOpen}
+                onClose={() => setIsGrammarDialogOpen(false)}
+                mode={grammarDialogMode}
+            />
+
+            {/* Comprehension Dialog */}
+            <ComprehensionDialog
+                isOpen={isComprehensionDialogOpen}
+                onClose={() => setIsComprehensionDialogOpen(false)}
+                mode={comprehensionDialogMode}
+            />
+
+            {/* Listening Dialog */}
+            <ListeningDialog
+                isOpen={isListeningDialogOpen}
+                onClose={() => setIsListeningDialogOpen(false)}
+                mode={listeningDialogMode}
             />
         </div>
     );
