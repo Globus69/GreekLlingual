@@ -2,9 +2,10 @@
 // SUPABASE CONFIGURATION
 // ========================================
 const SUPABASE_URL = 'https://bzdzqmnxycnudflcnmzj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6ZHpxbW54eWNudWRmbGNubXpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc0NTU1ODQsImV4cCI6MjA1MzAzMTU4NH0.Ug6iHZJZLdTgzQZW7GRxe-rZZwu2LlraBGBGf-kOC8I';
+const SUPABASE_ANON_KEY = 'sb_publishable_uT0wv5-tv95ETP0u16h8zg_Ni3WqAIo';
 
-let supabase = null;
+// Use window.supabaseClient to avoid conflict with CDN's global supabase variable
+let supabaseClient = null;
 let currentUser = null;
 let useSupabase = false;
 
@@ -13,28 +14,28 @@ function initializeSupabase() {
     try {
         // The CDN script exposes supabase as a global variable
         // Check multiple possible locations
-        let SupabaseClient = null;
+        let SupabaseLibrary = null;
         
-        // Check global supabase variable (from CDN)
-        if (typeof supabase !== 'undefined') {
-            if (supabase.createClient) {
-                SupabaseClient = supabase;
-            } else if (supabase.default && supabase.default.createClient) {
-                SupabaseClient = supabase.default;
-            }
-        }
-        
-        // Check window.supabase
-        if (!SupabaseClient && window.supabase) {
+        // Check global supabase variable (from CDN) - use window to avoid conflict
+        if (typeof window.supabase !== 'undefined') {
             if (window.supabase.createClient) {
-                SupabaseClient = window.supabase;
+                SupabaseLibrary = window.supabase;
             } else if (window.supabase.default && window.supabase.default.createClient) {
-                SupabaseClient = window.supabase.default;
+                SupabaseLibrary = window.supabase.default;
             }
         }
         
-        if (SupabaseClient && SupabaseClient.createClient) {
-            supabase = SupabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Also check if supabase is available globally (not as window property)
+        if (!SupabaseLibrary && typeof supabase !== 'undefined') {
+            if (supabase.createClient) {
+                SupabaseLibrary = supabase;
+            } else if (supabase.default && supabase.default.createClient) {
+                SupabaseLibrary = supabase.default;
+            }
+        }
+        
+        if (SupabaseLibrary && SupabaseLibrary.createClient) {
+            supabaseClient = SupabaseLibrary.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             useSupabase = true;
             console.log('✅ Supabase initialized successfully');
             console.log('   URL:', SUPABASE_URL);
@@ -93,6 +94,74 @@ let currentPhraseIndex = 0;
 let phrasesReviewed = 0;
 const DECK_ID = 'c8852ed2-ebb9-414c-ac90-4867c562561e';
 
+// Fallback data if Supabase is not available
+const FALLBACK_PHRASES = [
+    {
+        id: 'fallback-1',
+        deck_id: DECK_ID,
+        greek_phrase: 'Καλημέρα!',
+        english_translation: 'Good morning!',
+        category: 'greetings',
+        difficulty: 'easy'
+    },
+    {
+        id: 'fallback-2',
+        deck_id: DECK_ID,
+        greek_phrase: 'Καλησπέρα!',
+        english_translation: 'Good evening!',
+        category: 'greetings',
+        difficulty: 'easy'
+    },
+    {
+        id: 'fallback-3',
+        deck_id: DECK_ID,
+        greek_phrase: 'Πώς είσαι;',
+        english_translation: 'How are you?',
+        category: 'greetings',
+        difficulty: 'easy'
+    },
+    {
+        id: 'fallback-4',
+        deck_id: DECK_ID,
+        greek_phrase: 'Ευχαριστώ πολύ.',
+        english_translation: 'Thank you very much.',
+        category: 'courtesy',
+        difficulty: 'easy'
+    },
+    {
+        id: 'fallback-5',
+        deck_id: DECK_ID,
+        greek_phrase: 'Παρακαλώ.',
+        english_translation: 'Please.',
+        category: 'courtesy',
+        difficulty: 'easy'
+    },
+    {
+        id: 'fallback-6',
+        deck_id: DECK_ID,
+        greek_phrase: 'Συγνώμη.',
+        english_translation: 'Sorry.',
+        category: 'courtesy',
+        difficulty: 'easy'
+    },
+    {
+        id: 'fallback-7',
+        deck_id: DECK_ID,
+        greek_phrase: 'Τι ώρα είναι;',
+        english_translation: 'What time is it?',
+        category: 'time',
+        difficulty: 'medium'
+    },
+    {
+        id: 'fallback-8',
+        deck_id: DECK_ID,
+        greek_phrase: 'Πού είναι η τουαλέτα;',
+        english_translation: 'Where is the restroom?',
+        category: 'directions',
+        difficulty: 'easy'
+    }
+];
+
 // ========================================
 // SPEECH SYNTHESIS
 // ========================================
@@ -137,9 +206,9 @@ async function init() {
     }
 
     // Get Supabase user (but don't require it for development)
-    if (useSupabase && supabase) {
+    if (useSupabase && supabaseClient) {
         try {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
             if (userError) {
                 console.log('⚠️ Could not get user:', userError.message);
                 console.log('   Continuing in anonymous mode (RLS should allow public access)');
@@ -165,12 +234,14 @@ async function init() {
     console.log('📥 Loading phrases...');
     phrases = await loadPhrasesFromSupabase();
 
-    // Show message if no phrases available
+    // Show message if no phrases available (should not happen with fallback)
     if (phrases.length === 0) {
-        console.warn('⚠️ No phrases loaded');
+        console.warn('⚠️ No phrases loaded, even with fallback');
         showNoPhrasesMessage();
         return;
     }
+    
+    console.log(`✅ Successfully loaded ${phrases.length} phrases`);
 
     totalCards.textContent = phrases.length;
     loadPhrase(currentPhraseIndex);
@@ -184,7 +255,7 @@ async function init() {
 // ========================================
 async function loadPhrasesFromSupabase() {
     // Ensure Supabase is initialized
-    if (!useSupabase || !supabase) {
+    if (!useSupabase || !supabaseClient) {
         console.log('⚠️ Supabase not initialized, attempting to initialize...');
         const initialized = initializeSupabase();
         if (!initialized) {
@@ -194,23 +265,23 @@ async function loadPhrasesFromSupabase() {
         }
         await new Promise(resolve => setTimeout(resolve, 300));
         
-        if (!useSupabase || !supabase) {
+        if (!useSupabase || !supabaseClient) {
             console.error('❌ Supabase still unavailable after retry');
-            console.log('💡 Trying to use fallback data or check Supabase connection');
-            // Return empty array - will show "no phrases" message
-            return [];
+            console.log('💡 Using fallback data');
+            console.log(`📦 Loaded ${FALLBACK_PHRASES.length} fallback phrases`);
+            return shuffleArray([...FALLBACK_PHRASES]);
         }
     }
 
     try {
         console.log('🔄 Attempting to load phrases from daily_phrases table...');
         console.log('   Deck ID:', DECK_ID);
-        console.log('   Supabase client:', supabase ? 'available' : 'missing');
+        console.log('   Supabase client:', supabaseClient ? 'available' : 'missing');
         console.log('   Current user:', currentUser ? currentUser.email : 'none (anonymous)');
         
         // First, try to load ALL phrases to check if table exists and has data
         console.log('📊 Step 1: Checking if table exists and has any data...');
-        const { data: allPhrases, error: checkError } = await supabase
+        const { data: allPhrases, error: checkError } = await supabaseClient
             .from('daily_phrases')
             .select('id, deck_id, greek_phrase, english_translation')
             .limit(5);
@@ -221,17 +292,31 @@ async function loadPhrasesFromSupabase() {
             console.error('Error message:', checkError.message);
             console.error('Error details:', JSON.stringify(checkError, null, 2));
             
+            // If API key is invalid
+            if (checkError.message?.includes('Invalid API key') || checkError.message?.includes('401') || checkError.code === 'PGRST301') {
+                console.error('⚠️ Invalid Supabase API key');
+                console.error('💡 Please check your SUPABASE_ANON_KEY in the script');
+                console.error('💡 You can find the correct key in your Supabase project settings');
+                console.log('💡 Using fallback data for now');
+                return shuffleArray([...FALLBACK_PHRASES]);
+            }
+            
             // If table doesn't exist, show helpful message
             if (checkError.code === '42P01' || checkError.message?.includes('does not exist')) {
                 console.error('⚠️ daily_phrases table does not exist. Please run supabase/insert_test_daily_phrases.sql');
+                console.log('💡 Using fallback data');
+                return shuffleArray([...FALLBACK_PHRASES]);
             }
             
             // If RLS error, try without authentication
             if (checkError.code === '42501' || checkError.message?.includes('permission') || checkError.message?.includes('policy')) {
-                console.warn('⚠️ RLS policy might be blocking access. Checking policies...');
+                console.warn('⚠️ RLS policy might be blocking access. Using fallback data.');
+                return shuffleArray([...FALLBACK_PHRASES]);
             }
             
-            return [];
+            // For other errors, use fallback
+            console.warn('⚠️ Error accessing Supabase. Using fallback data.');
+            return shuffleArray([...FALLBACK_PHRASES]);
         }
         
         console.log(`📊 Found ${allPhrases?.length || 0} total phrases in table`);
@@ -241,7 +326,7 @@ async function loadPhrasesFromSupabase() {
         
         // Now load phrases filtered by deck_id
         console.log('📊 Step 2: Loading phrases for deck_id:', DECK_ID);
-        const { data: phrasesData, error } = await supabase
+        const { data: phrasesData, error } = await supabaseClient
             .from('daily_phrases')
             .select('*')
             .eq('deck_id', DECK_ID)
@@ -254,12 +339,20 @@ async function loadPhrasesFromSupabase() {
             console.error('Error message:', error.message);
             console.error('Error details:', JSON.stringify(error, null, 2));
             
+            // If API key is invalid
+            if (error.message?.includes('Invalid API key') || error.message?.includes('401') || error.code === 'PGRST301') {
+                console.error('⚠️ Invalid Supabase API key');
+                console.error('💡 Please check your SUPABASE_ANON_KEY in the script');
+                console.log('💡 Using fallback data for now');
+                return shuffleArray([...FALLBACK_PHRASES]);
+            }
+            
             // If no data found for this deck_id, try loading all phrases
             if (error.code === 'PGRST116' || (phrasesData && phrasesData.length === 0)) {
                 console.log('⚠️ No phrases found for deck_id:', DECK_ID);
                 console.log('🔄 Trying to load phrases without deck_id filter...');
                 
-                const { data: allPhrasesData, error: allError } = await supabase
+                const { data: allPhrasesData, error: allError } = await supabaseClient
                     .from('daily_phrases')
                     .select('*')
                     .order('created_at', { ascending: true })
@@ -276,7 +369,7 @@ async function loadPhrasesFromSupabase() {
             if (error.message?.includes('fetch') || error.message?.includes('network')) {
                 console.log('🔄 Network error, retrying once...');
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                const retry = await supabase
+                const retry = await supabaseClient
                     .from('daily_phrases')
                     .select('*')
                     .eq('deck_id', DECK_ID)
@@ -289,7 +382,9 @@ async function loadPhrasesFromSupabase() {
                 }
             }
             
-            return [];
+            // Use fallback for any other error
+            console.log('💡 Using fallback data due to error');
+            return shuffleArray([...FALLBACK_PHRASES]);
         }
 
         if (!phrasesData || phrasesData.length === 0) {
@@ -299,7 +394,7 @@ async function loadPhrasesFromSupabase() {
             
             // Try loading without filter as fallback
             console.log('🔄 Trying fallback: loading all phrases...');
-            const { data: fallbackData, error: fallbackError } = await supabase
+            const { data: fallbackData, error: fallbackError } = await supabaseClient
                 .from('daily_phrases')
                 .select('*')
                 .order('created_at', { ascending: true })
@@ -310,7 +405,9 @@ async function loadPhrasesFromSupabase() {
                 return shuffleArray(fallbackData);
             }
             
-            return [];
+            // Use hardcoded fallback data
+            console.log('💡 Using hardcoded fallback phrases');
+            return shuffleArray([...FALLBACK_PHRASES]);
         }
 
         console.log(`✅ Loaded ${phrasesData.length} phrases from Supabase`);
@@ -322,7 +419,8 @@ async function loadPhrasesFromSupabase() {
     } catch (error) {
         console.error('❌ Error loading phrases:', error);
         console.error('Error stack:', error.stack);
-        return [];
+        console.log('💡 Using fallback data due to error');
+        return shuffleArray([...FALLBACK_PHRASES]);
     }
 }
 
@@ -566,7 +664,7 @@ async function savePhraseProgress(phrase, rating) {
             };
 
             // Upsert into student_progress table with phrase_id
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('student_progress')
                 .upsert(progressRecord, {
                     onConflict: 'student_id,phrase_id'
