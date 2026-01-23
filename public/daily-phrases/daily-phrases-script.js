@@ -38,7 +38,6 @@ window.speechSynthesis.onvoiceschanged = () => {
 // ========================================
 const phraseCard = document.getElementById('phraseCard');
 const greekPhrase = document.getElementById('greekPhrase');
-const translationContainer = document.getElementById('translationContainer');
 const englishTranslation = document.getElementById('englishTranslation');
 const audioBtn = document.getElementById('audioBtn');
 const cancelBtn = document.getElementById('cancelBtn');
@@ -147,23 +146,7 @@ function showNoPhrasesMessage() {
 // ========================================
 function attachEventListeners() {
     console.log('🎯 Attaching event listeners...');
-    console.log('  translationContainer:', translationContainer);
     console.log('  ratingButtons:', ratingButtons.length);
-
-    // Click on translation container to reveal (remove blur)
-    if (!translationContainer) {
-        console.error('❌ translationContainer not found!');
-        return;
-    }
-
-    translationContainer.addEventListener('click', (e) => {
-        console.log('🖱️ Translation container clicked!');
-
-        e.stopPropagation();
-        if (!isRevealed) {
-            revealTranslation();
-        }
-    });
 
     // Audio button - play Greek phrase
     audioBtn?.addEventListener('click', (e) => {
@@ -175,10 +158,16 @@ function attachEventListeners() {
     });
 
     // Cancel button - return to dashboard
-    cancelBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        window.location.href = '/dashboard';
-    });
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log('🚪 Cancel button clicked - returning to dashboard');
+            window.location.href = '/dashboard';
+        });
+    } else {
+        console.error('❌ Cancel button not found!');
+    }
 
     // Restart button - reload phrases
     restartBtn?.addEventListener('click', async (e) => {
@@ -207,30 +196,13 @@ function attachEventListeners() {
 function loadPhrase(index) {
     const phrase = phrases[index] || {};
 
+    // Load Greek phrase from database
     greekPhrase.textContent = phrase.greek_phrase || '—';
+    
+    // Load English translation from database
     englishTranslation.textContent = phrase.english_translation || '—';
 
-    // Reset revealed state - add blur again
-    isRevealed = false;
-    translationContainer.classList.add('blurred');
-    translationContainer.classList.remove('revealed');
-
     currentCardNum.textContent = index + 1;
-}
-
-// ========================================
-// REVEAL TRANSLATION (Remove Blur)
-// ========================================
-function revealTranslation() {
-    if (!translationContainer) {
-        console.error('❌ translationContainer not found!');
-        return;
-    }
-
-    // Remove blurred class, add revealed class
-    translationContainer.classList.remove('blurred');
-    translationContainer.classList.add('revealed');
-    isRevealed = true;
 }
 
 // ========================================
