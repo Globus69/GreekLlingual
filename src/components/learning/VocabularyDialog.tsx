@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/db/supabase';
+import { useAuth } from '@/context/AuthContext';
 import Flashcard from '@/components/learning/Flashcard';
 import '@/styles/liquid-glass.css';
 
@@ -38,9 +39,8 @@ interface VocabularyDialogProps {
     mode?: 'weak' | 'review' | 'due'; // Optional mode parameter
 }
 
-const STUDENT_ID = 'demo-student-id';
-
 export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: VocabularyDialogProps) {
+    const { user } = useAuth();
     const [vocabulary, setVocabulary] = useState<VocabWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -49,17 +49,108 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
     const [total, setTotal] = useState(0);
     const [showSummary, setShowSummary] = useState(false);
     const [showToast, setShowToast] = useState(false);
+    const [flipped, setFlipped] = useState(false);
+    
+    const STUDENT_ID = user?.id || '';
 
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && user?.id) {
             fetchVocabulary();
             setShowSummary(false);
+            setFlipped(false);
         }
-    }, [isOpen, mode]);
+    }, [isOpen, mode, user?.id]);
+
+    const playAudio = () => {
+        if (vocabulary.length === 0 || currentIndex >= vocabulary.length) return;
+        
+        const currentVocab = vocabulary[currentIndex];
+        if (!currentVocab) return;
+        
+        const text = currentVocab.greek;
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'el-GR';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            
+            // Try to find Greek voice
+            const voices = window.speechSynthesis.getVoices();
+            const greekVoice = voices.find(v => v.lang.startsWith('el')) || voices.find(v => v.lang.includes('Greek'));
+            if (greekVoice) {
+                utterance.voice = greekVoice;
+            }
+            
+            window.speechSynthesis.speak(utterance);
+        } else {
+            console.warn('Speech synthesis not supported');
+        }
+    };
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleKeyPress = (e: KeyboardEvent) => {
+            // Don't handle shortcuts if user is typing in an input
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+                return;
+            }
+
+            switch (e.key) {
+                case ' ':
+                case 'Spacebar':
+                    e.preventDefault();
+                    setFlipped(!flipped);
+                    break;
+                case '1':
+                    e.preventDefault();
+                    handleScore(1);
+                    break;
+                case '2':
+                    e.preventDefault();
+                    handleScore(2.5);
+                    break;
+                case '3':
+                    e.preventDefault();
+                    handleScore(3);
+                    break;
+                case 'a':
+                case 'A':
+                    e.preventDefault();
+                    playAudio();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    handlePrevious();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    handleNext();
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    handleClose(false);
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, [isOpen, flipped, currentIndex, vocabulary.length]);
 
     const fetchVocabulary = async () => {
+        if (!STUDENT_ID) {
+            console.error("❌ No student ID available");
+            setVocabulary([]);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
+            // Fetch learning_items with student_progress (LEFT JOIN)
             const { data, error } = await supabase
                 .from('learning_items')
                 .select(`
@@ -68,20 +159,30 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                 `)
                 .eq('type', 'vocabulary')
                 .order('next_review', { foreignTable: 'student_progress', ascending: true, nullsFirst: true })
-                .limit(50); // Fetch more to allow filtering
+                .limit(100); // Fetch more to allow filtering
 
             if (error) {
-                console.error("Error fetching vocabs:", error);
-                setVocabulary(filterVocabsByMode(getDemoVocabs(), mode));
+                console.error("❌ Error fetching vocabs:", error);
+                setVocabulary([]);
             } else if (data && data.length > 0) {
-                const filtered = filterVocabsByMode(data as VocabWithProgress[], mode);
+                // Filter student_progress to only include entries for current student
+                const processedData = data.map((item: any) => ({
+                    ...item,
+                    student_progress: item.student_progress?.filter(
+                        (p: any) => p?.student_id === STUDENT_ID
+                    ) || []
+                })) as VocabWithProgress[];
+                
+                const filtered = filterVocabsByMode(processedData, mode);
+                console.log(`✅ Loaded ${filtered.length} cards for mode: ${mode} (from ${data.length} total items)`);
                 setVocabulary(filtered);
             } else {
-                setVocabulary(filterVocabsByMode(getDemoVocabs(), mode)); // Fallback if empty
+                console.log("⚠️ No vocabulary items found in database");
+                setVocabulary([]);
             }
         } catch (err) {
-            console.error("Fetch error:", err);
-            setVocabulary(filterVocabsByMode(getDemoVocabs(), mode));
+            console.error("❌ Fetch error:", err);
+            setVocabulary([]);
         } finally {
             setLoading(false);
         }
@@ -106,18 +207,22 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                     });
             
             case 'due':
-                // Filter: next_review <= heute
+                // Filter: next_review <= heute (or no review date = due)
+                const todayDate = new Date(today);
                 return vocabs
                     .filter(vocab => {
                         const progress = vocab.student_progress?.[0];
                         if (!progress?.next_review) return true; // No review date = due
-                        const reviewDate = progress.next_review.split('T')[0];
-                        return reviewDate <= today;
+                        const reviewDate = new Date(progress.next_review);
+                        return reviewDate <= todayDate;
                     })
                     .sort((a, b) => {
-                        const dateA = a.student_progress?.[0]?.next_review || '';
-                        const dateB = b.student_progress?.[0]?.next_review || '';
-                        return dateA.localeCompare(dateB); // Älteste zuerst
+                        const dateA = a.student_progress?.[0]?.next_review;
+                        const dateB = b.student_progress?.[0]?.next_review;
+                        if (!dateA && !dateB) return 0;
+                        if (!dateA) return -1; // No date = most urgent
+                        if (!dateB) return 1;
+                        return new Date(dateA).getTime() - new Date(dateB).getTime(); // Älteste zuerst
                     });
             
             case 'review':
@@ -145,113 +250,6 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         }
     };
 
-    const getDemoVocabs = (): VocabWithProgress[] => [
-        {
-            id: 1,
-            type: 'vocabulary',
-            english: 'Hello',
-            greek: 'Γεια σου',
-            example_en: 'Hello friend',
-            example_gr: 'Γεια σου φίλε',
-            audio_url: null,
-            created_at: new Date().toISOString(),
-            student_progress: [{
-                id: 1,
-                student_id: STUDENT_ID,
-                item_id: 1,
-                interval_days: 2,
-                ease_factor: 2.5,
-                attempts: 3,
-                correct_count: 2,
-                last_attempt: new Date().toISOString(),
-                next_review: new Date().toISOString()
-            }]
-        },
-        {
-            id: 2,
-            type: 'vocabulary',
-            english: 'Thank you',
-            greek: 'Ευχαριστώ',
-            example_en: 'Thank you very much',
-            example_gr: 'Ευχαριστώ πολύ',
-            audio_url: null,
-            created_at: new Date().toISOString(),
-            student_progress: [{
-                id: 2,
-                student_id: STUDENT_ID,
-                item_id: 2,
-                interval_days: 1,
-                ease_factor: 2.0, // Weak word (ease < 2.3)
-                attempts: 2,
-                correct_count: 1,
-                last_attempt: new Date().toISOString(),
-                next_review: new Date().toISOString()
-            }]
-        },
-        {
-            id: 3,
-            type: 'vocabulary',
-            english: 'Water',
-            greek: 'Νερό',
-            example_en: 'I want water',
-            example_gr: 'Θέλω νερό',
-            audio_url: null,
-            created_at: new Date().toISOString(),
-            student_progress: [{
-                id: 3,
-                student_id: STUDENT_ID,
-                item_id: 3,
-                interval_days: 1,
-                ease_factor: 2.1, // Weak word (ease < 2.3)
-                attempts: 1,
-                correct_count: 0,
-                last_attempt: new Date().toISOString(),
-                next_review: new Date().toISOString()
-            }]
-        },
-        {
-            id: 4,
-            type: 'vocabulary',
-            english: 'Please',
-            greek: 'Παρακαλώ',
-            example_en: 'Please help me',
-            example_gr: 'Παρακαλώ βοήθησέ με',
-            audio_url: null,
-            created_at: new Date().toISOString(),
-            student_progress: [{
-                id: 4,
-                student_id: STUDENT_ID,
-                item_id: 4,
-                interval_days: 1,
-                ease_factor: 1.9, // Very weak word
-                attempts: 1,
-                correct_count: 0,
-                last_attempt: new Date().toISOString(),
-                next_review: new Date().toISOString()
-            }]
-        },
-        {
-            id: 5,
-            type: 'vocabulary',
-            english: 'Good morning',
-            greek: 'Καλημέρα',
-            example_en: 'Good morning, how are you?',
-            example_gr: 'Καλημέρα, πώς είσαι;',
-            audio_url: null,
-            created_at: new Date().toISOString(),
-            student_progress: [{
-                id: 5,
-                student_id: STUDENT_ID,
-                item_id: 5,
-                interval_days: 5,
-                ease_factor: 2.8, // Good word (ease >= 2.3)
-                attempts: 5,
-                correct_count: 4,
-                last_attempt: new Date().toISOString(),
-                next_review: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
-            }]
-        }
-    ];
 
     const handleScore = async (quality: number) => {
         const item = vocabulary[currentIndex];
@@ -265,18 +263,22 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         let newInterval = progress.interval_days;
         let newEase = progress.ease_factor;
 
-        // Update ratings counter
+        // Update ratings counter and calculate new interval/ease
         if (quality === 1) {
+            // Hard - reset interval, decrease ease slightly
             setRatings(prev => ({ ...prev, hard: prev.hard + 1 }));
             newInterval = 1;
+            newEase = Math.max(1.3, progress.ease_factor - 0.15); // Minimum ease is 1.3
         } else if (quality === 2.5) {
+            // Good - increase interval, slight ease increase
             setRatings(prev => ({ ...prev, good: prev.good + 1 }));
-            newInterval = Math.round(progress.interval_days * 2.5);
-            if (quality > 2.5) newEase += 0.1;
+            newInterval = Math.max(1, Math.round(progress.interval_days * 2.5));
+            newEase = Math.min(3.0, progress.ease_factor + 0.05); // Maximum ease is 3.0
         } else if (quality === 3) {
+            // Easy - larger interval increase, more ease increase
             setRatings(prev => ({ ...prev, easy: prev.easy + 1 }));
-            newInterval = Math.round(progress.interval_days * 3);
-            newEase += 0.1;
+            newInterval = Math.max(1, Math.round(progress.interval_days * 3));
+            newEase = Math.min(3.0, progress.ease_factor + 0.1); // Maximum ease is 3.0
         }
 
         // Update correct/total
@@ -287,7 +289,8 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         nextReview.setDate(nextReview.getDate() + newInterval);
 
         try {
-            const { error } = await supabase
+            // Upsert with onConflict to handle unique constraint (item_id, student_id)
+            const { data: upsertData, error } = await supabase
                 .from('student_progress')
                 .upsert({
                     item_id: item.id,
@@ -298,14 +301,38 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                     next_review: nextReview.toISOString(),
                     interval_days: newInterval,
                     ease_factor: newEase
+                }, {
+                    onConflict: 'item_id,student_id'
                 });
 
-            if (error) console.error("Update error:", error);
+            if (error) {
+                console.error("❌ Update error:", error);
+                console.error("Failed to save progress for item:", item.id);
+            } else {
+                console.log(`✅ Progress saved: ${item.english} → ease: ${progress.ease_factor.toFixed(2)} → ${newEase.toFixed(2)}, interval: ${newInterval}d`);
+                
+                // Update local state to reflect the change immediately
+                const updatedVocabulary = [...vocabulary];
+                updatedVocabulary[currentIndex] = {
+                    ...item,
+                    student_progress: [{
+                        ...progress,
+                        attempts: progress.attempts + 1,
+                        correct_count: quality > 1 ? progress.correct_count + 1 : progress.correct_count,
+                        last_attempt: new Date().toISOString(),
+                        next_review: nextReview.toISOString(),
+                        interval_days: newInterval,
+                        ease_factor: newEase
+                    }]
+                };
+                setVocabulary(updatedVocabulary);
+            }
         } catch (err) {
-            console.error("Failed to update SRT data:", err);
+            console.error("❌ Failed to update SRT data:", err);
         }
 
         // Move to next card with animation
+        setFlipped(false); // Reset flip state
         if (currentIndex < vocabulary.length - 1) {
             setTimeout(() => setCurrentIndex(currentIndex + 1), 300);
         } else {
@@ -316,12 +343,14 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
 
     const handlePrevious = () => {
         if (currentIndex > 0) {
+            setFlipped(false); // Reset flip when changing cards
             setCurrentIndex(currentIndex - 1);
         }
     };
 
     const handleNext = () => {
         if (currentIndex < vocabulary.length - 1) {
+            setFlipped(false); // Reset flip when changing cards
             setCurrentIndex(currentIndex + 1);
         }
     };
@@ -345,6 +374,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         setCorrect(0);
         setTotal(0);
         setShowSummary(false);
+        setFlipped(false);
         onClose();
     };
 
@@ -444,6 +474,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                             exampleTerm={currentVocab.example_en || ''}
                             exampleTranslation={currentVocab.example_gr || ''}
                             onScore={handleScore}
+                            onAudio={playAudio}
                         />
                     </div>
 
@@ -456,17 +487,57 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                     </button>
                 </div>
 
-                {/* Footer: Just Rating Buttons */}
-                <div className="dialog-footer compact-footer">
-                    <button className="rating-btn rating-hard" onClick={() => handleScore(1)}>
-                        Hard
+                {/* Footer: Rating Buttons + Audio */}
+                <div className="dialog-footer compact-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', gap: '8px', flex: 1, justifyContent: 'center' }}>
+                        <button className="rating-btn rating-hard" onClick={() => handleScore(1)}>
+                            Hard (1)
+                        </button>
+                        <button className="rating-btn rating-good" onClick={() => handleScore(2.5)}>
+                            Good (2)
+                        </button>
+                        <button className="rating-btn rating-easy" onClick={() => handleScore(3)}>
+                            Easy (3)
+                        </button>
+                    </div>
+                    <button 
+                        onClick={playAudio}
+                        style={{
+                            padding: '10px 16px',
+                            background: 'rgba(0, 122, 255, 0.15)',
+                            border: '1px solid rgba(0, 122, 255, 0.3)',
+                            borderRadius: '12px',
+                            color: '#007AFF',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            transition: 'all 0.2s'
+                        }}
+                        title="Audio abspielen (A)"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                        Audio
                     </button>
-                    <button className="rating-btn rating-good" onClick={() => handleScore(2.5)}>
-                        Good
-                    </button>
-                    <button className="rating-btn rating-easy" onClick={() => handleScore(3)}>
-                        Easy
-                    </button>
+                </div>
+
+                {/* Keyboard Shortcuts Hint */}
+                <div style={{ 
+                    textAlign: 'center', 
+                    marginTop: '12px', 
+                    fontSize: '11px', 
+                    color: '#8E8E93',
+                    padding: '8px',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '8px'
+                }}>
+                    ⌨️ Shortcuts: Space=Flip • 1/2/3=Rate • A=Audio • ←/→=Navigate • Esc=Close
                 </div>
 
                 {showToast && (

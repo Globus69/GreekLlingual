@@ -57,10 +57,12 @@ export default function DashboardPage() {
 
     const fetchStats = async () => {
         try {
+            if (!user?.id) return;
+            
             const { data: progressData } = await supabase
                 .from('student_progress')
                 .select('correct_count, attempts')
-                .eq('student_id', 'demo-student-id');
+                .eq('student_id', user.id);
 
             if (progressData && progressData.length > 0) {
                 const totalCorrect = progressData.reduce((sum: number, p: any) => sum + (p.correct_count || 0), 0);

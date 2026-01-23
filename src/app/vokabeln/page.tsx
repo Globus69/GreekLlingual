@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/db/supabase';
+import { useAuth } from '@/context/AuthContext';
 import Flashcard from '@/components/learning/Flashcard';
 import '@/styles/liquid-glass.css';
 
@@ -33,21 +34,31 @@ interface VocabWithProgress extends LearningItem {
     student_progress?: StudentProgress[];
 }
 
-const STUDENT_ID = 'demo-student-id';
-
 export default function VokabelnPage() {
     const router = useRouter();
+    const { user } = useAuth();
     const [vocabulary, setVocabulary] = useState<VocabWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [finished, setFinished] = useState(false);
     const [totalDue, setTotalDue] = useState(0);
+    
+    const STUDENT_ID = user?.id || '';
 
     useEffect(() => {
-        fetchVocabulary();
-    }, []);
+        if (user?.id) {
+            fetchVocabulary();
+        }
+    }, [user?.id]);
 
     const fetchVocabulary = async () => {
+        if (!STUDENT_ID) {
+            console.error("❌ No student ID available");
+            setVocabulary([]);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
             const { data, error } = await supabase
@@ -61,54 +72,30 @@ export default function VokabelnPage() {
                 .limit(20);
 
             if (error) {
-                console.error("Error fetching vocabs:", error);
-                setVocabulary(getDemoVocabs());
+                console.error("❌ Error fetching vocabs:", error);
+                setVocabulary([]);
             } else if (data && data.length > 0) {
-                setVocabulary(data as VocabWithProgress[]);
-                setTotalDue(data.length);
+                // Filter student_progress to only include entries for current student
+                const processedData = data.map((item: any) => ({
+                    ...item,
+                    student_progress: item.student_progress?.filter(
+                        (p: any) => p?.student_id === STUDENT_ID
+                    ) || []
+                })) as VocabWithProgress[];
+                
+                setVocabulary(processedData);
+                setTotalDue(processedData.length);
             } else {
-                setVocabulary(getDemoVocabs());
+                console.log("⚠️ No vocabulary items found in database");
+                setVocabulary([]);
             }
         } catch (err) {
-            console.error("Fetch error:", err);
-            setVocabulary(getDemoVocabs());
+            console.error("❌ Fetch error:", err);
+            setVocabulary([]);
         } finally {
             setLoading(false);
         }
     };
-
-    const getDemoVocabs = (): VocabWithProgress[] => [
-        {
-            id: 1,
-            type: 'vocabulary',
-            english: 'Hello',
-            greek: 'Γεια σου',
-            example_en: 'Hello friend',
-            example_gr: 'Γεια σου φίλε',
-            audio_url: null,
-            created_at: new Date().toISOString()
-        },
-        {
-            id: 2,
-            type: 'vocabulary',
-            english: 'Thank you',
-            greek: 'Ευχαριστώ',
-            example_en: 'Thank you very much',
-            example_gr: 'Ευχαριστώ πολύ',
-            audio_url: null,
-            created_at: new Date().toISOString()
-        },
-        {
-            id: 3,
-            type: 'vocabulary',
-            english: 'Water',
-            greek: 'Νερό',
-            example_en: 'I want water',
-            example_gr: 'Θέλω νερό',
-            audio_url: null,
-            created_at: new Date().toISOString()
-        }
-    ];
 
     const handleScore = async (quality: number) => {
         const item = vocabulary[currentIndex];
