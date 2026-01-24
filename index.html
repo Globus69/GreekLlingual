@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header (dynamisch im Review-Modus) -->
+        <h2 class="header" id="pageHeader">Flashcards</h2>
+
+        <!-- Flashcard Container -->
+        <div class="flashcard" id="flashcard">
+            <!-- Vorderseite (Englisch) -->
+            <div class="card-face card-front">
+                <h1 class="word" id="englishWord">Loading...</h1>
+                <button class="audio-btn" id="audioFront" aria-label="Play audio">
+                    🔊
+                </button>
+                <p class="hint">Click to flip</p>
+            </div>
+
+            <!-- Rückseite (Griechisch) -->
+            <div class="card-face card-back">
+                <h2 class="word" id="greekWord">Γεια σου</h2>
+                <button class="audio-btn" id="audioBack" aria-label="Play audio">
+                    🔊
+                </button>
+
+                <!-- Text-Eingabe -->
+                <input
+                    type="text"
+                    class="answer-input"
+                    id="answerInput"
+                    placeholder="Type your answer..."
+                    aria-label="Answer input"
+                >
+
+                <!-- Bewertungs-Buttons -->
+                <div class="rating-buttons">
+                    <button class="rating-btn btn-good" data-rating="good">Good</button>
+                    <button class="rating-btn btn-very-good" data-rating="very-good">Very Good</button>
+                    <button class="rating-btn btn-easy" data-rating="easy">Easy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress">
+            <span id="currentCard">1</span> / <span id="totalCards">3</span>
+        </div>
+
+        <!-- Completion Screen (hidden by default) -->
+        <div class="completion-screen" id="completionScreen" style="display: none;">
+            <div class="completion-content">
+                <h2>🎉 All done!</h2>
+                <p>You've reviewed all cards for today.</p>
+                <button class="back-btn" id="backToDashboard">Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="shared-data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

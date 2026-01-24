@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greek Vocabulary · Flashcards</title>
+    <link rel="stylesheet" href="flashcards-style.css">
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="app-container">
+
+        <!-- Mode Header (Dynamic) -->
+        <div class="mode-header">
+            <h2 class="mode-title" id="modeTitle">Flashcards</h2>
+            <p class="mode-subtitle" id="modeSubtitle">Review your vocabulary</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-wrapper">
+            <div class="progress-info">
+                <span class="progress-text">Card <span id="currentCardNum">1</span> of <span id="totalCards">5</span></span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Flashcard -->
+        <div class="card-container" id="cardContainer">
+            <div class="flashcard" id="flashcard">
+
+                <!-- Front Face (English) -->
+                <div class="card-face card-front">
+                    <div class="card-content">
+                        <h1 class="main-word" id="wordFront">Hello</h1>
+                        <p class="context-text" id="contextFront">A common greeting</p>
+
+                        <!-- Audio Button (Centered) -->
+                        <button class="audio-btn-large" id="audioFront" aria-label="Play pronunciation">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <span class="flip-hint">Click to flip</span>
+                </div>
+
+                <!-- Back Face (Greek) -->
+                <div class="card-face card-back">
+                    <div class="card-content">
+                        <h1 class="main-word greek" id="wordBack">Γεια σου</h1>
+                        <p class="context-text" id="contextBack">Μια κοινή χαιρετισμός</p>
+
+                        <!-- Audio Button (Centered) -->
+                        <button class="audio-btn-large" id="audioBack" aria-label="Play pronunciation">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Rating Buttons -->
+                    <div class="rating-buttons">
+                        <button class="rating-btn btn-good" data-rating="good">
+                            <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Good
+                        </button>
+                        <button class="rating-btn btn-very-good" data-rating="very-good">
+                            <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Very Good
+                        </button>
+                        <button class="rating-btn btn-easy" data-rating="easy">
+                            <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Easy
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Completion Screen (hidden by default) -->
+        <div class="completion-screen" id="completionScreen">
+            <div class="completion-content">
+                <div class="completion-icon">🎉</div>
+                <h2 class="completion-title">Excellent Work!</h2>
+                <p class="completion-text">You've completed all flashcards for this session.</p>
+                <div class="completion-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="cardsReviewed">5</span>
+                        <span class="stat-label">Cards Reviewed</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-value">100%</span>
+                        <span class="stat-label">Completion</span>
+                    </div>
+                </div>
+                <button class="back-to-dashboard-btn" id="backToDashboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    </svg>
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Shared Flashcard Data -->
+    <script src="shared-data.js"></script>
+    <script src="flashcards-script.js"></script>
+</body>
+</html>
