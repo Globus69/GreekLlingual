@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Short Stories - Greek Learning</title>
+    <link rel="stylesheet" href="/short-stories/short-stories-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        (function() {
+            function checkSupabase() {
+                if (typeof supabase !== 'undefined') {
+                    window.supabase = supabase;
+                    window.supabaseLoaded = true;
+                    window.dispatchEvent(new Event('supabase-loaded'));
+                } else {
+                    setTimeout(checkSupabase, 100);
+                }
+            }
+            checkSupabase();
+        })();
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <div class="mode-header">
+            <div class="mode-header-frame">
+                <h1 id="modeTitle">📚 Short Stories</h1>
+                <p id="modeSubtitle">Griechischer Text oben, Englisch unten – Audio per MP3</p>
+            </div>
+        </div>
+
+        <div class="progress-wrapper">
+            <div class="progress-info">
+                <div class="progress-text">
+                    <span id="currentCardNum">1</span> / <span id="totalCards">0</span>
+                </div>
+            </div>
+            <div class="progress-track">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="main-card-area">
+            <div id="phraseCard" class="phrase-card">
+                <div class="card-content">
+                    <div class="frame-row">
+                        <div class="frame-with-arrows greek-frame">
+                            <div class="frame-inner">
+                                <div class="field-label">Griechisch</div>
+                                <div id="greekScrollContainer" class="frame-scroll-container"></div>
+                            </div>
+                        </div>
+                        <div class="frame-arrow-outside">
+                            <button type="button" class="scroll-arrow scroll-up" id="scrollUp" title="Vorheriger Abschnitt" aria-label="Vorheriger Abschnitt">▲</button>
+                        </div>
+                    </div>
+                    <div class="frame-row">
+                        <div class="frame-with-arrows english-frame english-translation-container">
+                            <div class="frame-inner">
+                                <div class="field-label">Englisch</div>
+                                <div id="englishScrollContainer" class="frame-scroll-container"></div>
+                            </div>
+                        </div>
+                        <div class="frame-arrow-outside">
+                            <button type="button" class="scroll-arrow scroll-down" id="scrollDown" title="Nächster Abschnitt" aria-label="Nächster Abschnitt">▼</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-bar">
+                <div class="rating-group">
+                    <button class="rating-btn rating-hard" data-rating="hard">Hard</button>
+                    <button class="rating-btn rating-good" data-rating="good">Good</button>
+                    <button class="rating-btn rating-easy" data-rating="easy">Easy</button>
+                </div>
+                <div class="action-group">
+                    <button id="audioBtn" class="action-btn audio-btn" title="MP3-Audio abspielen">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                        Audio
+                    </button>
+                    <div class="action-buttons-vertical">
+                        <button id="restartBtn" class="action-btn restart-btn vertical-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                            Wiederholen
+                        </button>
+                        <button id="cancelBtn" class="action-btn cancel-btn vertical-btn" type="button">Abbrechen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="completionScreen" class="completion-screen">
+            <div class="completion-content">
+                <div class="completion-icon">🎉</div>
+                <h2 class="completion-title">Fertig!</h2>
+                <p class="completion-text">Du hast alle Short Stories durchgearbeitet.</p>
+                <div class="completion-stats">
+                    <div class="stat-item">
+                        <span id="phrasesReviewed" class="stat-value">0</span>
+                        <span class="stat-label">Reviewed</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-value">100%</span>
+                        <span class="stat-label">Accuracy</span>
+                    </div>
+                </div>
+                <button class="back-to-dashboard-btn" id="backToDashboardBtn">Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/short-stories/short-stories-script.js"></script>
+</body>
+</html>
