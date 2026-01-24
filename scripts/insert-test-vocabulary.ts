@@ -77,7 +77,7 @@ const testVocabulary = [
   { type: 'vocabulary', english: 'To see', greek: 'Βλέπω', example_en: 'I see the sea', example_gr: 'Βλέπω τη θάλασσα' },
   { type: 'vocabulary', english: 'To know', greek: 'Ξέρω', example_en: 'I know Greek', example_gr: 'Ξέρω ελληνικά' },
   { type: 'vocabulary', english: 'To want', greek: 'Θέλω', example_en: 'I want to learn', example_gr: 'Θέλω να μάθω' },
-  { type: 'vocabulary', english: 'To love', greek: 'Αγαπώ', example_en: 'I love you', example_gr: 'Σ''αγαπώ' },
+  { type: 'vocabulary', english: 'To love', greek: 'Αγαπώ', example_en: 'I love you', example_gr: "Σ' αγαπώ" },
   { type: 'vocabulary', english: 'To speak', greek: 'Μιλάω', example_en: 'I speak Greek', example_gr: 'Μιλάω ελληνικά' },
   { type: 'vocabulary', english: 'To learn', greek: 'Μαθαίνω', example_en: 'I learn Greek', example_gr: 'Μαθαίνω ελληνικά' },
   { type: 'vocabulary', english: 'To read', greek: 'Διαβάζω', example_en: 'I read a book', example_gr: 'Διαβάζω ένα βιβλίο' },
@@ -116,7 +116,7 @@ const testVocabulary = [
   
   // Abstract
   { type: 'vocabulary', english: 'God', greek: 'Θεός', example_en: 'Oh my God', example_gr: 'Ω Θεέ μου' },
-  { type: 'vocabulary', english: 'Love', greek: 'Αγάπη', example_en: 'I love you', example_gr: 'Σ''αγαπώ' },
+  { type: 'vocabulary', english: 'Love', greek: 'Αγάπη', example_en: 'I love you', example_gr: "Σ' αγαπώ" },
   { type: 'vocabulary', english: 'Life', greek: 'Ζωή', example_en: 'Beautiful life', example_gr: 'Όμορφη ζωή' },
   { type: 'vocabulary', english: 'Work', greek: 'Δουλειά', example_en: 'I go to work', example_gr: 'Πάω στη δουλειά' },
   { type: 'vocabulary', english: 'Money', greek: 'Χρήματα', example_en: 'I need money', example_gr: 'Χρειάζομαι χρήματα' },
