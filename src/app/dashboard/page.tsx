@@ -19,15 +19,16 @@ interface ActionTileProps {
     icon: string;
     label: string;
     primary?: boolean;
+    disabled?: boolean;
     onClick?: () => void;
 }
 
-function ActionTile({ icon, label, primary, onClick }: ActionTileProps) {
+function ActionTile({ icon, label, primary, disabled, onClick }: ActionTileProps) {
     return (
         <div
-            className="action-tile-clean"
-            onClick={onClick}
-            style={primary ? { borderColor: 'rgba(0, 122, 255, 0.4)', background: 'rgba(0, 122, 255, 0.03)' } : {}}
+            className={`action-tile-clean${disabled ? ' action-tile-disabled' : ''}`}
+            onClick={disabled ? undefined : onClick}
+            style={primary && !disabled ? { borderColor: 'rgba(0, 122, 255, 0.4)', background: 'rgba(0, 122, 255, 0.03)' } : {}}
         >
             <div className="at-icon">{icon}</div>
             <div className="at-label">{label}</div>
@@ -171,8 +172,8 @@ export default function DashboardPage() {
 
                     {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
                     <div className="quick-actions-grid">
-                        <ActionTile icon="✨" label="Magic Round" />
-                        <ActionTile icon="⚡" label="20 min Quick Lesson" />
+                        <ActionTile icon="✨" label="Magic Round" disabled />
+                        <ActionTile icon="⚡" label="20 min Quick Lesson" disabled />
                         <ActionTile 
                             icon="💬" 
                             label="Daily Phrases" 
@@ -180,7 +181,13 @@ export default function DashboardPage() {
                                 window.location.href = '/daily-phrases/daily-phrases.html';
                             }}
                         />
-                        <ActionTile icon="📚" label="Short Stories" />
+                        <ActionTile
+                            icon="📚"
+                            label="Short Stories"
+                            onClick={() => {
+                                window.location.href = '/short-stories/short-stories.html';
+                            }}
+                        />
 
                         <ActionTile 
                             icon="⚠️" 
@@ -221,26 +228,28 @@ export default function DashboardPage() {
                         <ActionTile 
                             icon="👂" 
                             label="Listening Practice" 
+                            disabled
                             onClick={() => {
                                 setListeningDialogMode('review');
                                 setIsListeningDialogOpen(true);
                             }}
                         />
-                        <ActionTile icon="🗣️" label="Pronunciation Trainer" />
+                        <ActionTile icon="🗣️" label="Pronunciation Trainer" disabled />
                         <ActionTile 
                             icon="🧠" 
                             label="Comprehension" 
+                            disabled
                             onClick={() => {
                                 setComprehensionDialogMode('review');
                                 setIsComprehensionDialogOpen(true);
                             }}
                         />
-                        <ActionTile icon="🎧" label="Audio Immersion" />
+                        <ActionTile icon="🎧" label="Audio Immersion" disabled />
 
-                        <ActionTile icon="📝" label="Test" />
-                        <ActionTile icon="🏛️" label="Cyprus Exam Sim" />
-                        <ActionTile icon="📕" label="Book Recommendations" />
-                        <ActionTile icon="📊" label="Progress History" />
+                        <ActionTile icon="📝" label="Test" disabled />
+                        <ActionTile icon="🏛️" label="Cyprus Exam Sim" disabled />
+                        <ActionTile icon="📕" label="Book Recommendations" disabled />
+                        <ActionTile icon="📊" label="Progress History" disabled />
                     </div>
                 </div>
             </main>

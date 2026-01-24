@@ -100,8 +100,10 @@ html,
 
 /* Mastery Box Pimping (V3) */
 .mastery-box {
-    background: #1C1C1E;
-    border: 1px solid rgba(0, 122, 255, 0.3);
+    background: linear-gradient(160deg, #1C1C1E 0%, #151517 100%);
+    border-radius: 24px;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     position: relative;
     overflow: hidden;
     padding: 24px;
@@ -110,15 +112,14 @@ html,
     gap: 20px;
 }
 
-.mastery-box::before {
+.mastery-box::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(0, 122, 255, 0.05) 0%, transparent 60%);
-    transform: translate(-50%, -50%);
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(0, 122, 255, 0.15), transparent 70%);
     pointer-events: none;
 }
 
@@ -278,6 +279,18 @@ html,
     background: var(--bg-card-hover);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     z-index: 2;
+}
+
+.action-tile-clean.action-tile-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.action-tile-clean.action-tile-disabled:hover {
+    transform: none;
+    background: var(--bg-card);
+    box-shadow: none;
 }
 
 .at-icon {
