@@ -29,38 +29,18 @@ CREATE POLICY "Short stories are viewable by everyone"
 ON public.short_stories FOR SELECT
 USING (true);
 
--- Demo data. Replace audio_url with your MP3 paths (e.g. /audio/short-stories/1.mp3).
+-- Alle Stories löschen (Ratings werden per CASCADE mitgelöscht).
+DELETE FROM public.short_stories;
+
+-- Eine Story mit genau 5 Abschnitten. Trennzeichen: |||SECTION|||
+-- Lorem Ipsum Platzhalter zum Testen. Ein Abschnitt = ein Druck auf ▲/▼.
+-- Jeder Abschnitt max. 100 Zeichen.
 INSERT INTO public.short_stories (greek_text, english_text, audio_url, title)
-VALUES
-(
-    'Καλημέρα! Ονομάζομαι Μαρία. Μιλάω ελληνικά και αγγλικά. Σήμερα η μέρα είναι όμορφη.',
-    'Good morning! My name is Maria. I speak Greek and English. Today the weather is beautiful.',
+VALUES (
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.|||SECTION|||Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.|||SECTION|||Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.|||SECTION|||Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.|||SECTION|||Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.',
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.|||SECTION|||Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.|||SECTION|||Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.|||SECTION|||Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.|||SECTION|||Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.',
     '/audio/short-stories/1.mp3',
-    'Maria says hello'
-),
-(
-    'Πώς σε λένε; Είμαι από την Ελλάδα. Μου αρέσει η θάλασσα και το φαγητό.',
-    'What is your name? I am from Greece. I like the sea and the food.',
-    '/audio/short-stories/2.mp3',
-    'Introduction'
-),
-(
-    'Πού μένεις; Εγώ μένω στην Αθήνα. Το σπίτι μου είναι κοντά στην ακρόπολη.',
-    'Where do you live? I live in Athens. My house is near the Acropolis.',
-    '/audio/short-stories/3.mp3',
-    'Where you live'
-),
-(
-    'Τι ώρα είναι; Θέλω να πάω στο καφενείο. Ο καφές εδώ είναι πολύ καλός.',
-    'What time is it? I want to go to the café. The coffee here is very good.',
-    '/audio/short-stories/4.mp3',
-    'Time and café'
-),
-(
-    'Συγγνώμη, πού είναι η τουαλέτα; Ευχαριστώ πολύ. Είσαι πολύ ευγενικός.',
-    'Excuse me, where is the restroom? Thank you very much. You are very kind.',
-    '/audio/short-stories/5.mp3',
-    'Asking for help'
+    '5 Abschnitte – Lorem Ipsum'
 );
 
 -- ========================================
