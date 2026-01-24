@@ -50,14 +50,26 @@ if (document.readyState === 'loading') {
 // ========================================
 // DATA
 // ========================================
+const SECTION_SEP = '|||SECTION|||';
+const N_SECTIONS = 5;
 let stories = [];
 let currentIndex = 0;
 let storiesReviewed = 0;
 
+const LOREM = [
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.',
+    'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.',
+    'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.',
+    'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.',
+    'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.',
+];
 const FALLBACK_STORIES = [
-    { id: 'f1', greek_text: 'Καλημέρα! Ονομάζομαι Μαρία.', english_text: 'Good morning! My name is Maria.', audio_url: null },
-    { id: 'f2', greek_text: 'Πώς σε λένε; Είμαι από την Ελλάδα.\n\nΠού μένεις; Εγώ μένω στην Αθήνα.\n\nΤι ώρα είναι; Θέλω να πάω στο καφενείο.', english_text: 'What is your name? I am from Greece.\n\nWhere do you live? I live in Athens.\n\nWhat time is it? I want to go to the café.', audio_url: null },
-    { id: 'f3', greek_text: 'Πού μένεις; Εγώ μένω στην Αθήνα.', english_text: 'Where do you live? I live in Athens.', audio_url: null },
+    {
+        id: 'f1',
+        greek_text: LOREM.join(SECTION_SEP),
+        english_text: LOREM.join(SECTION_SEP),
+        audio_url: null,
+    },
 ];
 
 // ========================================
@@ -71,8 +83,6 @@ const cancelBtn = document.getElementById('cancelBtn');
 const restartBtn = document.getElementById('restartBtn');
 const ratingButtons = document.querySelectorAll('.rating-btn');
 const progressFill = document.getElementById('progressFill');
-const currentCardNum = document.getElementById('currentCardNum');
-const totalCards = document.getElementById('totalCards');
 const completionScreen = document.getElementById('completionScreen');
 const phrasesReviewedSpan = document.getElementById('phrasesReviewed');
 const mainCardArea = document.querySelector('.main-card-area');
@@ -81,6 +91,7 @@ let currentSectionIndex = 0;
 let sectionCount = 1;
 let greekSectionEls = [];
 let englishSectionEls = [];
+const sectionRatingByKey = {};
 
 // ========================================
 // LOAD FROM SUPABASE
@@ -151,7 +162,6 @@ async function init() {
         return;
     }
 
-    totalCards.textContent = stories.length;
     loadStory(currentIndex);
     updateProgress();
 }
@@ -175,14 +185,26 @@ function showNoStories() {
 }
 
 // ========================================
-// SECTIONS (Abschnitte: \n\n or \n)
+// SECTIONS (|||SECTION|||, dann \n\n oder \n)
 // ========================================
 function splitSections(text) {
     if (!text || !String(text).trim()) return ['—'];
     const s = String(text).trim();
+    
+    // Prüfe explizit auf das Trennzeichen
+    if (s.includes(SECTION_SEP)) {
+        const parts = s.split(SECTION_SEP).map(p => p.trim()).filter(Boolean);
+        if (parts.length > 0) {
+            return parts;
+        }
+    }
+    
+    // Fallback: Versuche andere Trennzeichen
     let parts = s.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
     if (parts.length === 0) parts = s.split(/\n/).map(p => p.trim()).filter(Boolean);
-    if (parts.length === 0) return [s];
+    if (parts.length === 0) {
+        return [s];
+    }
     return parts;
 }
 
@@ -206,60 +228,538 @@ function loadStory(index) {
     const s = stories[index] || {};
     const greekRaw = s.greek_text || '—';
     const englishRaw = s.english_text || '—';
+    
     const greekParts = splitSections(greekRaw);
     const englishParts = splitSections(englishRaw);
-    sectionCount = Math.max(greekParts.length, englishParts.length, 1);
 
+    // Verwende die tatsächliche Anzahl der Abschnitte
+    sectionCount = Math.max(greekParts.length, englishParts.length, 1);
+    
     const greekSections = [];
     const englishSections = [];
     for (let i = 0; i < sectionCount; i++) {
-        greekSections.push(greekParts[i] ?? '');
-        englishSections.push(englishParts[i] ?? '');
+        greekSections.push((greekParts[i] ?? '').trim() || '—');
+        englishSections.push((englishParts[i] ?? '').trim() || '—');
     }
 
     greekSectionEls = buildSectionDom(greekScrollContainer, greekSections, 'frame-section');
     englishSectionEls = buildSectionDom(englishScrollContainer, englishSections, 'frame-section');
 
     currentSectionIndex = 0;
-    currentCardNum.textContent = index + 1;
 
     const en = document.querySelector('.english-translation-container');
     if (en) en.classList.add('blurred');
 
-    scrollToSection(0);
+    // Warte auf das Rendering der DOM-Elemente, bevor gescrollt wird
+    // Doppeltes requestAnimationFrame stellt sicher, dass Layout und Paint abgeschlossen sind
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            scrollToSection(0);
+            // Aktualisiere die Anzeige nach dem Rendering
+            setTimeout(() => {
+                updateSectionCountDisplay();
+            }, 100);
+        });
+    });
+    
+    // Initiale Anzeige (wird später aktualisiert)
+    updateSectionCountDisplay();
+    updateRatingDisplay();
+    updateProgress();
 }
 
 function scrollToSection(i) {
     currentSectionIndex = Math.max(0, Math.min(i, sectionCount - 1));
+    
+    // Beim initialen Laden: Scrolle zum Anfang und zeige nur vollständig sichtbare Abschnitte
     const scrollOne = (container, els) => {
-        if (!container || !els[currentSectionIndex]) return;
-        const el = els[currentSectionIndex];
-        const rect = el.getBoundingClientRect();
-        const contRect = container.getBoundingClientRect();
-        const relTop = rect.top - contRect.top + container.scrollTop;
-        const top = Math.max(0, Math.round(relTop) - 8);
-        container.scrollTo({ top, behavior: 'smooth' });
+        if (!container || !els || els.length === 0) return;
+        
+        const performScroll = () => {
+            const containerHeight = container.clientHeight;
+            
+            // Wenn Container noch keine Größe hat, versuche es erneut
+            if (containerHeight === 0) {
+                setTimeout(performScroll, 50);
+                return;
+            }
+            
+            // Beim initialen Laden (Index 0): Scrolle zum Anfang
+            if (currentSectionIndex === 0) {
+                container.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Nach dem Scrollen: Prüfe welche Abschnitte vollständig sichtbar sind
+                setTimeout(() => {
+                    const visible = getFullyVisibleSections(container, els);
+                    if (visible.length > 0) {
+                        // Aktualisiere currentSectionIndex basierend auf dem ersten sichtbaren Abschnitt
+                        // Aber nur wenn wir beim initialen Laden sind
+                    }
+                }, 300);
+            } else {
+                // Für andere Abschnitte: Verwende die normale Scroll-Logik
+                const el = els[currentSectionIndex];
+                if (!el) return;
+                
+                const elementTop = el.offsetTop;
+                const elementHeight = el.offsetHeight;
+                const elementBottom = elementTop + elementHeight;
+                const currentScrollTop = container.scrollTop;
+                const visibleTop = currentScrollTop;
+                const visibleBottom = currentScrollTop + containerHeight;
+                
+                // Prüfe, ob der Abschnitt vollständig sichtbar ist
+                const isFullyVisible = elementTop >= visibleTop && elementBottom <= visibleBottom;
+                
+                if (!isFullyVisible) {
+                    let targetScroll;
+                    if (elementHeight > containerHeight) {
+                        // Abschnitt ist größer als Container, zeige den Anfang
+                        targetScroll = elementTop;
+                    } else {
+                        // Abschnitt passt in Container
+                        if (elementTop < visibleTop) {
+                            // Abschnitt ist oben abgeschnitten
+                            targetScroll = elementTop;
+                        } else if (elementBottom > visibleBottom) {
+                            // Abschnitt ist unten abgeschnitten
+                            targetScroll = elementBottom - containerHeight;
+                        } else {
+                            targetScroll = currentScrollTop;
+                        }
+                    }
+                    container.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+                }
+            }
+        };
+        
+        performScroll();
     };
-    scrollOne(greekScrollContainer, greekSectionEls);
-    scrollOne(englishScrollContainer, englishSectionEls);
-    updateArrowDisabled();
+    
+    // Führe das Scrolling aus, nachdem das DOM aktualisiert wurde
+    requestAnimationFrame(() => {
+        scrollOne(greekScrollContainer, greekSectionEls);
+        scrollOne(englishScrollContainer, englishSectionEls);
+    });
+    
+    // Nach dem Scrollen: Aktualisiere currentSectionIndex basierend auf vollständig sichtbaren Abschnitten
+    setTimeout(() => {
+        const greekVisible = getFullyVisibleSections(greekScrollContainer, greekSectionEls);
+        const englishVisible = getFullyVisibleSections(englishScrollContainer, englishSectionEls);
+        
+        if (greekVisible.length > 0 || englishVisible.length > 0) {
+            // Verwende den ersten vollständig sichtbaren Abschnitt
+            const firstVisible = Math.min(
+                greekVisible.length > 0 ? greekVisible[0] : sectionCount,
+                englishVisible.length > 0 ? englishVisible[0] : sectionCount
+            );
+            currentSectionIndex = Math.max(0, Math.min(sectionCount - 1, firstVisible));
+        }
+        
+        updateArrowDisabled();
+        updateSectionCountDisplay();
+        updateRatingDisplay();
+        updateProgress();
+    }, 350);
 }
 
 function updateArrowDisabled() {
     const up = document.querySelectorAll('.scroll-arrow.scroll-up');
     const down = document.querySelectorAll('.scroll-arrow.scroll-down');
-    up.forEach((btn) => { btn.disabled = sectionCount <= 1 || currentSectionIndex <= 0; });
-    down.forEach((btn) => { btn.disabled = sectionCount <= 1 || currentSectionIndex >= sectionCount - 1; });
+    
+    // Prüfe Scroll-Positionen beider Container
+    const greekScrollTop = greekScrollContainer?.scrollTop || 0;
+    const greekScrollHeight = greekScrollContainer?.scrollHeight || 0;
+    const greekContainerHeight = greekScrollContainer?.clientHeight || 0;
+    const greekMaxScroll = greekScrollHeight - greekContainerHeight;
+    const greekAtTop = greekScrollTop <= 1;
+    const greekAtBottom = greekScrollTop >= greekMaxScroll - 1;
+    
+    const englishScrollTop = englishScrollContainer?.scrollTop || 0;
+    const englishScrollHeight = englishScrollContainer?.scrollHeight || 0;
+    const englishContainerHeight = englishScrollContainer?.clientHeight || 0;
+    const englishMaxScroll = englishScrollHeight - englishContainerHeight;
+    const englishAtTop = englishScrollTop <= 1;
+    const englishAtBottom = englishScrollTop >= englishMaxScroll - 1;
+    
+    // Prüfe zusätzlich, ob der letzte Abschnitt vollständig sichtbar ist
+    const greekVisible = getFullyVisibleSections(greekScrollContainer, greekSectionEls);
+    const englishVisible = getFullyVisibleSections(englishScrollContainer, englishSectionEls);
+    const lastSectionIndex = sectionCount - 1;
+    const greekLastVisible = greekVisible.includes(lastSectionIndex);
+    const englishLastVisible = englishVisible.includes(lastSectionIndex);
+    const lastSectionFullyVisible = greekLastVisible && englishLastVisible;
+    
+    // Up-Button ist disabled, wenn beide Container am Anfang sind
+    const canScrollUp = !greekAtTop || !englishAtTop;
+    // Down-Button ist disabled, wenn beide Container am Ende sind UND der letzte Abschnitt vollständig sichtbar ist
+    const canScrollDown = (!greekAtBottom || !englishAtBottom) && !lastSectionFullyVisible;
+    
+    up.forEach((btn) => { btn.disabled = sectionCount <= 1 || !canScrollUp; });
+    down.forEach((btn) => { btn.disabled = sectionCount <= 1 || !canScrollDown; });
+    
+    // Rating-Buttons nur aktivieren, wenn der letzte Abschnitt vollständig sichtbar ist
+    const isLastSection = sectionCount <= 1 || lastSectionFullyVisible;
+    ratingButtons.forEach((btn) => { 
+        btn.disabled = !isLastSection; 
+    });
+}
+
+function updateSectionCountDisplay() {
+    const totalEl = document.getElementById('sectionCount');
+    const currentEl = document.getElementById('sectionCurrent');
+    
+    // y = Gesamtanzahl der Abschnitte (konstant)
+    if (totalEl) totalEl.textContent = String(Math.max(1, sectionCount));
+    
+    // Prüfe welche Abschnitte vollständig sichtbar sind
+    const greekVisible = getFullyVisibleSections(greekScrollContainer, greekSectionEls);
+    const englishVisible = getFullyVisibleSections(englishScrollContainer, englishSectionEls);
+    
+    // x = Anzahl der vollständig sichtbaren Abschnitte (dynamisch)
+    let visibleCount = 0;
+    
+    const lastSectionIndex = sectionCount - 1;
+    
+    // Prüfe, ob wir am Ende des Scrolls sind
+    const greekScrollTop = greekScrollContainer?.scrollTop || 0;
+    const greekScrollHeight = greekScrollContainer?.scrollHeight || 0;
+    const greekContainerHeight = greekScrollContainer?.clientHeight || 0;
+    const greekMaxScroll = greekScrollHeight - greekContainerHeight;
+    const greekAtBottom = greekScrollTop >= greekMaxScroll - 5;
+    
+    const englishScrollTop = englishScrollContainer?.scrollTop || 0;
+    const englishScrollHeight = englishScrollContainer?.scrollHeight || 0;
+    const englishContainerHeight = englishScrollContainer?.clientHeight || 0;
+    const englishMaxScroll = englishScrollHeight - englishContainerHeight;
+    const englishAtBottom = englishScrollTop >= englishMaxScroll - 5;
+    
+    // Prüfe ZUERST, ob der letzte Abschnitt sichtbar ist ODER ob wir am Ende sind
+    // Wenn ja, dann x = y (alle Abschnitte wurden durchgescrollt)
+    const lastInGreek = greekVisible.includes(lastSectionIndex);
+    const lastInEnglish = englishVisible.includes(lastSectionIndex);
+    const bothAtBottom = greekAtBottom && englishAtBottom;
+    
+    // Wenn der letzte Abschnitt in beiden Containern sichtbar ist ODER beide Container am Ende sind
+    if ((lastInGreek && lastInEnglish) || (bothAtBottom && lastSectionIndex >= 0)) {
+        visibleCount = sectionCount;
+    } else {
+        // Finde die gemeinsamen sichtbaren Abschnitte in beiden Containern
+        const commonVisible = [];
+        for (let i = 0; i < sectionCount; i++) {
+            if (greekVisible.includes(i) && englishVisible.includes(i)) {
+                commonVisible.push(i);
+            }
+        }
+        
+        if (commonVisible.length > 0) {
+            // Sortiere die gemeinsamen sichtbaren Abschnitte
+            commonVisible.sort((a, b) => a - b);
+            
+            // Finde die höchste Abschnittsnummer, die vollständig sichtbar ist
+            const maxVisibleIndex = commonVisible[commonVisible.length - 1];
+            // x = höchste sichtbare Abschnittsnummer + 1
+            // Dies zeigt, wie viele Abschnitte bis zu diesem Punkt gesehen wurden
+            visibleCount = maxVisibleIndex + 1;
+            
+            // Wenn der letzte Abschnitt in einem der Container sichtbar ist, setze auf sectionCount
+            if (maxVisibleIndex === lastSectionIndex || lastInGreek || lastInEnglish) {
+                visibleCount = sectionCount;
+            }
+        } else {
+            // Fallback: Wenn keine gemeinsamen Abschnitte gefunden wurden, 
+            // verwende die höchste Nummer aus einem der Container
+            if (greekVisible.length > 0) {
+                const maxGreek = Math.max(...greekVisible);
+                visibleCount = maxGreek + 1;
+                if (maxGreek === lastSectionIndex) {
+                    visibleCount = sectionCount;
+                }
+            } else if (englishVisible.length > 0) {
+                const maxEnglish = Math.max(...englishVisible);
+                visibleCount = maxEnglish + 1;
+                if (maxEnglish === lastSectionIndex) {
+                    visibleCount = sectionCount;
+                }
+            } else {
+                visibleCount = 1;
+            }
+        }
+    }
+    
+    // Stelle sicher, dass mindestens 1 angezeigt wird und nicht mehr als die Gesamtanzahl
+    if (currentEl) {
+        currentEl.textContent = String(Math.max(1, Math.min(visibleCount, sectionCount)));
+    }
+}
+
+function getSectionRatingKey() {
+    return `${currentIndex}-${currentSectionIndex}`;
+}
+
+function updateRatingDisplay() {
+    const el = document.getElementById('sectionRatingValue');
+    if (!el) return;
+    const key = getSectionRatingKey();
+    el.textContent = sectionRatingByKey[key] ?? 'good';
+    
+    // Prüfe, ob der letzte Abschnitt sichtbar ist
+    const ratingDisplay = document.querySelector('.section-rating-display');
+    if (ratingDisplay) {
+        const lastSectionIndex = sectionCount - 1;
+        const greekVisible = getFullyVisibleSections(greekScrollContainer, greekSectionEls);
+        const englishVisible = getFullyVisibleSections(englishScrollContainer, englishSectionEls);
+        
+        const lastInGreek = greekVisible.includes(lastSectionIndex);
+        const lastInEnglish = englishVisible.includes(lastSectionIndex);
+        const isLastSectionVisible = lastInGreek && lastInEnglish;
+        
+        // Prüfe auch, ob wir am Ende sind
+        const greekScrollTop = greekScrollContainer?.scrollTop || 0;
+        const greekScrollHeight = greekScrollContainer?.scrollHeight || 0;
+        const greekContainerHeight = greekScrollContainer?.clientHeight || 0;
+        const greekMaxScroll = greekScrollHeight - greekContainerHeight;
+        const greekAtBottom = greekScrollTop >= greekMaxScroll - 10;
+        
+        const englishScrollTop = englishScrollContainer?.scrollTop || 0;
+        const englishScrollHeight = englishScrollContainer?.scrollHeight || 0;
+        const englishContainerHeight = englishScrollContainer?.clientHeight || 0;
+        const englishMaxScroll = englishScrollHeight - englishContainerHeight;
+        const englishAtBottom = englishScrollTop >= englishMaxScroll - 10;
+        
+        const bothAtBottom = greekAtBottom && englishAtBottom;
+        
+        if (isLastSectionVisible || (bothAtBottom && lastSectionIndex >= 0)) {
+            ratingDisplay.classList.add('last-section');
+        } else {
+            ratingDisplay.classList.remove('last-section');
+        }
+    }
+}
+
+// Prüft, welche Abschnitte vollständig sichtbar sind
+function getFullyVisibleSections(container, els) {
+    if (!container || !els || els.length === 0) return [];
+    
+    const containerHeight = container.clientHeight;
+    const currentScrollTop = container.scrollTop;
+    const visibleTop = currentScrollTop;
+    const visibleBottom = currentScrollTop + containerHeight;
+    const maxScroll = container.scrollHeight - containerHeight;
+    const isAtBottom = currentScrollTop >= maxScroll - 10; // 10px Toleranz für "am Ende"
+    
+    const fullyVisible = [];
+    
+    els.forEach((el, index) => {
+        // Verwende offsetTop für die Position relativ zum Container
+        const elementTop = el.offsetTop;
+        const elementHeight = el.offsetHeight;
+        const elementBottom = elementTop + elementHeight;
+        
+        const isLastSection = index === els.length - 1;
+        
+        // Abschnitt ist vollständig sichtbar, wenn er komplett im sichtbaren Bereich liegt
+        // Mit einem Toleranzbereich (5px) für Rundungsfehler
+        const isFullyVisible = elementTop >= visibleTop - 5 && elementBottom <= visibleBottom + 5;
+        
+        if (isFullyVisible) {
+            fullyVisible.push(index);
+        } else if (isLastSection && isAtBottom) {
+            // Spezialfall für den letzten Abschnitt: Wenn wir am Ende sind,
+            // betrachte ihn als vollständig sichtbar, wenn er teilweise sichtbar ist
+            const isPartiallyVisible = elementTop < visibleBottom && elementBottom > visibleTop;
+            
+            if (isPartiallyVisible) {
+                // Prüfe, wie viel vom Abschnitt sichtbar ist
+                const visibleHeight = Math.min(elementBottom, visibleBottom) - Math.max(elementTop, visibleTop);
+                const visibilityRatio = elementHeight > 0 ? visibleHeight / elementHeight : 0;
+                
+                // Wenn mehr als 70% des Abschnitts sichtbar sind ODER wir wirklich am Ende sind,
+                // betrachte ihn als vollständig sichtbar
+                if (visibilityRatio > 0.7 || currentScrollTop >= maxScroll - 2) {
+                    fullyVisible.push(index);
+                }
+            }
+        }
+    });
+    
+    return fullyVisible;
 }
 
 function scrollSectionUp() {
-    if (currentSectionIndex <= 0) return;
-    scrollToSection(currentSectionIndex - 1);
+    // Scrollt den gesamten sichtbaren Bereich nach unten (zeigt vorherige Abschnitte)
+    const scrollOne = (container, els) => {
+        if (!container || !els || els.length === 0) return;
+        const containerHeight = container.clientHeight;
+        const currentScrollTop = container.scrollTop;
+        const newScrollTop = Math.max(0, currentScrollTop - containerHeight);
+        
+        container.scrollTo({ top: newScrollTop, behavior: 'smooth' });
+    };
+    
+    scrollOne(greekScrollContainer, greekSectionEls);
+    scrollOne(englishScrollContainer, englishSectionEls);
+    
+    // Nach dem Scrollen: Stelle sicher, dass keine Abschnitte abgeschnitten werden
+    setTimeout(() => {
+        const adjustScroll = (container, els) => {
+            if (!container || !els || els.length === 0) return;
+            
+            const containerHeight = container.clientHeight;
+            const currentScrollTop = container.scrollTop;
+            const visibleTop = currentScrollTop;
+            const visibleBottom = currentScrollTop + containerHeight;
+            
+            // Finde den ersten teilweise sichtbaren Abschnitt oben
+            for (let i = 0; i < els.length; i++) {
+                const el = els[i];
+                const elementTop = el.offsetTop;
+                const elementBottom = elementTop + el.offsetHeight;
+                
+                // Wenn Abschnitt oben abgeschnitten ist, scrolle zu seinem Anfang
+                if (elementTop < visibleTop && elementBottom > visibleTop) {
+                    container.scrollTo({ top: elementTop, behavior: 'smooth' });
+                    break;
+                }
+            }
+        };
+        
+        adjustScroll(greekScrollContainer, greekSectionEls);
+        adjustScroll(englishScrollContainer, englishSectionEls);
+        
+        // Prüfe welche Abschnitte vollständig sichtbar sind
+        setTimeout(() => {
+            const greekVisible = getFullyVisibleSections(greekScrollContainer, greekSectionEls);
+            const englishVisible = getFullyVisibleSections(englishScrollContainer, englishSectionEls);
+            
+            // Verwende den ersten vollständig sichtbaren Abschnitt
+            if (greekVisible.length > 0 || englishVisible.length > 0) {
+                const firstVisible = Math.min(
+                    greekVisible.length > 0 ? greekVisible[0] : sectionCount,
+                    englishVisible.length > 0 ? englishVisible[0] : sectionCount
+                );
+                currentSectionIndex = Math.max(0, firstVisible);
+            }
+            
+            updateArrowDisabled();
+            updateSectionCountDisplay();
+            updateRatingDisplay();
+            updateProgress();
+        }, 300);
+    }, 100);
 }
 
 function scrollSectionDown() {
-    if (currentSectionIndex >= sectionCount - 1) return;
-    scrollToSection(currentSectionIndex + 1);
+    // Scrollt den gesamten sichtbaren Bereich nach oben (zeigt nächste Abschnitte)
+    const scrollOne = (container, els) => {
+        if (!container || !els || els.length === 0) return;
+        const containerHeight = container.clientHeight;
+        const currentScrollTop = container.scrollTop;
+        const maxScroll = container.scrollHeight - containerHeight;
+        
+        // Prüfe, ob wir bereits am Ende sind
+        if (currentScrollTop >= maxScroll - 1) {
+            // Am Ende: Stelle sicher, dass der letzte Abschnitt vollständig sichtbar ist
+            const lastEl = els[els.length - 1];
+            if (lastEl) {
+                const lastElementTop = lastEl.offsetTop;
+                const lastElementBottom = lastElementTop + lastEl.offsetHeight;
+                const targetScroll = lastElementBottom - containerHeight;
+                container.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+                return;
+            }
+        }
+        
+        const newScrollTop = Math.min(maxScroll, currentScrollTop + containerHeight);
+        container.scrollTo({ top: newScrollTop, behavior: 'smooth' });
+    };
+    
+    scrollOne(greekScrollContainer, greekSectionEls);
+    scrollOne(englishScrollContainer, englishSectionEls);
+    
+    // Nach dem Scrollen: Stelle sicher, dass keine Abschnitte abgeschnitten werden
+    setTimeout(() => {
+        const adjustScroll = (container, els) => {
+            if (!container || !els || els.length === 0) return;
+            
+            const containerHeight = container.clientHeight;
+            const currentScrollTop = container.scrollTop;
+            const maxScroll = container.scrollHeight - containerHeight;
+            const visibleTop = currentScrollTop;
+            const visibleBottom = currentScrollTop + containerHeight;
+            
+            // Prüfe, ob wir am Ende sind
+            const isAtBottom = currentScrollTop >= maxScroll - 2; // 2px Toleranz
+            
+            if (isAtBottom) {
+                // Am Ende: Stelle sicher, dass der letzte Abschnitt vollständig sichtbar ist
+                const lastEl = els[els.length - 1];
+                if (lastEl) {
+                    const lastElementTop = lastEl.offsetTop;
+                    const lastElementBottom = lastElementTop + lastEl.offsetHeight;
+                    
+                    // Wenn der letzte Abschnitt unten abgeschnitten ist, scrolle so, dass er vollständig sichtbar ist
+                    if (lastElementBottom > visibleBottom + 2) {
+                        const targetScroll = lastElementBottom - containerHeight;
+                        container.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+                        return true; // Anpassung wurde vorgenommen
+                    }
+                }
+                return false; // Keine Anpassung nötig
+            }
+            
+            // Finde den ersten teilweise sichtbaren Abschnitt oben
+            for (let i = 0; i < els.length; i++) {
+                const el = els[i];
+                const elementTop = el.offsetTop;
+                const elementBottom = elementTop + el.offsetHeight;
+                
+                // Wenn Abschnitt oben abgeschnitten ist, scrolle zu seinem Anfang
+                if (elementTop < visibleTop - 2 && elementBottom > visibleTop + 2) {
+                    container.scrollTo({ top: elementTop, behavior: 'smooth' });
+                    return true; // Anpassung wurde vorgenommen
+                }
+            }
+            
+            return false; // Keine Anpassung nötig
+        };
+        
+        const greekAdjusted = adjustScroll(greekScrollContainer, greekSectionEls);
+        const englishAdjusted = adjustScroll(englishScrollContainer, englishSectionEls);
+        
+        // Warte länger, wenn Anpassungen vorgenommen wurden
+        const waitTime = (greekAdjusted || englishAdjusted) ? 400 : 300;
+        
+        // Prüfe welche Abschnitte vollständig sichtbar sind
+        setTimeout(() => {
+            const greekVisible = getFullyVisibleSections(greekScrollContainer, greekSectionEls);
+            const englishVisible = getFullyVisibleSections(englishScrollContainer, englishSectionEls);
+            
+            // Bestimme den aktuellen Abschnitt
+            if (greekVisible.length > 0 || englishVisible.length > 0) {
+                const lastSectionIndex = sectionCount - 1;
+                
+                // Wenn der letzte Abschnitt vollständig sichtbar ist, verwende diesen
+                if (greekVisible.includes(lastSectionIndex) && englishVisible.includes(lastSectionIndex)) {
+                    currentSectionIndex = lastSectionIndex;
+                } else {
+                    // Verwende den letzten vollständig sichtbaren Abschnitt
+                    const lastVisible = Math.max(
+                        greekVisible.length > 0 ? greekVisible[greekVisible.length - 1] : -1,
+                        englishVisible.length > 0 ? englishVisible[englishVisible.length - 1] : -1
+                    );
+                    if (lastVisible >= 0) {
+                        currentSectionIndex = Math.min(sectionCount - 1, lastVisible);
+                    }
+                }
+            }
+            
+            updateArrowDisabled();
+            updateSectionCountDisplay();
+            updateRatingDisplay();
+            updateProgress();
+        }, waitTime);
+    }, 100);
 }
 
 // ========================================
@@ -322,8 +822,11 @@ async function saveSectionRating(storyId, sectionIndex, rating) {
 async function handleRating(rating) {
     const s = stories[currentIndex];
     if (!s) return;
+    const key = getSectionRatingKey();
+    sectionRatingByKey[key] = rating;
     await saveSectionRating(s.id, currentSectionIndex, rating);
     storiesReviewed++;
+    updateRatingDisplay();
 
     if (currentSectionIndex < sectionCount - 1) {
         scrollToSection(currentSectionIndex + 1);
@@ -349,8 +852,9 @@ function nextStory() {
 }
 
 function updateProgress() {
-    const pct = stories.length ? ((currentIndex + 1) / stories.length) * 100 : 0;
-    progressFill.style.width = `${pct}%`;
+    const total = Math.max(1, sectionCount);
+    const pct = total ? ((currentSectionIndex + 1) / total) * 100 : 0;
+    if (progressFill) progressFill.style.width = `${pct}%`;
 }
 
 function showCompletion() {
@@ -367,6 +871,7 @@ function showCompletion() {
 async function restartSession() {
     currentIndex = 0;
     storiesReviewed = 0;
+    Object.keys(sectionRatingByKey).forEach((k) => delete sectionRatingByKey[k]);
     stories = await loadStoriesFromSupabase();
     if (stories.length === 0) {
         showNoStories();
@@ -376,7 +881,6 @@ async function restartSession() {
     mainCardArea.style.display = 'flex';
     const pw = document.querySelector('.progress-wrapper');
     if (pw) pw.style.display = 'block';
-    totalCards.textContent = stories.length;
     loadStory(currentIndex);
     updateProgress();
 }
