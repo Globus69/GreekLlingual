@@ -5,6 +5,7 @@ import { supabase } from '@/db/supabase';
 import { useAuth } from '@/context/AuthContext';
 import Flashcard from '@/components/learning/Flashcard';
 import { useTranslation } from '@/lib/useTranslation';
+import { usePerformanceEvaluation } from '@/lib/usePerformanceEvaluation';
 import '@/styles/liquid-glass.css';
 
 interface LearningItem {
@@ -16,6 +17,8 @@ interface LearningItem {
     example_en: string | null;
     example_gr: string | null;
     audio_url: string | null;
+    level?: string;
+    difficulty?: string;
     created_at: string;
 }
 
@@ -59,6 +62,7 @@ const FALLBACK_VOCABULARY: VocabWithProgress[] = [
 export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: VocabularyDialogProps) {
     const { user } = useAuth();
     const { t, locale } = useTranslation();
+    const { evaluate } = usePerformanceEvaluation();
     const [vocabulary, setVocabulary] = useState<VocabWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -68,6 +72,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
     const [showSummary, setShowSummary] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [flipped, setFlipped] = useState(false);
+    const [perfMessage, setPerfMessage] = useState<string | null>(null);
     
     const STUDENT_ID = user?.id || '';
 
@@ -163,27 +168,69 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
 
     const fetchVocabulary = async () => {
         setLoading(true);
-        console.log(`🔄 Fetching vocabulary for mode: ${mode}, student: ${STUDENT_ID || 'demo'}`);
-        
+        console.log(`🔄 Fetching vocabulary for mode: ${mode}, student: ${STUDENT_ID || 'demo'}, level: ${user?.level || 'A1'}, difficulty: ${user?.difficulty || 'easy'}`);
+
         try {
             // Add timeout to prevent hanging
-            const timeoutPromise = new Promise((_, reject) => 
+            const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Database query timeout')), 10000)
             );
 
-            // Fetch learning_items with student_progress (LEFT JOIN)
-            // Even if no student_id, we can still load vocabulary items
-            const queryPromise = supabase
-                .from('learning_items')
-                .select(`
-                    *,
-                    student_progress!left(*)
-                `)
-                .eq('type', 'vocabulary')
-                .order('created_at', { ascending: false })
-                .limit(100);
+            let data: any = null;
+            let error: any = null;
 
-            const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+            // Strategy 1: RPC mit Level+Difficulty Filterung (bevorzugt)
+            if (STUDENT_ID && STUDENT_ID !== 'admin-local') {
+                try {
+                    const rpcResult = await Promise.race([
+                        supabase.rpc('get_learning_items_for_student', {
+                            p_student_id: STUDENT_ID,
+                            p_type: 'vocabulary',
+                            p_limit: 100
+                        }),
+                        timeoutPromise
+                    ]) as any;
+
+                    if (!rpcResult.error && rpcResult.data && Array.isArray(rpcResult.data) && rpcResult.data.length > 0) {
+                        // RPC liefert flache Daten mit progress-Feldern direkt am Item
+                        data = rpcResult.data.map((item: any) => ({
+                            ...item,
+                            student_progress: item.attempts != null ? [{
+                                student_id: STUDENT_ID,
+                                item_id: item.id,
+                                correct_count: item.correct_count || 0,
+                                attempts: item.attempts || 0,
+                                ease_factor: item.ease_factor || 2.5,
+                                interval_days: item.interval_days || 1,
+                                next_review: item.next_review,
+                                last_attempt: item.last_attempt
+                            }] : []
+                        }));
+                        console.log(`✅ RPC: ${data.length} items fuer Level ${user?.level || '?'}-${user?.difficulty || '?'}`);
+                    } else {
+                        console.log('⚠️ RPC returned no data or error, falling back to direct query');
+                    }
+                } catch (rpcErr) {
+                    console.log('⚠️ RPC not available, falling back to direct query');
+                }
+            }
+
+            // Strategy 2: Fallback – direkte Query (alle Items, keine Level-Filterung)
+            if (!data) {
+                const queryPromise = supabase
+                    .from('learning_items')
+                    .select(`
+                        *,
+                        student_progress!left(*)
+                    `)
+                    .eq('type', 'vocabulary')
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                const result = await Promise.race([queryPromise, timeoutPromise]) as any;
+                data = result.data;
+                error = result.error;
+            }
 
             if (error) {
                 console.error("❌ Error fetching vocabs:", error);
@@ -414,8 +461,14 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                 setCurrentIndex(currentIndex + 1);
             }, 300);
         } else {
-            // Show summary instead of auto-close
-            setTimeout(() => setShowSummary(true), 300);
+            // Show summary and evaluate performance
+            setTimeout(async () => {
+                setShowSummary(true);
+                const result = await evaluate();
+                if (result?.changed && result.message) {
+                    setPerfMessage(result.message);
+                }
+            }, 300);
         }
     };
 
@@ -442,6 +495,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         setCorrect(0);
         setTotal(0);
         setShowSummary(false);
+        setPerfMessage(null);
         
         // Reload vocabulary
         await fetchVocabulary();
@@ -467,6 +521,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         setTotal(0);
         setShowSummary(false);
         setFlipped(false);
+        setPerfMessage(null);
         onClose();
     };
 
@@ -627,13 +682,33 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                         </div>
                     </div>
 
-                    <button 
-                        className="btn-primary" 
-                        onClick={() => handleClose(true)} 
-                        style={{ 
-                            width: '100%', 
-                            padding: '12px 24px', 
-                            borderRadius: 'var(--radius-md)', 
+                    {/* Performance-Nachricht bei Stufenaenderung */}
+                    {perfMessage && (
+                        <div style={{
+                            background: 'rgba(52, 199, 89, 0.1)',
+                            border: '1px solid rgba(52, 199, 89, 0.25)',
+                            borderRadius: 'var(--radius-md)',
+                            padding: '10px 16px',
+                            marginBottom: '12px',
+                            fontSize: '0.8rem',
+                            color: '#34C759',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                        }}>
+                            <span style={{ fontSize: '1.2rem' }}>🎯</span>
+                            {perfMessage}
+                        </div>
+                    )}
+
+                    <button
+                        className="btn-primary"
+                        onClick={() => handleClose(true)}
+                        style={{
+                            width: '100%',
+                            padding: '12px 24px',
+                            borderRadius: 'var(--radius-md)',
                             fontSize: '0.875rem',
                             fontWeight: 600,
                             background: 'rgba(99, 102, 241, 0.15)',

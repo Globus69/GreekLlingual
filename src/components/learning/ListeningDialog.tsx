@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/lib/useTranslation';
+import { usePerformanceEvaluation } from '@/lib/usePerformanceEvaluation';
 import '@/styles/liquid-glass.css';
 
 interface LearningItem {
@@ -77,6 +78,7 @@ const FALLBACK_LISTENING: ListeningWithProgress[] = [
 export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: ListeningDialogProps) {
     const { user } = useAuth();
     const { t, locale } = useTranslation();
+    const { evaluate } = usePerformanceEvaluation();
     const [listening, setListening] = useState<ListeningWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -89,6 +91,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
     const [showResult, setShowResult] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [perfMessage, setPerfMessage] = useState<string | null>(null);
     
     const STUDENT_ID = user?.id || '';
 
@@ -448,7 +451,13 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
             setSelectedAnswer(null);
             setShowResult(false);
         } else {
-            setTimeout(() => setShowSummary(true), 500);
+            setTimeout(async () => {
+                setShowSummary(true);
+                const result = await evaluate();
+                if (result?.changed && result.message) {
+                    setPerfMessage(result.message);
+                }
+            }, 500);
         }
     };
 
@@ -461,6 +470,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
         setShowSummary(false);
         setSelectedAnswer(null);
         setShowResult(false);
+        setPerfMessage(null);
         await fetchListening();
     };
 
@@ -484,6 +494,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
         setShowSummary(false);
         setSelectedAnswer(null);
         setShowResult(false);
+        setPerfMessage(null);
         if (audioRef.current) {
             audioRef.current.pause();
         }
@@ -636,6 +647,25 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                             }}>{t('shared.wrong')}</span>
                         </div>
                     </div>
+
+                    {perfMessage && (
+                        <div style={{
+                            background: 'rgba(52, 199, 89, 0.1)',
+                            border: '1px solid rgba(52, 199, 89, 0.25)',
+                            borderRadius: 'var(--radius-md)',
+                            padding: '10px 16px',
+                            marginBottom: '12px',
+                            fontSize: '0.8rem',
+                            color: '#34C759',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                        }}>
+                            <span style={{ fontSize: '1.2rem' }}>🎯</span>
+                            {perfMessage}
+                        </div>
+                    )}
 
                     <button 
                         className="btn-primary" 

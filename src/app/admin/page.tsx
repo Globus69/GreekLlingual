@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/lib/useTranslation';
 import { useLanguage } from '@/context/LanguageContext';
+import StudentManagementDialog from '@/components/admin/StudentManagementDialog';
 
 export default function AdminPage() {
     const { user, isAdmin, isAuthenticated, loading } = useAuth();
     const { t } = useTranslation();
     const { locale, setLocale } = useLanguage();
     const router = useRouter();
+    const [studentDialogOpen, setStudentDialogOpen] = useState(false);
 
     useEffect(() => {
         if (!loading && !isAuthenticated) {
@@ -78,12 +80,24 @@ export default function AdminPage() {
         );
     }
 
+    // Dezente Hintergrundfarbe je nach Sprache
+    const bgGradient = locale === 'ru'
+        ? 'linear-gradient(135deg, #0a0a1a 0%, #2a1028 50%, #0a0a1a 100%)'  // warmer Rotton
+        : 'linear-gradient(135deg, #0a0a1a 0%, #0f1a3e 50%, #0a0a1a 100%)'; // kuehler Blauton
+    const headerBg = locale === 'ru'
+        ? 'rgba(60, 0, 20, 0.25)'   // dezenter Rot-Touch
+        : 'rgba(0, 20, 60, 0.25)';  // dezenter Blau-Touch
+    const headerBorder = locale === 'ru'
+        ? '1px solid rgba(200, 50, 50, 0.08)'
+        : '1px solid rgba(50, 100, 200, 0.08)';
+
     return (
         <div style={{
             minHeight: '100vh',
-            background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0a0a1a 100%)',
+            background: bgGradient,
             color: '#fff',
             fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif',
+            transition: 'background 0.6s ease',
         }}>
             {/* Admin Header */}
             <header style={{
@@ -91,9 +105,10 @@ export default function AdminPage() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '16px 24px',
-                borderBottom: '1px solid rgba(255,255,255,0.08)',
-                background: 'rgba(0,0,0,0.3)',
+                borderBottom: headerBorder,
+                background: headerBg,
                 backdropFilter: 'blur(20px)',
+                transition: 'background 0.4s ease, border-color 0.4s ease',
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <span style={{ fontSize: '24px' }}>⚙️</span>
@@ -104,45 +119,37 @@ export default function AdminPage() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {/* Sprachwahl EN/RU */}
-                    <div style={{
-                        display: 'flex',
-                        background: 'rgba(255,255,255,0.06)',
-                        borderRadius: '10px',
-                        overflow: 'hidden',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                    }}>
-                        <button
-                            onClick={() => setLocale('en')}
-                            style={{
-                                padding: '6px 12px',
-                                fontSize: '12px',
-                                fontWeight: 600,
-                                border: 'none',
-                                cursor: 'pointer',
-                                background: locale === 'en' ? 'rgba(0, 122, 255, 0.3)' : 'transparent',
-                                color: locale === 'en' ? '#007AFF' : '#8E8E93',
-                                transition: 'all 0.2s',
-                            }}
-                        >
-                            🇬🇧 EN
-                        </button>
-                        <button
-                            onClick={() => setLocale('ru')}
-                            style={{
-                                padding: '6px 12px',
-                                fontSize: '12px',
-                                fontWeight: 600,
-                                border: 'none',
-                                cursor: 'pointer',
-                                background: locale === 'ru' ? 'rgba(0, 122, 255, 0.3)' : 'transparent',
-                                color: locale === 'ru' ? '#007AFF' : '#8E8E93',
-                                transition: 'all 0.2s',
-                            }}
-                        >
-                            🇷🇺 RU
-                        </button>
-                    </div>
+                    {/* Flaggen-Anzeige: Klick wechselt Sprache */}
+                    <button
+                        onClick={() => setLocale(locale === 'en' ? 'ru' : 'en')}
+                        title={locale === 'en' ? 'Switch to Russian' : 'Switch to English'}
+                        style={{
+                            background: 'rgba(255,255,255,0.06)',
+                            border: locale === 'ru'
+                                ? '1px solid rgba(200, 60, 60, 0.2)'
+                                : '1px solid rgba(60, 120, 220, 0.2)',
+                            borderRadius: '10px',
+                            padding: '6px 10px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            transition: 'all 0.3s ease',
+                            fontSize: '20px',
+                            lineHeight: 1,
+                        }}
+                    >
+                        <span style={{ fontSize: '22px' }}>{locale === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : '\uD83C\uDDF7\uD83C\uDDFA'}</span>
+                        <span style={{
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            color: locale === 'ru' ? '#E05555' : '#5B9BFF',
+                            textTransform: 'uppercase',
+                            transition: 'color 0.3s ease',
+                        }}>
+                            {locale === 'en' ? 'EN' : 'RU'}
+                        </span>
+                    </button>
 
                     {/* Zurueck zum Dashboard */}
                     <button
@@ -228,6 +235,7 @@ export default function AdminPage() {
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                     }}
+                        onClick={() => setStudentDialogOpen(true)}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.background = 'rgba(88, 86, 214, 0.15)';
                             e.currentTarget.style.transform = 'translateY(-2px)';
@@ -240,7 +248,7 @@ export default function AdminPage() {
                         <div style={{ fontSize: '40px', marginBottom: '12px' }}>👥</div>
                         <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>{t('admin.students')}</h3>
                         <p style={{ fontSize: '13px', color: '#8E8E93' }}>
-                            Manage students, levels, and performance tracking.
+                            {t('admin.students_desc')}
                         </p>
                     </div>
 
@@ -264,7 +272,7 @@ export default function AdminPage() {
                         <div style={{ fontSize: '40px', marginBottom: '12px' }}>📚</div>
                         <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>{t('admin.content')}</h3>
                         <p style={{ fontSize: '13px', color: '#8E8E93' }}>
-                            Manage learning items, vocabulary, grammar, and exercises.
+                            {t('admin.content_desc')}
                         </p>
                     </div>
 
@@ -288,7 +296,7 @@ export default function AdminPage() {
                         <div style={{ fontSize: '40px', marginBottom: '12px' }}>⚙️</div>
                         <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>{t('admin.settings')}</h3>
                         <p style={{ fontSize: '13px', color: '#8E8E93' }}>
-                            Application settings and configuration.
+                            {t('admin.settings_desc')}
                         </p>
                     </div>
                 </div>
@@ -309,6 +317,12 @@ export default function AdminPage() {
                     <span>Role: {user?.role || 'admin'}</span>
                 </div>
             </main>
+
+            {/* Schueler-Verwaltungs-Dialog */}
+            <StudentManagementDialog
+                open={studentDialogOpen}
+                onClose={() => setStudentDialogOpen(false)}
+            />
         </div>
     );
 }

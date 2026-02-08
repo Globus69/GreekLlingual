@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/lib/useTranslation';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface HeaderProps {
     studentName?: string;
@@ -13,6 +14,7 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
     const [dateTime, setDateTime] = useState('');
     const { logout, isAdmin } = useAuth();
     const { t } = useTranslation();
+    const { locale, setLocale } = useLanguage();
     const router = useRouter();
 
     useEffect(() => {
@@ -48,6 +50,41 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
                     <div className="avatar">{studentName ? studentName.substring(0, 2).toUpperCase() : 'SW'}</div>
                     <span className="username">{studentName || 'SWS'}</span>
                 </div>
+
+                {/* Flaggen-Anzeige: Klick wechselt Sprache */}
+                <button
+                    onClick={() => setLocale(locale === 'en' ? 'ru' : 'en')}
+                    title={locale === 'en' ? 'Switch to Russian' : 'Switch to English'}
+                    style={{
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        borderRadius: '10px',
+                        padding: '6px 10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.2s',
+                        fontSize: '20px',
+                        lineHeight: 1,
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                        e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                >
+                    <span style={{ fontSize: '22px' }}>{locale === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : '\uD83C\uDDF7\uD83C\uDDFA'}</span>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#8E8E93', textTransform: 'uppercase' }}>
+                        {locale === 'en' ? 'EN' : 'RU'}
+                    </span>
+                </button>
+
                 {isAdmin && (
                     <button
                         onClick={() => router.push('/admin')}

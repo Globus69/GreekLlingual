@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/lib/useTranslation';
+import { usePerformanceEvaluation } from '@/lib/usePerformanceEvaluation';
 import '@/styles/liquid-glass.css';
 
 interface LearningItem {
@@ -57,6 +58,7 @@ const FALLBACK_GRAMMAR: GrammarWithProgress[] = [
 export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: GrammarDialogProps) {
     const { user } = useAuth();
     const { t, locale } = useTranslation();
+    const { evaluate } = usePerformanceEvaluation();
     const [grammar, setGrammar] = useState<GrammarWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -66,6 +68,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
     const [showSummary, setShowSummary] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [flipped, setFlipped] = useState(false);
+    const [perfMessage, setPerfMessage] = useState<string | null>(null);
     
     const STUDENT_ID = user?.id || '';
 
@@ -380,7 +383,13 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                 setCurrentIndex(currentIndex + 1);
             }, 300);
         } else {
-            setTimeout(() => setShowSummary(true), 300);
+            setTimeout(async () => {
+                setShowSummary(true);
+                const result = await evaluate();
+                if (result?.changed && result.message) {
+                    setPerfMessage(result.message);
+                }
+            }, 300);
         }
     };
 
@@ -406,6 +415,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
         setCorrect(0);
         setTotal(0);
         setShowSummary(false);
+        setPerfMessage(null);
         await fetchGrammar();
     };
 
@@ -428,6 +438,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
         setTotal(0);
         setShowSummary(false);
         setFlipped(false);
+        setPerfMessage(null);
         onClose();
     };
 
@@ -579,13 +590,32 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                         </div>
                     </div>
 
-                    <button 
-                        className="btn-primary" 
-                        onClick={() => handleClose(true)} 
-                        style={{ 
-                            width: '100%', 
-                            padding: '12px 24px', 
-                            borderRadius: 'var(--radius-md)', 
+                    {perfMessage && (
+                        <div style={{
+                            background: 'rgba(52, 199, 89, 0.1)',
+                            border: '1px solid rgba(52, 199, 89, 0.25)',
+                            borderRadius: 'var(--radius-md)',
+                            padding: '10px 16px',
+                            marginBottom: '12px',
+                            fontSize: '0.8rem',
+                            color: '#34C759',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                        }}>
+                            <span style={{ fontSize: '1.2rem' }}>🎯</span>
+                            {perfMessage}
+                        </div>
+                    )}
+
+                    <button
+                        className="btn-primary"
+                        onClick={() => handleClose(true)}
+                        style={{
+                            width: '100%',
+                            padding: '12px 24px',
+                            borderRadius: 'var(--radius-md)',
                             fontSize: '0.875rem',
                             fontWeight: 600,
                             background: 'rgba(99, 102, 241, 0.15)',
