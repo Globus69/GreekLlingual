@@ -10,6 +10,7 @@ interface LearningItem {
     id: number;
     type: string;
     english: string;
+    russian?: string;
     greek: string;
     example_en: string | null;
     example_gr: string | null;
@@ -41,21 +42,21 @@ interface GrammarDialogProps {
 
 // Fallback grammar data if Supabase is not available
 const FALLBACK_GRAMMAR: GrammarWithProgress[] = [
-    { id: 1, type: 'grammar', english: 'Present Tense - First Person', greek: 'Εγώ κάνω', example_en: 'I do / I make', example_gr: 'Εγώ κάνω την εργασία', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 1, student_id: 'demo', item_id: 1, interval_days: 1, ease_factor: 2.0, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 2, type: 'grammar', english: 'Present Tense - Second Person', greek: 'Εσύ κάνεις', example_en: 'You do / You make', example_gr: 'Εσύ κάνεις καλά', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 2, student_id: 'demo', item_id: 2, interval_days: 1, ease_factor: 2.1, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 3, type: 'grammar', english: 'Present Tense - Third Person', greek: 'Αυτός/Αυτή/Αυτό κάνει', example_en: 'He/She/It does', example_gr: 'Αυτός κάνει δουλειά', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 3, student_id: 'demo', item_id: 3, interval_days: 1, ease_factor: 2.2, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 4, type: 'grammar', english: 'Definite Article - Masculine', greek: 'Ο', example_en: 'The (masculine)', example_gr: 'Ο άνθρωπος', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 5, type: 'grammar', english: 'Definite Article - Feminine', greek: 'Η', example_en: 'The (feminine)', example_gr: 'Η γυναίκα', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 6, type: 'grammar', english: 'Definite Article - Neuter', greek: 'Το', example_en: 'The (neuter)', example_gr: 'Το παιδί', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 7, type: 'grammar', english: 'Plural - Masculine', greek: 'Οι', example_en: 'The (masculine plural)', example_gr: 'Οι άνθρωποι', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 8, type: 'grammar', english: 'Plural - Feminine', greek: 'Οι', example_en: 'The (feminine plural)', example_gr: 'Οι γυναίκες', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 9, type: 'grammar', english: 'Plural - Neuter', greek: 'Τα', example_en: 'The (neuter plural)', example_gr: 'Τα παιδιά', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 10, type: 'grammar', english: 'Verb "to be" - Present', greek: 'Είμαι, Είσαι, Είναι', example_en: 'I am, You are, He/She/It is', example_gr: 'Εγώ είμαι εδώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] }
+    { id: 1, type: 'grammar', english: 'Present Tense - First Person', russian: 'Настоящее время – первое лицо', greek: 'Εγώ κάνω', example_en: 'I do / I make', example_gr: 'Εγώ κάνω την εργασία', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 1, student_id: 'demo', item_id: 1, interval_days: 1, ease_factor: 2.0, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 2, type: 'grammar', english: 'Present Tense - Second Person', russian: 'Настоящее время – второе лицо', greek: 'Εσύ κάνεις', example_en: 'You do / You make', example_gr: 'Εσύ κάνεις καλά', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 2, student_id: 'demo', item_id: 2, interval_days: 1, ease_factor: 2.1, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 3, type: 'grammar', english: 'Present Tense - Third Person', russian: 'Настоящее время – третье лицо', greek: 'Αυτός/Αυτή/Αυτό κάνει', example_en: 'He/She/It does', example_gr: 'Αυτός κάνει δουλειά', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 3, student_id: 'demo', item_id: 3, interval_days: 1, ease_factor: 2.2, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 4, type: 'grammar', english: 'Definite Article - Masculine', russian: 'Определённый артикль – мужской род', greek: 'Ο', example_en: 'The (masculine)', example_gr: 'Ο άνθρωπος', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 5, type: 'grammar', english: 'Definite Article - Feminine', russian: 'Определённый артикль – женский род', greek: 'Η', example_en: 'The (feminine)', example_gr: 'Η γυναίκα', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 6, type: 'grammar', english: 'Definite Article - Neuter', russian: 'Определённый артикль – средний род', greek: 'Το', example_en: 'The (neuter)', example_gr: 'Το παιδί', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 7, type: 'grammar', english: 'Plural - Masculine', russian: 'Множественное число – мужской род', greek: 'Οι', example_en: 'The (masculine plural)', example_gr: 'Οι άνθρωποι', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 8, type: 'grammar', english: 'Plural - Feminine', russian: 'Множественное число – женский род', greek: 'Οι', example_en: 'The (feminine plural)', example_gr: 'Οι γυναίκες', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 9, type: 'grammar', english: 'Plural - Neuter', russian: 'Множественное число – средний род', greek: 'Τα', example_en: 'The (neuter plural)', example_gr: 'Τα παιδιά', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 10, type: 'grammar', english: 'Verb "to be" - Present', russian: 'Глагол "быть" – настоящее время', greek: 'Είμαι, Είσαι, Είναι', example_en: 'I am, You are, He/She/It is', example_gr: 'Εγώ είμαι εδώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] }
 ];
 
 export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: GrammarDialogProps) {
     const { user } = useAuth();
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const [grammar, setGrammar] = useState<GrammarWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -680,7 +681,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                         <div className="card-content">
                             <div className={`english-translation-container ${!flipped ? 'active' : ''}`}>
                                 <div className="field-label">{t('flashcard.label_source')}</div>
-                                <p className="english-translation">{currentItem.english}</p>
+                                <p className="english-translation">{locale === 'ru' && currentItem.russian ? currentItem.russian : currentItem.english}</p>
                                 {currentItem.example_en && (
                                     <p style={{ 
                                         fontSize: '1rem', 

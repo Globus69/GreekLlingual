@@ -10,6 +10,7 @@ interface LearningItem {
     id: number;
     type: string;
     english: string;
+    russian?: string;
     greek: string;
     example_en: string | null;
     example_gr: string | null;
@@ -41,21 +42,21 @@ interface ComprehensionDialogProps {
 
 // Fallback comprehension data if Supabase is not available
 const FALLBACK_COMPREHENSION: ComprehensionWithProgress[] = [
-    { id: 1, type: 'comprehension', english: 'What is your name?', greek: 'Πώς σε λένε;', example_en: 'What is your name?', example_gr: 'Πώς σε λένε; Με λένε Μαρία.', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 1, student_id: 'demo', item_id: 1, interval_days: 1, ease_factor: 2.0, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 2, type: 'comprehension', english: 'How are you?', greek: 'Πώς είσαι;', example_en: 'How are you?', example_gr: 'Πώς είσαι; Είμαι καλά, ευχαριστώ.', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 2, student_id: 'demo', item_id: 2, interval_days: 1, ease_factor: 2.1, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 3, type: 'comprehension', english: 'Where are you from?', greek: 'Από πού είσαι;', example_en: 'Where are you from?', example_gr: 'Από πού είσαι; Είμαι από την Ελλάδα.', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 3, student_id: 'demo', item_id: 3, interval_days: 1, ease_factor: 2.2, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 4, type: 'comprehension', english: 'I understand', greek: 'Καταλαβαίνω', example_en: 'I understand', example_gr: 'Καταλαβαίνω τι λες.', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 5, type: 'comprehension', english: 'I don\'t understand', greek: 'Δεν καταλαβαίνω', example_en: 'I don\'t understand', example_gr: 'Δεν καταλαβαίνω τι λες.', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 6, type: 'comprehension', english: 'Can you repeat?', greek: 'Μπορείς να επαναλάβεις;', example_en: 'Can you repeat?', example_gr: 'Μπορείς να επαναλάβεις, παρακαλώ;', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 7, type: 'comprehension', english: 'What does this mean?', greek: 'Τι σημαίνει αυτό;', example_en: 'What does this mean?', example_gr: 'Τι σημαίνει αυτή η λέξη;', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 8, type: 'comprehension', english: 'Can you speak slower?', greek: 'Μπορείς να μιλήσεις πιο αργά;', example_en: 'Can you speak slower?', example_gr: 'Μπορείς να μιλήσεις πιο αργά, παρακαλώ;', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 9, type: 'comprehension', english: 'I need help', greek: 'Χρειάζομαι βοήθεια', example_en: 'I need help', example_gr: 'Χρειάζομαι βοήθεια με αυτό.', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 10, type: 'comprehension', english: 'That\'s correct', greek: 'Αυτό είναι σωστό', example_en: 'That\'s correct', example_gr: 'Αυτό είναι σωστό, μπράβο!', audio_url: null, created_at: new Date().toISOString(), student_progress: [] }
+    { id: 1, type: 'comprehension', english: 'What is your name?', russian: 'Как тебя зовут?', greek: 'Πώς σε λένε;', example_en: 'What is your name?', example_gr: 'Πώς σε λένε; Με λένε Μαρία.', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 1, student_id: 'demo', item_id: 1, interval_days: 1, ease_factor: 2.0, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 2, type: 'comprehension', english: 'How are you?', russian: 'Как дела?', greek: 'Πώς είσαι;', example_en: 'How are you?', example_gr: 'Πώς είσαι; Είμαι καλά, ευχαριστώ.', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 2, student_id: 'demo', item_id: 2, interval_days: 1, ease_factor: 2.1, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 3, type: 'comprehension', english: 'Where are you from?', russian: 'Откуда ты?', greek: 'Από πού είσαι;', example_en: 'Where are you from?', example_gr: 'Από πού είσαι; Είμαι από την Ελλάδα.', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 3, student_id: 'demo', item_id: 3, interval_days: 1, ease_factor: 2.2, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 4, type: 'comprehension', english: 'I understand', russian: 'Я понимаю', greek: 'Καταλαβαίνω', example_en: 'I understand', example_gr: 'Καταλαβαίνω τι λες.', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 5, type: 'comprehension', english: 'I don\'t understand', russian: 'Я не понимаю', greek: 'Δεν καταλαβαίνω', example_en: 'I don\'t understand', example_gr: 'Δεν καταλαβαίνω τι λες.', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 6, type: 'comprehension', english: 'Can you repeat?', russian: 'Можете повторить?', greek: 'Μπορείς να επαναλάβεις;', example_en: 'Can you repeat?', example_gr: 'Μπορείς να επαναλάβεις, παρακαλώ;', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 7, type: 'comprehension', english: 'What does this mean?', russian: 'Что это значит?', greek: 'Τι σημαίνει αυτό;', example_en: 'What does this mean?', example_gr: 'Τι σημαίνει αυτή η λέξη;', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 8, type: 'comprehension', english: 'Can you speak slower?', russian: 'Можете говорить медленнее?', greek: 'Μπορείς να μιλήσεις πιο αργά;', example_en: 'Can you speak slower?', example_gr: 'Μπορείς να μιλήσεις πιο αργά, παρακαλώ;', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 9, type: 'comprehension', english: 'I need help', russian: 'Мне нужна помощь', greek: 'Χρειάζομαι βοήθεια', example_en: 'I need help', example_gr: 'Χρειάζομαι βοήθεια με αυτό.', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 10, type: 'comprehension', english: 'That\'s correct', russian: 'Это правильно', greek: 'Αυτό είναι σωστό', example_en: 'That\'s correct', example_gr: 'Αυτό είναι σωστό, μπράβο!', audio_url: null, created_at: new Date().toISOString(), student_progress: [] }
 ];
 
 export default function ComprehensionDialog({ isOpen, onClose, mode = 'review' }: ComprehensionDialogProps) {
     const { user } = useAuth();
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const [comprehension, setComprehension] = useState<ComprehensionWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -680,7 +681,7 @@ export default function ComprehensionDialog({ isOpen, onClose, mode = 'review' }
                         <div className="card-content">
                             <div className={`english-translation-container ${!flipped ? 'active' : ''}`}>
                                 <div className="field-label">{t('flashcard.label_source')}</div>
-                                <p className="english-translation">{currentItem.english}</p>
+                                <p className="english-translation">{locale === 'ru' && currentItem.russian ? currentItem.russian : currentItem.english}</p>
                                 {currentItem.example_en && (
                                     <p style={{ 
                                         fontSize: '1rem', 

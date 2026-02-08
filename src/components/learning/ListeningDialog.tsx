@@ -10,6 +10,7 @@ interface LearningItem {
     id: number;
     type: string;
     english: string;
+    russian?: string;
     greek: string;
     example_en: string | null;
     example_gr: string | null;
@@ -47,6 +48,7 @@ const FALLBACK_LISTENING: ListeningWithProgress[] = [
         id: 1, 
         type: 'listening', 
         english: 'Listen and choose the correct answer', 
+        russian: 'Слушайте и выберите правильный ответ',
         greek: 'Γεια σου', 
         example_en: 'Hello', 
         example_gr: 'Thank you', 
@@ -60,6 +62,7 @@ const FALLBACK_LISTENING: ListeningWithProgress[] = [
         id: 2, 
         type: 'listening', 
         english: 'Listen and choose the correct answer', 
+        russian: 'Слушайте и выберите правильный ответ',
         greek: 'Ευχαριστώ', 
         example_en: 'Hello', 
         example_gr: 'Thank you', 
@@ -73,7 +76,7 @@ const FALLBACK_LISTENING: ListeningWithProgress[] = [
 
 export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: ListeningDialogProps) {
     const { user } = useAuth();
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const [listening, setListening] = useState<ListeningWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);

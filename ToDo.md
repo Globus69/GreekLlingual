@@ -53,11 +53,12 @@
 - `ModuleGrid.tsx` – 8 Modul-Titel und Subtitel uebersetzt (`modules.*`)
 - `PerformanceHub.tsx` – Labels, Wochentage, Stats uebersetzt (`perf.*`)
 
-### 8. ⬜ `learning_items` Tabelle um Russisch erweitern
-- Neue Spalte: `russian TEXT` (neben `english`)
-- SQL-Migration erstellen
-- VocabularyDialog: Kartenansicht zeigt je nach UI-Sprache EN oder RU als Frageseite
+### 8. ✅ `learning_items` Tabelle um Russisch erweitern (2026-02-08)
+- SQL-Migration `supabase/alter_learning_items_add_russian.sql` erstellt
+- `LearningItem` Interface in allen 4 Dialogen um `russian?: string` erweitert
+- VocabularyDialog, GrammarDialog, ComprehensionDialog: Kartenansicht zeigt je nach UI-Sprache EN oder RU
 - Fallback auf `english` wenn `russian` leer ist
+- Fallback-Daten in allen Dialogen um russische Uebersetzungen ergaenzt
 
 ---
 
