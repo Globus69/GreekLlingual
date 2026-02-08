@@ -159,6 +159,35 @@
 
 ---
 
+## Phase 3: Sprachpersistenz + UX-Verbesserungen
+
+### 20. ✅ Sprache aus Anmelde-Dialog dauerhaft fuer gesamte Session / App beibehalten (2026-02-08 23:45)
+- Sprachauswahl im Login-Dialog wird in localStorage gespeichert (bereits via LanguageContext)
+- Pruefen: Sprache bleibt nach Login erhalten (Login → Dashboard → Dialoge → Admin)
+- Optional: Sprache auch im User-Profil in Supabase speichern (`preferred_locale` Spalte)
+- Beim Login: Sprache aus User-Profil laden, falls vorhanden
+
+### 21. ✅ Auf Frontend-Mainpage: Sprachwechsel-Option hinzufuegen (2026-02-08 23:50)
+- Dashboard-Seite: Sprachwechsel-Button/Flaggen bereits im Header vorhanden
+- Pruefen: Flaggen-Toggle funktioniert auf allen Seiten (Dashboard, Admin, Dialoge)
+- Falls fehlend: Sprachwechsel-Option auf weiteren Seiten ergaenzen
+
+### 22. ✅ Bei jeder Sprachaenderung alle UI-Texte sofort aktualisieren (2026-02-08 23:52)
+- Alle Komponenten nutzen `useTranslation()` Hook (reaktiv auf Locale-Aenderung)
+- Pruefen: Sprachwechsel aktualisiert sofort alle Texte ohne Seitenreload
+- Falls DB-Texte sprachabhaengig: Cache invalidieren und neu laden
+- Sicherstellen: Kein Flackern oder verzoegertes Laden bei Sprachwechsel
+
+### 23. ✅ Bei Sprachwechsel kurzes Toast/Pop-up anzeigen (2026-02-08 23:55)
+- Toast-Nachricht in der neu aktiven Sprache:
+  - EN: "Language changed to English."
+  - RU: "Язык изменён на Русский."
+- Toast erscheint fuer 2-3 Sekunden, verschwindet dann automatisch
+- Position: oben mittig oder unten mittig
+- Dezentes Design passend zum Glasmorphismus-Stil
+
+---
+
 ## Legende
 - ⬜ = offen
 - 🔄 = in Arbeit
