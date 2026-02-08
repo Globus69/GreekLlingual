@@ -211,12 +211,15 @@ export default function LoginPage() {
             <div style={{
                 position: 'fixed',
                 inset: 0,
-                background: '#0A0A0C',
+                background: locale === 'ru'
+                    ? 'radial-gradient(ellipse at 50% 50%, #2a1028 0%, #0A0A0C 70%)'
+                    : 'radial-gradient(ellipse at 50% 50%, #0f1a3e 0%, #0A0A0C 70%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 overflow: 'hidden',
                 fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                transition: 'background 0.6s ease',
             }}>
                 {/* Animated Canvas Background */}
                 <canvas
@@ -224,28 +227,34 @@ export default function LoginPage() {
                     style={{ position: 'absolute', inset: 0, zIndex: 0 }}
                 />
 
-                {/* Gradient Orbs */}
+                {/* Gradient Orbs – Farbe wechselt mit Sprache */}
                 <div style={{
                     position: 'absolute',
                     width: '500px',
                     height: '500px',
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(0, 122, 255, 0.12) 0%, transparent 70%)',
+                    background: locale === 'ru'
+                        ? 'radial-gradient(circle, rgba(224, 85, 85, 0.12) 0%, transparent 70%)'
+                        : 'radial-gradient(circle, rgba(0, 122, 255, 0.12) 0%, transparent 70%)',
                     top: '-100px',
                     right: '-100px',
                     animation: 'orbFloat1 12s ease-in-out infinite',
                     pointerEvents: 'none',
+                    transition: 'background 0.6s ease',
                 }} />
                 <div style={{
                     position: 'absolute',
                     width: '400px',
                     height: '400px',
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(88, 86, 214, 0.1) 0%, transparent 70%)',
+                    background: locale === 'ru'
+                        ? 'radial-gradient(circle, rgba(180, 60, 60, 0.1) 0%, transparent 70%)'
+                        : 'radial-gradient(circle, rgba(88, 86, 214, 0.1) 0%, transparent 70%)',
                     bottom: '-80px',
                     left: '-80px',
                     animation: 'orbFloat2 15s ease-in-out infinite',
                     pointerEvents: 'none',
+                    transition: 'background 0.6s ease',
                 }} />
 
                 {/* Language Selector – Top Right */}
@@ -283,7 +292,9 @@ export default function LoginPage() {
                                     borderRadius: '8px',
                                     border: 'none',
                                     background: locale === lang
-                                        ? 'linear-gradient(135deg, #007AFF, #5856D6)'
+                                        ? lang === 'ru'
+                                            ? 'linear-gradient(135deg, #E05555, #C0392B)'
+                                            : 'linear-gradient(135deg, #007AFF, #5856D6)'
                                         : 'transparent',
                                     color: locale === lang ? '#fff' : '#8E8E93',
                                     fontSize: '13px',
@@ -292,7 +303,11 @@ export default function LoginPage() {
                                     transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
                                     letterSpacing: '1px',
                                     textTransform: 'uppercase',
-                                    boxShadow: locale === lang ? '0 2px 8px rgba(0, 122, 255, 0.3)' : 'none',
+                                    boxShadow: locale === lang
+                                        ? lang === 'ru'
+                                            ? '0 2px 8px rgba(224, 85, 85, 0.3)'
+                                            : '0 2px 8px rgba(0, 122, 255, 0.3)'
+                                        : 'none',
                                 }}
                             >
                                 {lang === 'en' ? 'EN' : 'RU'}

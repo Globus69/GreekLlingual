@@ -4,7 +4,7 @@
 -- Erweitert bestehende users-Tabelle um:
 --   name, pin_hash, whatsapp, role, level, difficulty, performance_index
 -- PIN wird als bcrypt-Hash gespeichert (pgcrypto)
--- Admin-User wird mit PIN "1234" angelegt
+-- Admin-User wird mit PIN "123456" angelegt
 -- ============================================================
 
 -- 1. pgcrypto Extension fuer Passwort-Hashing
@@ -111,22 +111,22 @@ CREATE POLICY "Anon can read users for login" ON public.users
     TO anon
     USING (true);
 
--- 8. Admin-User erstellen (PIN "1234" als bcrypt-Hash)
+-- 8. Admin-User erstellen (PIN "123456" als bcrypt-Hash)
 -- Upsert: Nur einfuegen wenn noch kein Admin existiert
 INSERT INTO public.users (id, email, name, pin, pin_hash, role, level, difficulty)
 VALUES (
     uuid_generate_v4(),
     'admin@greeklingua.local',
     'Admin',
-    '1234',
-    crypt('1234', gen_salt('bf')),
+    '123456',
+    crypt('123456', gen_salt('bf')),
     'admin',
     'A1',
     'easy'
 )
 ON CONFLICT (email) DO UPDATE SET
     name = 'Admin',
-    pin_hash = crypt('1234', gen_salt('bf')),
+    pin_hash = crypt('123456', gen_salt('bf')),
     role = 'admin';
 
 -- 9. Hilfsfunktion: PIN validieren (fuer Server-seitige Auth)
