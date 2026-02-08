@@ -1,6 +1,6 @@
-# HellenicHorizons GreekLingua – Mehrsprachige UI (EN + RU) + Backend
+# HellenicHorizons GreekLingua – Mehrsprachige UI (EN + RU + EL) + Backend
 
-> **Ziel:** UI-Sprache waehlbar (Englisch / Russisch). Lernziel-Sprache bleibt immer Neugriechisch.
+> **Ziel:** UI-Sprache waehlbar (Englisch / Russisch / Griechisch). Lernziel-Sprache bleibt immer Neugriechisch.
 > **Regel:** Hardcodierte Texte → Supabase-Tabelle `ui_translations`. Sprachauswahl im Login-Dialog.
 > **Backend:** Admin-Bereich fuer Inhaltsverwaltung, Schueler-Management, Leistungsstufen.
 
@@ -185,6 +185,93 @@
 - Toast erscheint fuer 2-3 Sekunden, verschwindet dann automatisch
 - Position: oben mittig oder unten mittig
 - Dezentes Design passend zum Glasmorphismus-Stil
+
+---
+
+## Phase 4: Dashboard UI-Texte vollstaendig in DB erfassen
+
+### 24. ✅ Inventar: Alle hardcodierten UI-Texte der Main Page identifizieren (2026-02-09 00:30)
+- Alle Dashboard-Komponenten durchgehen und noch nicht uebersetzte Strings auflisten
+- Betrifft: DashboardHeader, StatsCard, ActionGrid, ModuleGrid, PerformanceHub, dashboard/page.tsx
+- Ergebnis: Vollstaendige Liste aller fehlenden Keys mit EN- und RU-Text
+
+### 25. ✅ SQL-INSERT: Fehlende Uebersetzungsschluessel in `ui_translations` einfuegen (2026-02-09)
+- Fuer jeden identifizierten String einen Key definieren (z.B. `header.flag_tooltip_ru`)
+- SQL-INSERT mit EN-Text und RU-Text in `ui_translations` Tabelle
+- Datei: `supabase/insert_missing_dashboard_translations.sql`
+
+### 26. ✅ DashboardHeader.tsx: Hardcodierte Tooltips durch t() ersetzen (2026-02-09)
+- Flaggen-Button Tooltip: "Switch to Russian" / "Switch to English" → t('header.switch_to_ru') / t('header.switch_to_en')
+- Sicherstellen dass Fallback-Keys in FALLBACK_EN ergaenzt werden
+
+### 27. ✅ ActionGrid.tsx: Hardcodierte Toast-Nachrichten durch t() ersetzen (2026-02-09)
+- 8 Toast-Messages (showToast-Aufrufe) durch t()-Aufrufe ersetzen
+- Keys: `action_grid.toast_magic_round`, `action_grid.toast_comprehension`, etc.
+- Fallback-Keys in FALLBACK_EN ergaenzen
+
+### 28. ✅ ModuleGrid.tsx: Hardcodiertes Alert durch t() ersetzen (2026-02-09)
+- Alert-Text "Opening module: " → t('modules.opening') + Modul-Name
+- Fallback-Key in FALLBACK_EN ergaenzen
+
+### 29. ✅ StatsCard.tsx: Stunden-Suffix "h" durch t() ersetzen (2026-02-09)
+- "h" → t('stats.hours_suffix')
+- Fallback-Key in FALLBACK_EN ergaenzen
+
+### 30. ✅ FALLBACK_EN in useTranslation.ts aktualisieren + Build testen (2026-02-09)
+- Alle neuen Keys aus Aufgaben 26-29 in FALLBACK_EN eintragen (EN + sinnvoller Default)
+- Build testen (`npx next build`)
+- CLAUDE.md aktualisieren
+
+---
+
+## Phase 5: Griechisch (el) als dritte UI-Sprache
+
+### 31. ✅ Locale-Typ + LanguageContext auf 3 Sprachen erweitern (2026-02-09)
+- `Locale = 'en' | 'ru' | 'el'` in `LanguageContext.tsx`
+- `translationCache` und `fetchPromises` in `useTranslation.ts` um `el` erweitern
+- CHECK-Constraint auf `preferred_locale` in DB anpassen (`'en', 'ru', 'el'`)
+- CHECK-Constraint auf `lang` in `ui_translations` anpassen (`'en', 'ru', 'el'`)
+
+### 32. ✅ FALLBACK_EL: Griechische Fallback-Uebersetzungen in useTranslation.ts (2026-02-09)
+- Alle ~130 Keys ins Griechische uebersetzen
+- Als `FALLBACK_EL` Objekt in `useTranslation.ts` einfuegen
+- Fallback-Logik anpassen: `translations[key] || FALLBACK_EN[key]` → Locale-abhaengig
+
+### 33. ✅ SQL: Griechische Uebersetzungen in ui_translations einfuegen (2026-02-09)
+- SQL-Datei `supabase/insert_greek_translations.sql` erstellt
+- Alle ~130 Keys mit `lang = 'el'` und griechischen Texten eingefuegt
+- Idempotent via `ON CONFLICT (key, lang) DO UPDATE`
+- CHECK-Constraint `lang` auf `('en', 'ru', 'el')` erweitert (kombiniert mit Aufgabe 38)
+
+### 34. ✅ Login-Seite: 3-Sprachen-Auswahl (EN / RU / EL) (2026-02-09)
+- EN/RU Toggle durch 3-Button-Auswahl ersetzt (EN / RU / EL)
+- Griechische Flagge 🇬🇷 hinzugefuegt
+- Hintergrund-Gradient fuer Griechisch definiert (cyan-blau Ton)
+- Canvas-Partikel-Farbe fuer Griechisch definiert (Hue 190-220)
+- Gradient Orbs fuer Griechisch angepasst
+- Divider "or/или/ή" dreisprachig
+
+### 35. ✅ DashboardHeader: Flaggen-Toggle fuer 3 Sprachen (2026-02-09)
+- 2-Wege-Toggle (EN↔RU) durch 3-Wege-Toggle ersetzt (EN→RU→EL→EN)
+- Flagge zeigt 🇬🇧 / 🇷🇺 / 🇬🇷 je nach aktiver Sprache
+- Tooltip-Keys: `header.switch_to_el` hinzugefuegt
+
+### 36. ✅ Admin-Seite: Flaggen-Toggle fuer 3 Sprachen (2026-02-09)
+- Gleiche 3-Wege-Logik wie im DashboardHeader
+- Hintergrund-Farbe fuer Griechisch (EL) definiert (griechisches Blau)
+- Flaggen-Button Rahmenfarbe fuer EL angepasst (#0D6EFD)
+- Header-Border und Background fuer EL angepasst
+
+### 37. ✅ LanguageToast: Griechische Toast-Nachricht (2026-02-09)
+- Toast fuer EL: "Η γλώσσα άλλαξε σε Ελληνικά." mit 🇬🇷
+- Farbschema fuer EL-Toast definiert (blau-cyan)
+- TOAST_COLORS Record fuer alle 3 Locales erstellt
+
+### 38. ✅ SQL: preferred_locale CHECK-Constraint erweitern + Build testen (2026-02-09)
+- `preferred_locale` CHECK auf `('en', 'ru', 'el')` erweitert (in insert_greek_translations.sql)
+- `ui_translations.lang` CHECK auf `('en', 'ru', 'el')` erweitert
+- `update_user_locale()` RPC auf 3 Sprachen erweitert
+- Build getestet – erfolgreich ✅
 
 ---
 

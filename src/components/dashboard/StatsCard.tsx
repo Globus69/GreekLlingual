@@ -36,7 +36,7 @@ export default function StatsCard({
                     <div className="lbl">{t('stats.vocabs')}</div>
                 </div>
                 <div className="stat-item">
-                    <div className="val">{learnedHours}h</div>
+                    <div className="val">{learnedHours}{t('stats.hours_suffix')}</div>
                     <div className="lbl">{t('stats.learned')}</div>
                 </div>
             </div>

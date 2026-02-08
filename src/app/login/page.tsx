@@ -35,7 +35,6 @@ export default function LoginPage() {
         if (!ctx) return;
 
         let animationId: number;
-        const isRu = locale === 'ru';
         const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; hue: number }[] = [];
 
         const resize = () => {
@@ -45,7 +44,13 @@ export default function LoginPage() {
         resize();
         window.addEventListener('resize', resize);
 
-        // Create particles – Hue: EN=blau (200-240), RU=rot (340-20)
+        // Create particles – Hue: EN=blau (200-240), RU=rot (340-20), EL=cyan-blau (190-220)
+        const hueRange = locale === 'ru'
+            ? { base: 345, spread: 30 }   // rot-ish (345-375 → wraps to 345-15)
+            : locale === 'el'
+                ? { base: 190, spread: 30 }   // cyan-blau griechisch (190-220)
+                : { base: 200, spread: 40 };  // blau-ish (200-240)
+
         for (let i = 0; i < 60; i++) {
             particles.push({
                 x: Math.random() * canvas.width,
@@ -54,14 +59,12 @@ export default function LoginPage() {
                 vy: (Math.random() - 0.5) * 0.4,
                 size: Math.random() * 2 + 0.5,
                 opacity: Math.random() * 0.4 + 0.1,
-                hue: isRu
-                    ? Math.random() * 30 + 345 // rot-ish range (345-375 → wraps to 345-15)
-                    : Math.random() * 40 + 200, // blau-ish range (200-240)
+                hue: Math.random() * hueRange.spread + hueRange.base,
             });
         }
 
         // Verbindungslinien-Farbe
-        const lineColor = isRu ? '180, 60, 60' : '0, 122, 255';
+        const lineColor = locale === 'ru' ? '180, 60, 60' : locale === 'el' ? '13, 110, 253' : '0, 122, 255';
 
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -234,7 +237,9 @@ export default function LoginPage() {
                 inset: 0,
                 background: locale === 'ru'
                     ? 'radial-gradient(ellipse at 50% 50%, #3d1535 0%, #1a0818 50%, #0A0A0C 100%)'
-                    : 'radial-gradient(ellipse at 50% 50%, #0f2555 0%, #0a1230 50%, #0A0A0C 100%)',
+                    : locale === 'el'
+                        ? 'radial-gradient(ellipse at 50% 50%, #0d2847 0%, #091a35 50%, #0A0A0C 100%)'
+                        : 'radial-gradient(ellipse at 50% 50%, #0f2555 0%, #0a1230 50%, #0A0A0C 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -256,7 +261,9 @@ export default function LoginPage() {
                     borderRadius: '50%',
                     background: locale === 'ru'
                         ? 'radial-gradient(circle, rgba(224, 85, 85, 0.18) 0%, transparent 70%)'
-                        : 'radial-gradient(circle, rgba(0, 122, 255, 0.18) 0%, transparent 70%)',
+                        : locale === 'el'
+                            ? 'radial-gradient(circle, rgba(13, 110, 253, 0.18) 0%, transparent 70%)'
+                            : 'radial-gradient(circle, rgba(0, 122, 255, 0.18) 0%, transparent 70%)',
                     top: '-100px',
                     right: '-100px',
                     animation: 'orbFloat1 12s ease-in-out infinite',
@@ -270,7 +277,9 @@ export default function LoginPage() {
                     borderRadius: '50%',
                     background: locale === 'ru'
                         ? 'radial-gradient(circle, rgba(180, 60, 60, 0.15) 0%, transparent 70%)'
-                        : 'radial-gradient(circle, rgba(88, 86, 214, 0.15) 0%, transparent 70%)',
+                        : locale === 'el'
+                            ? 'radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%)'
+                            : 'radial-gradient(circle, rgba(88, 86, 214, 0.15) 0%, transparent 70%)',
                     bottom: '-80px',
                     left: '-80px',
                     animation: 'orbFloat2 15s ease-in-out infinite',
@@ -303,37 +312,46 @@ export default function LoginPage() {
                         borderRadius: '10px',
                         padding: '3px',
                     }}>
-                        {(['en', 'ru'] as Locale[]).map((lang) => (
-                            <button
-                                key={lang}
-                                type="button"
-                                onClick={() => handleLanguageChange(lang)}
-                                style={{
-                                    padding: '8px 16px',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    background: locale === lang
-                                        ? lang === 'ru'
-                                            ? 'linear-gradient(135deg, #E05555, #C0392B)'
-                                            : 'linear-gradient(135deg, #007AFF, #5856D6)'
-                                        : 'transparent',
-                                    color: locale === lang ? '#fff' : '#8E8E93',
-                                    fontSize: '13px',
-                                    fontWeight: 700,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                                    letterSpacing: '1px',
-                                    textTransform: 'uppercase',
-                                    boxShadow: locale === lang
-                                        ? lang === 'ru'
-                                            ? '0 2px 8px rgba(224, 85, 85, 0.3)'
-                                            : '0 2px 8px rgba(0, 122, 255, 0.3)'
-                                        : 'none',
-                                }}
-                            >
-                                {lang === 'en' ? 'EN' : 'RU'}
-                            </button>
-                        ))}
+                        {(['en', 'ru', 'el'] as Locale[]).map((lang) => {
+                            const langGradient: Record<Locale, string> = {
+                                en: 'linear-gradient(135deg, #007AFF, #5856D6)',
+                                ru: 'linear-gradient(135deg, #E05555, #C0392B)',
+                                el: 'linear-gradient(135deg, #0D6EFD, #0A58CA)',
+                            };
+                            const langShadow: Record<Locale, string> = {
+                                en: '0 2px 8px rgba(0, 122, 255, 0.3)',
+                                ru: '0 2px 8px rgba(224, 85, 85, 0.3)',
+                                el: '0 2px 8px rgba(13, 110, 253, 0.3)',
+                            };
+                            const langLabel: Record<Locale, string> = {
+                                en: 'EN',
+                                ru: 'RU',
+                                el: 'EL',
+                            };
+                            return (
+                                <button
+                                    key={lang}
+                                    type="button"
+                                    onClick={() => handleLanguageChange(lang)}
+                                    style={{
+                                        padding: '8px 14px',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        background: locale === lang ? langGradient[lang] : 'transparent',
+                                        color: locale === lang ? '#fff' : '#8E8E93',
+                                        fontSize: '13px',
+                                        fontWeight: 700,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                                        letterSpacing: '1px',
+                                        textTransform: 'uppercase',
+                                        boxShadow: locale === lang ? langShadow[lang] : 'none',
+                                    }}
+                                >
+                                    {langLabel[lang]}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -589,7 +607,7 @@ export default function LoginPage() {
                     }}>
                         <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
                         <span style={{ fontSize: '11px', color: '#4A4A4E', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                            {locale === 'ru' ? 'или' : 'or'}
+                            {locale === 'ru' ? 'или' : locale === 'el' ? 'ή' : 'or'}
                         </span>
                         <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
                     </div>

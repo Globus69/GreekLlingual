@@ -83,13 +83,19 @@ export default function AdminPage() {
     // Dezente Hintergrundfarbe je nach Sprache
     const bgGradient = locale === 'ru'
         ? 'linear-gradient(135deg, #0a0a1a 0%, #2a1028 50%, #0a0a1a 100%)'  // warmer Rotton
-        : 'linear-gradient(135deg, #0a0a1a 0%, #0f1a3e 50%, #0a0a1a 100%)'; // kuehler Blauton
+        : locale === 'el'
+            ? 'linear-gradient(135deg, #0a0a1a 0%, #0d2847 50%, #0a0a1a 100%)'  // griechisches Blau
+            : 'linear-gradient(135deg, #0a0a1a 0%, #0f1a3e 50%, #0a0a1a 100%)'; // kuehler Blauton
     const headerBg = locale === 'ru'
         ? 'rgba(60, 0, 20, 0.25)'   // dezenter Rot-Touch
-        : 'rgba(0, 20, 60, 0.25)';  // dezenter Blau-Touch
+        : locale === 'el'
+            ? 'rgba(0, 30, 70, 0.25)'   // griechischer Blau-Touch
+            : 'rgba(0, 20, 60, 0.25)';  // dezenter Blau-Touch
     const headerBorder = locale === 'ru'
         ? '1px solid rgba(200, 50, 50, 0.08)'
-        : '1px solid rgba(50, 100, 200, 0.08)';
+        : locale === 'el'
+            ? '1px solid rgba(13, 110, 253, 0.08)'
+            : '1px solid rgba(50, 100, 200, 0.08)';
 
     return (
         <div style={{
@@ -119,15 +125,20 @@ export default function AdminPage() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {/* Flaggen-Anzeige: Klick wechselt Sprache */}
+                    {/* Flaggen-Anzeige: Klick rotiert durch 3 Sprachen (EN → RU → EL → EN) */}
                     <button
-                        onClick={() => setLocale(locale === 'en' ? 'ru' : 'en')}
-                        title={locale === 'en' ? 'Switch to Russian' : 'Switch to English'}
+                        onClick={() => {
+                            const nextLocale = locale === 'en' ? 'ru' : locale === 'ru' ? 'el' : 'en';
+                            setLocale(nextLocale);
+                        }}
+                        title={locale === 'en' ? t('header.switch_to_ru') : locale === 'ru' ? t('header.switch_to_el') : t('header.switch_to_en')}
                         style={{
                             background: 'rgba(255,255,255,0.06)',
                             border: locale === 'ru'
                                 ? '1px solid rgba(200, 60, 60, 0.2)'
-                                : '1px solid rgba(60, 120, 220, 0.2)',
+                                : locale === 'el'
+                                    ? '1px solid rgba(13, 110, 253, 0.2)'
+                                    : '1px solid rgba(60, 120, 220, 0.2)',
                             borderRadius: '10px',
                             padding: '6px 10px',
                             cursor: 'pointer',
@@ -139,15 +150,17 @@ export default function AdminPage() {
                             lineHeight: 1,
                         }}
                     >
-                        <span style={{ fontSize: '22px' }}>{locale === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : '\uD83C\uDDF7\uD83C\uDDFA'}</span>
+                        <span style={{ fontSize: '22px' }}>
+                            {locale === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : locale === 'ru' ? '\uD83C\uDDF7\uD83C\uDDFA' : '\uD83C\uDDEC\uD83C\uDDF7'}
+                        </span>
                         <span style={{
                             fontSize: '11px',
                             fontWeight: 600,
-                            color: locale === 'ru' ? '#E05555' : '#5B9BFF',
+                            color: locale === 'ru' ? '#E05555' : locale === 'el' ? '#0D6EFD' : '#5B9BFF',
                             textTransform: 'uppercase',
                             transition: 'color 0.3s ease',
                         }}>
-                            {locale === 'en' ? 'EN' : 'RU'}
+                            {locale === 'en' ? 'EN' : locale === 'ru' ? 'RU' : 'EL'}
                         </span>
                     </button>
 
