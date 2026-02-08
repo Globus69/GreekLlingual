@@ -91,42 +91,47 @@
 - Login-Kette: 1) Supabase verify_user_pin (bcrypt) → 2) Supabase direkt → 3) Lokaler Fallback
 - Session-Timeout: 24 Stunden mit Timestamp-Pruefung
 
-### 12. ⬜ Admin-Hauptseite (Backend-Main-Page)
-- Route: `/admin`
-- Layout: Sidebar/Navigation mit Admin-Menue
-- Sprachwahl-Switch EN/RU (selektiert DB-Abfrage-Sprache)
-- Dashboard-Uebersicht: Anzahl Schueler, Lernfortschritt-Statistik
-- Links zu: Schueler-Verwaltung, Inhalts-Verwaltung, Einstellungen
-- Mehrsprachig (alle Texte via `t('admin.*')`)
+### 12. ✅ Schueler-Verwaltungs-Dialog (Modal/Component) im Backend (erledigt 2026-02-08 22:30)
+- Funktionen: Neuer Schueler, Bearbeiten, Loeschen (CRUD)
+- Felder anzeigen/aendern: Name, Email, WhatsApp, PIN (6-stellig, editierbar)
+- Aktueller Leistungsstand anzeigen + editierbar:
+  - Level: RadioButtons A1 / A2 / B1 / B2
+  - Schwierigkeit: RadioButtons easy / middle / hard
+- Kombinierter Index-Key automatisch gebildet (z.B. "A2-middle")
+- Schueler-Liste mit Suchfunktion im Admin-Bereich
+- Supabase CRUD-Operationen gegen `users` Tabelle
 
-### 13. ⬜ Auswahlliste Studienlevel (A1, A2, B1)
-- Dropdown/Toggle in Admin-Seite und Schueler-Profil
-- Werte: `A1` (Anfaenger), `A2` (Grundlagen), `B1` (Fortgeschritten)
-- Gespeichert in `users.level`
-- Beeinflusst welche `learning_items` angezeigt werden
-- Filter-Logik: Items haben ebenfalls ein `level` Feld
+### 13. ✅ Sprachwechsel-Hintergrundfarbe im Backend (erledigt 2026-02-08)
+- Bei Sprachwechsel (EN ↔ RU) im Backend-Bereich:
+  - Hintergrundfarbe links oben aendert sich dezent
+  - z.B. hellgrau → hellblau oder Flaggen-Farbe-Touch
 
-### 14. ⬜ Auswahl Schwierigkeit (leicht, mittel, schwer)
-- Dropdown/Toggle in Admin-Seite und Schueler-Profil
-- Werte: `easy`, `medium`, `hard`
-- Gespeichert in `users.difficulty`
-- Beeinflusst Kartenauswahl und Sitzungslaenge
-- `learning_items` Tabelle um `difficulty` Spalte erweitern
+### 14. ✅ Flaggen-Anzeige rechts oben (2026-02-08)
+- Rechts oben (neben Admin-Logout):
+  - Aktuelle Sprache als kleine Flagge anzeigen
+  - Standard: Englisch → kleine GB-Flagge (🇬🇧)
+  - Russisch → kleine russische Flagge (🇷🇺)
+  - Flaggen dezent (ca. 22 px), nicht dominant
+  - Im DashboardHeader UND Admin-Header implementiert
 
-### 15. ⬜ Index-Key aus Kriterien bilden
-- Zusammengesetzter Key als String: `"{level}-{difficulty}"` (z.B. `"A1-easy"`, `"B1-hard"`)
-- Berechnet aus `users.level` + `users.difficulty`
-- Gespeichert in `users.performance_index`
-- Dient als Filter fuer `learning_items` Abfragen
-- Automatische Aktualisierung bei Aenderung von Level oder Schwierigkeit
+### 15. ✅ Flaggen-Klick wechselt Backend-Sprache (2026-02-08)
+- Klick auf Flagge wechselt die Sprache (Toggle EN ↔ RU)
+- Speichert in localStorage via LanguageContext
+- Wechselt Locale sofort, alle Texte aktualisieren sich
+- Admin-Header: Flaggen-Farbe passt sich an (EN=blau, RU=rot)
+- Dashboard-Header: Hover-Effekt mit Scale-Animation
 
-### 16. ⬜ Schueler-Leistungsstufe zuordnen
+### 16. ✅ Schueler-Leistungsstufe zuordnen (2026-02-08)
 - Initiale Leistungsstufe bei Erstellung durch Admin festlegen
 - Automatische Anpassung basierend auf Lernfortschritt:
   - Korrektquote > 80% ueber 50 Karten → Schwierigkeit erhoehen
   - Korrektquote < 40% ueber 50 Karten → Schwierigkeit senken
 - Leistungsstufe aendert `performance_index` automatisch
-- Verlauf der Aenderungen loggen (optional: `performance_log` Tabelle)
+- Verlauf der Aenderungen in `performance_log` Tabelle geloggt
+- `evaluate_student_performance()` RPC-Funktion erstellt
+- `get_student_stats()` RPC-Funktion fuer Admin-Dashboard erstellt
+- `usePerformanceEvaluation` Hook in alle 4 Lern-Dialoge integriert
+- Performance-Nachricht nach Session-Abschluss angezeigt
 
 ### 17. ⬜ Inhalte basierend auf Leistungsstufe filtern
 - `learning_items` Query: `WHERE level = user.level AND difficulty = user.difficulty`

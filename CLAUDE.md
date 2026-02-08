@@ -247,4 +247,189 @@
   - Build erfolgreich getestet
 - **Dateien:** `src/context/AuthContext.tsx`
 - **Commit-Vorschlag:** `2026-02-08 22:00 | Aufgabe 11 – Admin-Auth mit verify_user_pin, Session-Timeout, Login-Kette`
-- **Naechste Aufgabe:** Aufgabe 12 – Admin-Hauptseite (Backend-Main-Page)
+- **Naechste Aufgabe:** Aufgabe 12 – Schueler-Verwaltungs-Dialog
+
+---
+
+### 2026-02-08 – Aufgabe 12: Schueler-Verwaltungs-Dialog
+- **Aufgabe:** CRUD-Dialog fuer Schueler-Verwaltung im Admin-Backend erstellen
+- **Was wurde gemacht:**
+  - **Neue Datei `src/components/admin/StudentManagementDialog.tsx`** erstellt:
+    - Vollstaendiger Modal-Dialog mit 3 Modi: Liste / Hinzufuegen / Bearbeiten
+    - **Schueler-Liste** mit Echtzeit-Suchfunktion (Name, Email, WhatsApp)
+    - **Neuer Schueler**: Formular mit Name*, Email, WhatsApp, PIN (6-stellig, nur Ziffern)
+    - **Bearbeiten**: Gleiche Felder, PIN optional (leer = beibehalten)
+    - **Loeschen**: 2-Klick-Bestaetigung (Sicherheitsabfrage)
+    - **Level-RadioButtons**: A1, A2, B1, B2 – visuell hervorgehoben (lila)
+    - **Difficulty-RadioButtons**: Easy, Middle, Hard – visuell hervorgehoben (gruen)
+    - **Index-Key** automatisch berechnet und angezeigt (z.B. "A2-middle", orange Highlight)
+    - Validierung: Name Pflichtfeld, PIN exakt 6 Ziffern
+    - Supabase CRUD: SELECT (role='student'), INSERT, UPDATE, DELETE
+    - Tags pro Schueler: Level (lila), Difficulty (gruen), Index-Key (orange)
+    - Fehler- und Erfolgsmeldungen
+    - Glasmorphismus-Stil passend zum Admin-Design
+  - **`src/app/admin/page.tsx`** aktualisiert:
+    - Import von `StudentManagementDialog`
+    - State `studentDialogOpen` hinzugefuegt
+    - "Students"-Karte oeffnet Dialog per Klick
+    - Beschreibungstexte lokalisiert (`admin.students_desc`, `admin.content_desc`, `admin.settings_desc`)
+  - **`src/lib/useTranslation.ts`** (FALLBACK_EN): ~35 neue Keys hinzugefuegt:
+    - `students.title`, `students.subtitle`, `students.add_new`, `students.back_to_list`
+    - `students.search_placeholder`, `students.loading`, `students.no_students`
+    - `students.form_add_title`, `students.form_edit_title`
+    - `students.field_*` (name, email, whatsapp, pin, level, difficulty)
+    - `students.diff_easy`, `students.diff_middle`, `students.diff_hard`
+    - `students.index_key_label`, `students.btn_create`, `students.btn_update`
+    - `students.saved_success`, `students.updated_success`, `students.deleted_success`
+    - `students.error_*` Fehlermeldungen
+    - `admin.students_desc`, `admin.content_desc`, `admin.settings_desc`
+  - **ToDo.md** aktualisiert: Aufgaben 12-15 durch neue Definitionen ersetzt
+  - Build erfolgreich getestet
+- **Dateien:** `src/components/admin/StudentManagementDialog.tsx` (neu), `src/app/admin/page.tsx`, `src/lib/useTranslation.ts`, `ToDo.md`
+- **Commit-Vorschlag:** `2026-02-08 22:30 | Aufgabe 12 – Schueler-Verwaltungs-Dialog mit CRUD, Level/Difficulty RadioButtons, Index-Key`
+- **Naechste Aufgabe:** Aufgabe 13 – Sprachwechsel-Hintergrundfarbe im Backend
+
+---
+
+### 2026-02-08 – Bugfix: Student-Management Datenbankfehler
+- **Aufgabe:** Datenbankfehler beim Speichern von Schuelern beheben
+- **Was wurde gemacht:**
+  - **5 Probleme identifiziert und behoben:**
+    1. CHECK-Constraint `level`: `B2` fehlte in erlaubten Werten
+    2. CHECK-Constraint `difficulty`: DB hatte `'medium'`, Code sendete `'middle'`
+    3. RLS-Policies: Anon-User durfte nur SELECT, kein INSERT/UPDATE/DELETE
+    4. `email` Spalte war NOT NULL, aber Formular erlaubt leeres Email
+    5. `pin_hash` wurde nie gesetzt – Schueler konnten sich nicht einloggen
+  - **SQL-Migration `supabase/fix_student_management.sql`** erstellt:
+    - CHECK-Constraints gefixed (B2 hinzugefuegt, medium→middle)
+    - Email nullable gemacht
+    - 4 RPC-Funktionen mit SECURITY DEFINER (umgehen RLS):
+      - `create_student()` – erstellt Schueler mit bcrypt PIN-Hash
+      - `update_student()` – aktualisiert Schueler, optional neuer PIN-Hash
+      - `delete_student()` – loescht Schueler (nur role='student')
+      - `list_students()` – listet alle Schueler
+    - GRANT EXECUTE fuer anon + authenticated
+  - **`StudentManagementDialog.tsx`** aktualisiert:
+    - Alle CRUD-Operationen nutzen jetzt RPC-Funktionen (primaer)
+    - Fallback auf direkte Supabase-Queries falls RPC nicht verfuegbar
+    - Fehlerbehandlung fuer RPC-Ergebnisse (`success`/`error` JSON)
+  - **`create_users_table.sql`** aktualisiert:
+    - Level-Constraint: `('A1', 'A2', 'B1', 'B2')`
+    - Difficulty-Constraint: `('easy', 'middle', 'hard')`
+  - Build erfolgreich getestet
+- **Dateien:** `supabase/fix_student_management.sql` (neu), `src/components/admin/StudentManagementDialog.tsx`, `supabase/create_users_table.sql`
+- **Hinweis:** SQL muss in Supabase SQL Editor ausgefuehrt werden!
+
+---
+
+### 2026-02-08 – Aufgabe 13: Sprachwechsel-Hintergrundfarbe im Backend
+- **Aufgabe:** Dezente Hintergrundfarbaenderung bei Sprachwechsel EN/RU
+- **Was wurde gemacht:**
+  - **Hintergrund-Gradient** aendert sich je nach Locale:
+    - EN: Kuehler Blauton (`#0f1a3e` Mitte)
+    - RU: Warmer Rotton (`#2a1028` Mitte)
+    - Sanfter Uebergang mit `transition: background 0.6s ease`
+  - **Header-Hintergrund** passt sich an:
+    - EN: `rgba(0, 20, 60, 0.25)` – dezenter Blau-Touch
+    - RU: `rgba(60, 0, 20, 0.25)` – dezenter Rot-Touch
+    - Header-Border ebenfalls farblich angepasst
+  - **Sprachwahl-Buttons** farblich differenziert:
+    - EN aktiv: Blau (`#5B9BFF`)
+    - RU aktiv: Rot (`#E05555`)
+    - Button-Rahmen passt sich aktiver Sprache an
+  - Build erfolgreich getestet
+- **Dateien:** `src/app/admin/page.tsx`
+- **Commit-Vorschlag:** `2026-02-08 23:00 | Bugfix Student-DB + Aufgabe 13 – Sprachwechsel-Hintergrundfarbe im Admin-Backend`
+- **Naechste Aufgabe:** Aufgabe 14 – Flaggen-Anzeige rechts oben
+
+---
+
+### 2026-02-08 – Bugfix v2: Student-Management SQL konsolidiert
+- **Aufgabe:** Alle SQL-Fehler fuer Student-Management in einer konsolidierten Datei beheben
+- **Was wurde gemacht:**
+  - **Neue Datei `supabase/fix_student_management_v2.sql`** erstellt (ersetzt v1 + create_users_table.sql):
+  - **Gefundene Probleme:**
+    1. **KRITISCH: `public.users` Tabelle existierte nicht in Supabase!** schema.sql war nie ausgefuehrt worden → Gefixt: `CREATE TABLE IF NOT EXISTS` mit allen Spalten
+    2. `uuid_generate_v4()` in create_users_table.sql ohne uuid-ossp Extension → Gefixt
+    3. `update_student()` RPC: `v_index` falsch berechnet wenn p_level/p_difficulty NULL → Gefixt (nutzt jetzt COALESCE mit bestehenden DB-Werten via Trigger)
+    4. `create_student()` RPC: Setzte `pin` Klartext mit Fallback `000000` → Gefixt (nur wenn 6 Ziffern)
+    5. Email NOT NULL im schema.sql aber Schueler brauchen keine → Nullable gemacht
+    6. Pin NOT NULL im schema.sql → Nullable gemacht (wird durch pin_hash ersetzt)
+    7. Bestehende plain-text PINs werden zu bcrypt-Hashes migriert
+    8. CHECK-Constraints waren nicht idempotent → Gefixt mit `IF NOT EXISTS` Pruefung
+  - **Konsolidierte Datei enthaelt alles:**
+    - Extensions (pgcrypto + uuid-ossp)
+    - **CREATE TABLE IF NOT EXISTS** mit allen 12 Spalten (funktioniert auf leerer DB!)
+    - Spalten-Erweiterung fuer bestehende Tabellen (idempotent)
+    - Email + Pin nullable (idempotent via information_schema Pruefung)
+    - CHECK-Constraints (dynamisches Entfernen + idempotentes Neusetzen)
+    - Trigger fuer performance_index
+    - RLS-Policies komplett
+    - 5 RPC-Funktionen: verify_user_pin, create_student, update_student, delete_student, list_students
+    - Admin-User Seed (idempotent)
+    - Daten-Migration (performance_index + pin_hash)
+    - **Komplett idempotent** – kann beliebig oft sicher ausgefuehrt werden
+  - Build erfolgreich getestet
+- **Dateien:** `supabase/fix_student_management_v2.sql` (aktualisiert)
+- **Hinweis:** Diese Datei im Supabase SQL Editor ausfuehren! Ersetzt `schema.sql` (users-Teil), `create_users_table.sql` und `fix_student_management.sql`.
+
+---
+
+### 2026-02-08 – Aufgabe 14+15: Flaggen-Anzeige + Klick-Sprachwechsel
+- **Aufgabe:** Flaggen-Anzeige rechts oben + Sprachwechsel per Klick
+- **Was wurde gemacht:**
+  - **DashboardHeader.tsx:**
+    - `useLanguage` Hook importiert (locale + setLocale)
+    - Flaggen-Button zwischen User-Profil und Admin-Button eingefuegt
+    - Zeigt aktuelle Sprache als Emoji-Flagge: EN = 🇬🇧, RU = 🇷🇺
+    - Kleines Label daneben (EN/RU, 11px, grau)
+    - Klick togglet Sprache (EN ↔ RU) via `setLocale()`
+    - Hover-Effekt: Hintergrund heller + leichtes Scale (1.05)
+    - Tooltip zeigt Zielsprache
+    - Glasmorphismus-Stil, dezent (~22px Flagge)
+  - **Admin-Seite (admin/page.tsx):**
+    - Alte EN/RU Text-Buttons durch Flaggen-Button ersetzt
+    - Gleiche Toggle-Logik (Klick wechselt Sprache)
+    - Flaggen-Rahmen passt sich Sprache an (EN=blau, RU=rot)
+    - Label-Farbe passt sich an (EN=#5B9BFF, RU=#E05555)
+    - Hintergrundfarbe der Seite wechselt weiterhin mit (Aufgabe 13)
+  - Build erfolgreich getestet
+- **Dateien:** `src/components/dashboard/DashboardHeader.tsx`, `src/app/admin/page.tsx`
+- **Commit-Vorschlag:** `2026-02-08 23:30 | Aufgabe 14+15 – Flaggen-Anzeige mit Klick-Sprachwechsel in Dashboard + Admin`
+- **Naechste Aufgabe:** Aufgabe 16 – Schueler-Leistungsstufe zuordnen
+
+---
+
+### 2026-02-08 – Aufgabe 16: Schueler-Leistungsstufe zuordnen
+- **Aufgabe:** Automatische Leistungsstufen-Anpassung nach Lernsessions + Logging
+- **Was wurde gemacht:**
+  - **Neue SQL-Migration `supabase/create_performance_evaluation.sql`** erstellt:
+    - `performance_log` Tabelle: student_id, old/new_level, old/new_difficulty, old/new_index, correct_rate, total_attempts, reason, created_at
+    - Indizes auf student_id und created_at
+    - RLS-Policies: Admin lesen, Anon lesen + schreiben (fuer RPC)
+    - `evaluate_student_performance(p_student_id, p_min_attempts)` RPC-Funktion:
+      - Berechnet Korrektquote aus `student_progress` Tabelle (SUM attempts/correct_count)
+      - >80% ueber 50+ Karten → Difficulty erhoehen (easy→middle→hard)
+      - Bei hard + >80% → Level erhoehen (A1→A2→B1→B2) und Difficulty zurueck auf easy
+      - <40% ueber 50+ Karten → Difficulty senken (hard→middle→easy)
+      - Bei easy + <40% → Level senken (B2→B1→A2→A1) und Difficulty zurueck auf hard
+      - Aenderung wird in performance_log geloggt
+      - Gibt JSON zurueck: evaluated, correct_rate, changed, old/new level/difficulty, message
+    - `get_student_stats(p_student_id)` RPC-Funktion fuer Admin-Dashboard-Statistiken
+    - SECURITY DEFINER + GRANT EXECUTE fuer anon + authenticated
+  - **Neuer Hook `src/lib/usePerformanceEvaluation.ts`** erstellt:
+    - `evaluate(minAttempts)` Funktion: Ruft RPC nach Lernsession auf
+    - Nur fuer eingeloggte Studenten (nicht Admin, nicht lokaler Fallback)
+    - Console-Logging fuer Debugging
+    - Gibt `lastResult` zurueck fuer UI-Anzeige
+  - **4 Lern-Dialoge integriert:**
+    - `VocabularyDialog.tsx`: evaluate() nach Session-Summary, perfMessage-Anzeige (gruene Box mit 🎯)
+    - `GrammarDialog.tsx`: Gleiche Integration wie Vocabulary
+    - `ComprehensionDialog.tsx`: Gleiche Integration wie Vocabulary
+    - `ListeningDialog.tsx`: Gleiche Integration (angepasst an handleAnswerSelect Logik)
+    - Alle: perfMessage wird bei Restart/Close zurueckgesetzt
+  - Build erfolgreich getestet
+- **Dateien:** `supabase/create_performance_evaluation.sql` (neu), `src/lib/usePerformanceEvaluation.ts` (neu), `src/components/learning/VocabularyDialog.tsx`, `src/components/learning/GrammarDialog.tsx`, `src/components/learning/ComprehensionDialog.tsx`, `src/components/learning/ListeningDialog.tsx`
+- **Hinweis:** `create_performance_evaluation.sql` muss im Supabase SQL Editor ausgefuehrt werden!
+- **Commit-Vorschlag:** `2026-02-08 24:00 | Aufgabe 16 – Automatische Leistungsstufen-Anpassung mit performance_log + evaluate RPC`
+- **Naechste Aufgabe:** Aufgabe 17 – Inhalte basierend auf Leistungsstufe filtern

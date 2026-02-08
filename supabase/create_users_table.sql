@@ -34,16 +34,16 @@ BEGIN
             CHECK (role IN ('admin', 'student'));
     END IF;
 
-    -- level (Sprachniveau: A1, A2, B1)
+    -- level (Sprachniveau: A1, A2, B1, B2)
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='level') THEN
         ALTER TABLE public.users ADD COLUMN level TEXT DEFAULT 'A1'
-            CHECK (level IN ('A1', 'A2', 'B1'));
+            CHECK (level IN ('A1', 'A2', 'B1', 'B2'));
     END IF;
 
-    -- difficulty (Schwierigkeitsgrad: easy, medium, hard)
+    -- difficulty (Schwierigkeitsgrad: easy, middle, hard)
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='difficulty') THEN
         ALTER TABLE public.users ADD COLUMN difficulty TEXT DEFAULT 'easy'
-            CHECK (difficulty IN ('easy', 'medium', 'hard'));
+            CHECK (difficulty IN ('easy', 'middle', 'hard'));
     END IF;
 
     -- performance_index (zusammengesetzter Key: "{level}-{difficulty}")
@@ -57,8 +57,8 @@ COMMENT ON COLUMN public.users.name IS 'Display name, used for login (Name + PIN
 COMMENT ON COLUMN public.users.pin_hash IS 'bcrypt-hashed 6-digit PIN (via pgcrypto crypt). Never store plain text.';
 COMMENT ON COLUMN public.users.whatsapp IS 'Optional WhatsApp number for notifications';
 COMMENT ON COLUMN public.users.role IS 'User role: admin or student';
-COMMENT ON COLUMN public.users.level IS 'Language proficiency level: A1, A2, B1';
-COMMENT ON COLUMN public.users.difficulty IS 'Content difficulty: easy, medium, hard';
+COMMENT ON COLUMN public.users.level IS 'Language proficiency level: A1, A2, B1, B2';
+COMMENT ON COLUMN public.users.difficulty IS 'Content difficulty: easy, middle, hard';
 COMMENT ON COLUMN public.users.performance_index IS 'Composite key: "{level}-{difficulty}" (e.g. "A1-easy", "B1-hard")';
 
 -- 4. Index auf name fuer schnelle Login-Suche
