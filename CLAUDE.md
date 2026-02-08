@@ -199,3 +199,34 @@
 - **Dateien:** `src/context/AuthContext.tsx`, `src/components/dashboard/DashboardHeader.tsx`, `src/app/admin/page.tsx`, `src/lib/useTranslation.ts`
 - **Commit-Vorschlag:** `2026-02-08 21:00 | Aufgabe 9 – Admin-Button im Header + Admin-Seite mit Zugriffskontrolle`
 - **Naechste Aufgabe:** Aufgabe 10 – User-Tabelle erstellen
+
+---
+
+### 2026-02-08 – Aufgabe 10: User-Tabelle erstellen
+- **Aufgabe:** Bestehende users-Tabelle um alle benoetigten Felder erweitern
+- **Was wurde gemacht:**
+  - SQL-Migration `supabase/create_users_table.sql` erstellt:
+    - `pgcrypto` Extension fuer bcrypt-Hashing aktiviert
+    - 7 neue Spalten idempotent hinzugefuegt (DO $$ IF NOT EXISTS):
+      - `name TEXT` – Login-Name
+      - `pin_hash TEXT` – bcrypt-gehashter PIN (via `crypt()` + `gen_salt('bf')`)
+      - `whatsapp TEXT` – optionale WhatsApp-Nummer
+      - `role TEXT NOT NULL DEFAULT 'student'` – CHECK (admin/student)
+      - `level TEXT DEFAULT 'A1'` – CHECK (A1/A2/B1)
+      - `difficulty TEXT DEFAULT 'easy'` – CHECK (easy/medium/hard)
+      - `performance_index TEXT DEFAULT 'A1-easy'` – zusammengesetzter Key
+    - Indizes: `idx_users_name`, `idx_users_performance`
+    - Trigger `trg_update_performance_index`: Automatische Aktualisierung von `performance_index` bei Aenderung von `level` oder `difficulty`
+    - RLS-Policies:
+      - "Admin full access" – Admin darf alles
+      - "Students read own data" – Student nur eigene Daten
+      - "Anon can read users for login" – Anon darf fuer Login lesen
+    - Admin-User via Upsert: Name "Admin", PIN "1234" als bcrypt-Hash
+    - Hilfsfunktion `verify_user_pin(p_name, p_pin)`:
+      - Validiert Name + PIN gegen bcrypt-Hash
+      - Gibt user_id, name, email, role, level, difficulty, performance_index zurueck
+      - SECURITY DEFINER, Zugriffsrechte fuer anon + authenticated
+  - Build erfolgreich getestet
+- **Dateien:** `supabase/create_users_table.sql`
+- **Commit-Vorschlag:** `2026-02-08 21:30 | Aufgabe 10 – User-Tabelle mit bcrypt PIN-Hashing, RLS, Trigger, verify_user_pin()`
+- **Naechste Aufgabe:** Aufgabe 11 – Admin-Authentifizierung absichern
