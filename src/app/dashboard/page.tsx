@@ -13,6 +13,7 @@ import GrammarDialog from '@/components/learning/GrammarDialog';
 import ComprehensionDialog from '@/components/learning/ComprehensionDialog';
 import ListeningDialog from '@/components/learning/ListeningDialog';
 import { supabase } from '@/db/supabase';
+import { useTranslation } from '@/lib/useTranslation';
 import Link from 'next/link';
 
 interface ActionTileProps {
@@ -50,14 +51,16 @@ export default function DashboardPage() {
     const [listeningDialogMode, setListeningDialogMode] = useState<'weak' | 'review' | 'due'>('review');
     const [masteryProgress, setMasteryProgress] = useState(38);
     const [stats, setStats] = useState({ streak: 5, words: 47, weak: 'Verbs' });
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (!authLoading) {
-            // For development: Allow access even without user to avoid infinite redirect loop
-            // In production, this should check for user and redirect to login
-            if (user) {
-                fetchStats();
+            if (!user) {
+                // Not logged in – redirect to login page
+                router.push('/login');
+                return;
             }
+            fetchStats();
             const timer = setTimeout(() => {
                 setLoading(false);
             }, 800);
@@ -89,7 +92,7 @@ export default function DashboardPage() {
     if (authLoading || loading) {
         return (
             <div className="login-overlay">
-                <h1 style={{ color: 'white', fontSize: '24px' }}>🏛️ {authLoading ? 'Authenticating...' : 'Loading GreekLingua...'}</h1>
+                <h1 style={{ color: 'white', fontSize: '24px' }}>🏛️ {authLoading ? t('dashboard.authenticating') : t('dashboard.loading')}</h1>
             </div>
         );
     }
@@ -103,18 +106,17 @@ export default function DashboardPage() {
                     {/* Hero Right Side (Welcome / quick info) can go here if needed, 
                         or we can keep it cleaner as per new design focus on footer */}
                     <div className="action-area" style={{ alignItems: 'flex-start', paddingLeft: '20px' }}>
-                        <h2 style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#fff' }}>Welcome back, SWS! 🏛️</h2>
-                        <p style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}>
-                            Ready to continue your journey? You have <b>12 new vocabulary cards</b> waiting for review today.
-                        </p>
+                        <h2 style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#fff' }}>{t('dashboard.welcome', { name: user?.name || 'SWS' })} 🏛️</h2>
+                        <p style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}
+                           dangerouslySetInnerHTML={{ __html: t('dashboard.welcome_subtitle', { count: '12' }) }} />
                     </div>
                 </div>
 
                 <div className="dashboard-footer-area">
                     {/* LEFT: MASTERY BOX (PIMPED) */}
                     <div className="mastery-box">
-                        <div className="mastery-title-v3">Learning Mastery</div>
-                        <div className="mastery-total-time">Total time spent learning: 14.5 hours</div>
+                        <div className="mastery-title-v3">{t('mastery.title')}</div>
+                        <div className="mastery-total-time">{t('mastery.total_time', { hours: '14.5' })}</div>
 
                         <div className="mastery-stats-row">
                             <div className="mastery-bar-container">
@@ -143,22 +145,21 @@ export default function DashboardPage() {
                         <div className="rating-tiles-grid">
                             <div className="rating-tile">
                                 <span className="rating-tile-val" style={{ color: '#007AFF' }}>78%</span>
-                                <span className="rating-tile-lbl">Last Test</span>
+                                <span className="rating-tile-lbl">{t('mastery.last_test')}</span>
                             </div>
                             <div className="rating-tile">
                                 <span className="rating-tile-val" style={{ color: '#007AFF' }}>85%</span>
-                                <span className="rating-tile-lbl">Actual Test</span>
+                                <span className="rating-tile-lbl">{t('mastery.actual_test')}</span>
                             </div>
                             <div className="rating-tile">
                                 <span className="rating-tile-val" style={{ color: '#007AFF' }}>92%</span>
-                                <span className="rating-tile-lbl">Last Exam</span>
+                                <span className="rating-tile-lbl">{t('mastery.last_exam')}</span>
                             </div>
                         </div>
 
                         <div className="vocab-progress-section">
-                            <div className="vocab-status-text">
-                                <b>187 / 600</b> Vocabulary confidently – 413 require attention
-                            </div>
+                            <div className="vocab-status-text"
+                                 dangerouslySetInnerHTML={{ __html: t('mastery.vocab_progress', { learned: '187', total: '600', remaining: '413' }) }} />
                             <div className="vocab-bar-dual">
                                 <div className="vocab-bar-learned" style={{ width: '31%' }}></div>
                                 <div className="vocab-bar-repeat" style={{ width: '69%' }}></div>
@@ -166,24 +167,24 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="mastery-suggestion">
-                            Suggestion for today: 12 new vocabulary cards + 1 short text about Cyprus.
+                            {t('mastery.suggestion_default')}
                         </div>
                     </div>
 
                     {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
                     <div className="quick-actions-grid">
-                        <ActionTile icon="✨" label="Magic Round" disabled />
-                        <ActionTile icon="⚡" label="20 min Quick Lesson" disabled />
+                        <ActionTile icon="✨" label={t('action.magic_round')} disabled />
+                        <ActionTile icon="⚡" label={t('action.quick_lesson')} disabled />
                         <ActionTile 
                             icon="💬" 
-                            label="Daily Phrases" 
+                            label={t('action.daily_phrases')} 
                             onClick={() => {
                                 window.location.href = '/daily-phrases/daily-phrases.html';
                             }}
                         />
                         <ActionTile
                             icon="📚"
-                            label="Short Stories"
+                            label={t('action.short_stories')}
                             onClick={() => {
                                 window.location.href = '/short-stories/short-stories.html';
                             }}
@@ -191,7 +192,7 @@ export default function DashboardPage() {
 
                         <ActionTile 
                             icon="⚠️" 
-                            label="Train Weak Words" 
+                            label={t('action.train_weak')} 
                             onClick={() => {
                                 setVocabDialogMode('weak');
                                 setIsVocabDialogOpen(true);
@@ -200,7 +201,7 @@ export default function DashboardPage() {
 
                         <ActionTile 
                             icon="🔄" 
-                            label="Review Vocabulary" 
+                            label={t('action.review_vocab')} 
                             onClick={() => {
                                 setVocabDialogMode('review');
                                 setIsVocabDialogOpen(true);
@@ -209,7 +210,7 @@ export default function DashboardPage() {
 
                         <ActionTile 
                             icon="📅" 
-                            label="Due Cards Today" 
+                            label={t('action.due_cards')} 
                             onClick={() => {
                                 setVocabDialogMode('due');
                                 setIsVocabDialogOpen(true);
@@ -218,7 +219,7 @@ export default function DashboardPage() {
 
                         <ActionTile 
                             icon="📐" 
-                            label="Grammar Quick Hits" 
+                            label={t('action.grammar_hits')} 
                             onClick={() => {
                                 setGrammarDialogMode('review');
                                 setIsGrammarDialogOpen(true);
@@ -227,29 +228,29 @@ export default function DashboardPage() {
 
                         <ActionTile 
                             icon="👂" 
-                            label="Listening Practice" 
+                            label={t('action.listening')} 
                             disabled
                             onClick={() => {
                                 setListeningDialogMode('review');
                                 setIsListeningDialogOpen(true);
                             }}
                         />
-                        <ActionTile icon="🗣️" label="Pronunciation Trainer" disabled />
+                        <ActionTile icon="🗣️" label={t('action.pronunciation')} disabled />
                         <ActionTile 
                             icon="🧠" 
-                            label="Comprehension" 
+                            label={t('action.comprehension')} 
                             disabled
                             onClick={() => {
                                 setComprehensionDialogMode('review');
                                 setIsComprehensionDialogOpen(true);
                             }}
                         />
-                        <ActionTile icon="🎧" label="Audio Immersion" disabled />
+                        <ActionTile icon="🎧" label={t('action.audio_immersion')} disabled />
 
-                        <ActionTile icon="📝" label="Test" disabled />
-                        <ActionTile icon="🏛️" label="Cyprus Exam Sim" disabled />
-                        <ActionTile icon="📕" label="Book Recommendations" disabled />
-                        <ActionTile icon="📊" label="Progress History" disabled />
+                        <ActionTile icon="📝" label={t('action.test')} disabled />
+                        <ActionTile icon="🏛️" label={t('action.cyprus_exam')} disabled />
+                        <ActionTile icon="📕" label={t('action.book_recs')} disabled />
+                        <ActionTile icon="📊" label={t('action.progress_history')} disabled />
                     </div>
                 </div>
             </main>
