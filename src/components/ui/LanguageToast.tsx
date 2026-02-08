@@ -7,18 +7,21 @@ const TOAST_MESSAGES: Record<Locale, string> = {
     en: 'Language changed to English.',
     ru: '\u042f\u0437\u044b\u043a \u0438\u0437\u043c\u0435\u043d\u0451\u043d \u043d\u0430 \u0420\u0443\u0441\u0441\u043a\u0438\u0439.',
     el: '\u0397 \u03b3\u03bb\u03ce\u03c3\u03c3\u03b1 \u03ac\u03bb\u03bb\u03b1\u03be\u03b5 \u03c3\u03b5 \u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac.',
+    de: 'Sprache auf Deutsch ge\u00e4ndert.',
 };
 
 const TOAST_FLAGS: Record<Locale, string> = {
     en: '\ud83c\uddec\ud83c\udde7',
     ru: '\ud83c\uddf7\ud83c\uddfa',
     el: '\ud83c\uddec\ud83c\uddf7',
+    de: '\ud83c\udde9\ud83c\uddea',
 };
 
 const TOAST_COLORS: Record<Locale, { bg: string; border: string; shadow: string }> = {
     en: { bg: 'rgba(10, 20, 60, 0.85)', border: 'rgba(0, 122, 255, 0.3)', shadow: 'rgba(0, 122, 255, 0.2)' },
     ru: { bg: 'rgba(60, 10, 30, 0.85)', border: 'rgba(224, 85, 85, 0.3)', shadow: 'rgba(224, 85, 85, 0.2)' },
     el: { bg: 'rgba(10, 40, 60, 0.85)', border: 'rgba(13, 110, 253, 0.3)', shadow: 'rgba(13, 110, 253, 0.2)' },
+    de: { bg: 'rgba(50, 40, 10, 0.85)', border: 'rgba(218, 165, 32, 0.3)', shadow: 'rgba(218, 165, 32, 0.2)' },
 };
 
 export default function LanguageToast() {

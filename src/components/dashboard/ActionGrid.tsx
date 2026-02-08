@@ -15,8 +15,8 @@ export default function ActionGrid() {
         <div className="actions-group debug-flex">
             <div className="actions-inner-grid debug-grid">
                 <div className="grid-cell">
-                    <button className="btn btn-primary glass" onClick={() => showToast('✨ ' + t('action_grid.toast_magic_round'))}>
-                        <span>✨</span> {t('action_grid.magic_round')}
+                    <button className="btn btn-primary glass" onClick={() => showToast('👩‍🏫 ' + t('action_grid.toast_magic_round'))}>
+                        <span>👩‍🏫</span> {t('action_grid.magic_round')}
                     </button>
                 </div>
                 <div className="grid-cell">

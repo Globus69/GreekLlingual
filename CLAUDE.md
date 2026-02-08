@@ -636,12 +636,99 @@
 
 ---
 
+### 2026-02-09 – Aufgabe 39-46: Phase 6 – Deutsch (de) als vierte UI-Sprache
+- **Aufgabe:** Komplette Erweiterung der App von 3 auf 4 UI-Sprachen (EN + RU + EL + DE)
+- **Was wurde gemacht:**
+  - **Aufgabe 39: Locale-Typ erweitert**
+    - `Locale = 'en' | 'ru' | 'el' | 'de'` in LanguageContext, AuthContext, useTranslation
+    - `translationCache` und `fetchPromises` um `de` erweitert
+    - `preferred_locale` Typ in AuthContext um `'de'` erweitert (inkl. alle Casts)
+  - **Aufgabe 40: FALLBACK_DE erstellt**
+    - ~130 deutsche Fallback-Uebersetzungen in `useTranslation.ts`
+    - `getFallback(locale)` um `de` erweitert
+    - `FALLBACKS` Record um `de: FALLBACK_DE` erweitert
+    - `header.switch_to_de` in FALLBACK_EN und FALLBACK_EL ergaenzt
+  - **Aufgabe 41+46: SQL deutsche Uebersetzungen + CHECK-Constraints**
+    - `supabase/insert_german_translations.sql` erstellt
+    - ~130 deutsche Uebersetzungen mit `ON CONFLICT DO UPDATE`
+    - CHECK-Constraints auf `ui_translations.lang` und `users.preferred_locale` auf 4 Sprachen erweitert
+    - `update_user_locale()` RPC auf 4 Sprachen erweitert
+  - **Aufgabe 42: Login-Seite 4-Sprachen-Auswahl**
+    - 3-Button-Auswahl durch 4-Button-Auswahl ersetzt (EN / RU / EL / DE)
+    - Hintergrund-Gradient fuer Deutsch (warmer Goldton, #3d3010)
+    - Canvas-Partikel: Hue 35-55 (gold/amber), Linienfarbe 218,165,32
+    - Gradient Orbs fuer Deutsch angepasst (rgba(218, 165, 32))
+    - Divider viersprachig: "or" / "или" / "ή" / "oder"
+  - **Aufgabe 43: DashboardHeader 4-Sprachen-Toggle**
+    - 3-Wege-Toggle durch 4-Wege-Rotation ersetzt (EN→RU→EL→DE→EN)
+    - Flagge zeigt 🇬🇧 / 🇷🇺 / 🇬🇷 / 🇩🇪, Label EN/RU/EL/DE
+    - Tooltip nutzt `header.switch_to_de` Key
+  - **Aufgabe 44: Admin-Seite 4-Sprachen-Toggle**
+    - Gleiche 4-Wege-Rotation wie DashboardHeader
+    - Hintergrund-Gradient fuer DE definiert (warmer Goldton #2a2010)
+    - Header-Background und Border fuer DE angepasst
+    - Flaggen-Rahmenfarbe DE: rgba(218, 165, 32, 0.2), Label-Farbe: #DAA520
+  - **Aufgabe 45: LanguageToast**
+    - Toast fuer DE: "Sprache auf Deutsch geaendert." mit 🇩🇪
+    - Farbschema: gold/amber (bg rgba(50, 40, 10), border rgba(218, 165, 32))
+  - Build erfolgreich getestet ✅
+- **Dateien:** `src/context/LanguageContext.tsx`, `src/context/AuthContext.tsx`, `src/lib/useTranslation.ts`, `src/components/ui/LanguageToast.tsx`, `src/app/login/page.tsx`, `src/components/dashboard/DashboardHeader.tsx`, `src/app/admin/page.tsx`, `supabase/insert_german_translations.sql` (neu), `ToDo.md`
+- **Hinweis:** `supabase/insert_german_translations.sql` muss im Supabase SQL Editor ausgefuehrt werden!
+- **Commit-Vorschlag:** `2026-02-09 04:00 | Aufgabe 39-46 – Deutsch (DE) als vierte UI-Sprache komplett implementiert`
+
+---
+
+### 2026-02-09 – Aufgabe 47: "Dein Unterricht" Button + LessonDialog + Datenbank
+- **Aufgabe:** Button "Magische Runde" umbenennen, Unterrichts-Dialog erstellen, Datenbank fuer Lektionen
+- **Was wurde gemacht:**
+  - **Button umbenannt (alle 4 Sprachen):**
+    - `action.magic_round`: EN "Your Lesson", RU via DB, EL "Το μάθημά σου", DE "Dein Unterricht"
+    - `action_grid.magic_round` + `action_grid.toast_magic_round` ebenfalls aktualisiert
+    - Icon geaendert: ✨ → 👩‍🏫 (Lehrerin)
+    - Button war `disabled` → jetzt aktiv mit onClick
+  - **SQL-Migration `supabase/create_lesson_sessions.sql`** erstellt:
+    - `lesson_sessions` Tabelle: id, student_id (FK→users), date, topic, created_at, updated_at
+    - `lesson_vocabulary` Tabelle: id, session_id (FK→lesson_sessions), source_word, greek_word, sort_order
+    - UNIQUE(student_id, date) – ein Eintrag pro Schueler+Tag
+    - Indizes fuer schnelle Abfragen
+    - Trigger fuer automatische updated_at Aktualisierung
+    - RLS-Policies: Admin voll, Student eigene, Anon via RPC
+    - 5 RPC-Funktionen (SECURITY DEFINER):
+      - `get_lesson_sessions(student_id)` – Liste aller Sitzungen
+      - `get_lesson_detail(session_id)` – Einzelne Sitzung mit Vokabeln
+      - `upsert_lesson_session(student_id, date, topic)` – Erstellen/Aktualisieren
+      - `set_lesson_vocabulary(session_id, vocabulary_json)` – Vokabeln setzen
+      - `delete_lesson_session(session_id)` – Loeschen
+  - **`src/components/learning/LessonDialog.tsx`** erstellt:
+    - Modal-Dialog im gleichen Layout wie VocabularyDialog
+    - 2 Ansichten: Sitzungsliste → Detailansicht
+    - Sitzungsliste: Datum (lokal formatiert), Thema, Vokabelanzahl
+    - Detailansicht: Thema-Box, 2-spaltige Vokabeltabelle (#, Uebersetzung, Griechisch)
+    - Nur Abbrechen-Button (kein X-Button)
+    - Glasmorphismus-Stil wie alle anderen Dialoge
+  - **Dashboard-Integration:**
+    - `LessonDialog` importiert in `dashboard/page.tsx`
+    - `isLessonDialogOpen` State hinzugefuegt
+    - ActionTile onClick oeffnet Dialog
+    - Dialog-Komponente am Ende gerendert
+  - **Uebersetzungen (4 Sprachen):**
+    - 12 neue `lesson.*` Keys in FALLBACK_EN, FALLBACK_EL, FALLBACK_DE
+    - RU nutzt FALLBACK_EN (wird via Supabase DB uebersetzt)
+  - Build erfolgreich getestet ✅
+- **Dateien:** `supabase/create_lesson_sessions.sql` (neu), `src/components/learning/LessonDialog.tsx` (neu), `src/app/dashboard/page.tsx`, `src/components/dashboard/ActionGrid.tsx`, `src/lib/useTranslation.ts`
+- **Hinweis:** `create_lesson_sessions.sql` muss im Supabase SQL Editor ausgefuehrt werden!
+- **Commit-Vorschlag:** `2026-02-09 05:00 | Aufgabe 47 – "Dein Unterricht" Button + LessonDialog + lesson_sessions DB`
+
+---
+
 ### Projekt-Status
 - Phase 1 (Aufgaben 1-8): Mehrsprachige UI komplett ✅
 - Phase 2 (Aufgaben 9-19): Admin-Backend + Schueler-Management komplett ✅
 - Phase 3 (Aufgaben 20-23): Sprachpersistenz + UX komplett ✅
 - Phase 4 (Aufgaben 24-30): Dashboard UI-Texte vollstaendig in DB ✅
 - Phase 5 (Aufgaben 31-38): Griechisch (EL) als dritte UI-Sprache ✅
+- Phase 6 (Aufgaben 39-46): Deutsch (DE) als vierte UI-Sprache ✅
+- Phase 7 (Aufgabe 47): "Dein Unterricht" Feature ✅
 - SQL-Dateien die im Supabase SQL Editor ausgefuehrt werden muessen:
   1. `supabase/fix_student_management_v2.sql` (Users-Tabelle + RPC)
   2. `supabase/create_performance_evaluation.sql` (Performance-Log + Evaluation)
@@ -649,3 +736,5 @@
   4. `supabase/add_preferred_locale.sql` (Sprach-Persistenz + update_user_locale RPC)
   5. `supabase/insert_missing_dashboard_translations.sql` (Fehlende Dashboard-Uebersetzungen)
   6. `supabase/insert_greek_translations.sql` (Griechische Uebersetzungen + CHECK-Constraints)
+  7. `supabase/insert_german_translations.sql` (Deutsche Uebersetzungen + CHECK-Constraints)
+  8. `supabase/create_lesson_sessions.sql` (Unterrichts-Tabellen + RPC-Funktionen)
