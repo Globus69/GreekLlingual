@@ -15,7 +15,7 @@
 - Russische Übersetzungen einfügen
 - RLS-Policy: Leserechte für authentifizierte + anon Nutzer
 
-### 2. ⬜ LanguageContext + Provider erstellen
+### 2. ✅ LanguageContext + Provider erstellen (2026-02-08)
 - `src/context/LanguageContext.tsx` erstellen
 - State: `locale` (en | ru), persistiert in `localStorage`
 - `setLocale(lang)` Methode

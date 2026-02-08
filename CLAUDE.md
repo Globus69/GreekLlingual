@@ -29,3 +29,20 @@
 - **Dateien:** `supabase/create_ui_translations.sql`
 - **Commit-Vorschlag:** `2026-02-08 16:30 | Aufgabe 1 – ui_translations Tabelle mit EN+RU Uebersetzungen erstellt`
 - **Naechste Aufgabe:** Aufgabe 2 – LanguageContext + Provider erstellen
+
+---
+
+### 2026-02-08 – Aufgabe 2: LanguageContext + Provider
+- **Aufgabe:** LanguageContext mit Locale-State und Provider erstellt
+- **Was wurde gemacht:**
+  - `src/context/LanguageContext.tsx` erstellt
+  - Typ `Locale = 'en' | 'ru'` exportiert
+  - State `locale` persistiert in localStorage (`greeklingua_locale`)
+  - `setLocale(lang)` Methode zum Sprachwechsel
+  - Hydration-Safety: Rendert erst nach Client-Mount (verhindert SSR-Mismatch)
+  - `useLanguage()` Hook exportiert
+  - `LanguageProvider` in `layout.tsx` eingebunden (umschliesst AuthProvider)
+  - Build erfolgreich getestet
+- **Dateien:** `src/context/LanguageContext.tsx`, `src/app/layout.tsx`
+- **Commit-Vorschlag:** `2026-02-08 16:45 | Aufgabe 2 – LanguageContext mit Locale-Persistierung erstellt`
+- **Naechste Aufgabe:** Aufgabe 3 – useTranslation Hook + Supabase-Anbindung
