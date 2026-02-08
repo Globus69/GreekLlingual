@@ -346,7 +346,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION list_students TO anon;
 GRANT EXECUTE ON FUNCTION list_students TO authenticated;
 
--- ── 15. Admin-User Seed (PIN: 1234, bcrypt-gehasht) ─────────
+-- ── 15. Admin-User Seed (PIN: 123456, bcrypt-gehasht) ─────────
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM public.users WHERE role = 'admin' AND name = 'Admin') THEN
@@ -355,20 +355,20 @@ BEGIN
             uuid_generate_v4(),
             'admin@greeklingua.local',
             'Admin',
-            '1234',
-            crypt('1234', gen_salt('bf')),
+            '123456',
+            crypt('123456', gen_salt('bf')),
             'admin',
             'A1',
             'easy'
         );
-        RAISE NOTICE '✅ Admin user created (Name: Admin, PIN: 1234)';
+        RAISE NOTICE '✅ Admin user created (Name: Admin, PIN: 123456)';
     ELSE
-        -- Admin existiert → pin_hash aktualisieren falls leer
+        -- Admin existiert → pin_hash aktualisieren
         UPDATE public.users
-        SET pin_hash = crypt('1234', gen_salt('bf')),
-            pin = '1234'
-        WHERE role = 'admin' AND name = 'Admin' AND pin_hash IS NULL;
-        RAISE NOTICE '✅ Admin user already exists';
+        SET pin_hash = crypt('123456', gen_salt('bf')),
+            pin = '123456'
+        WHERE role = 'admin' AND name = 'Admin';
+        RAISE NOTICE '✅ Admin user updated (PIN: 123456)';
     END IF;
 END $$;
 

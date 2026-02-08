@@ -1,40 +1,44 @@
 "use client";
 
 import React, { useEffect } from "react";
-import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
   const router = useRouter();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    router.push("/dashboard");
-  }, [router]);
+    if (loading) return;
+    if (user) {
+      router.push("/dashboard");
+    } else {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
-  const handleGetStarted = () => {
-    router.push("/student-mockup-complex");
-  };
-
-  const handleLearnMore = () => {
-    alert("Hellenic Horicons: Master new languages with ease!");
-  };
-
+  // Kurzer Ladebildschirm waehrend Redirect
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <div className="glass" style={{ padding: '40px', borderRadius: '28px', textAlign: 'center', maxWidth: '600px' }}>
-          <h1 style={{ fontSize: '3rem', marginBottom: '20px', fontWeight: 700 }}>Hellenic Horicons</h1>
-          <p style={{ fontSize: '1.2rem', marginBottom: '40px', opacity: 0.8 }}>
-            Master new languages with spaced repetition and immersive media.
-          </p>
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-            <button className="btn-primary" onClick={handleGetStarted}>Get Started</button>
-            <button className="glass" style={{ padding: '12px 24px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer' }} onClick={handleLearnMore}>
-              Learn More
-            </button>
-          </div>
-        </div>
-      </main>
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: '#0A0A0C',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <div style={{
+        fontSize: '48px',
+        animation: 'spin 1.5s ease-in-out infinite',
+      }}>
+        🏛️
+      </div>
+      <style jsx global>{`
+        @keyframes spin {
+          0%, 100% { transform: scale(1); opacity: 0.7; }
+          50% { transform: scale(1.1); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

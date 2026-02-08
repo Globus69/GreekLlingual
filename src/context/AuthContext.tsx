@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // 3. Fallback: Lokaler Admin-Account (funktioniert ohne Supabase)
-        if (username.toLowerCase() === 'admin' && pin === '1234') {
+        if (username.toLowerCase() === 'admin' && pin === '123456') {
             const adminUser: User = {
                 id: 'admin-local',
                 email: 'admin@greeklingua.local',
