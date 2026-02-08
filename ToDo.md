@@ -45,11 +45,13 @@
 - Feld-Label "ENGLISH" dynamisch via `flashcard.label_source` (EN: "ENGLISH", RU: "АНГЛИЙСКИЙ")
 - "ΕΛΛΗΝΙΚΑ" bleibt immer gleich (Zielsprache)
 
-### 7. ⬜ Restliche Komponenten mehrsprachig
-- `GrammarDialog.tsx`
-- `ComprehensionDialog.tsx`
-- `ListeningDialog.tsx`
-- `ActionGrid.tsx`, `ModuleGrid.tsx`, `PerformanceHub.tsx`
+### 7. ✅ Restliche Komponenten mehrsprachig (2026-02-08)
+- `GrammarDialog.tsx` – Loading, Login, NoItems, Error, Summary, Mode-Titel, Buttons uebersetzt
+- `ComprehensionDialog.tsx` – Loading, Login, NoItems, Error, Summary, Mode-Titel, Buttons uebersetzt
+- `ListeningDialog.tsx` – Loading, Login, NoItems, Error, Summary, Mode-Titel, Audio, Feedback uebersetzt
+- `ActionGrid.tsx` – 9 Button-Labels uebersetzt (`action_grid.*`)
+- `ModuleGrid.tsx` – 8 Modul-Titel und Subtitel uebersetzt (`modules.*`)
+- `PerformanceHub.tsx` – Labels, Wochentage, Stats uebersetzt (`perf.*`)
 
 ### 8. ⬜ `learning_items` Tabelle um Russisch erweitern
 - Neue Spalte: `russian TEXT` (neben `english`)

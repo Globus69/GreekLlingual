@@ -1,19 +1,23 @@
+"use client";
+
 import { useRouter } from 'next/navigation';
 import PerformanceHub from './PerformanceHub';
-
-const modules = [
-    { title: 'Vokabeln', icon: '📝', sub: '12 Due', id: 'vokabeln' },
-    { title: 'Phrases', icon: '💬', sub: 'Travel', id: 'phrases' },
-    { title: 'Quiz', icon: '❓', sub: 'Reading', id: 'quiz' },
-    { title: 'Cyprus', icon: '🏛️', sub: 'Exam Prep', id: 'cyprus' },
-    { title: 'Video Class', icon: '🎥', sub: '', id: 'video' },
-    { title: 'Audio', icon: '🎧', sub: '', id: 'audio' },
-    { title: 'Library', icon: '📚', sub: '', id: 'library' },
-    { title: 'Stories', icon: '📚', sub: 'Short Stories', id: 'stories' }
-];
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function ModuleGrid() {
     const router = useRouter();
+    const { t } = useTranslation();
+
+    const modules = [
+        { title: t('modules.vokabeln'), icon: '📝', sub: t('modules.vokabeln_sub'), id: 'vokabeln' },
+        { title: t('modules.phrases'), icon: '💬', sub: t('modules.phrases_sub'), id: 'phrases' },
+        { title: t('modules.quiz'), icon: '❓', sub: t('modules.quiz_sub'), id: 'quiz' },
+        { title: t('modules.cyprus'), icon: '🏛️', sub: t('modules.cyprus_sub'), id: 'cyprus' },
+        { title: t('modules.video'), icon: '🎥', sub: '', id: 'video' },
+        { title: t('modules.audio'), icon: '🎧', sub: '', id: 'audio' },
+        { title: t('modules.library'), icon: '📚', sub: '', id: 'library' },
+        { title: t('modules.stories'), icon: '📚', sub: t('modules.stories_sub'), id: 'stories' }
+    ];
 
     const handleModuleClick = (id: string) => {
         if (id === 'vokabeln') {

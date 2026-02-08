@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/lib/useTranslation';
 import '@/styles/liquid-glass.css';
 
 interface LearningItem {
@@ -72,6 +73,7 @@ const FALLBACK_LISTENING: ListeningWithProgress[] = [
 
 export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: ListeningDialogProps) {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [listening, setListening] = useState<ListeningWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -494,9 +496,9 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact">
                     <div style={{ textAlign: 'center', padding: '60px', color: '#fff' }}>
-                        <h2>👂 Loading...</h2>
+                        <h2>👂 {t('vocab.loading')}</h2>
                         <p style={{ color: '#8E8E93', marginTop: '12px', fontSize: '14px' }}>
-                            Fetching listening exercises from database...
+                            {t('listening.loading_subtitle')}
                         </p>
                     </div>
                 </div>
@@ -508,12 +510,12 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ Login Required</h2>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ {t('vocab.login_required')}</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
-                        Please log in to access listening practice features.
+                        {t('listening.login_required_msg')}
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
-                        Abbrechen
+                        {t('btn.cancel')}
                     </button>
                 </div>
             </div>
@@ -524,15 +526,15 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>👂 No Listening Exercises Found</h2>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>👂 {t('listening.no_items')}</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '20px' }}>
-                        No listening exercises available for this mode.
+                        {t('listening.no_items_msg')}
                     </p>
                     <p style={{ color: '#8E8E93', fontSize: '14px', marginBottom: '30px' }}>
-                        💡 <strong>Tip:</strong> Run <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>supabase/insert_test_listening.sql</code> in your Supabase SQL editor to add test listening exercises.
+                        💡 <strong>Tip:</strong> {t('listening.no_items_tip')}
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
-                        Abbrechen
+                        {t('btn.cancel')}
                     </button>
                 </div>
             </div>
@@ -544,12 +546,12 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ Error</h2>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ {t('vocab.error')}</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
-                        Unable to load listening exercise.
+                        {t('listening.error_msg')}
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
-                        Abbrechen
+                        {t('btn.cancel')}
                     </button>
                 </div>
             </div>
@@ -579,14 +581,14 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                         marginBottom: 'calc(var(--spacing-sm) * 0.75)',
                         color: 'var(--text-primary)',
                         letterSpacing: '-0.5px'
-                    }}>Session beendet!</h2>
+                    }}>{t('shared.session_complete')}</h2>
                     <p style={{ 
                         color: 'var(--text-secondary)', 
                         marginBottom: 'calc(var(--spacing-xl) * 0.75)',
                         fontSize: '1rem',
                         letterSpacing: '-0.1px'
                     }}>
-                        {correct} richtig / {total - correct} falsch ({progressPercent} %)
+                        {correct} {t('shared.correct').toLowerCase()} / {total - correct} {t('shared.wrong').toLowerCase()} ({progressPercent} %)
                     </p>
 
                     <div className="summary-stats" style={{ 
@@ -608,7 +610,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.8px',
                                 marginTop: 'calc(var(--spacing-xs) * 0.75)'
-                            }}>Richtig</span>
+                            }}>{t('shared.correct')}</span>
                         </div>
                         <div style={{
                             width: '1px',
@@ -628,7 +630,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.8px',
                                 marginTop: 'calc(var(--spacing-xs) * 0.75)'
-                            }}>Falsch</span>
+                            }}>{t('shared.wrong')}</span>
                         </div>
                     </div>
 
@@ -663,7 +665,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                             e.currentTarget.style.boxShadow = 'var(--shadow-inner)';
                         }}
                     >
-                        Zurück zum Dashboard
+                        {t('shared.back_to_dashboard')}
                     </button>
 
                     {showToast && (
@@ -682,7 +684,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                             boxShadow: 'var(--shadow-frosted)',
                             border: '1px solid var(--border-soft)'
                         }}>
-                            ✅ Fortschritt gespeichert – super gemacht!
+                            ✅ {t('shared.progress_saved')}
                         </div>
                     )}
                 </div>
@@ -693,12 +695,12 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
     const getModeConfig = () => {
         switch (mode) {
             case 'weak':
-                return { title: '💪 Train Weak Listening', subtitle: 'Lass uns diese stärken' };
+                return { title: '💪 ' + t('listening.mode.weak_title'), subtitle: t('listening.mode.weak_subtitle') };
             case 'due':
-                return { title: '📚 Due Listening Today', subtitle: 'Deine täglichen Wiederholungen' };
+                return { title: '📚 ' + t('listening.mode.due_title'), subtitle: t('listening.mode.due_subtitle') };
             case 'review':
             default:
-                return { title: '👂 Listening Practice', subtitle: 'Höre zu und wähle die richtige Antwort' };
+                return { title: '👂 ' + t('listening.mode.review_title'), subtitle: t('listening.mode.review_subtitle') };
         }
     };
 
@@ -745,11 +747,11 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
                                 <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                             </svg>
-                            Audio abspielen
+                            {t('listening.play_audio')}
                         </button>
                         {!currentItem.audio_url && (
                             <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem', fontStyle: 'italic' }}>
-                                (Demo: Keine Audio-Datei verfügbar)
+                                {t('listening.no_audio')}
                             </p>
                         )}
                     </div>
@@ -817,7 +819,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                                 fontWeight: 600,
                                 fontSize: '0.9375rem'
                             }}>
-                                {isCorrect ? '✓ Richtig! Sehr gut!' : `✗ Falsch. Die richtige Antwort ist: "${options[correctAnswerIndex]}"`}
+                                {isCorrect ? '✓ ' + t('listening.correct_answer') : '✗ ' + t('listening.wrong_answer', { answer: options[correctAnswerIndex] })}
                             </div>
                         )}
                     </div>
@@ -838,7 +840,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                                         <polyline points="23 4 23 10 17 10"></polyline>
                                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                                     </svg>
-                                    Wiederholen
+                                    {t('btn.restart')}
                                 </button>
                                 <button 
                                     className="action-btn cancel-btn vertical-btn" 
@@ -851,7 +853,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
                                         <line x1="6" y1="6" x2="18" y2="18"></line>
                                     </svg>
-                                    Abbrechen
+                                    {t('btn.cancel')}
                                 </button>
                             </div>
                             {showResult && currentIndex < listening.length - 1 && (
@@ -860,7 +862,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
                                     onClick={handleNext}
                                     style={{ marginLeft: 'calc(var(--spacing-sm) * 0.7)' }}
                                 >
-                                    Weiter →
+                                    {t('listening.next')} →
                                 </button>
                             )}
                         </div>
@@ -869,7 +871,7 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
 
                 {showToast && (
                     <div className="save-toast">
-                        ✅ Result saved - well done!
+                        ✅ {t('shared.result_saved')}
                     </div>
                 )}
             </div>
