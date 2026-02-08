@@ -175,6 +175,19 @@ const FALLBACK_EN: Record<string, string> = {
     'perf.day.fri': 'Fri',
     'perf.day.sat': 'Sat',
     'perf.day.sun': 'Sun',
+    'header.admin': 'Admin',
+    'admin.title': 'Admin Panel',
+    'admin.subtitle': 'Content & Student Management',
+    'admin.back_to_dashboard': 'Back to Dashboard',
+    'admin.students': 'Students',
+    'admin.content': 'Content Management',
+    'admin.settings': 'Settings',
+    'admin.total_students': 'Total Students',
+    'admin.active_today': 'Active Today',
+    'admin.avg_progress': 'Avg. Progress',
+    'admin.not_admin': 'Access Denied',
+    'admin.not_admin_msg': 'You must be logged in as Admin to access this page.',
+    'admin.go_to_dashboard': 'Go to Dashboard',
 };
 
 async function fetchTranslations(locale: Locale): Promise<Record<string, string>> {
@@ -196,10 +209,11 @@ async function fetchTranslations(locale: Locale): Promise<Record<string, string>
                 .eq('lang', locale);
 
             if (error) {
-                console.error(`❌ Error fetching translations for ${locale}:`, error);
-                // Fallback: return English hardcoded if locale is 'en', else empty
-                if (locale === 'en') return { ...FALLBACK_EN };
-                return {};
+                // Supabase nicht erreichbar oder Tabelle existiert nicht – stille Warnung
+                console.warn(`⚠️ Translations table not available for ${locale}, using built-in fallback.`);
+                const fallback = { ...FALLBACK_EN };
+                translationCache[locale] = fallback;
+                return fallback;
             }
 
             if (data && data.length > 0) {
@@ -212,14 +226,17 @@ async function fetchTranslations(locale: Locale): Promise<Record<string, string>
                 return map;
             }
 
-            // No data in DB – use fallback for English
-            console.warn(`⚠️ No translations found for locale: ${locale}, using fallback`);
-            if (locale === 'en') return { ...FALLBACK_EN };
-            return {};
+            // Keine Daten in der DB – Fallback verwenden und cachen
+            console.warn(`⚠️ No translations found for locale: ${locale}, using built-in fallback.`);
+            const fallback = { ...FALLBACK_EN };
+            translationCache[locale] = fallback;
+            return fallback;
         } catch (err) {
-            console.error(`❌ Translation fetch error for ${locale}:`, err);
-            if (locale === 'en') return { ...FALLBACK_EN };
-            return {};
+            // Netzwerk-/Verbindungsfehler – stille Warnung
+            console.warn(`⚠️ Could not reach translations service for ${locale}, using built-in fallback.`);
+            const fallback = { ...FALLBACK_EN };
+            translationCache[locale] = fallback;
+            return fallback;
         } finally {
             fetchPromises[locale] = null;
         }
@@ -241,7 +258,7 @@ async function fetchTranslations(locale: Locale): Promise<Record<string, string>
 export function useTranslation() {
     const { locale } = useLanguage();
     const [translations, setTranslations] = useState<Record<string, string>>(
-        translationCache[locale] || (locale === 'en' ? FALLBACK_EN : {})
+        translationCache[locale] || FALLBACK_EN
     );
     const [loading, setLoading] = useState(!translationCache[locale]);
     const localeRef = useRef(locale);

@@ -169,3 +169,33 @@
   - Build erfolgreich getestet
 - **Dateien:** `supabase/alter_learning_items_add_russian.sql`, `src/components/learning/VocabularyDialog.tsx`, `src/components/learning/GrammarDialog.tsx`, `src/components/learning/ComprehensionDialog.tsx`, `src/components/learning/ListeningDialog.tsx`
 - **Commit-Vorschlag:** `2026-02-08 20:00 | Aufgabe 8 – learning_items um russian Spalte erweitert, Kartenansicht sprachabhaengig`
+- **Naechste Aufgabe:** Aufgabe 9 – Admin-Button im Dashboard-Header
+
+---
+
+### 2026-02-08 – Aufgabe 9: Admin-Button im Dashboard-Header
+- **Aufgabe:** Admin-Button neben Logout, Admin-Seite mit Zugriffskontrolle
+- **Was wurde gemacht:**
+  - `AuthContext.tsx` erweitert:
+    - `User` Interface um `role?: 'admin' | 'student'` ergaenzt
+    - `isAdmin` Flag im Context (`user?.role === 'admin'`)
+    - Lokaler Admin-Login setzt `role: 'admin'`
+    - Supabase-Login liest `role` aus DB (`data.role || 'student'`)
+  - `DashboardHeader.tsx` erweitert:
+    - Admin-Button (lila, ⚙️ Icon) neben Logout-Button
+    - Nur sichtbar wenn `isAdmin === true`
+    - Navigiert zu `/admin`
+    - Hover-Effekt (lila Glasmorphismus)
+  - `src/app/admin/page.tsx` erstellt:
+    - Geschuetzte Route: Redirect zu `/login` wenn nicht authentifiziert
+    - Zugriffsverweigerung (🔒) wenn kein Admin
+    - Admin-Header mit Titel, Sprachwahl EN/RU, "Zurueck zum Dashboard" Button
+    - 3 Statistik-Karten (Total Students, Active Today, Avg. Progress)
+    - 3 Navigations-Karten (Students, Content Management, Settings)
+    - User-Info Footer (Name, Email, Rolle)
+    - Komplett mehrsprachig via `t('admin.*')` Keys
+  - `useTranslation.ts` (FALLBACK_EN): 14 neue Admin-Keys hinzugefuegt
+  - Build erfolgreich getestet
+- **Dateien:** `src/context/AuthContext.tsx`, `src/components/dashboard/DashboardHeader.tsx`, `src/app/admin/page.tsx`, `src/lib/useTranslation.ts`
+- **Commit-Vorschlag:** `2026-02-08 21:00 | Aufgabe 9 – Admin-Button im Header + Admin-Seite mit Zugriffskontrolle`
+- **Naechste Aufgabe:** Aufgabe 10 – User-Tabelle erstellen

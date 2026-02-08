@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/lib/useTranslation';
 
@@ -10,8 +11,9 @@ interface HeaderProps {
 
 export default function DashboardHeader({ studentName }: HeaderProps) {
     const [dateTime, setDateTime] = useState('');
-    const { logout } = useAuth();
+    const { logout, isAdmin } = useAuth();
     const { t } = useTranslation();
+    const router = useRouter();
 
     useEffect(() => {
         const updateDateTime = () => {
@@ -46,6 +48,35 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
                     <div className="avatar">{studentName ? studentName.substring(0, 2).toUpperCase() : 'SW'}</div>
                     <span className="username">{studentName || 'SWS'}</span>
                 </div>
+                {isAdmin && (
+                    <button
+                        onClick={() => router.push('/admin')}
+                        style={{
+                            background: 'rgba(88, 86, 214, 0.12)',
+                            border: '1px solid rgba(88, 86, 214, 0.25)',
+                            borderRadius: '12px',
+                            padding: '8px 14px',
+                            color: '#5856D6',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(88, 86, 214, 0.22)';
+                            e.currentTarget.style.borderColor = 'rgba(88, 86, 214, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(88, 86, 214, 0.12)';
+                            e.currentTarget.style.borderColor = 'rgba(88, 86, 214, 0.25)';
+                        }}
+                    >
+                        <span style={{ fontSize: '15px' }}>⚙️</span> {t('header.admin')}
+                    </button>
+                )}
                 <button
                     onClick={logout}
                     style={{

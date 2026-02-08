@@ -8,6 +8,7 @@ interface User {
     id: string;
     email: string;
     name?: string;
+    role?: 'admin' | 'student';
 }
 
 interface AuthContextType {
@@ -15,6 +16,7 @@ interface AuthContextType {
     login: (email: string, pin: string) => Promise<boolean>;
     logout: () => void;
     isAuthenticated: boolean;
+    isAdmin: boolean;
     loading: boolean;
 }
 
@@ -54,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 id: 'admin-local',
                 email: 'admin@greeklingua.local',
                 name: 'Admin',
+                role: 'admin',
             };
             setUser(adminUser);
             localStorage.setItem('greeklingua_user', JSON.stringify(adminUser));
@@ -75,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 return false;
             }
 
-            const userData: User = { id: data.id, email: data.email, name: data.name };
+            const userData: User = { id: data.id, email: data.email, name: data.name, role: data.role || 'student' };
             setUser(userData);
             localStorage.setItem('greeklingua_user', JSON.stringify(userData));
             router.push('/dashboard');
@@ -93,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isAdmin: user?.role === 'admin', loading }}>
             {children}
         </AuthContext.Provider>
     );

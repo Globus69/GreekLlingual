@@ -1,19 +1,20 @@
-# HellenicHorizons GreekLingua – Mehrsprachige UI (EN + RU)
+# HellenicHorizons GreekLingua – Mehrsprachige UI (EN + RU) + Backend
 
-> **Ziel:** UI-Sprache wählbar (Englisch / Russisch). Lernziel-Sprache bleibt immer Neugriechisch.
+> **Ziel:** UI-Sprache waehlbar (Englisch / Russisch). Lernziel-Sprache bleibt immer Neugriechisch.
 > **Regel:** Hardcodierte Texte → Supabase-Tabelle `ui_translations`. Sprachauswahl im Login-Dialog.
+> **Backend:** Admin-Bereich fuer Inhaltsverwaltung, Schueler-Management, Leistungsstufen.
 
 ---
 
-## Aufgaben
+## Phase 1: Mehrsprachige UI (abgeschlossen)
 
 ### 1. ✅ Supabase-Tabelle `ui_translations` anlegen (2026-02-08)
 - SQL-Migrationsdatei erstellen: `supabase/create_ui_translations.sql`
 - Tabelle: `ui_translations (id, key, lang, value, context, created_at)`
 - Alle bestehenden hardcodierten UI-Texte (EN + DE) inventarisieren
-- Englische Texte einfügen
-- Russische Übersetzungen einfügen
-- RLS-Policy: Leserechte für authentifizierte + anon Nutzer
+- Englische Texte einfuegen
+- Russische Uebersetzungen einfuegen
+- RLS-Policy: Leserechte fuer authentifizierte + anon Nutzer
 
 ### 2. ✅ LanguageContext + Provider erstellen (2026-02-08)
 - `src/context/LanguageContext.tsx` erstellen
@@ -23,10 +24,10 @@
 
 ### 3. ✅ `useTranslation` Hook + Supabase-Anbindung (2026-02-08)
 - `src/lib/useTranslation.ts` erstellen
-- Lädt alle Übersetzungen für aktive Sprache aus `ui_translations`
+- Laedt alle Uebersetzungen fuer aktive Sprache aus `ui_translations`
 - Caching (nur einmal pro Sprachwechsel laden)
-- Fallback-Texte (Englisch) falls Übersetzung fehlt
-- `t('key')` Funktion zurückgeben
+- Fallback-Texte (Englisch) falls Uebersetzung fehlt
+- `t('key')` Funktion zurueckgeben
 
 ### 4. ✅ Login-Seite mehrsprachig + Sprachauswahl-Dropdown (2026-02-08)
 - Sprachauswahl (EN/RU) als Toggle-Buttons im Login-Dialog (oben rechts)
@@ -62,6 +63,90 @@
 
 ---
 
+## Phase 2: Admin-Backend + Schueler-Management
+
+### 9. ✅ Admin-Button im Dashboard-Header (2026-02-08)
+- Button "Admin" oben rechts neben Logout im DashboardHeader
+- Linkt zur Admin-Backend-Seite (`/admin`)
+- Nur sichtbar wenn User Admin-Rolle hat (`isAdmin` aus AuthContext)
+- Mehrsprachig (`header.admin`)
+- Admin-Seite mit Zugriffskontrolle, Statistik-Karten, Navigation
+- Sprachwahl EN/RU in Admin-Header
+
+### 10. ⬜ User-Tabelle erstellen
+- SQL-Migration: `supabase/create_users_table.sql`
+- Felder: `id`, `name`, `pin_hash` (gehashter 6-stelliger PIN), `email`, `whatsapp`, `role` (admin/student), `level` (A1/A2/B1), `difficulty` (leicht/mittel/schwer), `performance_index`, `created_at`, `updated_at`
+- PIN wird als bcrypt/SHA-256 Hash gespeichert (niemals Klartext)
+- RLS-Policies: Admin darf alles, Student nur eigene Daten lesen
+- Ergaenzung: `admin_auth` Flag oder Rolle in der Tabelle
+
+### 11. ⬜ Admin-Authentifizierung absichern
+- Admin-Login ueber Name + PIN (wie normaler Login)
+- Rolle aus `users` Tabelle pruefen (`role = 'admin'`)
+- AuthContext erweitern: `isAdmin` Flag
+- Geschuetzte `/admin/*` Routen (Redirect zu Dashboard wenn kein Admin)
+- Session-basierte Admin-Auth (nicht nur Client-Check)
+
+### 12. ⬜ Admin-Hauptseite (Backend-Main-Page)
+- Route: `/admin`
+- Layout: Sidebar/Navigation mit Admin-Menue
+- Sprachwahl-Switch EN/RU (selektiert DB-Abfrage-Sprache)
+- Dashboard-Uebersicht: Anzahl Schueler, Lernfortschritt-Statistik
+- Links zu: Schueler-Verwaltung, Inhalts-Verwaltung, Einstellungen
+- Mehrsprachig (alle Texte via `t('admin.*')`)
+
+### 13. ⬜ Auswahlliste Studienlevel (A1, A2, B1)
+- Dropdown/Toggle in Admin-Seite und Schueler-Profil
+- Werte: `A1` (Anfaenger), `A2` (Grundlagen), `B1` (Fortgeschritten)
+- Gespeichert in `users.level`
+- Beeinflusst welche `learning_items` angezeigt werden
+- Filter-Logik: Items haben ebenfalls ein `level` Feld
+
+### 14. ⬜ Auswahl Schwierigkeit (leicht, mittel, schwer)
+- Dropdown/Toggle in Admin-Seite und Schueler-Profil
+- Werte: `easy`, `medium`, `hard`
+- Gespeichert in `users.difficulty`
+- Beeinflusst Kartenauswahl und Sitzungslaenge
+- `learning_items` Tabelle um `difficulty` Spalte erweitern
+
+### 15. ⬜ Index-Key aus Kriterien bilden
+- Zusammengesetzter Key als String: `"{level}-{difficulty}"` (z.B. `"A1-easy"`, `"B1-hard"`)
+- Berechnet aus `users.level` + `users.difficulty`
+- Gespeichert in `users.performance_index`
+- Dient als Filter fuer `learning_items` Abfragen
+- Automatische Aktualisierung bei Aenderung von Level oder Schwierigkeit
+
+### 16. ⬜ Schueler-Leistungsstufe zuordnen
+- Initiale Leistungsstufe bei Erstellung durch Admin festlegen
+- Automatische Anpassung basierend auf Lernfortschritt:
+  - Korrektquote > 80% ueber 50 Karten → Schwierigkeit erhoehen
+  - Korrektquote < 40% ueber 50 Karten → Schwierigkeit senken
+- Leistungsstufe aendert `performance_index` automatisch
+- Verlauf der Aenderungen loggen (optional: `performance_log` Tabelle)
+
+### 17. ⬜ Inhalte basierend auf Leistungsstufe filtern
+- `learning_items` Query: `WHERE level = user.level AND difficulty = user.difficulty`
+- Fallback: Wenn keine Items fuer aktuelle Stufe → naechst niedrigere Stufe
+- Alle 4 Dialoge (Vocabulary, Grammar, Comprehension, Listening) anpassen
+- Admin kann Items einem Level + Schwierigkeit zuordnen
+
+### 18. ⬜ User-Zuordnung via Name + 6-stelliger PIN
+- Login-Seite: Name-Feld + 6-stelliges PIN-Feld (statt Email + PIN)
+- PIN-Eingabe als 6 einzelne Ziffernfelder (PIN-Pad-Stil)
+- Validierung: Name in `users` Tabelle suchen, PIN-Hash vergleichen
+- Personalisierte Inhalte nach Login (basierend auf User-Profil)
+- AuthContext anpassen: User-Objekt mit Level + Difficulty
+
+### 19. ⬜ Schueler-DB-Verwaltung im Admin-Backend
+- CRUD-Operationen fuer Schueler (Create, Read, Update, Delete)
+- Schueler-Liste mit Suchfunktion
+- Schueler-Detail: Name, PIN (neu setzen), Email, WhatsApp, Level, Schwierigkeit
+- Fortschritts-Uebersicht pro Schueler
+- PIN generieren: Admin kann neuen 6-stelligen PIN fuer Schueler erstellen
+- Export-Funktion (CSV) fuer Schueler-Daten
+
+---
+
 ## Legende
 - ⬜ = offen
 - 🔄 = in Arbeit
@@ -71,5 +156,9 @@
 
 ## Hinweise
 - Commit-Format: `YYYY-MM-DD HH:MM | Aufgabe X – Kurzbeschreibung`
-- Griechisch = immer Antwortsprache (Schüler-Seite der Karten)
+- Griechisch = immer Antwortsprache (Schueler-Seite der Karten)
 - `html lang` Attribut dynamisch setzen (en/ru)
+- PIN wird IMMER gehasht gespeichert (SHA-256 oder bcrypt)
+- Index-Key Format: `"{level}-{difficulty}"` (z.B. `"A1-easy"`)
+- Admin-Routen sind geschuetzt (Server- UND Client-seitig)
+- Leistungsstufe wird automatisch bei Fortschritt angepasst
