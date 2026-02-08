@@ -9,11 +9,14 @@ interface User {
     email: string;
     name?: string;
     role?: 'admin' | 'student';
+    level?: string;
+    difficulty?: string;
+    performance_index?: string;
 }
 
 interface AuthContextType {
     user: User | null;
-    login: (email: string, pin: string) => Promise<boolean>;
+    login: (username: string, pin: string) => Promise<boolean>;
     logout: () => void;
     isAuthenticated: boolean;
     isAdmin: boolean;
@@ -22,15 +25,31 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Session-Timeout: 24 Stunden
+const SESSION_TIMEOUT_MS = 24 * 60 * 60 * 1000;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
-        // Check for session in local storage
+        // Session aus localStorage laden + Timeout pruefen
         const storedUser = localStorage.getItem('greeklingua_user');
-        if (storedUser) {
+        const sessionTimestamp = localStorage.getItem('greeklingua_session_ts');
+
+        if (storedUser && sessionTimestamp) {
+            const elapsed = Date.now() - parseInt(sessionTimestamp, 10);
+            if (elapsed > SESSION_TIMEOUT_MS) {
+                // Session abgelaufen
+                console.warn('Session expired after 24h, logging out.');
+                localStorage.removeItem('greeklingua_user');
+                localStorage.removeItem('greeklingua_session_ts');
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+
             try {
                 const parsedUser = JSON.parse(storedUser);
                 if (parsedUser && parsedUser.id) {
@@ -41,57 +60,97 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } catch (err) {
                 console.error("Error parsing stored user:", err);
                 localStorage.removeItem('greeklingua_user');
+                localStorage.removeItem('greeklingua_session_ts');
             }
         }
         
-        // No stored user found – user must log in
+        // Kein gespeicherter User – Login erforderlich
         setUser(null);
         setLoading(false);
     }, []);
 
-    const login = async (username: string, password: string) => {
-        // Local admin account (works without Supabase)
-        if (username.toLowerCase() === 'admin' && password === '1234') {
+    const login = async (username: string, pin: string) => {
+        // 1. Versuch: Supabase verify_user_pin() (bcrypt-validiert)
+        try {
+            const { data, error } = await supabase
+                .rpc('verify_user_pin', { p_name: username, p_pin: pin });
+
+            if (!error && data && data.length > 0) {
+                const dbUser = data[0];
+                const userData: User = {
+                    id: dbUser.user_id,
+                    email: dbUser.user_email,
+                    name: dbUser.user_name,
+                    role: dbUser.user_role as 'admin' | 'student',
+                    level: dbUser.user_level,
+                    difficulty: dbUser.user_difficulty,
+                    performance_index: dbUser.user_performance_index,
+                };
+                setUser(userData);
+                localStorage.setItem('greeklingua_user', JSON.stringify(userData));
+                localStorage.setItem('greeklingua_session_ts', String(Date.now()));
+                router.push('/dashboard');
+                return true;
+            }
+        } catch (err) {
+            console.warn('Supabase verify_user_pin not available, trying fallback:', err);
+        }
+
+        // 2. Versuch: Supabase direkte Abfrage (name + pin Klartext, Legacy)
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('id, email, name, role, level, difficulty, performance_index')
+                .ilike('name', username)
+                .eq('pin', pin)
+                .single();
+
+            if (!error && data) {
+                const userData: User = {
+                    id: data.id,
+                    email: data.email,
+                    name: data.name,
+                    role: (data.role as 'admin' | 'student') || 'student',
+                    level: data.level,
+                    difficulty: data.difficulty,
+                    performance_index: data.performance_index,
+                };
+                setUser(userData);
+                localStorage.setItem('greeklingua_user', JSON.stringify(userData));
+                localStorage.setItem('greeklingua_session_ts', String(Date.now()));
+                router.push('/dashboard');
+                return true;
+            }
+        } catch (err) {
+            console.warn('Supabase direct query failed, trying local fallback:', err);
+        }
+
+        // 3. Fallback: Lokaler Admin-Account (funktioniert ohne Supabase)
+        if (username.toLowerCase() === 'admin' && pin === '1234') {
             const adminUser: User = {
                 id: 'admin-local',
                 email: 'admin@greeklingua.local',
                 name: 'Admin',
                 role: 'admin',
+                level: 'A1',
+                difficulty: 'easy',
+                performance_index: 'A1-easy',
             };
             setUser(adminUser);
             localStorage.setItem('greeklingua_user', JSON.stringify(adminUser));
+            localStorage.setItem('greeklingua_session_ts', String(Date.now()));
             router.push('/dashboard');
             return true;
         }
 
-        // Supabase login (email + pin)
-        try {
-            const { data, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('email', username)
-                .eq('pin', password)
-                .single();
-
-            if (error || !data) {
-                console.error("Login failed:", error);
-                return false;
-            }
-
-            const userData: User = { id: data.id, email: data.email, name: data.name, role: data.role || 'student' };
-            setUser(userData);
-            localStorage.setItem('greeklingua_user', JSON.stringify(userData));
-            router.push('/dashboard');
-            return true;
-        } catch (err) {
-            console.error("Auth error:", err);
-            return false;
-        }
+        // Login fehlgeschlagen
+        return false;
     };
 
     const logout = () => {
         setUser(null);
         localStorage.removeItem('greeklingua_user');
+        localStorage.removeItem('greeklingua_session_ts');
         router.push('/login');
     };
 

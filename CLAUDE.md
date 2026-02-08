@@ -230,3 +230,21 @@
 - **Dateien:** `supabase/create_users_table.sql`
 - **Commit-Vorschlag:** `2026-02-08 21:30 | Aufgabe 10 – User-Tabelle mit bcrypt PIN-Hashing, RLS, Trigger, verify_user_pin()`
 - **Naechste Aufgabe:** Aufgabe 11 – Admin-Authentifizierung absichern
+
+---
+
+### 2026-02-08 – Aufgabe 11: Admin-Authentifizierung absichern
+- **Aufgabe:** Login-Flow sicher gegen Supabase-DB absichern + Session-Timeout
+- **Was wurde gemacht:**
+  - Login-Kette mit 3 Stufen implementiert:
+    1. **Supabase `verify_user_pin()`** – bcrypt-validierter Login ueber RPC-Funktion (sicherste Methode)
+    2. **Supabase Direkt-Query** – Legacy-Fallback (name + pin Klartext)
+    3. **Lokaler Admin-Fallback** – Funktioniert ohne Supabase (Admin/1234)
+  - **Session-Timeout (24h):** Timestamp wird bei Login in localStorage gespeichert, beim Laden geprueft und bei Ablauf automatisch ausgeloggt
+  - **User-Interface erweitert:** `level`, `difficulty`, `performance_index` Felder hinzugefuegt (Vorbereitung fuer Aufgaben 13-17)
+  - Login-Parameter umbenannt: `email` → `username` (konsistent mit Name+PIN-Login)
+  - Logout loescht auch Session-Timestamp
+  - Build erfolgreich getestet
+- **Dateien:** `src/context/AuthContext.tsx`
+- **Commit-Vorschlag:** `2026-02-08 22:00 | Aufgabe 11 – Admin-Auth mit verify_user_pin, Session-Timeout, Login-Kette`
+- **Naechste Aufgabe:** Aufgabe 12 – Admin-Hauptseite (Backend-Main-Page)
