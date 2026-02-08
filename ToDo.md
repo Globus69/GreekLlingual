@@ -73,12 +73,14 @@
 - Admin-Seite mit Zugriffskontrolle, Statistik-Karten, Navigation
 - Sprachwahl EN/RU in Admin-Header
 
-### 10. ⬜ User-Tabelle erstellen
+### 10. ✅ User-Tabelle erstellen (2026-02-08)
 - SQL-Migration: `supabase/create_users_table.sql`
-- Felder: `id`, `name`, `pin_hash` (gehashter 6-stelliger PIN), `email`, `whatsapp`, `role` (admin/student), `level` (A1/A2/B1), `difficulty` (leicht/mittel/schwer), `performance_index`, `created_at`, `updated_at`
-- PIN wird als bcrypt/SHA-256 Hash gespeichert (niemals Klartext)
-- RLS-Policies: Admin darf alles, Student nur eigene Daten lesen
-- Ergaenzung: `admin_auth` Flag oder Rolle in der Tabelle
+- Bestehende `users` Tabelle erweitert um: `name`, `pin_hash`, `whatsapp`, `role`, `level`, `difficulty`, `performance_index`
+- PIN als bcrypt-Hash via pgcrypto (`crypt()` + `gen_salt('bf')`)
+- RLS-Policies: Admin full access, Student read own, Anon read for login
+- Trigger: `performance_index` automatisch aktualisiert bei Level/Difficulty-Aenderung
+- Hilfsfunktion `verify_user_pin()` fuer Server-seitige PIN-Validierung
+- Admin-User angelegt (Name: Admin, PIN: 1234, bcrypt-gehasht)
 
 ### 11. ⬜ Admin-Authentifizierung absichern
 - Admin-Login ueber Name + PIN (wie normaler Login)
