@@ -23,7 +23,7 @@ export default function ModuleGrid() {
         if (id === 'vokabeln') {
             router.push('/vokabeln');
         } else {
-            alert(`Opening module: ${id}`);
+            alert(t('modules.opening') + id);
         }
     };
 

@@ -6,11 +6,19 @@ import { useLanguage, Locale } from '@/context/LanguageContext';
 const TOAST_MESSAGES: Record<Locale, string> = {
     en: 'Language changed to English.',
     ru: '\u042f\u0437\u044b\u043a \u0438\u0437\u043c\u0435\u043d\u0451\u043d \u043d\u0430 \u0420\u0443\u0441\u0441\u043a\u0438\u0439.',
+    el: '\u0397 \u03b3\u03bb\u03ce\u03c3\u03c3\u03b1 \u03ac\u03bb\u03bb\u03b1\u03be\u03b5 \u03c3\u03b5 \u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac.',
 };
 
 const TOAST_FLAGS: Record<Locale, string> = {
     en: '\ud83c\uddec\ud83c\udde7',
     ru: '\ud83c\uddf7\ud83c\uddfa',
+    el: '\ud83c\uddec\ud83c\uddf7',
+};
+
+const TOAST_COLORS: Record<Locale, { bg: string; border: string; shadow: string }> = {
+    en: { bg: 'rgba(10, 20, 60, 0.85)', border: 'rgba(0, 122, 255, 0.3)', shadow: 'rgba(0, 122, 255, 0.2)' },
+    ru: { bg: 'rgba(60, 10, 30, 0.85)', border: 'rgba(224, 85, 85, 0.3)', shadow: 'rgba(224, 85, 85, 0.2)' },
+    el: { bg: 'rgba(10, 40, 60, 0.85)', border: 'rgba(13, 110, 253, 0.3)', shadow: 'rgba(13, 110, 253, 0.2)' },
 };
 
 export default function LanguageToast() {
@@ -74,18 +82,12 @@ export default function LanguageToast() {
                     alignItems: 'center',
                     gap: '10px',
                     padding: '12px 24px',
-                    background: displayLocale === 'ru'
-                        ? 'rgba(60, 10, 30, 0.85)'
-                        : 'rgba(10, 20, 60, 0.85)',
+                    background: TOAST_COLORS[displayLocale].bg,
                     backdropFilter: 'blur(30px)',
                     WebkitBackdropFilter: 'blur(30px)',
                     borderRadius: '16px',
-                    border: displayLocale === 'ru'
-                        ? '1px solid rgba(224, 85, 85, 0.3)'
-                        : '1px solid rgba(0, 122, 255, 0.3)',
-                    boxShadow: displayLocale === 'ru'
-                        ? '0 8px 32px rgba(224, 85, 85, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05) inset'
-                        : '0 8px 32px rgba(0, 122, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',
+                    border: `1px solid ${TOAST_COLORS[displayLocale].border}`,
+                    boxShadow: `0 8px 32px ${TOAST_COLORS[displayLocale].shadow}, 0 0 0 1px rgba(255, 255, 255, 0.05) inset`,
                     animation: 'toastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
                     pointerEvents: 'none',
                     fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',

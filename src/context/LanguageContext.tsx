@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/db/supabase';
 
-export type Locale = 'en' | 'ru';
+export type Locale = 'en' | 'ru' | 'el';
 
 interface LanguageContextType {
     locale: Locale;
@@ -23,7 +23,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved === 'en' || saved === 'ru') {
+            if (saved === 'en' || saved === 'ru' || saved === 'el') {
                 setLocaleState(saved);
             }
         } catch {
@@ -34,7 +34,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
     // Sync locale from user profile (called after login)
     const syncLocaleFromUser = useCallback((preferredLocale?: string) => {
-        if (preferredLocale === 'en' || preferredLocale === 'ru') {
+        if (preferredLocale === 'en' || preferredLocale === 'ru' || preferredLocale === 'el') {
             setLocaleState(preferredLocale);
             try {
                 localStorage.setItem(STORAGE_KEY, preferredLocale);

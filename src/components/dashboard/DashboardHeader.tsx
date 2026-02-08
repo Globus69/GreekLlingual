@@ -51,10 +51,13 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
                     <span className="username">{studentName || 'SWS'}</span>
                 </div>
 
-                {/* Flaggen-Anzeige: Klick wechselt Sprache */}
+                {/* Flaggen-Anzeige: Klick rotiert durch 3 Sprachen (EN → RU → EL → EN) */}
                 <button
-                    onClick={() => setLocale(locale === 'en' ? 'ru' : 'en')}
-                    title={locale === 'en' ? 'Switch to Russian' : 'Switch to English'}
+                    onClick={() => {
+                        const nextLocale = locale === 'en' ? 'ru' : locale === 'ru' ? 'el' : 'en';
+                        setLocale(nextLocale);
+                    }}
+                    title={locale === 'en' ? t('header.switch_to_ru') : locale === 'ru' ? t('header.switch_to_el') : t('header.switch_to_en')}
                     style={{
                         background: 'rgba(255,255,255,0.06)',
                         border: '1px solid rgba(255,255,255,0.12)',
@@ -79,9 +82,11 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
                         e.currentTarget.style.transform = 'scale(1)';
                     }}
                 >
-                    <span style={{ fontSize: '22px' }}>{locale === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : '\uD83C\uDDF7\uD83C\uDDFA'}</span>
+                    <span style={{ fontSize: '22px' }}>
+                        {locale === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : locale === 'ru' ? '\uD83C\uDDF7\uD83C\uDDFA' : '\uD83C\uDDEC\uD83C\uDDF7'}
+                    </span>
                     <span style={{ fontSize: '11px', fontWeight: 600, color: '#8E8E93', textTransform: 'uppercase' }}>
-                        {locale === 'en' ? 'EN' : 'RU'}
+                        {locale === 'en' ? 'EN' : locale === 'ru' ? 'RU' : 'EL'}
                     </span>
                 </button>
 

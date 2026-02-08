@@ -3,7 +3,7 @@
 ## Projektübersicht
 - **Projekt:** HellenicHorizons GreekLingua Dashboard
 - **Stack:** Next.js 16 + React 19 + Supabase + TypeScript
-- **Ziel:** Mehrsprachige UI (EN + RU), Lernziel-Sprache immer Neugriechisch
+- **Ziel:** Mehrsprachige UI (EN + RU + EL), Lernziel-Sprache immer Neugriechisch
 
 ---
 
@@ -574,12 +574,78 @@
 
 ---
 
+### 2026-02-09 – Aufgabe 24-30: Dashboard UI-Texte vollstaendig in DB erfassen
+- **Aufgabe:** Alle hardcodierten UI-Texte der Dashboard Main Page identifizieren, in DB einfuegen, durch t() ersetzen
+- **Was wurde gemacht:**
+  - **Aufgabe 24:** Inventar aller hardcodierten Strings in 4 Dashboard-Komponenten:
+    - DashboardHeader: 2 Tooltip-Strings (Switch to Russian/English)
+    - ActionGrid: 8 Toast-Messages (showToast-Aufrufe)
+    - ModuleGrid: 1 Alert-Text ("Opening module: ")
+    - StatsCard: 1 Stunden-Suffix ("h")
+  - **Aufgabe 25:** SQL-Datei `supabase/insert_missing_dashboard_translations.sql` erstellt:
+    - 12 Keys x 2 Sprachen = 24 Eintraege
+    - Idempotent via ON CONFLICT DO UPDATE
+    - Keys: header.switch_to_ru/en, action_grid.toast_*, modules.opening, stats.hours_suffix
+  - **Aufgabe 26:** `DashboardHeader.tsx` – Flaggen-Tooltip hardcoded Strings durch `t('header.switch_to_ru')` / `t('header.switch_to_en')` ersetzt
+  - **Aufgabe 27:** `ActionGrid.tsx` – 8 Toast-Messages durch `t('action_grid.toast_*')` ersetzt
+  - **Aufgabe 28:** `ModuleGrid.tsx` – Alert-Text durch `t('modules.opening')` ersetzt
+  - **Aufgabe 29:** `StatsCard.tsx` – Stunden-Suffix "h" durch `t('stats.hours_suffix')` ersetzt
+  - **Aufgabe 30:** FALLBACK_EN in `useTranslation.ts` um 12 neue Keys ergaenzt, Build erfolgreich getestet
+- **Dateien:** `supabase/insert_missing_dashboard_translations.sql` (neu), `src/components/dashboard/DashboardHeader.tsx`, `src/components/dashboard/ActionGrid.tsx`, `src/components/dashboard/ModuleGrid.tsx`, `src/components/dashboard/StatsCard.tsx`, `src/lib/useTranslation.ts`
+- **Hinweis:** `insert_missing_dashboard_translations.sql` muss im Supabase SQL Editor ausgefuehrt werden!
+- **Commit-Vorschlag:** `2026-02-09 02:00 | Aufgabe 24-30 – Dashboard UI-Texte vollstaendig in DB, hardcodierte Strings durch t() ersetzt`
+
+---
+
+### 2026-02-09 – Aufgabe 31-38: Phase 5 – Griechisch (el) als dritte UI-Sprache
+- **Aufgabe:** Komplette Erweiterung der App von 2 auf 3 UI-Sprachen (EN + RU + EL)
+- **Was wurde gemacht:**
+  - **Aufgabe 31: Locale-Typ erweitert**
+    - `Locale = 'en' | 'ru' | 'el'` in LanguageContext, AuthContext, useTranslation
+    - `translationCache` und `fetchPromises` um `el` erweitert
+    - LanguageToast um griechische Nachricht + Farben ergaenzt (TOAST_COLORS Record)
+  - **Aufgabe 32: FALLBACK_EL erstellt**
+    - ~130 griechische Fallback-Uebersetzungen in `useTranslation.ts`
+    - `getFallback(locale)` Helper-Funktion fuer locale-abhaengige Fallbacks
+    - Fallback-Kette: `translations[key] || localeFallback[key] || FALLBACK_EN[key] || key`
+  - **Aufgabe 33+38: SQL griechische Uebersetzungen + CHECK-Constraints**
+    - `supabase/insert_greek_translations.sql` erstellt
+    - ~130 griechische Uebersetzungen mit `ON CONFLICT DO UPDATE`
+    - CHECK-Constraints auf `ui_translations.lang` und `users.preferred_locale` erweitert
+    - `update_user_locale()` RPC auf 3 Sprachen erweitert
+  - **Aufgabe 34: Login-Seite 3-Sprachen-Auswahl**
+    - EN/RU Toggle durch 3-Button-Auswahl ersetzt (EN / RU / EL)
+    - Hintergrund-Gradient fuer Griechisch (cyan-blau, #0d2847)
+    - Canvas-Partikel: Hue 190-220 (cyan-blau), Linienfarbe 13,110,253
+    - Gradient Orbs fuer Griechisch angepasst
+    - Divider dreisprachig: "or" / "или" / "ή"
+  - **Aufgabe 35: DashboardHeader 3-Sprachen-Toggle**
+    - 2-Wege-Toggle durch 3-Wege-Rotation ersetzt (EN→RU→EL→EN)
+    - Flagge zeigt 🇬🇧 / 🇷🇺 / 🇬🇷, Label EN/RU/EL
+    - Tooltip nutzt `header.switch_to_el` Key
+  - **Aufgabe 36: Admin-Seite 3-Sprachen-Toggle**
+    - Gleiche 3-Wege-Rotation wie DashboardHeader
+    - Hintergrund-Gradient fuer EL definiert (griechisches Blau #0d2847)
+    - Header-Background und Border fuer EL angepasst
+    - Flaggen-Rahmenfarbe EL: #0D6EFD, Label-Farbe: #0D6EFD
+  - **Aufgabe 37: LanguageToast** (bereits in Aufgabe 31 erledigt)
+  - Build erfolgreich getestet ✅
+- **Dateien:** `src/context/LanguageContext.tsx`, `src/context/AuthContext.tsx`, `src/lib/useTranslation.ts`, `src/components/ui/LanguageToast.tsx`, `src/app/login/page.tsx`, `src/components/dashboard/DashboardHeader.tsx`, `src/app/admin/page.tsx`, `supabase/insert_greek_translations.sql` (neu), `ToDo.md`
+- **Hinweis:** `supabase/insert_greek_translations.sql` muss im Supabase SQL Editor ausgefuehrt werden!
+- **Commit-Vorschlag:** `2026-02-09 03:00 | Aufgabe 31-38 – Griechisch (EL) als dritte UI-Sprache komplett implementiert`
+
+---
+
 ### Projekt-Status
 - Phase 1 (Aufgaben 1-8): Mehrsprachige UI komplett ✅
 - Phase 2 (Aufgaben 9-19): Admin-Backend + Schueler-Management komplett ✅
 - Phase 3 (Aufgaben 20-23): Sprachpersistenz + UX komplett ✅
+- Phase 4 (Aufgaben 24-30): Dashboard UI-Texte vollstaendig in DB ✅
+- Phase 5 (Aufgaben 31-38): Griechisch (EL) als dritte UI-Sprache ✅
 - SQL-Dateien die im Supabase SQL Editor ausgefuehrt werden muessen:
   1. `supabase/fix_student_management_v2.sql` (Users-Tabelle + RPC)
   2. `supabase/create_performance_evaluation.sql` (Performance-Log + Evaluation)
   3. `supabase/add_level_difficulty_to_learning_items.sql` (Level/Difficulty fuer Items)
   4. `supabase/add_preferred_locale.sql` (Sprach-Persistenz + update_user_locale RPC)
+  5. `supabase/insert_missing_dashboard_translations.sql` (Fehlende Dashboard-Uebersetzungen)
+  6. `supabase/insert_greek_translations.sql` (Griechische Uebersetzungen + CHECK-Constraints)
