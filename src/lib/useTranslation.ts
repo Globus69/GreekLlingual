@@ -228,6 +228,13 @@ const FALLBACK_EN: Record<string, string> = {
     'students.error_pin_6': 'PIN must be exactly 6 digits.',
     'students.error_save': 'Error saving student',
     'students.error_delete': 'Error deleting student',
+    'students.show_stats': 'Show progress',
+    'students.stats_not_available': 'Stats not available',
+    'students.stats_attempts': 'Attempts',
+    'students.stats_correct_rate': 'Correct Rate',
+    'students.stats_items_learned': 'Learned/Practiced',
+    'students.stats_last_active': 'Last Active',
+    'students.generate_pin': 'Generate random PIN',
 };
 
 async function fetchTranslations(locale: Locale): Promise<Record<string, string>> {

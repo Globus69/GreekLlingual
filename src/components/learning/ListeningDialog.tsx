@@ -16,6 +16,8 @@ interface LearningItem {
     example_en: string | null;
     example_gr: string | null;
     audio_url: string | null;
+    level?: string;
+    difficulty?: string;
     created_at: string;
 }
 
@@ -181,24 +183,68 @@ export default function ListeningDialog({ isOpen, onClose, mode = 'review' }: Li
 
     const fetchListening = async () => {
         setLoading(true);
-        console.log(`🔄 Fetching listening for mode: ${mode}, student: ${STUDENT_ID || 'demo'}`);
-        
+        console.log(`🔄 Fetching listening for mode: ${mode}, student: ${STUDENT_ID || 'demo'}, level: ${user?.level || 'A1'}, difficulty: ${user?.difficulty || 'easy'}`);
+
         try {
-            const timeoutPromise = new Promise((_, reject) => 
+            const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Database query timeout')), 10000)
             );
 
-            const queryPromise = supabase
-                .from('learning_items')
-                .select(`
-                    *,
-                    student_progress!left(*)
-                `)
-                .eq('type', 'listening')
-                .order('created_at', { ascending: false })
-                .limit(100);
+            let data: any = null;
+            let error: any = null;
 
-            const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+            // Strategy 1: RPC mit Level+Difficulty Filterung (bevorzugt)
+            if (STUDENT_ID && STUDENT_ID !== 'admin-local') {
+                try {
+                    const rpcResult = await Promise.race([
+                        supabase.rpc('get_learning_items_for_student', {
+                            p_student_id: STUDENT_ID,
+                            p_type: 'listening',
+                            p_limit: 100
+                        }),
+                        timeoutPromise
+                    ]) as any;
+
+                    if (!rpcResult.error && rpcResult.data && Array.isArray(rpcResult.data) && rpcResult.data.length > 0) {
+                        // RPC liefert flache Daten – student_progress Felder direkt am Item
+                        data = rpcResult.data.map((item: any) => ({
+                            ...item,
+                            student_progress: item.attempts != null ? [{
+                                student_id: STUDENT_ID,
+                                item_id: item.id,
+                                correct_count: item.correct_count || 0,
+                                attempts: item.attempts || 0,
+                                ease_factor: item.ease_factor || 2.5,
+                                interval_days: item.interval_days || 1,
+                                next_review: item.next_review,
+                                last_attempt: item.last_attempt
+                            }] : []
+                        }));
+                        console.log(`✅ RPC: ${data.length} listening items fuer Level ${user?.level || '?'}-${user?.difficulty || '?'}`);
+                    } else {
+                        console.log('⚠️ RPC returned no data or error, falling back to direct query');
+                    }
+                } catch (rpcErr) {
+                    console.log('⚠️ RPC not available, falling back to direct query');
+                }
+            }
+
+            // Strategy 2: Fallback – direkte Query (alle Items, keine Level-Filterung)
+            if (!data) {
+                const queryPromise = supabase
+                    .from('learning_items')
+                    .select(`
+                        *,
+                        student_progress!left(*)
+                    `)
+                    .eq('type', 'listening')
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                const result = await Promise.race([queryPromise, timeoutPromise]) as any;
+                data = result.data;
+                error = result.error;
+            }
 
             if (error) {
                 console.error("❌ Error fetching listening:", error);

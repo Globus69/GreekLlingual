@@ -433,3 +433,90 @@
 - **Hinweis:** `create_performance_evaluation.sql` muss im Supabase SQL Editor ausgefuehrt werden!
 - **Commit-Vorschlag:** `2026-02-08 24:00 | Aufgabe 16 – Automatische Leistungsstufen-Anpassung mit performance_log + evaluate RPC`
 - **Naechste Aufgabe:** Aufgabe 17 – Inhalte basierend auf Leistungsstufe filtern
+
+---
+
+### 2026-02-08 – Aufgabe 17: Inhalte basierend auf Leistungsstufe filtern
+- **Aufgabe:** learning_items nach Schueler-Level/Difficulty filtern
+- **Was wurde gemacht:**
+  - **SQL-Migration `supabase/add_level_difficulty_to_learning_items.sql`** erstellt:
+    - `level TEXT DEFAULT 'A1'` und `difficulty TEXT DEFAULT 'easy'` Spalten hinzugefuegt (idempotent)
+    - CHECK-Constraints fuer erlaubte Werte (idempotent)
+    - Index `idx_learning_items_level_difficulty` fuer schnelle Abfragen
+    - Bestehende Items auf A1-easy Default gesetzt
+    - `get_learning_items_for_student(p_student_id, p_type, p_limit)` RPC-Funktion:
+      - Holt Level/Difficulty des Schuelers aus `users` Tabelle
+      - 3-stufiger Fallback: 1) Exakter Match → 2) Gleiches Level alle Difficulties → 3) Alle Items
+      - LEFT JOIN mit student_progress fuer SRS-Daten
+    - `assign_item_level(p_item_id, p_level, p_difficulty)` RPC fuer Admin
+  - **4 Lern-Dialoge angepasst:**
+    - `VocabularyDialog.tsx`: RPC-Strategy 1 (get_learning_items_for_student) + Fallback direkte Query
+    - `GrammarDialog.tsx`: Gleiche 2-Strategy-Logik
+    - `ComprehensionDialog.tsx`: Gleiche 2-Strategy-Logik
+    - `ListeningDialog.tsx`: Gleiche 2-Strategy-Logik (mit options-Parsing)
+    - `LearningItem` Interface um `level?` und `difficulty?` erweitert (alle 4 Dialoge)
+  - Build erfolgreich getestet
+- **Dateien:** `supabase/add_level_difficulty_to_learning_items.sql` (aktualisiert), `src/components/learning/VocabularyDialog.tsx`, `src/components/learning/GrammarDialog.tsx`, `src/components/learning/ComprehensionDialog.tsx`, `src/components/learning/ListeningDialog.tsx`
+- **Hinweis:** `add_level_difficulty_to_learning_items.sql` muss im Supabase SQL Editor ausgefuehrt werden!
+- **Commit-Vorschlag:** `2026-02-09 00:30 | Aufgabe 17 – Content-Filterung nach Leistungsstufe mit RPC + Fallback`
+- **Naechste Aufgabe:** Aufgabe 18 – User-Zuordnung via Name + 6-stelliger PIN
+
+---
+
+### 2026-02-09 – Aufgabe 18: User-Zuordnung via Name + 6-stelliger PIN
+- **Aufgabe:** Login-Seite mit PIN-Pad-Stil (6 einzelne Ziffernfelder)
+- **Was wurde gemacht:**
+  - **Login-Seite `src/app/login/page.tsx`** umgebaut:
+    - Altes Password-Feld (single input) durch 6 einzelne Ziffern-Boxes ersetzt
+    - `pinDigits` State als Array von 6 Strings
+    - `pinRefs` fuer ref-basiertes Focus-Management
+    - `handlePinChange()`: Nur Ziffern, Auto-Focus auf naechstes Feld
+    - `handlePinKeyDown()`: Backspace springt zurueck, Arrow-Keys Navigation
+    - `handlePinPaste()`: Kompletten 6-stelligen PIN einfuegen
+    - PIN-Felder visuell: 48x56px, Glasmorphismus, blauer Rand bei Focus/Ausgefuellt
+    - `handleSubmit()`: Zusammensetzen der Digits, Validierung 6 Stellen
+    - Bei Fehler: Alle Felder leeren, Focus auf erstes Feld
+    - `showPassword` State entfernt (nicht mehr noetig)
+  - AuthContext hatte Level + Difficulty bereits im User-Objekt (Aufgabe 11)
+  - Build erfolgreich getestet
+- **Dateien:** `src/app/login/page.tsx`
+- **Commit-Vorschlag:** `2026-02-09 01:00 | Aufgabe 18 – PIN-Pad Login mit 6 einzelnen Ziffernfeldern`
+- **Naechste Aufgabe:** Aufgabe 19 – Schueler-DB-Verwaltung erweitert
+
+---
+
+### 2026-02-09 – Aufgabe 19: Schueler-DB-Verwaltung im Admin-Backend
+- **Aufgabe:** Erweiterte Schueler-Verwaltung mit Fortschritts-Uebersicht, PIN-Generator, CSV-Export
+- **Was wurde gemacht:**
+  - **`StudentManagementDialog.tsx`** erweitert:
+    - **Fortschritts-Uebersicht** pro Schueler (klappbar):
+      - 📊 Button in Schueler-Zeile zum Auf-/Zuklappen
+      - Zeigt: Total Attempts, Correct Rate (farbcodiert: gruen >80%, orange 40-80%, rot <40%), Learned/Practiced Items, Last Active Date
+      - Nutzt `get_student_stats()` RPC-Funktion (Aufgabe 16)
+      - Toggle-Logik: Klick blendet Stats ein/aus
+    - **PIN-Generator**:
+      - 🎲 Button neben PIN-Eingabefeld
+      - Generiert zufaelligen 6-stelligen PIN (`Math.floor(100000 + Math.random() * 900000)`)
+      - PIN wird direkt in Formular uebernommen
+    - **CSV-Export**:
+      - 📥 CSV Button im Header (neben "Add New")
+      - Exportiert alle Schueler: Name, Email, WhatsApp, Level, Difficulty, Index-Key
+      - UTF-8 BOM (`\uFEFF`) fuer korrekte Umlaute in Excel
+      - Dateiname: `students_YYYY-MM-DD.csv`
+  - **`useTranslation.ts`** (FALLBACK_EN): 7 neue Keys hinzugefuegt:
+    - `students.show_stats`, `students.stats_not_available`, `students.stats_attempts`
+    - `students.stats_correct_rate`, `students.stats_items_learned`, `students.stats_last_active`
+    - `students.generate_pin`
+  - Build erfolgreich getestet
+- **Dateien:** `src/components/admin/StudentManagementDialog.tsx`, `src/lib/useTranslation.ts`
+- **Commit-Vorschlag:** `2026-02-09 01:30 | Aufgabe 19 – Erweiterte Schueler-Verwaltung mit Stats, PIN-Generator, CSV-Export`
+
+---
+
+### Projekt-Status: ALLE AUFGABEN ABGESCHLOSSEN ✅
+- Phase 1 (Aufgaben 1-8): Mehrsprachige UI komplett
+- Phase 2 (Aufgaben 9-19): Admin-Backend + Schueler-Management komplett
+- SQL-Dateien die im Supabase SQL Editor ausgefuehrt werden muessen:
+  1. `supabase/fix_student_management_v2.sql` (Users-Tabelle + RPC)
+  2. `supabase/create_performance_evaluation.sql` (Performance-Log + Evaluation)
+  3. `supabase/add_level_difficulty_to_learning_items.sql` (Level/Difficulty fuer Items)
