@@ -31,7 +31,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (storedUser) {
             try {
                 const parsedUser = JSON.parse(storedUser);
-                // Accept both real users and demo users
                 if (parsedUser && parsedUser.id) {
                     setUser(parsedUser);
                     setLoading(false);
@@ -43,39 +42,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
         }
         
-        // DEVELOPMENT MODE: Auto-create demo user if no user exists
-        // This allows the app to work without login during development
-        const demoUser: User = {
-            id: 'demo-user-id',
-            email: 'demo@hellenichorizons.com',
-            name: 'Demo User'
-        };
-        setUser(demoUser);
-        localStorage.setItem('greeklingua_user', JSON.stringify(demoUser));
+        // No stored user found – user must log in
+        setUser(null);
         setLoading(false);
     }, []);
 
-    const login = async (email: string, pin: string) => {
+    const login = async (username: string, password: string) => {
+        // Local admin account (works without Supabase)
+        if (username.toLowerCase() === 'admin' && password === '1234') {
+            const adminUser: User = {
+                id: 'admin-local',
+                email: 'admin@greeklingua.local',
+                name: 'Admin',
+            };
+            setUser(adminUser);
+            localStorage.setItem('greeklingua_user', JSON.stringify(adminUser));
+            router.push('/dashboard');
+            return true;
+        }
+
+        // Supabase login (email + pin)
         try {
             const { data, error } = await supabase
                 .from('users')
                 .select('*')
-                .eq('email', email)
-                .eq('pin', pin)
+                .eq('email', username)
+                .eq('pin', password)
                 .single();
 
             if (error || !data) {
-                console.error("❌ Login failed:", error);
+                console.error("Login failed:", error);
                 return false;
             }
 
-            const userData = { id: data.id, email: data.email };
+            const userData: User = { id: data.id, email: data.email, name: data.name };
             setUser(userData);
             localStorage.setItem('greeklingua_user', JSON.stringify(userData));
             router.push('/dashboard');
             return true;
         } catch (err) {
-            console.error("❌ Auth error:", err);
+            console.error("Auth error:", err);
             return false;
         }
     };
