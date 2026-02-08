@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useTranslation } from '@/lib/useTranslation';
 
 interface FlashcardProps {
     term: string;
@@ -26,6 +27,7 @@ export default function Flashcard({
     onCancel
 }: FlashcardProps) {
     const [flipped, setFlipped] = useState(false);
+    const { t } = useTranslation();
 
     const handleFlip = () => setFlipped(!flipped);
 
@@ -41,10 +43,10 @@ export default function Flashcard({
                 <div className={`card ${flipped ? 'flipped' : ''}`} onClick={handleFlip}>
                     {/* Front Face (English usually in original) */}
                     <div className="card-face card-front">
-                        <span className="lang-label">ENGLISH</span>
+                        <span className="lang-label">{t('flashcard.label_source')}</span>
                         <div className="main-word">{term}</div>
                         {exampleTerm && <div className="example-sentence">{exampleTerm}</div>}
-                        <div className="flip-hint">Click to flip</div>
+                        <div className="flip-hint">{t('flashcard.flip_hint')}</div>
                         
                         {/* Action Buttons on Front - Wiederholen & Abbrechen */}
                         {(onRestart || onCancel) && (
@@ -105,7 +107,7 @@ export default function Flashcard({
                                             <polyline points="23 4 23 10 17 10"></polyline>
                                             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                                         </svg>
-                                        Wiederholen
+                                        {t('btn.restart')}
                                     </button>
                                 )}
                                 {onCancel && (
@@ -153,7 +155,7 @@ export default function Flashcard({
                                             <line x1="18" y1="6" x2="6" y2="18"></line>
                                             <line x1="6" y1="6" x2="18" y2="18"></line>
                                         </svg>
-                                        Abbrechen
+                                        {t('btn.cancel')}
                                     </button>
                                 )}
                             </div>
@@ -188,7 +190,7 @@ export default function Flashcard({
                                             e.stopPropagation();
                                             onAudio();
                                         }}
-                                        title="Griechische Aussprache anhören"
+                                        title={t('btn.audio_tooltip')}
                                         style={{
                                             width: '100%',
                                             maxWidth: '200px',
@@ -229,7 +231,7 @@ export default function Flashcard({
                                             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
                                             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                                         </svg>
-                                        Audio
+                                        {t('btn.audio')}
                                     </button>
                                 )}
 
@@ -276,7 +278,7 @@ export default function Flashcard({
                                             e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
                                         }}
                                     >
-                                        Hard
+                                        {t('btn.hard')}
                                     </button>
                                     <button 
                                         className="rating-btn-back rating-good-back" 
@@ -313,7 +315,7 @@ export default function Flashcard({
                                             e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
                                         }}
                                     >
-                                        Good
+                                        {t('btn.good')}
                                     </button>
                                     <button 
                                         className="rating-btn-back rating-easy-back" 
@@ -350,7 +352,7 @@ export default function Flashcard({
                                             e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
                                         }}
                                     >
-                                        Easy
+                                        {t('btn.easy')}
                                     </button>
                                 </div>
                             </div>
@@ -361,7 +363,7 @@ export default function Flashcard({
 
             <div className="controls-bar" style={{ marginTop: '40px' }}>
                 <p style={{ color: '#8E8E93', fontSize: '14px' }}>
-                    Tap the card to reveal translation, then rate your performance.
+                    {t('flashcard.tap_hint')}
                 </p>
             </div>
         </div>
