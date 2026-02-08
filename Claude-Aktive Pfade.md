@@ -69,4 +69,4 @@
 ---
 
 **Letzte Aktualisierung**: 2026-01-23 13:45
-**Projekt-Root**: `/Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard`
+**Projekt-Root**: `/Users/SWS/DEVELOP/HellenicHorizons-GreekLingua-Dashboard`

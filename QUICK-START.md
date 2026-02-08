@@ -7,7 +7,7 @@
 ## ⚡️ 30-Sekunden Start
 
 ```bash
-cd /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard
+cd /Users/SWS/DEVELOP/HellenicHorizons-GreekLingua-Dashboard
 npx http-server -p 3000
 ```
 
