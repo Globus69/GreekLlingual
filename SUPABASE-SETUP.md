@@ -79,7 +79,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 ### 5. Teste die Integration
 
 ```bash
-cd /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard
+cd /Users/SWS/DEVELOP/HellenicHorizons-GreekLingua-Dashboard
 npx http-server -p 8080
 open http://localhost:8080/web/index.html
 ```

@@ -2,7 +2,7 @@
 
 **Datum**: 22.01.2026
 **Quelle**: `/Users/SWS/.claude-worktrees/HellenicHorizons-GreekLingua-Dashboard/pedantic-joliot`
-**Ziel**: `/Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard`
+**Ziel**: `/Users/SWS/DEVELOP/HellenicHorizons-GreekLingua-Dashboard`
 
 ---
 
@@ -86,7 +86,7 @@
 ## 🔗 Dateistruktur im Hauptprojekt
 
 ```
-/Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard/
+/Users/SWS/DEVELOP/HellenicHorizons-GreekLingua-Dashboard/
 ├── flashcards.html              # Flashcard-UI mit Modi-Support
 ├── flashcards-script.js         # SRS-Logik, Modi-Filter, LocalStorage
 ├── flashcards-style.css         # Glassmorphism Design
@@ -107,7 +107,7 @@
 ### 1. Sofort einsatzbereit (LocalStorage)
 
 ```bash
-cd /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard
+cd /Users/SWS/DEVELOP/HellenicHorizons-GreekLingua-Dashboard
 npx http-server -p 3000
 open http://localhost:3000/web/index.html
 ```

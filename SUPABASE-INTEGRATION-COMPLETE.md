@@ -226,7 +226,7 @@ CREATE INDEX idx_flashcard_progress_ease ON flashcard_progress(ease);
 
 ### Option A: LocalStorage testen (Sofort)
 ```bash
-cd /Users/SWS/DEVELOP/Antigravity/HellenicHorizons-GreekLingua-Dashboard
+cd /Users/SWS/DEVELOP/HellenicHorizons-GreekLingua-Dashboard
 npx http-server -p 8080
 open http://localhost:8080/web/index.html
 ```
