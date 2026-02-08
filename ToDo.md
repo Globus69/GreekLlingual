@@ -82,12 +82,14 @@
 - Hilfsfunktion `verify_user_pin()` fuer Server-seitige PIN-Validierung
 - Admin-User angelegt (Name: Admin, PIN: 1234, bcrypt-gehasht)
 
-### 11. ⬜ Admin-Authentifizierung absichern
+### 11. ✅ Admin-Authentifizierung absichern (erledigt 2026-02-08)
 - Admin-Login ueber Name + PIN (wie normaler Login)
 - Rolle aus `users` Tabelle pruefen (`role = 'admin'`)
 - AuthContext erweitern: `isAdmin` Flag
 - Geschuetzte `/admin/*` Routen (Redirect zu Dashboard wenn kein Admin)
 - Session-basierte Admin-Auth (nicht nur Client-Check)
+- Login-Kette: 1) Supabase verify_user_pin (bcrypt) → 2) Supabase direkt → 3) Lokaler Fallback
+- Session-Timeout: 24 Stunden mit Timestamp-Pruefung
 
 ### 12. ⬜ Admin-Hauptseite (Backend-Main-Page)
 - Route: `/admin`
