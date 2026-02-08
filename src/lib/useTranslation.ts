@@ -18,6 +18,7 @@ const fetchPromises: Record<Locale, Promise<Record<string, string>> | null> = {
 
 // Fallback English translations (hardcoded subset for offline/error scenarios)
 const FALLBACK_EN: Record<string, string> = {
+    'header.logout': 'Logout',
     'login.title': 'GreekLingua',
     'login.subtitle': 'Enter your details to continue learning',
     'login.email_placeholder': 'Email',
