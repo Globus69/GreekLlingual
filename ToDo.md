@@ -1,6 +1,6 @@
-# HellenicHorizons GreekLingua – Mehrsprachige UI (EN + RU + EL) + Backend
+# HellenicHorizons GreekLingua – Mehrsprachige UI (EN + RU + EL + DE) + Backend
 
-> **Ziel:** UI-Sprache waehlbar (Englisch / Russisch / Griechisch). Lernziel-Sprache bleibt immer Neugriechisch.
+> **Ziel:** UI-Sprache waehlbar (Englisch / Russisch / Griechisch / Deutsch). Lernziel-Sprache bleibt immer Neugriechisch.
 > **Regel:** Hardcodierte Texte → Supabase-Tabelle `ui_translations`. Sprachauswahl im Login-Dialog.
 > **Backend:** Admin-Bereich fuer Inhaltsverwaltung, Schueler-Management, Leistungsstufen.
 
@@ -271,6 +271,57 @@
 - `preferred_locale` CHECK auf `('en', 'ru', 'el')` erweitert (in insert_greek_translations.sql)
 - `ui_translations.lang` CHECK auf `('en', 'ru', 'el')` erweitert
 - `update_user_locale()` RPC auf 3 Sprachen erweitert
+- Build getestet – erfolgreich ✅
+
+---
+
+## Phase 6: Deutsch (de) als vierte UI-Sprache
+
+### 39. ✅ Locale-Typ + LanguageContext auf 4 Sprachen erweitern (2026-02-09)
+- `Locale = 'en' | 'ru' | 'el' | 'de'` in `LanguageContext.tsx`
+- `translationCache` und `fetchPromises` in `useTranslation.ts` um `de` erweitern
+- `AuthContext.tsx` preferred_locale Typ um `'de'` erweitern
+
+### 40. ✅ FALLBACK_DE: Deutsche Fallback-Uebersetzungen in useTranslation.ts (2026-02-09)
+- Alle ~130 Keys ins Deutsche uebersetzt
+- Als `FALLBACK_DE` Objekt in `useTranslation.ts` eingefuegt
+- Fallback-Logik angepasst: `getFallback()` um `de` erweitert
+- `header.switch_to_de` in FALLBACK_EN und FALLBACK_EL ergaenzt
+
+### 41. ✅ SQL: Deutsche Uebersetzungen in ui_translations einfuegen (2026-02-09)
+- SQL-Datei `supabase/insert_german_translations.sql` erstellt
+- Alle ~130 Keys mit `lang = 'de'` und deutschen Texten eingefuegt
+- Idempotent via `ON CONFLICT (key, lang) DO UPDATE`
+- CHECK-Constraints auf `('en', 'ru', 'el', 'de')` erweitert
+
+### 42. ✅ Login-Seite: 4-Sprachen-Auswahl (EN / RU / EL / DE) (2026-02-09)
+- 3-Button-Auswahl durch 4-Button-Auswahl ersetzt (EN / RU / EL / DE)
+- Deutsche Flagge 🇩🇪 hinzugefuegt
+- Hintergrund-Gradient fuer Deutsch definiert (warmer Goldton #3d3010)
+- Canvas-Partikel-Farbe fuer Deutsch definiert (Hue 35-55, gold/amber)
+- Gradient Orbs fuer Deutsch angepasst (rgba(218, 165, 32))
+- Verbindungslinien-Farbe fuer DE (218, 165, 32)
+- Divider "or/или/ή/oder" viersprachig
+
+### 43. ✅ DashboardHeader: Flaggen-Toggle fuer 4 Sprachen (2026-02-09)
+- 3-Wege-Toggle durch 4-Wege-Toggle ersetzt (EN→RU→EL→DE→EN)
+- Flagge zeigt 🇬🇧 / 🇷🇺 / 🇬🇷 / 🇩🇪 je nach aktiver Sprache
+- Tooltip-Keys: `header.switch_to_de` hinzugefuegt
+
+### 44. ✅ Admin-Seite: Flaggen-Toggle fuer 4 Sprachen (2026-02-09)
+- Gleiche 4-Wege-Logik wie im DashboardHeader
+- Hintergrund-Farbe fuer Deutsch (DE) definiert (warmer Goldton #2a2010)
+- Flaggen-Button Rahmenfarbe fuer DE angepasst (rgba(218, 165, 32, 0.2))
+- Label-Farbe fuer DE: #DAA520 (Goldgelb)
+
+### 45. ✅ LanguageToast: Deutsche Toast-Nachricht (2026-02-09)
+- Toast fuer DE: "Sprache auf Deutsch geändert." mit 🇩🇪
+- Farbschema fuer DE-Toast definiert (gold/amber: bg rgba(50, 40, 10), border rgba(218, 165, 32))
+
+### 46. ✅ SQL: CHECK-Constraints erweitern + Build testen (2026-02-09)
+- `preferred_locale` CHECK auf `('en', 'ru', 'el', 'de')` erweitert
+- `ui_translations.lang` CHECK auf `('en', 'ru', 'el', 'de')` erweitert
+- `update_user_locale()` RPC auf 4 Sprachen erweitert
 - Build getestet – erfolgreich ✅
 
 ---

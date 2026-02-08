@@ -12,6 +12,7 @@ import VocabularyDialog from '@/components/learning/VocabularyDialog';
 import GrammarDialog from '@/components/learning/GrammarDialog';
 import ComprehensionDialog from '@/components/learning/ComprehensionDialog';
 import ListeningDialog from '@/components/learning/ListeningDialog';
+import LessonDialog from '@/components/learning/LessonDialog';
 import { supabase } from '@/db/supabase';
 import { useTranslation } from '@/lib/useTranslation';
 import Link from 'next/link';
@@ -49,6 +50,7 @@ export default function DashboardPage() {
     const [comprehensionDialogMode, setComprehensionDialogMode] = useState<'weak' | 'review' | 'due'>('review');
     const [isListeningDialogOpen, setIsListeningDialogOpen] = useState(false);
     const [listeningDialogMode, setListeningDialogMode] = useState<'weak' | 'review' | 'due'>('review');
+    const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
     const [masteryProgress, setMasteryProgress] = useState(38);
     const [stats, setStats] = useState({ streak: 5, words: 47, weak: 'Verbs' });
     const { t } = useTranslation();
@@ -173,7 +175,11 @@ export default function DashboardPage() {
 
                     {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
                     <div className="quick-actions-grid">
-                        <ActionTile icon="✨" label={t('action.magic_round')} disabled />
+                        <ActionTile
+                            icon="👩‍🏫"
+                            label={t('action.magic_round')}
+                            onClick={() => setIsLessonDialogOpen(true)}
+                        />
                         <ActionTile icon="⚡" label={t('action.quick_lesson')} disabled />
                         <ActionTile 
                             icon="💬" 
@@ -281,6 +287,12 @@ export default function DashboardPage() {
                 isOpen={isListeningDialogOpen}
                 onClose={() => setIsListeningDialogOpen(false)}
                 mode={listeningDialogMode}
+            />
+
+            {/* Lesson Dialog (Dein Unterricht) */}
+            <LessonDialog
+                isOpen={isLessonDialogOpen}
+                onClose={() => setIsLessonDialogOpen(false)}
             />
         </div>
     );

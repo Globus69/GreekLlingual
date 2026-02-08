@@ -44,12 +44,14 @@ export default function LoginPage() {
         resize();
         window.addEventListener('resize', resize);
 
-        // Create particles – Hue: EN=blau (200-240), RU=rot (340-20), EL=cyan-blau (190-220)
+        // Create particles – Hue: EN=blau (200-240), RU=rot (340-20), EL=cyan-blau (190-220), DE=gold (35-55)
         const hueRange = locale === 'ru'
             ? { base: 345, spread: 30 }   // rot-ish (345-375 → wraps to 345-15)
             : locale === 'el'
                 ? { base: 190, spread: 30 }   // cyan-blau griechisch (190-220)
-                : { base: 200, spread: 40 };  // blau-ish (200-240)
+                : locale === 'de'
+                    ? { base: 35, spread: 20 }    // gold/amber deutsch (35-55)
+                    : { base: 200, spread: 40 };  // blau-ish (200-240)
 
         for (let i = 0; i < 60; i++) {
             particles.push({
@@ -64,7 +66,7 @@ export default function LoginPage() {
         }
 
         // Verbindungslinien-Farbe
-        const lineColor = locale === 'ru' ? '180, 60, 60' : locale === 'el' ? '13, 110, 253' : '0, 122, 255';
+        const lineColor = locale === 'ru' ? '180, 60, 60' : locale === 'el' ? '13, 110, 253' : locale === 'de' ? '218, 165, 32' : '0, 122, 255';
 
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -239,7 +241,9 @@ export default function LoginPage() {
                     ? 'radial-gradient(ellipse at 50% 50%, #3d1535 0%, #1a0818 50%, #0A0A0C 100%)'
                     : locale === 'el'
                         ? 'radial-gradient(ellipse at 50% 50%, #0d2847 0%, #091a35 50%, #0A0A0C 100%)'
-                        : 'radial-gradient(ellipse at 50% 50%, #0f2555 0%, #0a1230 50%, #0A0A0C 100%)',
+                        : locale === 'de'
+                            ? 'radial-gradient(ellipse at 50% 50%, #3d3010 0%, #1a1508 50%, #0A0A0C 100%)'
+                            : 'radial-gradient(ellipse at 50% 50%, #0f2555 0%, #0a1230 50%, #0A0A0C 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -263,7 +267,9 @@ export default function LoginPage() {
                         ? 'radial-gradient(circle, rgba(224, 85, 85, 0.18) 0%, transparent 70%)'
                         : locale === 'el'
                             ? 'radial-gradient(circle, rgba(13, 110, 253, 0.18) 0%, transparent 70%)'
-                            : 'radial-gradient(circle, rgba(0, 122, 255, 0.18) 0%, transparent 70%)',
+                            : locale === 'de'
+                                ? 'radial-gradient(circle, rgba(218, 165, 32, 0.18) 0%, transparent 70%)'
+                                : 'radial-gradient(circle, rgba(0, 122, 255, 0.18) 0%, transparent 70%)',
                     top: '-100px',
                     right: '-100px',
                     animation: 'orbFloat1 12s ease-in-out infinite',
@@ -279,7 +285,9 @@ export default function LoginPage() {
                         ? 'radial-gradient(circle, rgba(180, 60, 60, 0.15) 0%, transparent 70%)'
                         : locale === 'el'
                             ? 'radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%)'
-                            : 'radial-gradient(circle, rgba(88, 86, 214, 0.15) 0%, transparent 70%)',
+                            : locale === 'de'
+                                ? 'radial-gradient(circle, rgba(180, 140, 20, 0.15) 0%, transparent 70%)'
+                                : 'radial-gradient(circle, rgba(88, 86, 214, 0.15) 0%, transparent 70%)',
                     bottom: '-80px',
                     left: '-80px',
                     animation: 'orbFloat2 15s ease-in-out infinite',
@@ -312,21 +320,24 @@ export default function LoginPage() {
                         borderRadius: '10px',
                         padding: '3px',
                     }}>
-                        {(['en', 'ru', 'el'] as Locale[]).map((lang) => {
+                        {(['en', 'ru', 'el', 'de'] as Locale[]).map((lang) => {
                             const langGradient: Record<Locale, string> = {
                                 en: 'linear-gradient(135deg, #007AFF, #5856D6)',
                                 ru: 'linear-gradient(135deg, #E05555, #C0392B)',
                                 el: 'linear-gradient(135deg, #0D6EFD, #0A58CA)',
+                                de: 'linear-gradient(135deg, #DAA520, #B8860B)',
                             };
                             const langShadow: Record<Locale, string> = {
                                 en: '0 2px 8px rgba(0, 122, 255, 0.3)',
                                 ru: '0 2px 8px rgba(224, 85, 85, 0.3)',
                                 el: '0 2px 8px rgba(13, 110, 253, 0.3)',
+                                de: '0 2px 8px rgba(218, 165, 32, 0.3)',
                             };
                             const langLabel: Record<Locale, string> = {
                                 en: 'EN',
                                 ru: 'RU',
                                 el: 'EL',
+                                de: 'DE',
                             };
                             return (
                                 <button
@@ -607,7 +618,7 @@ export default function LoginPage() {
                     }}>
                         <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
                         <span style={{ fontSize: '11px', color: '#4A4A4E', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                            {locale === 'ru' ? 'или' : locale === 'el' ? 'ή' : 'or'}
+                            {locale === 'ru' ? 'или' : locale === 'el' ? 'ή' : locale === 'de' ? 'oder' : 'or'}
                         </span>
                         <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
                     </div>
