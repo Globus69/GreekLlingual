@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/context/AuthContext';
 import Flashcard from '@/components/learning/Flashcard';
+import { useTranslation } from '@/lib/useTranslation';
 import '@/styles/liquid-glass.css';
 
 interface LearningItem {
@@ -56,6 +57,7 @@ const FALLBACK_VOCABULARY: VocabWithProgress[] = [
 
 export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: VocabularyDialogProps) {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [vocabulary, setVocabulary] = useState<VocabWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -482,9 +484,9 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact">
                     <div style={{ textAlign: 'center', padding: '60px', color: '#fff' }}>
-                        <h2>🏛️ Loading...</h2>
+                        <h2>🏛️ {t('vocab.loading')}</h2>
                         <p style={{ color: '#8E8E93', marginTop: '12px', fontSize: '14px' }}>
-                            Fetching vocabulary from database...
+                            {t('vocab.loading_subtitle')}
                         </p>
                     </div>
                 </div>
@@ -497,12 +499,12 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ Login Required</h2>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ {t('vocab.login_required')}</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
-                        Please log in to access vocabulary learning features.
+                        {t('vocab.login_required_msg')}
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
-                        Abbrechen
+                        {t('btn.cancel')}
                     </button>
                 </div>
             </div>
@@ -515,15 +517,15 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>📚 No Vocabulary Found</h2>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>📚 {t('vocab.no_items')}</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '20px' }}>
-                        No vocabulary items available for this mode.
+                        {t('vocab.no_items_msg')}
                     </p>
                     <p style={{ color: '#8E8E93', fontSize: '14px', marginBottom: '30px' }}>
                         💡 <strong>Tip:</strong> Run <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>supabase/insert_test_vocabulary.sql</code> in your Supabase SQL editor to add test vocabulary.
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
-                        Abbrechen
+                        {t('btn.cancel')}
                     </button>
                 </div>
             </div>
@@ -536,12 +538,12 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ Error</h2>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ {t('vocab.error')}</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
-                        Unable to load vocabulary card.
+                        {t('vocab.error_msg')}
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
-                        Abbrechen
+                        {t('btn.cancel')}
                     </button>
                 </div>
             </div>
@@ -571,14 +573,14 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                         marginBottom: 'calc(var(--spacing-sm) * 0.75)',
                         color: 'var(--text-primary)',
                         letterSpacing: '-0.5px'
-                    }}>Session beendet!</h2>
+                    }}>{t('vocab.session_complete')}</h2>
                     <p style={{ 
                         color: 'var(--text-secondary)', 
                         marginBottom: 'calc(var(--spacing-xl) * 0.75)',
                         fontSize: '1rem',
                         letterSpacing: '-0.1px'
                     }}>
-                        {correct} richtig / {total - correct} falsch ({progressPercent} %)
+                        {correct} {t('vocab.correct')} / {total - correct} {t('vocab.wrong')} ({progressPercent} %)
                     </p>
 
                     <div className="summary-stats" style={{ 
@@ -600,7 +602,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.8px',
                                 marginTop: 'calc(var(--spacing-xs) * 0.75)'
-                            }}>Richtig</span>
+                            }}>{t('vocab.correct')}</span>
                         </div>
                         <div style={{
                             width: '1px',
@@ -620,7 +622,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.8px',
                                 marginTop: 'calc(var(--spacing-xs) * 0.75)'
-                            }}>Falsch</span>
+                            }}>{t('vocab.wrong')}</span>
                         </div>
                     </div>
 
@@ -655,7 +657,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                             e.currentTarget.style.boxShadow = 'var(--shadow-inner)';
                         }}
                     >
-                        Zurück zum Dashboard
+                        {t('vocab.back_to_dashboard')}
                     </button>
 
                     {showToast && (
@@ -674,7 +676,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                             boxShadow: 'var(--shadow-frosted)',
                             border: '1px solid var(--border-soft)'
                         }}>
-                            ✅ Fortschritt gespeichert – super gemacht!
+                            ✅ {t('vocab.progress_saved')}
                         </div>
                     )}
                 </div>
@@ -686,12 +688,12 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
     const getModeConfig = () => {
         switch (mode) {
             case 'weak':
-                return { title: '💪 Train Weak Words', subtitle: 'Lass uns diese stärken' };
+                return { title: `💪 ${t('vocab.mode.weak_title')}`, subtitle: t('mode.weak_subtitle') };
             case 'due':
-                return { title: '📚 Due Cards Today', subtitle: 'Deine täglichen Wiederholungen' };
+                return { title: `📚 ${t('vocab.mode.due_title')}`, subtitle: t('mode.due_subtitle') };
             case 'review':
             default:
-                return { title: '🔄 Review Vocabulary', subtitle: 'Dein Wissen auffrischen' };
+                return { title: `🔄 ${t('vocab.mode.review_title')}`, subtitle: t('vocab.mode.review_subtitle') };
         }
     };
 
@@ -733,7 +735,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                         <div className="card-content">
                             {/* Front: English (always visible) */}
                             <div className={`english-translation-container ${!flipped ? 'active' : ''}`}>
-                                <div className="field-label">ENGLISH</div>
+                                <div className="field-label">{t('flashcard.label_source')}</div>
                                 <p className="english-translation">{currentVocab.english}</p>
                                 {currentVocab.example_en && (
                                     <p style={{ 
@@ -773,7 +775,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                                         handleScore(1);
                                     }}
                                 >
-                                    Hard
+                                    {t('btn.hard')}
                                 </button>
                                 <button 
                                     className="rating-btn rating-good" 
@@ -782,7 +784,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                                         handleScore(2.5);
                                     }}
                                 >
-                                    Good
+                                    {t('btn.good')}
                                 </button>
                                 <button 
                                     className="rating-btn rating-easy" 
@@ -791,7 +793,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                                         handleScore(3);
                                     }}
                                 >
-                                    Easy
+                                    {t('btn.easy')}
                                 </button>
                             </div>
                         ) : (
@@ -804,7 +806,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                                 <button 
                                     id="audioBtn" 
                                     className="action-btn audio-btn" 
-                                    title="Griechische Aussprache anhören"
+                                    title={t('btn.audio_tooltip')}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         playAudio();
@@ -815,7 +817,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                                         <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
                                         <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                                     </svg>
-                                    Audio
+                                    {t('btn.audio')}
                                 </button>
                             )}
                             {/* Vertical Stack: Wiederholen and Abbrechen (always visible) */}
@@ -831,7 +833,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                                         <polyline points="23 4 23 10 17 10"></polyline>
                                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                                     </svg>
-                                    Wiederholen
+                                    {t('btn.restart')}
                                 </button>
                                 <button 
                                     className="action-btn cancel-btn vertical-btn" 
@@ -844,7 +846,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
                                         <line x1="6" y1="6" x2="18" y2="18"></line>
                                     </svg>
-                                    Abbrechen
+                                    {t('btn.cancel')}
                                 </button>
                             </div>
                         </div>
@@ -853,7 +855,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
 
                 {showToast && (
                     <div className="save-toast">
-                        ✅ Result saved - well done!
+                        ✅ {t('vocab.result_saved')}
                     </div>
                 )}
             </div>
