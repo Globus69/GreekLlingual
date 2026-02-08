@@ -11,6 +11,7 @@ interface LearningItem {
     id: number;
     type: string;
     english: string;
+    russian?: string;
     greek: string;
     example_en: string | null;
     example_gr: string | null;
@@ -43,21 +44,21 @@ interface VocabularyDialogProps {
 // Fallback vocabulary data if Supabase is not available
 // Some items have low ease_factor to work with "weak" mode filter
 const FALLBACK_VOCABULARY: VocabWithProgress[] = [
-    { id: 1, type: 'vocabulary', english: 'Hello', greek: 'Γεια σου', example_en: 'Hello friend', example_gr: 'Γεια σου φίλε', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 1, student_id: 'demo', item_id: 1, interval_days: 1, ease_factor: 2.0, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 2, type: 'vocabulary', english: 'Thank you', greek: 'Ευχαριστώ', example_en: 'Thank you very much', example_gr: 'Ευχαριστώ πολύ', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 2, student_id: 'demo', item_id: 2, interval_days: 1, ease_factor: 2.1, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 3, type: 'vocabulary', english: 'Please', greek: 'Παρακαλώ', example_en: 'Please help me', example_gr: 'Παρακαλώ βοήθησέ με', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 3, student_id: 'demo', item_id: 3, interval_days: 1, ease_factor: 2.2, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
-    { id: 4, type: 'vocabulary', english: 'Yes', greek: 'Ναι', example_en: 'Yes, I agree', example_gr: 'Ναι, συμφωνώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 5, type: 'vocabulary', english: 'No', greek: 'Όχι', example_en: 'No, thank you', example_gr: 'Όχι, ευχαριστώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 6, type: 'vocabulary', english: 'Water', greek: 'Νερό', example_en: 'I want water', example_gr: 'Θέλω νερό', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 7, type: 'vocabulary', english: 'Coffee', greek: 'Καφές', example_en: 'Drink coffee', example_gr: 'Πίνω καφέ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 8, type: 'vocabulary', english: 'Friend', greek: 'Φίλος', example_en: 'Best friend', example_gr: 'Καλύτερος φίλος', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 9, type: 'vocabulary', english: 'Good morning', greek: 'Καλημέρα', example_en: 'Good morning!', example_gr: 'Καλημέρα!', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
-    { id: 10, type: 'vocabulary', english: 'Goodbye', greek: 'Αντίο', example_en: 'Goodbye for now', example_gr: 'Αντίο προς το παρόν', audio_url: null, created_at: new Date().toISOString(), student_progress: [] }
+    { id: 1, type: 'vocabulary', english: 'Hello', russian: 'Привет', greek: 'Γεια σου', example_en: 'Hello friend', example_gr: 'Γεια σου φίλε', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 1, student_id: 'demo', item_id: 1, interval_days: 1, ease_factor: 2.0, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 2, type: 'vocabulary', english: 'Thank you', russian: 'Спасибо', greek: 'Ευχαριστώ', example_en: 'Thank you very much', example_gr: 'Ευχαριστώ πολύ', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 2, student_id: 'demo', item_id: 2, interval_days: 1, ease_factor: 2.1, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 3, type: 'vocabulary', english: 'Please', russian: 'Пожалуйста', greek: 'Παρακαλώ', example_en: 'Please help me', example_gr: 'Παρακαλώ βοήθησέ με', audio_url: null, created_at: new Date().toISOString(), student_progress: [{ id: 3, student_id: 'demo', item_id: 3, interval_days: 1, ease_factor: 2.2, attempts: 0, correct_count: 0, last_attempt: null, next_review: null }] },
+    { id: 4, type: 'vocabulary', english: 'Yes', russian: 'Да', greek: 'Ναι', example_en: 'Yes, I agree', example_gr: 'Ναι, συμφωνώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 5, type: 'vocabulary', english: 'No', russian: 'Нет', greek: 'Όχι', example_en: 'No, thank you', example_gr: 'Όχι, ευχαριστώ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 6, type: 'vocabulary', english: 'Water', russian: 'Вода', greek: 'Νερό', example_en: 'I want water', example_gr: 'Θέλω νερό', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 7, type: 'vocabulary', english: 'Coffee', russian: 'Кофе', greek: 'Καφές', example_en: 'Drink coffee', example_gr: 'Πίνω καφέ', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 8, type: 'vocabulary', english: 'Friend', russian: 'Друг', greek: 'Φίλος', example_en: 'Best friend', example_gr: 'Καλύτερος φίλος', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 9, type: 'vocabulary', english: 'Good morning', russian: 'Доброе утро', greek: 'Καλημέρα', example_en: 'Good morning!', example_gr: 'Καλημέρα!', audio_url: null, created_at: new Date().toISOString(), student_progress: [] },
+    { id: 10, type: 'vocabulary', english: 'Goodbye', russian: 'До свидания', greek: 'Αντίο', example_en: 'Goodbye for now', example_gr: 'Αντίο προς το παρόν', audio_url: null, created_at: new Date().toISOString(), student_progress: [] }
 ];
 
 export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: VocabularyDialogProps) {
     const { user } = useAuth();
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const [vocabulary, setVocabulary] = useState<VocabWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -736,7 +737,7 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                             {/* Front: English (always visible) */}
                             <div className={`english-translation-container ${!flipped ? 'active' : ''}`}>
                                 <div className="field-label">{t('flashcard.label_source')}</div>
-                                <p className="english-translation">{currentVocab.english}</p>
+                                <p className="english-translation">{locale === 'ru' && currentVocab.russian ? currentVocab.russian : currentVocab.english}</p>
                                 {currentVocab.example_en && (
                                     <p style={{ 
                                         fontSize: '1rem', 

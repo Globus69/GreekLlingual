@@ -147,3 +147,25 @@
 - **Dateien:** `src/components/learning/GrammarDialog.tsx`, `src/components/learning/ComprehensionDialog.tsx`, `src/components/learning/ListeningDialog.tsx`, `src/components/dashboard/ActionGrid.tsx`, `src/components/dashboard/ModuleGrid.tsx`, `src/components/dashboard/PerformanceHub.tsx`, `src/lib/useTranslation.ts`
 - **Commit-Vorschlag:** `2026-02-08 19:30 | Aufgabe 7 – Restliche Komponenten komplett mehrsprachig (Grammar, Comprehension, Listening, ActionGrid, ModuleGrid, PerformanceHub)`
 - **Naechste Aufgabe:** Aufgabe 8 – learning_items Tabelle um Russisch erweitern
+
+---
+
+### 2026-02-08 – Aufgabe 8: learning_items Tabelle um Russisch erweitern
+- **Aufgabe:** Russische Spalte zu learning_items hinzufuegen, Kartenansicht sprachabhaengig machen
+- **Was wurde gemacht:**
+  - SQL-Migration `supabase/alter_learning_items_add_russian.sql` erstellt:
+    - `ALTER TABLE learning_items ADD COLUMN IF NOT EXISTS russian TEXT`
+    - UPDATE-Statements fuer ~30 bestehende Items (Vocabulary, Grammar, Comprehension, Listening)
+  - `LearningItem` Interface in allen 4 Dialogen um `russian?: string` erweitert
+  - `locale` aus `useTranslation()` in allen 4 Dialogen destrukturiert
+  - Anzeige-Logik in VocabularyDialog, GrammarDialog, ComprehensionDialog:
+    - `locale === 'ru' && item.russian ? item.russian : item.english`
+    - Fallback auf `english` wenn `russian` leer/null ist
+  - Fallback-Daten in allen 4 Dialogen um `russian` Feld ergaenzt:
+    - VocabularyDialog: 10 Vokabeln (Привет, Спасибо, Пожалуйста, ...)
+    - GrammarDialog: 10 Grammatik-Items (Настоящее время, Определённый артикль, ...)
+    - ComprehensionDialog: 10 Verstaendnis-Items (Как тебя зовут?, Как дела?, ...)
+    - ListeningDialog: 2 Hoerverstaendnis-Items
+  - Build erfolgreich getestet
+- **Dateien:** `supabase/alter_learning_items_add_russian.sql`, `src/components/learning/VocabularyDialog.tsx`, `src/components/learning/GrammarDialog.tsx`, `src/components/learning/ComprehensionDialog.tsx`, `src/components/learning/ListeningDialog.tsx`
+- **Commit-Vorschlag:** `2026-02-08 20:00 | Aufgabe 8 – learning_items um russian Spalte erweitert, Kartenansicht sprachabhaengig`
