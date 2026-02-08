@@ -8,17 +8,17 @@ import { useTranslation } from '@/lib/useTranslation';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [pinDigits, setPinDigits] = useState<string[]>(['', '', '', '', '', '']);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [shake, setShake] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
     const [focusedField, setFocusedField] = useState<string | null>(null);
     const { login, user } = useAuth();
     const router = useRouter();
     const { locale, setLocale } = useLanguage();
     const { t } = useTranslation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const pinRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     // If already logged in, redirect to dashboard
     useEffect(() => {
@@ -101,15 +101,68 @@ export default function LoginPage() {
         };
     }, []);
 
+    const handlePinChange = (index: number, value: string) => {
+        // Nur Ziffern erlauben
+        if (value && !/^\d$/.test(value)) return;
+
+        const newDigits = [...pinDigits];
+        newDigits[index] = value;
+        setPinDigits(newDigits);
+
+        // Auto-Focus auf naechstes Feld
+        if (value && index < 5) {
+            pinRefs.current[index + 1]?.focus();
+        }
+    };
+
+    const handlePinKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Backspace' && !pinDigits[index] && index > 0) {
+            // Bei Backspace auf leerem Feld: zurueck zum vorherigen
+            pinRefs.current[index - 1]?.focus();
+        }
+        if (e.key === 'ArrowLeft' && index > 0) {
+            pinRefs.current[index - 1]?.focus();
+        }
+        if (e.key === 'ArrowRight' && index < 5) {
+            pinRefs.current[index + 1]?.focus();
+        }
+    };
+
+    const handlePinPaste = (e: React.ClipboardEvent) => {
+        e.preventDefault();
+        const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+        if (pasted.length > 0) {
+            const newDigits = [...pinDigits];
+            for (let i = 0; i < pasted.length && i < 6; i++) {
+                newDigits[i] = pasted[i];
+            }
+            setPinDigits(newDigits);
+            // Focus auf das naechste leere oder letzte Feld
+            const nextEmpty = newDigits.findIndex(d => !d);
+            pinRefs.current[nextEmpty >= 0 ? nextEmpty : 5]?.focus();
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        const pin = pinDigits.join('');
+        if (pin.length !== 6) {
+            setError(t('login.error'));
+            setShake(true);
+            setTimeout(() => setShake(false), 600);
+            return;
+        }
+
         setIsSubmitting(true);
 
-        const success = await login(username, password);
+        const success = await login(username, pin);
         if (!success) {
             setError(t('login.error'));
             setShake(true);
+            setPinDigits(['', '', '', '', '', '']);
+            pinRefs.current[0]?.focus();
             setTimeout(() => setShake(false), 600);
             setIsSubmitting(false);
         }
@@ -356,76 +409,71 @@ export default function LoginPage() {
                             />
                         </div>
 
-                        {/* Password Field */}
-                        <div style={{ position: 'relative', marginBottom: '20px' }}>
+                        {/* PIN Field – 6 einzelne Ziffernfelder */}
+                        <div style={{ marginBottom: '20px' }}>
                             <div style={{
-                                position: 'absolute',
-                                left: '16px',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                fontSize: '16px',
-                                opacity: 0.4,
-                                transition: 'opacity 0.2s',
-                                ...(focusedField === 'password' ? { opacity: 0.8 } : {}),
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                marginBottom: '8px',
                             }}>
-                                🔒
+                                <span style={{ fontSize: '16px', opacity: 0.4 }}>🔒</span>
+                                <span style={{ fontSize: '13px', color: '#6E6E73', fontWeight: 500 }}>
+                                    {t('login.pin_placeholder')}
+                                </span>
                             </div>
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                placeholder={t('login.pin_placeholder')}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                onFocus={() => setFocusedField('password')}
-                                onBlur={() => setFocusedField(null)}
-                                required
-                                autoComplete="off"
-                                data-lpignore="true"
-                                data-1p-ignore
-                                data-form-type="other"
-                                style={{
-                                    width: '100%',
-                                    background: focusedField === 'password'
-                                        ? 'rgba(0, 0, 0, 0.5)'
-                                        : 'rgba(0, 0, 0, 0.25)',
-                                    border: `1.5px solid ${focusedField === 'password'
-                                        ? 'rgba(0, 122, 255, 0.5)'
-                                        : 'rgba(255, 255, 255, 0.06)'}`,
-                                    borderRadius: '16px',
-                                    padding: '16px 48px 16px 44px',
-                                    fontSize: '15px',
-                                    color: '#fff',
-                                    outline: 'none',
-                                    transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                                    boxSizing: 'border-box',
-                                    fontFamily: 'inherit',
-                                    boxShadow: focusedField === 'password'
-                                        ? '0 0 0 4px rgba(0, 122, 255, 0.1), 0 4px 16px rgba(0, 0, 0, 0.2)'
-                                        : 'none',
-                                }}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                style={{
-                                    position: 'absolute',
-                                    right: '14px',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#6E6E73',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                    padding: '4px',
-                                    opacity: 0.6,
-                                    transition: 'opacity 0.2s',
-                                }}
-                                onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.6'; }}
-                                tabIndex={-1}
-                            >
-                                {showPassword ? '🙈' : '👁️'}
-                            </button>
+                            <div style={{
+                                display: 'flex',
+                                gap: '8px',
+                                justifyContent: 'center',
+                            }}>
+                                {pinDigits.map((digit, index) => (
+                                    <input
+                                        key={index}
+                                        ref={(el) => { pinRefs.current[index] = el; }}
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength={1}
+                                        value={digit}
+                                        onChange={(e) => handlePinChange(index, e.target.value)}
+                                        onKeyDown={(e) => handlePinKeyDown(index, e)}
+                                        onPaste={index === 0 ? handlePinPaste : undefined}
+                                        onFocus={() => setFocusedField(`pin-${index}`)}
+                                        onBlur={() => setFocusedField(null)}
+                                        autoComplete="off"
+                                        data-lpignore="true"
+                                        data-1p-ignore
+                                        data-form-type="other"
+                                        style={{
+                                            width: '48px',
+                                            height: '56px',
+                                            background: focusedField === `pin-${index}`
+                                                ? 'rgba(0, 0, 0, 0.5)'
+                                                : digit
+                                                    ? 'rgba(0, 122, 255, 0.08)'
+                                                    : 'rgba(0, 0, 0, 0.25)',
+                                            border: `1.5px solid ${focusedField === `pin-${index}`
+                                                ? 'rgba(0, 122, 255, 0.5)'
+                                                : digit
+                                                    ? 'rgba(0, 122, 255, 0.2)'
+                                                    : 'rgba(255, 255, 255, 0.06)'}`,
+                                            borderRadius: '14px',
+                                            fontSize: '22px',
+                                            fontWeight: 700,
+                                            color: '#fff',
+                                            textAlign: 'center',
+                                            outline: 'none',
+                                            transition: 'all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                                            boxSizing: 'border-box',
+                                            fontFamily: 'inherit',
+                                            caretColor: '#007AFF',
+                                            boxShadow: focusedField === `pin-${index}`
+                                                ? '0 0 0 4px rgba(0, 122, 255, 0.1), 0 4px 16px rgba(0, 0, 0, 0.2)'
+                                                : 'none',
+                                        }}
+                                    />
+                                ))}
+                            </div>
                         </div>
 
                         {/* Error Message */}

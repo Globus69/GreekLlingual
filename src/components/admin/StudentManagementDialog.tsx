@@ -61,9 +61,69 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
     const [error, setError] = useState<string | null>(null);
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+    const [studentStats, setStudentStats] = useState<Record<string, any>>({});
+    const [loadingStats, setLoadingStats] = useState<string | null>(null);
 
     // ── Computed ──────────────────────────────────────────────────────────────
     const indexKey = `${form.level}-${form.difficulty}`;
+
+    // ── PIN Generator ────────────────────────────────────────────────────────
+    const generatePin = () => {
+        const pin = String(Math.floor(100000 + Math.random() * 900000));
+        setForm(f => ({ ...f, pin }));
+    };
+
+    // ── Student Stats laden (via RPC) ────────────────────────────────────────
+    const loadStudentStats = async (studentId: string) => {
+        if (studentStats[studentId]) {
+            // Toggle: Stats ausblenden wenn bereits geladen
+            setStudentStats(prev => {
+                const copy = { ...prev };
+                delete copy[studentId];
+                return copy;
+            });
+            return;
+        }
+        setLoadingStats(studentId);
+        try {
+            const { data, error } = await supabase.rpc('get_student_stats', {
+                p_student_id: studentId,
+            });
+            if (!error && data) {
+                setStudentStats(prev => ({ ...prev, [studentId]: data }));
+            } else {
+                setStudentStats(prev => ({ ...prev, [studentId]: { error: 'Not available' } }));
+            }
+        } catch {
+            setStudentStats(prev => ({ ...prev, [studentId]: { error: 'Failed' } }));
+        }
+        setLoadingStats(null);
+    };
+
+    // ── CSV Export ────────────────────────────────────────────────────────────
+    const exportCSV = () => {
+        const headers = ['Name', 'Email', 'WhatsApp', 'Level', 'Difficulty', 'Index-Key'];
+        const rows = students.map(s => [
+            s.name || '',
+            s.email || '',
+            s.whatsapp || '',
+            s.level || 'A1',
+            s.difficulty || 'easy',
+            s.performance_index || '',
+        ]);
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(r => r.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(','))
+        ].join('\n');
+
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `students_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
 
     // ── Fetch Students (via RPC – umgeht RLS) ────────────────────────────────
     const fetchStudents = useCallback(async () => {
@@ -353,9 +413,14 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                     </div>
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                         {mode === 'list' && (
-                            <button onClick={openAdd} style={btnPrimary}>
-                                + {t('students.add_new')}
-                            </button>
+                            <>
+                                <button onClick={exportCSV} style={btnSecondary} title="Export CSV">
+                                    📥 CSV
+                                </button>
+                                <button onClick={openAdd} style={btnPrimary}>
+                                    + {t('students.add_new')}
+                                </button>
+                            </>
                         )}
                         {mode !== 'list' && (
                             <button onClick={() => { setMode('list'); setError(null); }} style={btnSecondary}>
@@ -401,41 +466,98 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '50vh', overflowY: 'auto' }}>
                                     {filtered.map(student => (
-                                        <div
-                                            key={student.id}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between',
-                                                background: 'rgba(255,255,255,0.04)',
-                                                borderRadius: '10px',
-                                                padding: '8px 12px',
-                                                border: '1px solid rgba(255,255,255,0.06)',
-                                            }}
-                                        >
-                                            <div style={{ flex: 1, minWidth: 0 }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                                                    <span style={{ fontWeight: 600, color: '#fff', fontSize: '13px' }}>
-                                                        {student.name || '—'}
-                                                    </span>
-                                                    <span style={tagLevel}>{student.level || 'A1'}</span>
-                                                    <span style={tagDiff}>{student.difficulty || 'easy'}</span>
-                                                    <span style={tagIndex}>{student.performance_index || '—'}</span>
+                                        <div key={student.id}>
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    background: 'rgba(255,255,255,0.04)',
+                                                    borderRadius: studentStats[student.id] ? '10px 10px 0 0' : '10px',
+                                                    padding: '8px 12px',
+                                                    border: '1px solid rgba(255,255,255,0.06)',
+                                                    borderBottom: studentStats[student.id] ? 'none' : '1px solid rgba(255,255,255,0.06)',
+                                                }}
+                                            >
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                                        <span style={{ fontWeight: 600, color: '#fff', fontSize: '13px' }}>
+                                                            {student.name || '—'}
+                                                        </span>
+                                                        <span style={tagLevel}>{student.level || 'A1'}</span>
+                                                        <span style={tagDiff}>{student.difficulty || 'easy'}</span>
+                                                        <span style={tagIndex}>{student.performance_index || '—'}</span>
+                                                    </div>
+                                                    <div style={{ fontSize: '11px', color: '#636366', marginTop: '2px', display: 'flex', gap: '10px' }}>
+                                                        {student.email && <span>✉ {student.email}</span>}
+                                                        {student.whatsapp && <span>📱 {student.whatsapp}</span>}
+                                                    </div>
                                                 </div>
-                                                <div style={{ fontSize: '11px', color: '#636366', marginTop: '2px', display: 'flex', gap: '10px' }}>
-                                                    {student.email && <span>✉ {student.email}</span>}
-                                                    {student.whatsapp && <span>📱 {student.whatsapp}</span>}
+                                                <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                                                    <button
+                                                        onClick={() => loadStudentStats(student.id)}
+                                                        style={btnStatsRow}
+                                                        title={t('students.show_stats')}
+                                                    >
+                                                        {loadingStats === student.id ? '⏳' : '📊'}
+                                                    </button>
+                                                    <button onClick={() => openEdit(student)} style={btnEditRow}>✏️</button>
+                                                    <button
+                                                        onClick={() => handleDelete(student.id)}
+                                                        style={deleteConfirm === student.id ? btnDeleteConfirm : btnDeleteRow}
+                                                    >
+                                                        {deleteConfirm === student.id ? '⚠️' : '🗑'}
+                                                    </button>
                                                 </div>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                                                <button onClick={() => openEdit(student)} style={btnEditRow}>✏️</button>
-                                                <button
-                                                    onClick={() => handleDelete(student.id)}
-                                                    style={deleteConfirm === student.id ? btnDeleteConfirm : btnDeleteRow}
-                                                >
-                                                    {deleteConfirm === student.id ? '⚠️' : '🗑'}
-                                                </button>
-                                            </div>
+                                            {/* Fortschritts-Details (klappbar) */}
+                                            {studentStats[student.id] && (
+                                                <div style={{
+                                                    background: 'rgba(0, 122, 255, 0.04)',
+                                                    borderRadius: '0 0 10px 10px',
+                                                    padding: '8px 12px',
+                                                    border: '1px solid rgba(255,255,255,0.06)',
+                                                    borderTop: '1px solid rgba(0, 122, 255, 0.1)',
+                                                }}>
+                                                    {studentStats[student.id].error ? (
+                                                        <span style={{ fontSize: '11px', color: '#636366' }}>
+                                                            {t('students.stats_not_available')}
+                                                        </span>
+                                                    ) : (
+                                                        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                                                            <div style={statItem}>
+                                                                <span style={statLabel}>{t('students.stats_attempts')}</span>
+                                                                <span style={statValue}>{studentStats[student.id].total_attempts || 0}</span>
+                                                            </div>
+                                                            <div style={statItem}>
+                                                                <span style={statLabel}>{t('students.stats_correct_rate')}</span>
+                                                                <span style={{
+                                                                    ...statValue,
+                                                                    color: (studentStats[student.id].correct_rate || 0) >= 80 ? '#34C759'
+                                                                        : (studentStats[student.id].correct_rate || 0) < 40 ? '#FF3B30'
+                                                                        : '#FF9500',
+                                                                }}>
+                                                                    {studentStats[student.id].correct_rate || 0}%
+                                                                </span>
+                                                            </div>
+                                                            <div style={statItem}>
+                                                                <span style={statLabel}>{t('students.stats_items_learned')}</span>
+                                                                <span style={statValue}>
+                                                                    {studentStats[student.id].items_learned || 0}/{studentStats[student.id].items_practiced || 0}
+                                                                </span>
+                                                            </div>
+                                                            <div style={statItem}>
+                                                                <span style={statLabel}>{t('students.stats_last_active')}</span>
+                                                                <span style={statValue}>
+                                                                    {studentStats[student.id].last_activity
+                                                                        ? new Date(studentStats[student.id].last_activity).toLocaleDateString()
+                                                                        : '—'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -485,24 +607,44 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                                 </label>
                                 <label style={labelStyle}>
                                     {t('students.field_pin')} {mode === 'add' ? '*' : `(${t('students.pin_optional')})`}
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        maxLength={6}
-                                        value={form.pin}
-                                        onChange={e => {
-                                            const val = e.target.value.replace(/\D/g, '').slice(0, 6);
-                                            setForm(f => ({ ...f, pin: val }));
-                                        }}
-                                        placeholder="000000"
-                                        style={{
-                                            ...inputStyle,
-                                            letterSpacing: '6px',
-                                            fontFamily: 'monospace',
-                                            fontSize: '15px',
-                                            textAlign: 'center',
-                                        }}
-                                    />
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                        <input
+                                            type="text"
+                                            inputMode="numeric"
+                                            maxLength={6}
+                                            value={form.pin}
+                                            onChange={e => {
+                                                const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                                setForm(f => ({ ...f, pin: val }));
+                                            }}
+                                            placeholder="000000"
+                                            style={{
+                                                ...inputStyle,
+                                                letterSpacing: '6px',
+                                                fontFamily: 'monospace',
+                                                fontSize: '15px',
+                                                textAlign: 'center',
+                                                flex: 1,
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={generatePin}
+                                            title={t('students.generate_pin')}
+                                            style={{
+                                                background: 'rgba(0, 122, 255, 0.12)',
+                                                border: '1px solid rgba(0, 122, 255, 0.25)',
+                                                borderRadius: '8px',
+                                                padding: '4px 10px',
+                                                fontSize: '14px',
+                                                cursor: 'pointer',
+                                                flexShrink: 0,
+                                                transition: 'all 0.2s',
+                                            }}
+                                        >
+                                            🎲
+                                        </button>
+                                    </div>
                                 </label>
                             </div>
 
@@ -769,4 +911,33 @@ const msgSuccess: React.CSSProperties = {
     color: '#34C759',
     fontSize: '12px',
     fontWeight: 500,
+};
+
+const btnStatsRow: React.CSSProperties = {
+    background: 'rgba(0, 122, 255, 0.08)',
+    border: '1px solid rgba(0, 122, 255, 0.15)',
+    borderRadius: '6px',
+    padding: '4px 8px',
+    fontSize: '12px',
+    cursor: 'pointer',
+    lineHeight: 1,
+};
+
+const statItem: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1px',
+};
+
+const statLabel: React.CSSProperties = {
+    fontSize: '10px',
+    color: '#636366',
+    fontWeight: 500,
+};
+
+const statValue: React.CSSProperties = {
+    fontSize: '13px',
+    color: '#fff',
+    fontWeight: 700,
+    fontFamily: 'monospace',
 };

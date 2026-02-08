@@ -133,26 +133,29 @@
 - `usePerformanceEvaluation` Hook in alle 4 Lern-Dialoge integriert
 - Performance-Nachricht nach Session-Abschluss angezeigt
 
-### 17. ⬜ Inhalte basierend auf Leistungsstufe filtern
-- `learning_items` Query: `WHERE level = user.level AND difficulty = user.difficulty`
-- Fallback: Wenn keine Items fuer aktuelle Stufe → naechst niedrigere Stufe
-- Alle 4 Dialoge (Vocabulary, Grammar, Comprehension, Listening) anpassen
-- Admin kann Items einem Level + Schwierigkeit zuordnen
+### 17. ✅ Inhalte basierend auf Leistungsstufe filtern (2026-02-08)
+- SQL-Migration: `learning_items` um `level` + `difficulty` Spalten erweitert
+- RPC-Funktion `get_learning_items_for_student()` mit 3-stufigem Fallback
+- RPC-Funktion `assign_item_level()` fuer Admin
+- Alle 4 Dialoge: RPC-basierte Filterung (Strategy 1) mit direkter Query als Fallback (Strategy 2)
+- `LearningItem` Interface um `level?` + `difficulty?` erweitert
 
-### 18. ⬜ User-Zuordnung via Name + 6-stelliger PIN
-- Login-Seite: Name-Feld + 6-stelliges PIN-Feld (statt Email + PIN)
-- PIN-Eingabe als 6 einzelne Ziffernfelder (PIN-Pad-Stil)
-- Validierung: Name in `users` Tabelle suchen, PIN-Hash vergleichen
-- Personalisierte Inhalte nach Login (basierend auf User-Profil)
-- AuthContext anpassen: User-Objekt mit Level + Difficulty
+### 18. ✅ User-Zuordnung via Name + 6-stelliger PIN (2026-02-08)
+- Login-Seite: PIN-Eingabe als 6 einzelne Ziffernfelder (PIN-Pad-Stil)
+- Auto-Focus auf naechstes Feld bei Eingabe
+- Backspace springt zurueck zum vorherigen Feld
+- Paste-Support: 6-stelliger PIN kann eingefuegt werden
+- Visuelle Hervorhebung ausgefuellter Felder (blauer Rand)
+- AuthContext hat Level + Difficulty bereits im User-Objekt
 
-### 19. ⬜ Schueler-DB-Verwaltung im Admin-Backend
-- CRUD-Operationen fuer Schueler (Create, Read, Update, Delete)
-- Schueler-Liste mit Suchfunktion
-- Schueler-Detail: Name, PIN (neu setzen), Email, WhatsApp, Level, Schwierigkeit
-- Fortschritts-Uebersicht pro Schueler
-- PIN generieren: Admin kann neuen 6-stelligen PIN fuer Schueler erstellen
-- Export-Funktion (CSV) fuer Schueler-Daten
+### 19. ✅ Schueler-DB-Verwaltung im Admin-Backend (2026-02-08)
+- Fortschritts-Uebersicht pro Schueler (klappbar via 📊 Button)
+  - Zeigt: Attempts, Correct Rate (farbcodiert), Learned/Practiced, Last Active
+  - Nutzt `get_student_stats()` RPC-Funktion
+- PIN-Generator: 🎲 Button generiert zufaelligen 6-stelligen PIN
+- CSV-Export: 📥 CSV Button exportiert alle Schueler-Daten
+  - Felder: Name, Email, WhatsApp, Level, Difficulty, Index-Key
+  - UTF-8 BOM fuer korrekte Umlaute in Excel
 
 ---
 
