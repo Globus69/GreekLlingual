@@ -21,7 +21,7 @@
 - `setLocale(lang)` Methode
 - Provider in `layout.tsx` einbinden (innerhalb AuthProvider)
 
-### 3. ⬜ `useTranslation` Hook + Supabase-Anbindung
+### 3. ✅ `useTranslation` Hook + Supabase-Anbindung (2026-02-08)
 - `src/lib/useTranslation.ts` erstellen
 - Lädt alle Übersetzungen für aktive Sprache aus `ui_translations`
 - Caching (nur einmal pro Sprachwechsel laden)

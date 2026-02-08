@@ -46,3 +46,20 @@
 - **Dateien:** `src/context/LanguageContext.tsx`, `src/app/layout.tsx`
 - **Commit-Vorschlag:** `2026-02-08 16:45 | Aufgabe 2 – LanguageContext mit Locale-Persistierung erstellt`
 - **Naechste Aufgabe:** Aufgabe 3 – useTranslation Hook + Supabase-Anbindung
+
+---
+
+### 2026-02-08 – Aufgabe 3: useTranslation Hook
+- **Aufgabe:** useTranslation Hook mit Supabase-Anbindung und Caching erstellt
+- **Was wurde gemacht:**
+  - `src/lib/useTranslation.ts` erstellt
+  - Laedt Uebersetzungen aus `ui_translations` Tabelle per Supabase-Query
+  - Globaler Cache pro Locale (nur 1x pro Sprachwechsel geladen)
+  - Deduplizierung paralleler Fetch-Requests (fetchPromises)
+  - Kompletter Englisch-Fallback (FALLBACK_EN) fuer Offline-Betrieb
+  - `t(key, params?)` Funktion mit Template-Substitution: `t('dashboard.welcome', { name: 'SWS' })`
+  - Race-Condition-Schutz bei schnellem Sprachwechsel (localeRef + cancelled flag)
+  - Build erfolgreich getestet
+- **Dateien:** `src/lib/useTranslation.ts`
+- **Commit-Vorschlag:** `2026-02-08 17:00 | Aufgabe 3 – useTranslation Hook mit Supabase-Caching erstellt`
+- **Naechste Aufgabe:** Aufgabe 4 – Login-Seite mehrsprachig + Sprachauswahl
