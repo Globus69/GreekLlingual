@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/lib/useTranslation';
 import '@/styles/liquid-glass.css';
 
 interface LearningItem {
@@ -54,6 +55,7 @@ const FALLBACK_GRAMMAR: GrammarWithProgress[] = [
 
 export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: GrammarDialogProps) {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [grammar, setGrammar] = useState<GrammarWithProgress[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -440,9 +442,9 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact">
                     <div style={{ textAlign: 'center', padding: '60px', color: '#fff' }}>
-                        <h2>📐 Loading...</h2>
+                        <h2>📐 {t('vocab.loading')}</h2>
                         <p style={{ color: '#8E8E93', marginTop: '12px', fontSize: '14px' }}>
-                            Fetching grammar from database...
+                            {t('grammar.loading_subtitle')}
                         </p>
                     </div>
                 </div>
@@ -454,12 +456,12 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ Login Required</h2>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ {t('vocab.login_required')}</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
-                        Please log in to access grammar learning features.
+                        {t('grammar.login_required_msg')}
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
-                        Abbrechen
+                        {t('btn.cancel')}
                     </button>
                 </div>
             </div>
@@ -470,15 +472,15 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>📐 No Grammar Found</h2>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>📐 {t('grammar.no_items')}</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '20px' }}>
-                        No grammar items available for this mode.
+                        {t('grammar.no_items_msg')}
                     </p>
                     <p style={{ color: '#8E8E93', fontSize: '14px', marginBottom: '30px' }}>
-                        💡 <strong>Tip:</strong> Run <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>supabase/insert_test_grammar.sql</code> in your Supabase SQL editor to add test grammar.
+                        💡 <strong>Tip:</strong> {t('grammar.no_items_tip')}
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
-                        Abbrechen
+                        {t('btn.cancel')}
                     </button>
                 </div>
             </div>
@@ -490,12 +492,12 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
         return (
             <div className="vocabulary-dialog-overlay">
                 <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', padding: '40px' }}>
-                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ Error</h2>
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>⚠️ {t('vocab.error')}</h2>
                     <p style={{ color: '#8E8E93', marginBottom: '30px' }}>
-                        Unable to load grammar card.
+                        {t('grammar.error_msg')}
                     </p>
                     <button className="btn-primary" onClick={() => handleClose(false)} style={{ width: '100%', padding: '14px', borderRadius: '14px', fontSize: '16px' }}>
-                        Abbrechen
+                        {t('btn.cancel')}
                     </button>
                 </div>
             </div>
@@ -523,14 +525,14 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                         marginBottom: 'calc(var(--spacing-sm) * 0.75)',
                         color: 'var(--text-primary)',
                         letterSpacing: '-0.5px'
-                    }}>Session beendet!</h2>
+                    }}>{t('shared.session_complete')}</h2>
                     <p style={{ 
                         color: 'var(--text-secondary)', 
                         marginBottom: 'calc(var(--spacing-xl) * 0.75)',
                         fontSize: '1rem',
                         letterSpacing: '-0.1px'
                     }}>
-                        {correct} richtig / {total - correct} falsch ({progressPercent} %)
+                        {correct} {t('shared.correct').toLowerCase()} / {total - correct} {t('shared.wrong').toLowerCase()} ({progressPercent} %)
                     </p>
 
                     <div className="summary-stats" style={{ 
@@ -552,7 +554,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.8px',
                                 marginTop: 'calc(var(--spacing-xs) * 0.75)'
-                            }}>Richtig</span>
+                            }}>{t('shared.correct')}</span>
                         </div>
                         <div style={{
                             width: '1px',
@@ -572,7 +574,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.8px',
                                 marginTop: 'calc(var(--spacing-xs) * 0.75)'
-                            }}>Falsch</span>
+                            }}>{t('shared.wrong')}</span>
                         </div>
                     </div>
 
@@ -607,7 +609,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                             e.currentTarget.style.boxShadow = 'var(--shadow-inner)';
                         }}
                     >
-                        Zurück zum Dashboard
+                        {t('shared.back_to_dashboard')}
                     </button>
 
                     {showToast && (
@@ -626,7 +628,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                             boxShadow: 'var(--shadow-frosted)',
                             border: '1px solid var(--border-soft)'
                         }}>
-                            ✅ Fortschritt gespeichert – super gemacht!
+                            ✅ {t('shared.progress_saved')}
                         </div>
                     )}
                 </div>
@@ -637,12 +639,12 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
     const getModeConfig = () => {
         switch (mode) {
             case 'weak':
-                return { title: '💪 Train Weak Grammar', subtitle: 'Lass uns diese stärken' };
+                return { title: '💪 ' + t('grammar.mode.weak_title'), subtitle: t('grammar.mode.weak_subtitle') };
             case 'due':
-                return { title: '📚 Due Grammar Today', subtitle: 'Deine täglichen Wiederholungen' };
+                return { title: '📚 ' + t('grammar.mode.due_title'), subtitle: t('grammar.mode.due_subtitle') };
             case 'review':
             default:
-                return { title: '📐 Grammar Quick Hits', subtitle: 'Deine Grammatik auffrischen' };
+                return { title: '📐 ' + t('grammar.mode.review_title'), subtitle: t('grammar.mode.review_subtitle') };
         }
     };
 
@@ -677,7 +679,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                     >
                         <div className="card-content">
                             <div className={`english-translation-container ${!flipped ? 'active' : ''}`}>
-                                <div className="field-label">ENGLISH</div>
+                                <div className="field-label">{t('flashcard.label_source')}</div>
                                 <p className="english-translation">{currentItem.english}</p>
                                 {currentItem.example_en && (
                                     <p style={{ 
@@ -714,7 +716,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                                         handleScore(1);
                                     }}
                                 >
-                                    Hard
+                                    {t('btn.hard')}
                                 </button>
                                 <button 
                                     className="rating-btn rating-good" 
@@ -723,7 +725,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                                         handleScore(2.5);
                                     }}
                                 >
-                                    Good
+                                    {t('btn.good')}
                                 </button>
                                 <button 
                                     className="rating-btn rating-easy" 
@@ -732,7 +734,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                                         handleScore(3);
                                     }}
                                 >
-                                    Easy
+                                    {t('btn.easy')}
                                 </button>
                             </div>
                         ) : (
@@ -744,7 +746,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                                 <button 
                                     id="audioBtn" 
                                     className="action-btn audio-btn" 
-                                    title="Griechische Aussprache anhören"
+                                    title={t('btn.audio_tooltip')}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         playAudio();
@@ -755,7 +757,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                                         <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
                                         <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                                     </svg>
-                                    Audio
+                                    {t('btn.audio')}
                                 </button>
                             )}
                             <div className="action-buttons-vertical">
@@ -770,7 +772,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                                         <polyline points="23 4 23 10 17 10"></polyline>
                                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                                     </svg>
-                                    Wiederholen
+                                    {t('btn.restart')}
                                 </button>
                                 <button 
                                     className="action-btn cancel-btn vertical-btn" 
@@ -783,7 +785,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
                                         <line x1="6" y1="6" x2="18" y2="18"></line>
                                     </svg>
-                                    Abbrechen
+                                    {t('btn.cancel')}
                                 </button>
                             </div>
                         </div>
@@ -792,7 +794,7 @@ export default function GrammarDialog({ isOpen, onClose, mode = 'review' }: Gram
 
                 {showToast && (
                     <div className="save-toast">
-                        ✅ Result saved - well done!
+                        ✅ {t('shared.result_saved')}
                     </div>
                 )}
             </div>

@@ -122,3 +122,28 @@
 - **Dateien:** `src/components/learning/VocabularyDialog.tsx`, `src/components/learning/Flashcard.tsx`
 - **Commit-Vorschlag:** `2026-02-08 18:30 | Aufgabe 6 – VocabularyDialog + Flashcard komplett mehrsprachig`
 - **Naechste Aufgabe:** Aufgabe 7 – Restliche Komponenten mehrsprachig
+
+---
+
+### 2026-02-08 – Aufgabe 7: Restliche Komponenten mehrsprachig
+- **Aufgabe:** GrammarDialog, ComprehensionDialog, ListeningDialog, ActionGrid, ModuleGrid, PerformanceHub mehrsprachig machen
+- **Was wurde gemacht:**
+  - `GrammarDialog.tsx`: `useTranslation` importiert, alle Strings uebersetzt:
+    - Loading: `vocab.loading`, `grammar.loading_subtitle`
+    - Zustaende: `vocab.login_required`, `grammar.login_required_msg`, `grammar.no_items`, `grammar.no_items_msg`, `grammar.no_items_tip`, `vocab.error`, `grammar.error_msg`
+    - Summary: `shared.session_complete`, `shared.correct`, `shared.wrong`, `shared.back_to_dashboard`, `shared.progress_saved`, `shared.result_saved`
+    - Mode-Konfiguration: `grammar.mode.weak_title`, `grammar.mode.due_title`, `grammar.mode.review_title`, `grammar.mode.review_subtitle`, `grammar.mode.weak_subtitle`, `grammar.mode.due_subtitle`
+    - Karten-Label: `flashcard.label_source`
+    - Buttons: `btn.hard`, `btn.good`, `btn.easy`, `btn.audio`, `btn.audio_tooltip`, `btn.restart`, `btn.cancel`
+  - `ComprehensionDialog.tsx`: `useTranslation` importiert, alle Strings uebersetzt (gleiche Struktur wie Grammar, mit `comprehension.*` Keys)
+  - `ListeningDialog.tsx`: `useTranslation` importiert, alle Strings uebersetzt:
+    - Listening-spezifisch: `listening.play_audio`, `listening.no_audio`, `listening.correct_answer`, `listening.wrong_answer`, `listening.next`
+    - Mode-Konfiguration: `listening.mode.*`
+  - `ActionGrid.tsx`: `useTranslation` importiert, 9 Button-Labels uebersetzt (`action_grid.*`)
+  - `ModuleGrid.tsx`: `useTranslation` importiert, 8 Modul-Titel und Subtitel uebersetzt (`modules.*`)
+  - `PerformanceHub.tsx`: `useTranslation` importiert, Labels uebersetzt (`perf.title`, `perf.subtitle`, `perf.this_week`, `perf.total_active`, `perf.target`, 7 Wochentage `perf.day.*`)
+  - `useTranslation.ts` (FALLBACK_EN): ~50 neue Schluessel hinzugefuegt fuer alle Komponenten
+  - Build erfolgreich getestet
+- **Dateien:** `src/components/learning/GrammarDialog.tsx`, `src/components/learning/ComprehensionDialog.tsx`, `src/components/learning/ListeningDialog.tsx`, `src/components/dashboard/ActionGrid.tsx`, `src/components/dashboard/ModuleGrid.tsx`, `src/components/dashboard/PerformanceHub.tsx`, `src/lib/useTranslation.ts`
+- **Commit-Vorschlag:** `2026-02-08 19:30 | Aufgabe 7 – Restliche Komponenten komplett mehrsprachig (Grammar, Comprehension, Listening, ActionGrid, ModuleGrid, PerformanceHub)`
+- **Naechste Aufgabe:** Aufgabe 8 – learning_items Tabelle um Russisch erweitern

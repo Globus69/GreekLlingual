@@ -1,8 +1,11 @@
 "use client";
 
 import React from 'react';
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function ActionGrid() {
+    const { t } = useTranslation();
+
     const showToast = (msg: string) => {
         // Placeholder for real toast logic
         alert(msg);
@@ -13,49 +16,49 @@ export default function ActionGrid() {
             <div className="actions-inner-grid debug-grid">
                 <div className="grid-cell">
                     <button className="btn btn-primary glass" onClick={() => showToast('✨ Preparing Magic Round...')}>
-                        <span>✨</span> Start Magic Round
+                        <span>✨</span> {t('action_grid.magic_round')}
                     </button>
                 </div>
                 <div className="grid-cell">
                     <button className="btn btn-primary glass" style={{ background: '#FF5722 !important' }} onClick={() => showToast('📖 Starting Comprehension...')}>
-                        <span>📖</span> Comprehension
+                        <span>📖</span> {t('action_grid.comprehension')}
                     </button>
                 </div>
                 <div className="grid-cell">
                     <button className="btn btn-primary glass" style={{ background: '#FF9800 !important' }} onClick={() => showToast('📝 Starting Exam Test...')}>
-                        <span>📝</span> Exam Test
+                        <span>📝</span> {t('action_grid.exam_test')}
                     </button>
                 </div>
 
                 <div className="grid-cell">
                     <button className="btn btn-secondary glass" onClick={() => showToast('⚡️ Quick Lesson Started')}>
-                        <span>⚡️</span> 20 min Quick Lesson
+                        <span>⚡️</span> {t('action_grid.quick_lesson')}
                     </button>
                 </div>
                 <div className="grid-cell">
                     <button className="btn btn-primary glass" style={{ background: '#00BCD4 !important' }} onClick={() => showToast('🎮 Starting Game...')}>
-                        <span>🎮</span> Game
+                        <span>🎮</span> {t('action_grid.game')}
                     </button>
                 </div>
                 <div className="grid-cell">
                     <button className="btn btn-secondary glass" onClick={() => showToast('🧪 Running Test...')}>
-                        <span>🧪</span> Test
+                        <span>🧪</span> {t('action_grid.test')}
                     </button>
                 </div>
 
                 <div className="grid-cell">
                     <button className="btn btn-primary glass" style={{ background: '#34C759 !important' }} onClick={() => showToast('📅 Lesson Started')}>
-                        <span>📅</span> Lesson Today
+                        <span>📅</span> {t('action_grid.lesson_today')}
                     </button>
                 </div>
                 <div className="grid-cell">
-                    <button className="btn btn-tertiary glass" onClick={() => showToast('🔁 Vokabeln wiederholen')}>
-                        <span>🔁</span> Vokabeln wiederholen
+                    <button className="btn btn-tertiary glass" onClick={() => showToast('🔁 Review Vocabulary')}>
+                        <span>🔁</span> {t('action_grid.review_vocab')}
                     </button>
                 </div>
                 <div className="grid-cell">
                     <button className="btn btn-secondary glass" onClick={() => window.print()}>
-                        <span>🖨️</span> Print
+                        <span>🖨️</span> {t('action_grid.print')}
                     </button>
                 </div>
             </div>
