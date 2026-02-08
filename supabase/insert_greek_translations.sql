@@ -4,42 +4,30 @@
 -- Idempotent – kann beliebig oft ausgefuehrt werden
 -- ============================================================
 
--- 1. CHECK-Constraint auf ui_translations.lang erweitern (en, ru, el)
+-- 1. CHECK-Constraint auf ui_translations.lang erweitern (en, ru, el, de)
 DO $$
 BEGIN
     -- Alten Constraint entfernen falls vorhanden
-    IF EXISTS (
-        SELECT 1 FROM information_schema.table_constraints
-        WHERE table_schema = 'public' AND table_name = 'ui_translations'
-          AND constraint_name = 'ui_translations_lang_check'
-    ) THEN
-        ALTER TABLE public.ui_translations DROP CONSTRAINT ui_translations_lang_check;
-    END IF;
-    -- Neuen Constraint setzen
-    ALTER TABLE public.ui_translations ADD CONSTRAINT ui_translations_lang_check CHECK (lang IN ('en', 'ru', 'el'));
-    RAISE NOTICE 'CHECK-Constraint ui_translations.lang auf (en, ru, el) erweitert';
+    ALTER TABLE public.ui_translations DROP CONSTRAINT IF EXISTS ui_translations_lang_check;
+    -- Neuen Constraint setzen (alle 4 Sprachen)
+    ALTER TABLE public.ui_translations ADD CONSTRAINT ui_translations_lang_check CHECK (lang IN ('en', 'ru', 'el', 'de'));
+    RAISE NOTICE 'CHECK-Constraint ui_translations.lang auf (en, ru, el, de) erweitert';
 END $$;
 
--- 2. CHECK-Constraint auf users.preferred_locale erweitern (en, ru, el)
+-- 2. CHECK-Constraint auf users.preferred_locale erweitern (en, ru, el, de)
 DO $$
 BEGIN
-    IF EXISTS (
-        SELECT 1 FROM information_schema.table_constraints
-        WHERE table_schema = 'public' AND table_name = 'users'
-          AND constraint_name = 'users_preferred_locale_check'
-    ) THEN
-        ALTER TABLE public.users DROP CONSTRAINT users_preferred_locale_check;
-    END IF;
-    ALTER TABLE public.users ADD CONSTRAINT users_preferred_locale_check CHECK (preferred_locale IN ('en', 'ru', 'el'));
-    RAISE NOTICE 'CHECK-Constraint users.preferred_locale auf (en, ru, el) erweitert';
+    ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_preferred_locale_check;
+    ALTER TABLE public.users ADD CONSTRAINT users_preferred_locale_check CHECK (preferred_locale IN ('en', 'ru', 'el', 'de'));
+    RAISE NOTICE 'CHECK-Constraint users.preferred_locale auf (en, ru, el, de) erweitert';
 END $$;
 
 -- 3. update_user_locale RPC: el als gueltig akzeptieren
 CREATE OR REPLACE FUNCTION update_user_locale(p_user_id UUID, p_locale TEXT)
 RETURNS JSON AS $$
 BEGIN
-    IF p_locale NOT IN ('en', 'ru', 'el') THEN
-        RETURN json_build_object('success', false, 'error', 'Invalid locale. Must be en, ru or el.');
+    IF p_locale NOT IN ('en', 'ru', 'el', 'de') THEN
+        RETURN json_build_object('success', false, 'error', 'Invalid locale. Must be en, ru, el or de.');
     END IF;
     UPDATE public.users SET preferred_locale = p_locale WHERE id = p_user_id;
     IF NOT FOUND THEN
@@ -107,7 +95,7 @@ INSERT INTO ui_translations (key, lang, value, context) VALUES
 ('mastery.suggestion_default', 'el', '12 νέες κάρτες + 1 σύντομο κείμενο για την Κύπρο.', 'mastery'),
 
 -- === DASHBOARD - ACTION TILES (4x4 Grid) ===
-('action.magic_round', 'el', 'Μαγικός γύρος', 'actions'),
+('action.magic_round', 'el', 'Το μάθημά σου', 'actions'),
 ('action.quick_lesson', 'el', 'Γρήγορο μάθημα 20 λεπτά', 'actions'),
 ('action.daily_phrases', 'el', 'Φράσεις της ημέρας', 'actions'),
 ('action.short_stories', 'el', 'Σύντομες ιστορίες', 'actions'),
@@ -253,7 +241,7 @@ INSERT INTO ui_translations (key, lang, value, context) VALUES
 ('modules.opening', 'el', 'Άνοιγμα ενότητας: ', 'modules'),
 
 -- === ACTION GRID ===
-('action_grid.magic_round', 'el', 'Μαγικός γύρος', 'action_grid'),
+('action_grid.magic_round', 'el', 'Το μάθημά σου', 'action_grid'),
 ('action_grid.comprehension', 'el', 'Κατανόηση', 'action_grid'),
 ('action_grid.exam_test', 'el', 'Εξετάσεις', 'action_grid'),
 ('action_grid.quick_lesson', 'el', 'Γρήγορο μάθημα 20 λεπτά', 'action_grid'),
@@ -262,7 +250,7 @@ INSERT INTO ui_translations (key, lang, value, context) VALUES
 ('action_grid.lesson_today', 'el', 'Μάθημα σήμερα', 'action_grid'),
 ('action_grid.review_vocab', 'el', 'Επανάληψη λεξιλογίου', 'action_grid'),
 ('action_grid.print', 'el', 'Εκτύπωση', 'action_grid'),
-('action_grid.toast_magic_round', 'el', 'Προετοιμασία μαγικού γύρου...', 'action_grid'),
+('action_grid.toast_magic_round', 'el', 'Άνοιγμα του μαθήματος...', 'action_grid'),
 ('action_grid.toast_comprehension', 'el', 'Έναρξη κατανόησης...', 'action_grid'),
 ('action_grid.toast_exam', 'el', 'Έναρξη εξετάσεων...', 'action_grid'),
 ('action_grid.toast_quick_lesson', 'el', 'Το γρήγορο μάθημα ξεκίνησε', 'action_grid'),

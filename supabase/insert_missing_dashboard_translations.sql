@@ -14,8 +14,8 @@ ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;
 
 -- 2. ActionGrid – Toast-Nachrichten
 INSERT INTO ui_translations (key, lang, value, context) VALUES
-    ('action_grid.toast_magic_round', 'en', 'Preparing Magic Round...', 'action_grid'),
-    ('action_grid.toast_magic_round', 'ru', 'Подготовка волшебного раунда...', 'action_grid'),
+    ('action_grid.toast_magic_round', 'en', 'Opening Your Lesson...', 'action_grid'),
+    ('action_grid.toast_magic_round', 'ru', 'Открытие урока...', 'action_grid'),
     ('action_grid.toast_comprehension', 'en', 'Starting Comprehension...', 'action_grid'),
     ('action_grid.toast_comprehension', 'ru', 'Запуск упражнения на понимание...', 'action_grid'),
     ('action_grid.toast_exam', 'en', 'Starting Exam Test...', 'action_grid'),

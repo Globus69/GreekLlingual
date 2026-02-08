@@ -109,7 +109,7 @@ INSERT INTO ui_translations (key, lang, value, context) VALUES ('mastery.suggest
 ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;
 
 -- === Actions ===
-INSERT INTO ui_translations (key, lang, value, context) VALUES ('action.magic_round', 'de', 'Magische Runde', 'actions')
+INSERT INTO ui_translations (key, lang, value, context) VALUES ('action.magic_round', 'de', 'Dein Unterricht', 'actions')
 ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;
 INSERT INTO ui_translations (key, lang, value, context) VALUES ('action.quick_lesson', 'de', '20 Min. Schnelllektion', 'actions')
 ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;
@@ -343,7 +343,7 @@ INSERT INTO ui_translations (key, lang, value, context) VALUES ('perf.day.sun', 
 ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;
 
 -- === Action Grid ===
-INSERT INTO ui_translations (key, lang, value, context) VALUES ('action_grid.magic_round', 'de', 'Magische Runde starten', 'action_grid')
+INSERT INTO ui_translations (key, lang, value, context) VALUES ('action_grid.magic_round', 'de', 'Dein Unterricht', 'action_grid')
 ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;
 INSERT INTO ui_translations (key, lang, value, context) VALUES ('action_grid.comprehension', 'de', 'Leseverständnis', 'action_grid')
 ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;
@@ -361,7 +361,7 @@ INSERT INTO ui_translations (key, lang, value, context) VALUES ('action_grid.rev
 ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;
 INSERT INTO ui_translations (key, lang, value, context) VALUES ('action_grid.print', 'de', 'Drucken', 'action_grid')
 ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;
-INSERT INTO ui_translations (key, lang, value, context) VALUES ('action_grid.toast_magic_round', 'de', 'Magische Runde wird vorbereitet...', 'action_grid')
+INSERT INTO ui_translations (key, lang, value, context) VALUES ('action_grid.toast_magic_round', 'de', 'Unterricht wird geöffnet...', 'action_grid')
 ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;
 INSERT INTO ui_translations (key, lang, value, context) VALUES ('action_grid.toast_comprehension', 'de', 'Leseverständnis wird gestartet...', 'action_grid')
 ON CONFLICT (key, lang) DO UPDATE SET value = EXCLUDED.value;

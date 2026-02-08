@@ -79,7 +79,7 @@ INSERT INTO public.ui_translations (key, lang, value, context) VALUES
 ('mastery.suggestion_default', 'en', '12 new vocabulary cards + 1 short text about Cyprus.', 'mastery'),
 
 -- === DASHBOARD - ACTION TILES (4x4 Grid) ===
-('action.magic_round', 'en', 'Magic Round', 'actions'),
+('action.magic_round', 'en', 'Your Lesson', 'actions'),
 ('action.quick_lesson', 'en', '20 min Quick Lesson', 'actions'),
 ('action.daily_phrases', 'en', 'Daily Phrases', 'actions'),
 ('action.short_stories', 'en', 'Short Stories', 'actions'),
@@ -200,7 +200,7 @@ INSERT INTO public.ui_translations (key, lang, value, context) VALUES
 ('module.sub.short_stories', 'en', 'Short Stories', 'modules'),
 
 -- === ACTION GRID (Legacy 3x3) ===
-('actiongrid.magic_round', 'en', 'Start Magic Round', 'action_grid'),
+('actiongrid.magic_round', 'en', 'Your Lesson', 'action_grid'),
 ('actiongrid.comprehension', 'en', 'Comprehension', 'action_grid'),
 ('actiongrid.exam_test', 'en', 'Exam Test', 'action_grid'),
 ('actiongrid.quick_lesson', 'en', '20 min Quick Lesson', 'action_grid'),
@@ -266,7 +266,7 @@ INSERT INTO public.ui_translations (key, lang, value, context) VALUES
 ('mastery.suggestion_default', 'ru', '12 новых карточек + 1 короткий текст о Кипре.', 'mastery'),
 
 -- === DASHBOARD - ACTION TILES (4x4 Grid) ===
-('action.magic_round', 'ru', 'Магический раунд', 'actions'),
+('action.magic_round', 'ru', 'Твой урок', 'actions'),
 ('action.quick_lesson', 'ru', 'Быстрый урок 20 мин', 'actions'),
 ('action.daily_phrases', 'ru', 'Фразы дня', 'actions'),
 ('action.short_stories', 'ru', 'Короткие рассказы', 'actions'),
@@ -387,7 +387,7 @@ INSERT INTO public.ui_translations (key, lang, value, context) VALUES
 ('module.sub.short_stories', 'ru', 'Короткие рассказы', 'modules'),
 
 -- === ACTION GRID (Legacy 3x3) ===
-('actiongrid.magic_round', 'ru', 'Магический раунд', 'action_grid'),
+('actiongrid.magic_round', 'ru', 'Твой урок', 'action_grid'),
 ('actiongrid.comprehension', 'ru', 'Понимание', 'action_grid'),
 ('actiongrid.exam_test', 'ru', 'Экзамен', 'action_grid'),
 ('actiongrid.quick_lesson', 'ru', 'Быстрый урок 20 мин', 'action_grid'),
