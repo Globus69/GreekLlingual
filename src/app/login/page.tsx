@@ -15,7 +15,7 @@ export default function LoginPage() {
     const [focusedField, setFocusedField] = useState<string | null>(null);
     const { login, user } = useAuth();
     const router = useRouter();
-    const { locale, setLocale } = useLanguage();
+    const { locale, setLocale, syncLocaleFromUser } = useLanguage();
     const { t } = useTranslation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const pinRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -27,7 +27,7 @@ export default function LoginPage() {
         }
     }, [user, router]);
 
-    // Animated background particles
+    // Animated background particles – Farbe wechselt mit Sprache
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -35,6 +35,7 @@ export default function LoginPage() {
         if (!ctx) return;
 
         let animationId: number;
+        const isRu = locale === 'ru';
         const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; hue: number }[] = [];
 
         const resize = () => {
@@ -44,7 +45,7 @@ export default function LoginPage() {
         resize();
         window.addEventListener('resize', resize);
 
-        // Create particles
+        // Create particles – Hue: EN=blau (200-240), RU=rot (340-20)
         for (let i = 0; i < 60; i++) {
             particles.push({
                 x: Math.random() * canvas.width,
@@ -53,9 +54,14 @@ export default function LoginPage() {
                 vy: (Math.random() - 0.5) * 0.4,
                 size: Math.random() * 2 + 0.5,
                 opacity: Math.random() * 0.4 + 0.1,
-                hue: Math.random() * 40 + 200, // blue-ish range
+                hue: isRu
+                    ? Math.random() * 30 + 345 // rot-ish range (345-375 → wraps to 345-15)
+                    : Math.random() * 40 + 200, // blau-ish range (200-240)
             });
         }
+
+        // Verbindungslinien-Farbe
+        const lineColor = isRu ? '180, 60, 60' : '0, 122, 255';
 
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -68,7 +74,7 @@ export default function LoginPage() {
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist < 150) {
                         ctx.beginPath();
-                        ctx.strokeStyle = `rgba(0, 122, 255, ${0.06 * (1 - dist / 150)})`;
+                        ctx.strokeStyle = `rgba(${lineColor}, ${0.06 * (1 - dist / 150)})`;
                         ctx.lineWidth = 0.5;
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
@@ -81,7 +87,7 @@ export default function LoginPage() {
             for (const p of particles) {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${p.hue}, 80%, 65%, ${p.opacity})`;
+                ctx.fillStyle = `hsla(${p.hue % 360}, 80%, 65%, ${p.opacity})`;
                 ctx.fill();
 
                 p.x += p.vx;
@@ -99,7 +105,7 @@ export default function LoginPage() {
             cancelAnimationFrame(animationId);
             window.removeEventListener('resize', resize);
         };
-    }, []);
+    }, [locale]);
 
     const handlePinChange = (index: number, value: string) => {
         // Nur Ziffern erlauben
@@ -158,6 +164,21 @@ export default function LoginPage() {
         setIsSubmitting(true);
 
         const success = await login(username, pin);
+        if (success) {
+            // Nach Login: Sprache aus User-Profil laden (falls in DB gespeichert)
+            try {
+                const storedUser = localStorage.getItem('greeklingua_user');
+                if (storedUser) {
+                    const userData = JSON.parse(storedUser);
+                    if (userData.preferred_locale) {
+                        syncLocaleFromUser(userData.preferred_locale);
+                    }
+                }
+            } catch {
+                // Ignore – Sprache bleibt wie sie ist
+            }
+            return;
+        }
         if (!success) {
             setError(t('login.error'));
             setShake(true);
@@ -212,8 +233,8 @@ export default function LoginPage() {
                 position: 'fixed',
                 inset: 0,
                 background: locale === 'ru'
-                    ? 'radial-gradient(ellipse at 50% 50%, #2a1028 0%, #0A0A0C 70%)'
-                    : 'radial-gradient(ellipse at 50% 50%, #0f1a3e 0%, #0A0A0C 70%)',
+                    ? 'radial-gradient(ellipse at 50% 50%, #3d1535 0%, #1a0818 50%, #0A0A0C 100%)'
+                    : 'radial-gradient(ellipse at 50% 50%, #0f2555 0%, #0a1230 50%, #0A0A0C 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -234,8 +255,8 @@ export default function LoginPage() {
                     height: '500px',
                     borderRadius: '50%',
                     background: locale === 'ru'
-                        ? 'radial-gradient(circle, rgba(224, 85, 85, 0.12) 0%, transparent 70%)'
-                        : 'radial-gradient(circle, rgba(0, 122, 255, 0.12) 0%, transparent 70%)',
+                        ? 'radial-gradient(circle, rgba(224, 85, 85, 0.18) 0%, transparent 70%)'
+                        : 'radial-gradient(circle, rgba(0, 122, 255, 0.18) 0%, transparent 70%)',
                     top: '-100px',
                     right: '-100px',
                     animation: 'orbFloat1 12s ease-in-out infinite',
@@ -248,8 +269,8 @@ export default function LoginPage() {
                     height: '400px',
                     borderRadius: '50%',
                     background: locale === 'ru'
-                        ? 'radial-gradient(circle, rgba(180, 60, 60, 0.1) 0%, transparent 70%)'
-                        : 'radial-gradient(circle, rgba(88, 86, 214, 0.1) 0%, transparent 70%)',
+                        ? 'radial-gradient(circle, rgba(180, 60, 60, 0.15) 0%, transparent 70%)'
+                        : 'radial-gradient(circle, rgba(88, 86, 214, 0.15) 0%, transparent 70%)',
                     bottom: '-80px',
                     left: '-80px',
                     animation: 'orbFloat2 15s ease-in-out infinite',

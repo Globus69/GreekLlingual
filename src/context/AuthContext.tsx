@@ -12,6 +12,7 @@ interface User {
     level?: string;
     difficulty?: string;
     performance_index?: string;
+    preferred_locale?: 'en' | 'ru';
 }
 
 interface AuthContextType {
@@ -85,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     level: dbUser.user_level,
                     difficulty: dbUser.user_difficulty,
                     performance_index: dbUser.user_performance_index,
+                    preferred_locale: (dbUser.user_preferred_locale as 'en' | 'ru') || 'en',
                 };
                 setUser(userData);
                 localStorage.setItem('greeklingua_user', JSON.stringify(userData));
@@ -100,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             const { data, error } = await supabase
                 .from('users')
-                .select('id, email, name, role, level, difficulty, performance_index')
+                .select('id, email, name, role, level, difficulty, performance_index, preferred_locale')
                 .ilike('name', username)
                 .eq('pin', pin)
                 .single();
@@ -114,6 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     level: data.level,
                     difficulty: data.difficulty,
                     performance_index: data.performance_index,
+                    preferred_locale: (data.preferred_locale as 'en' | 'ru') || 'en',
                 };
                 setUser(userData);
                 localStorage.setItem('greeklingua_user', JSON.stringify(userData));

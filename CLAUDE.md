@@ -513,10 +513,73 @@
 
 ---
 
-### Projekt-Status: ALLE AUFGABEN ABGESCHLOSSEN ✅
-- Phase 1 (Aufgaben 1-8): Mehrsprachige UI komplett
-- Phase 2 (Aufgaben 9-19): Admin-Backend + Schueler-Management komplett
+### 2026-02-08 – Aufgabe 20: Sprache dauerhaft fuer Session beibehalten
+- **Aufgabe:** Sprachauswahl im Login persistieren (localStorage + Supabase User-Profil)
+- **Was wurde gemacht:**
+  - SQL-Migration `supabase/add_preferred_locale.sql` erstellt:
+    - `preferred_locale TEXT DEFAULT 'en'` Spalte zu `users` hinzugefuegt (idempotent)
+    - CHECK-Constraint: nur `'en'` oder `'ru'` erlaubt
+    - `update_user_locale(p_user_id, p_locale)` RPC-Funktion (SECURITY DEFINER)
+    - `verify_user_pin()` erweitert: gibt jetzt `user_preferred_locale` zurueck
+  - `AuthContext.tsx` erweitert:
+    - `User` Interface um `preferred_locale?: 'en' | 'ru'` ergaenzt
+    - Login-Strategy 1 (RPC): `preferred_locale` aus `user_preferred_locale` gelesen
+    - Login-Strategy 2 (direkt): `preferred_locale` aus SELECT gelesen
+  - `LanguageContext.tsx` erweitert:
+    - `syncLocaleFromUser(preferredLocale)` Methode: Setzt Locale aus User-Profil nach Login
+    - `setLocale()`: Speichert Sprachwechsel auch in Supabase (fire-and-forget via RPC)
+    - Aktualisiert `greeklingua_user` in localStorage mit neuer Sprache
+  - `login/page.tsx`: Nach erfolgreichem Login wird `syncLocaleFromUser()` aufgerufen
+  - Build erfolgreich getestet
+- **Dateien:** `supabase/add_preferred_locale.sql` (neu), `src/context/LanguageContext.tsx`, `src/context/AuthContext.tsx`, `src/app/login/page.tsx`
+- **Hinweis:** `add_preferred_locale.sql` muss im Supabase SQL Editor ausgefuehrt werden!
+- **Commit-Vorschlag:** `2026-02-08 23:45 | Aufgabe 20 – Sprachpersistenz in localStorage + Supabase User-Profil`
+- **Naechste Aufgabe:** Aufgabe 21 – Sprachwechsel auf Frontend-Mainpage
+
+---
+
+### 2026-02-08 – Aufgabe 21+22: Sprachwechsel + sofortige UI-Aktualisierung (bereits implementiert)
+- **Aufgabe:** Sprachwechsel auf Frontend-Mainpage + sofortige UI-Aktualisierung
+- **Was wurde gemacht:**
+  - **Bereits vorhanden** – keine Code-Aenderungen noetig:
+    - Login-Seite: EN/RU Toggle-Buttons
+    - DashboardHeader: Flaggen-Toggle (Dashboard + Student-Seite)
+    - Admin-Seite: Flaggen-Toggle
+    - `useTranslation` Hook: Reagiert reaktiv auf `locale` via `useLanguage()`, Cache pro Locale, Race-Condition-Schutz
+    - Alle Komponenten nutzen `t('key')` – werden bei Sprachwechsel automatisch re-gerendert
+- **Dateien:** Keine Aenderungen
+- **Commit-Vorschlag:** Dokumentation in CLAUDE.md
+
+---
+
+### 2026-02-08 – Aufgabe 23: Toast bei Sprachwechsel anzeigen
+- **Aufgabe:** Kurzes Toast/Pop-up bei jedem Sprachwechsel
+- **Was wurde gemacht:**
+  - **Neue Datei `src/components/ui/LanguageToast.tsx`** erstellt:
+    - Toast-Nachrichten in aktiver Sprache:
+      - EN: "Language changed to English." mit Flagge
+      - RU: "Язык изменён на Русский." mit Flagge
+    - Erscheint fuer 2.5 Sekunden, verschwindet automatisch
+    - Position: oben mittig (fixed, z-index: 9999)
+    - Kein Toast beim ersten Mount (nur bei tatsaechlichem Sprachwechsel)
+    - Farblich passend zur Sprache (EN=blauer Hintergrund/Rand, RU=roter Hintergrund/Rand)
+    - Glasmorphismus-Stil (backdrop-filter blur)
+    - Animation: slideIn mit cubic-bezier bounce
+  - **`src/app/layout.tsx`** aktualisiert:
+    - `LanguageToast` importiert und innerhalb `LanguageProvider` eingebunden
+    - Global sichtbar auf allen Seiten (Login, Dashboard, Admin)
+  - Build erfolgreich getestet
+- **Dateien:** `src/components/ui/LanguageToast.tsx` (neu), `src/app/layout.tsx`
+- **Commit-Vorschlag:** `2026-02-08 23:55 | Aufgabe 20-23 – Sprachpersistenz, Sprachwechsel-Toast, UI-Aktualisierung`
+
+---
+
+### Projekt-Status
+- Phase 1 (Aufgaben 1-8): Mehrsprachige UI komplett ✅
+- Phase 2 (Aufgaben 9-19): Admin-Backend + Schueler-Management komplett ✅
+- Phase 3 (Aufgaben 20-23): Sprachpersistenz + UX komplett ✅
 - SQL-Dateien die im Supabase SQL Editor ausgefuehrt werden muessen:
   1. `supabase/fix_student_management_v2.sql` (Users-Tabelle + RPC)
   2. `supabase/create_performance_evaluation.sql` (Performance-Log + Evaluation)
   3. `supabase/add_level_difficulty_to_learning_items.sql` (Level/Difficulty fuer Items)
+  4. `supabase/add_preferred_locale.sql` (Sprach-Persistenz + update_user_locale RPC)
