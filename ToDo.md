@@ -28,21 +28,21 @@
 - Fallback-Texte (Englisch) falls Übersetzung fehlt
 - `t('key')` Funktion zurückgeben
 
-### 4. ⬜ Login-Seite mehrsprachig + Sprachauswahl-Dropdown
-- Sprachauswahl (EN/RU) als Dropdown/Toggle im Login-Dialog
-- Alle hardcodierten Texte durch `t('key')` ersetzen
-- Sprache wird bei Login in localStorage + ggf. Supabase gespeichert
+### 4. ✅ Login-Seite mehrsprachig + Sprachauswahl-Dropdown (2026-02-08)
+- Sprachauswahl (EN/RU) als Toggle-Buttons im Login-Dialog (oben rechts)
+- Alle hardcodierten Texte durch `t('key')` ersetzt (title, subtitle, placeholders, buttons, error, biometric)
+- Sprache wird bei Auswahl in localStorage gespeichert (via LanguageContext)
 
-### 5. ⬜ Dashboard-Seite mehrsprachig
-- `DashboardHeader.tsx` – alle Labels übersetzen
-- `StatsCard.tsx` – Labels (Current Level, Vocabs, Learned, Today, Days)
-- `dashboard/page.tsx` – Welcome-Text, Mastery-Box, Action-Tiles, alle Labels
-- Action-Tile Labels (Magic Round, Quick Lesson, etc.)
+### 5. ✅ Dashboard-Seite mehrsprachig (2026-02-08)
+- `DashboardHeader.tsx` – Logout-Button uebersetzt (`header.logout`)
+- `StatsCard.tsx` – Labels uebersetzt (Current Level, Vocabs, Learned, Today, Days)
+- `dashboard/page.tsx` – Welcome-Text, Mastery-Box (6 Labels), alle 16 Action-Tiles uebersetzt
+- Loading-Screens uebersetzt (Authenticating, Loading)
 
-### 6. ⬜ VocabularyDialog mehrsprachig
-- `VocabularyDialog.tsx` – Alle Strings (Loading, Session beendet, Richtig/Falsch, etc.)
-- `Flashcard.tsx` – Labels (ENGLISH→dynamisch, Click to flip, Hard/Good/Easy, etc.)
-- Feld-Label "ENGLISH" dynamisch anpassen (→ "ENGLISH" bei EN, "АНГЛИЙСКИЙ" bei RU)
+### 6. ✅ VocabularyDialog mehrsprachig (2026-02-08)
+- `VocabularyDialog.tsx` – Alle Strings uebersetzt (Loading, Session, Richtig/Falsch, Mode-Titel, Buttons)
+- `Flashcard.tsx` – Labels uebersetzt (ENGLISH dynamisch, Click to flip, Hard/Good/Easy, Audio, Restart, Cancel)
+- Feld-Label "ENGLISH" dynamisch via `flashcard.label_source` (EN: "ENGLISH", RU: "АНГЛИЙСКИЙ")
 - "ΕΛΛΗΝΙΚΑ" bleibt immer gleich (Zielsprache)
 
 ### 7. ⬜ Restliche Komponenten mehrsprachig
