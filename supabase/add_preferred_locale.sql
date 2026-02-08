@@ -31,7 +31,7 @@ BEGIN
     ) THEN
         ALTER TABLE public.users
             ADD CONSTRAINT users_preferred_locale_check
-            CHECK (preferred_locale IN ('en', 'ru'));
+            CHECK (preferred_locale IN ('en', 'ru', 'el', 'de'));
         RAISE NOTICE 'CHECK-Constraint fuer preferred_locale hinzugefuegt';
     END IF;
 END $$;
@@ -40,8 +40,8 @@ END $$;
 CREATE OR REPLACE FUNCTION update_user_locale(p_user_id UUID, p_locale TEXT)
 RETURNS JSON AS $$
 BEGIN
-    IF p_locale NOT IN ('en', 'ru') THEN
-        RETURN json_build_object('success', false, 'error', 'Invalid locale. Must be en or ru.');
+    IF p_locale NOT IN ('en', 'ru', 'el', 'de') THEN
+        RETURN json_build_object('success', false, 'error', 'Invalid locale. Must be en, ru, el or de.');
     END IF;
 
     UPDATE public.users
