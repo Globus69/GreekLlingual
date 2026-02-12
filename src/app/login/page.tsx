@@ -172,6 +172,34 @@ export default function LoginPage() {
         e.preventDefault();
         setError('');
 
+        // IP-Whitelisting-Check für Admin-Login
+        const allowedIPs = process.env.NEXT_PUBLIC_ADMIN_ALLOWED_IPS || '';
+        if (allowedIPs.trim()) {
+            // Hole Client-IP
+            let clientIp = null;
+            try {
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                clientIp = ipData.ip;
+            } catch {
+                setError('IP check failed - please try again');
+                setShake(true);
+                generateCaptcha();
+                setTimeout(() => setShake(false), 600);
+                return;
+            }
+
+            // Prüfe ob IP in Whitelist
+            const whitelist = allowedIPs.split(',').map(ip => ip.trim()).filter(ip => ip);
+            if (clientIp && !whitelist.includes(clientIp)) {
+                setError('Access denied - IP not whitelisted');
+                setShake(true);
+                generateCaptcha();
+                setTimeout(() => setShake(false), 600);
+                return;
+            }
+        }
+
         // CAPTCHA-Validierung
         if (parseInt(captchaAnswer) !== captchaQuestion.answer) {
             setError('CAPTCHA incorrect');
