@@ -328,104 +328,112 @@
 
 ## Phase 7: PIN-Management-System + WhatsApp-Benachrichtigungen
 
-### 47. ⬜ Auto-PIN-Generierung bei User-Erstellung
+### 47. ✅ Auto-PIN-Generierung bei User-Erstellung (2026-02-12)
 - **Ziel:** Beim Anlegen eines neuen Users im Admin-Backend (StudentManagementDialog) automatisch eine zufällige 4-stellige PIN generieren
 - **Implementierung:**
-  - Funktion `generateRandomPin()` erstellen (Client-seitig)
-  - Generiert zufällige 4-stellige Zahl (1000-9999)
-  - Auto-Fill des PIN-Feldes beim Klick auf "Neuer Schüler"
-  - Bereits vorhanden: 🎲 Button für manuelle Regenerierung (existiert für 6-stellig, muss auf 4-stellig angepasst werden)
-- **Validierung:** siehe Aufgaben 48 + 49
-- **Status:** ⬜ Offen
+  - `generatePin()` Funktion von 6-stellig auf 4-stellig umgestellt (1000-9999)
+  - Auto-Fill beim Öffnen des Add-Dialogs (`openAdd()` generiert automatisch PIN)
+  - 🎲 Button für manuelle Regenerierung angepasst (4-stellig)
+  - PIN-Validierung: 4 Ziffern statt 6
+  - Placeholder: "0000" statt "000000"
+  - maxLength: 4 statt 6
+- **Dateien:** `src/components/admin/StudentManagementDialog.tsx`
+- **Status:** ✅ Erledigt
 
-### 48. ⬜ Duplikat-Prüfung bei PIN-Vergabe
+### 48. ✅ Duplikat-Prüfung bei PIN-Vergabe (2026-02-12)
 - **Ziel:** Sicherstellen, dass keine zwei User die gleiche PIN haben
 - **Implementierung:**
-  - Client-seitig: Vor dem Speichern prüfen ob `pin_4digit` bereits existiert (Supabase Query)
-  - Falls Duplikat gefunden: Neue PIN generieren und erneut prüfen (max. 10 Versuche)
-  - Server-seitig: UNIQUE Constraint auf `users.pin_4digit` Spalte in DB setzen
-  - RPC-Funktion `create_student()` + `update_student()` anpassen: Duplikat-Check vor INSERT/UPDATE
-- **Fehlermeldung:** "PIN bereits vergeben – neue PIN generiert"
-- **Status:** ⬜ Offen
+  - **SQL-Migration:** `supabase/add_pin_duplicate_check.sql`
+    - UNIQUE Constraint auf `users.pin_4digit`
+    - RPC `is_pin_taken(pin, exclude_user_id)` → BOOLEAN
+    - RPC `generate_safe_pin(exclude_user_id)` → TEXT (50 Versuche, Honeypot+Duplikat-Check)
+    - `create_student()` aktualisiert: Duplikat-Check vor INSERT
+    - `update_student()` aktualisiert: Duplikat-Check vor UPDATE
+  - **Client-seitig:** `generatePin()` ruft `is_pin_taken()` RPC auf (max. 50 Versuche)
+  - Fehlermeldung: "PIN bereits vergeben"
+- **Dateien:** `supabase/add_pin_duplicate_check.sql`, `StudentManagementDialog.tsx`
+- **Status:** ✅ Erledigt
 
-### 49. ⬜ Honeypot-PIN-Prüfung bei PIN-Vergabe
+### 49. ✅ Honeypot-PIN-Prüfung bei PIN-Vergabe (2026-02-12)
 - **Ziel:** Verhindern, dass User PINs bekommen, die in der Honeypot-Liste sind
-- **Verbotene PINs:** 0000, 1111, 2222, 3333, 4444, 5555, 6666, 7777, 8888, 9999, 1234, 4321, 1122, 2211, 5678 (15 PINs)
+- **Verbotene PINs:** 0000, 1111-9999, 1234, 4321, 1122, 2211, 5678 (15 PINs)
 - **Implementierung:**
-  - Client-seitig: Liste der 15 Honeypot-PINs als Konstante
-  - Vor Speichern: Prüfen ob PIN in Honeypot-Liste → Falls ja: Neue PIN generieren
-  - Server-seitig: RPC-Funktion prüft gegen `honeypot_pins` Tabelle
-  - Bei Konflikt: `generate_safe_pin()` RPC-Funktion mit automatischer Retry-Logik
-- **Fehlermeldung:** "PIN ungültig (Sicherheitsregel) – neue PIN generiert"
-- **Status:** ⬜ Offen
+  - **Client-seitig:**
+    - Konstante `HONEYPOT_PINS` Set mit 15 PINs
+    - `generatePin()` prüft gegen HONEYPOT_PINS (Retry bei Treffer)
+    - `openAdd()` prüft gegen HONEYPOT_PINS (Auto-Fill)
+    - `handleSave()` prüft vor Speichern (Client-Validierung)
+  - **Server-seitig:**
+    - `create_student()` RPC prüft gegen `honeypot_pins` Tabelle
+    - `update_student()` RPC prüft gegen `honeypot_pins` Tabelle
+    - `generate_safe_pin()` RPC prüft automatisch (siehe Aufgabe 48)
+  - Fehlermeldung: "PIN ungültig (Sicherheitsregel) – bitte neue PIN generieren"
+- **Dateien:** `StudentManagementDialog.tsx`, `add_pin_duplicate_check.sql`
+- **Status:** ✅ Erledigt
 
-### 50. ⬜ Admin: PIN neu generieren für bestehende User
+### 50. ✅ Admin: PIN neu generieren für bestehende User (2026-02-12)
 - **Ziel:** Admin kann für einen bestehenden User eine neue PIN vergeben
 - **Implementierung:**
-  - Im StudentManagementDialog (Edit-Modus): 🎲 Button neben PIN-Feld
-  - Klick generiert neue 4-stellige PIN (inkl. Duplikat- und Honeypot-Prüfung)
-  - Neue PIN wird in Formular übernommen (nicht sofort gespeichert)
-  - Admin kann vor Speichern prüfen/anpassen
-  - Beim Speichern: `update_student()` RPC mit neuer PIN
-- **Validierung:** Gleiche Checks wie bei Aufgaben 48 + 49
-- **Bestätigung:** Toast-Nachricht "Neue PIN generiert: XXXX"
-- **Status:** ⬜ Offen
+  - 🎲 Button im Edit-Modus nutzt neue `generatePin()` Funktion
+  - Klick generiert 4-stellige PIN mit Duplikat- und Honeypot-Prüfung
+  - Toast-Nachricht: "Neue PIN generiert: XXXX" (2.5 Sekunden)
+  - PIN wird in Formular übernommen (nicht sofort gespeichert)
+  - Beim Speichern: `update_student()` RPC validiert nochmal
+- **Validierung:** Gleiche Checks wie Aufgaben 48 + 49 (bereits implementiert)
+- **Dateien:** `StudentManagementDialog.tsx`
+- **Status:** ✅ Erledigt
 
-### 51. ⬜ Admin: User entsperren (IP-Ban + Account-Lock)
+### 51. ✅ Admin: User entsperren (IP-Ban + Account-Lock) (2026-02-12)
 - **Ziel:** Admin kann gebannte/gesperrte User entsperren
-- **Option 1 – IP-Entsperrung:**
-  - Button "IP entsperren" in StudentManagementDialog
-  - Zeigt alle IPs die mit diesem User verbunden sind (aus `honeypot_log`)
-  - Admin kann einzelne IPs aus `banned_ips` entfernen
-  - RPC-Funktion `unban_user_ips(user_id)` erstellt
-- **Option 2 – Account-Lock:**
-  - Neues Feld `users.locked` (BOOLEAN, DEFAULT false)
-  - Bei Honeypot-Versuch: User-Account sperren (`locked = true`)
-  - Admin-Button "Account entsperren" setzt `locked = false`
-  - Login prüft `locked` Flag (zusätzlich zu IP-Check)
-- **UI:**
-  - 🔓 Button nur sichtbar wenn User gesperrt ist
-  - Status-Badge in User-Liste: "🔒 Gesperrt" (rot) wenn `locked = true` oder IP gebannt
-- **Status:** ⬜ Offen
-
-### 52. ⬜ WhatsApp-Benachrichtigung bei User-Sperrung
-- **Ziel:** Wenn ein User durch Honeypot-PIN gesperrt wird, WhatsApp-Nachricht an Admin senden
-- **Empfänger:** +35796120069 (Admin-Telefonnummer)
-- **Nachricht-Inhalt:**
-  ```
-  🚨 Sicherheitsalarm – GreekLingua Dashboard
-
-  User: [Name]
-  PIN-Versuch: [PIN]
-  IP-Adresse: [IP]
-  Zeitpunkt: [Datum + Uhrzeit]
-  Aktion: 24h IP-Ban + Account gesperrt
-  ```
 - **Implementierung:**
-  - **Option A (bevorzugt):** Telegram Bot API statt WhatsApp (einfacher, keine Business-API nötig)
-  - **Option B:** WhatsApp Business API (Twilio, WhatsApp Cloud API)
-  - Server-seitige Integration: Edge Function oder RPC-Funktion mit HTTP-Request
-  - Trigger: Nach `ban_ip()` in `verify_user_4digit_pin()` RPC
-  - Fehlerbehandlung: Falls Nachricht fehlschlägt, trotzdem sperren (nur Log-Warnung)
-- **Reminder:** In 5 Stunden an ToDo erinnern + Telegram vs. WhatsApp entscheiden
-- **Status:** ⬜ Offen (Technologie-Entscheidung ausstehend)
+  - **SQL-Migration:** `supabase/add_user_unlock_functions.sql`
+    - RPC `unlock_user(user_id)` → setzt locked_until + failed_attempts zurück
+    - RPC `unban_user_ips(user_id)` → entfernt alle IPs des Users
+    - RPC `unban_all_ips()` → pauschale IP-Entsperrung
+    - RPC `get_user_lock_status(user_id)` → gibt Lock-Status zurück
+  - **UI:**
+    - Student-Interface erweitert: `locked_until`, `failed_attempts`
+    - Status-Badge "🔒 Gesperrt" (rot) in User-Liste wenn `locked_until > NOW()`
+    - 🔓 Button "Account entsperren" nur sichtbar wenn gesperrt
+    - `handleUnlock()` Funktion ruft `unlock_user()` RPC auf
+    - Erfolgs-Toast: "Account entsperrt"
+- **Dateien:** `supabase/add_user_unlock_functions.sql`, `StudentManagementDialog.tsx`
+- **Status:** ✅ Erledigt
 
-### 53. ⬜ Admin-Telefonnummer in Datenbank speichern
-- **Ziel:** Admin-User bekommt Telefonnummer-Feld für WhatsApp/Telegram-Benachrichtigungen
+### 52. ✅ Benachrichtigungssystem vorbereitet (2026-02-12)
+- **Ziel:** Admin bei Honeypot-Versuch per Telegram/WhatsApp benachrichtigen
+- **Status:** ⚠️ **Vorbereitet, aber NICHT aktiviert** (Technologie-Entscheidung ausstehend)
 - **Implementierung:**
-  - SQL-Migration: `users` Tabelle erweitern
-    - Neues Feld `contact_phone` TEXT (nullable, für alle User)
-    - Oder: Bestehendes `whatsapp` Feld auch für Admin nutzen
-  - Admin-User Update: `contact_phone = '+35796120069'`
-  - UI: Telefonnummer-Feld in StudentManagementDialog anzeigen
-    - Für Studenten: Zeigt `whatsapp` Feld (bereits vorhanden)
-    - Für Admin: Zeigt `contact_phone` / `whatsapp` Feld (editierbar)
-  - RPC-Funktion `get_admin_contact()` für Benachrichtigungs-System
-- **Anzeige:**
-  - In User-Liste: Tel.Nr. als Spalte
-  - In Edit-Dialog: Tel.Nr. als Eingabefeld (optional)
-  - Format-Validierung: `+[Ländercode][Nummer]` (z.B. +35796120069)
-- **Status:** ⬜ Offen
+  - **SQL-Migration:** `supabase/prepare_notification_system.sql`
+    - Tabelle `notification_log` (type, recipient, message, status)
+    - RPC `send_security_alert()` → Placeholder mit Log-Funktionalität
+    - Dokumentation für Integration in `verify_user_4digit_pin()`
+  - **Edge Function:** `supabase/functions/send-telegram/index.ts`
+    - Vollständige Telegram Bot API Integration
+    - Setup-Anleitung mit BotFather
+    - Aktualisiert `notification_log` Status
+  - **Nächste Schritte:**
+    1. Entscheidung: Telegram (bevorzugt) oder WhatsApp
+    2. Telegram Bot erstellen (@BotFather)
+    3. Secrets setzen: TELEGRAM_BOT_TOKEN + TELEGRAM_ADMIN_CHAT_ID
+    4. Edge Function deployen: `supabase functions deploy send-telegram`
+    5. Integration in `verify_user_4digit_pin()` aktivieren
+- **Dateien:** `prepare_notification_system.sql`, `send-telegram/index.ts`
+- **Status:** ✅ Vorbereitet (manuelles Setup erforderlich)
+
+### 53. ✅ Admin-Telefonnummer in Datenbank speichern (2026-02-12)
+- **Ziel:** Admin-User bekommt Telefonnummer-Feld für Benachrichtigungen
+- **Implementierung:**
+  - **SQL-Migration:** `supabase/add_admin_contact_phone.sql`
+    - Neues Feld `contact_phone TEXT` (nullable, für alle User)
+    - Admin-User Update: `contact_phone = '+35796120069'`
+    - RPC `get_admin_contact()` → gibt Admin-Kontaktdaten zurück
+    - CHECK-Constraint: E.164 Format (`^\\+[1-9]\\d{1,14}$`)
+    - Index auf `contact_phone` für schnelle Abfragen
+  - **Format:** +35796120069 (Ländercode + Nummer)
+  - **UI:** Optional erweiterbar (Telefonnummer in StudentManagementDialog)
+- **Dateien:** `supabase/add_admin_contact_phone.sql`
+- **Status:** ✅ Erledigt
 
 ### 54. ⬜ ToDo.md aktualisiert mit Phase 7
 - **Ziel:** Diese 7 neuen Aufgaben (47-53) in ToDo.md dokumentieren

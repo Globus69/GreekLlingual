@@ -15,6 +15,8 @@ interface Student {
     level: string;
     difficulty: string;
     performance_index: string;
+    locked_until?: string | null;
+    failed_attempts?: number;
 }
 
 interface StudentFormData {
@@ -35,6 +37,13 @@ interface Props {
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2'];
 const DIFFICULTIES = ['easy', 'middle', 'hard'];
+
+// Honeypot-PINs (verboten, lösen sofort Alarm aus)
+const HONEYPOT_PINS = new Set([
+    '0000', '1111', '2222', '3333', '4444', '5555',
+    '6666', '7777', '8888', '9999', '1234', '4321',
+    '1122', '2211', '5678'
+]);
 
 const EMPTY_FORM: StudentFormData = {
     name: '',
@@ -67,10 +76,49 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
     // ── Computed ──────────────────────────────────────────────────────────────
     const indexKey = `${form.level}-${form.difficulty}`;
 
-    // ── PIN Generator ────────────────────────────────────────────────────────
-    const generatePin = () => {
-        const pin = String(Math.floor(100000 + Math.random() * 900000));
+    // ── PIN Generator (4-stellig) mit Honeypot- und Duplikat-Check ──────────
+    const generatePin = async () => {
+        let pin = '';
+        let attempts = 0;
+        const maxAttempts = 50;
+
+        while (attempts < maxAttempts) {
+            pin = String(Math.floor(1000 + Math.random() * 9000));
+
+            // Check 1: Honeypot-PIN?
+            if (HONEYPOT_PINS.has(pin)) {
+                attempts++;
+                continue;
+            }
+
+            // Check 2: PIN bereits vergeben? (Server-Check)
+            try {
+                const { data, error } = await supabase.rpc('is_pin_taken', {
+                    p_pin: pin,
+                    p_exclude_user_id: editingId || null,
+                });
+
+                if (!error && data === false) {
+                    // PIN ist frei
+                    break;
+                }
+            } catch (err) {
+                console.warn('PIN duplicate check failed:', err);
+                // Bei Fehler: PIN trotzdem verwenden (Server prüft später nochmal)
+                break;
+            }
+
+            attempts++;
+        }
+
+        if (attempts >= maxAttempts) {
+            setError('Konnte keine sichere PIN generieren. Bitte versuchen Sie es später erneut.');
+            return;
+        }
+
         setForm(f => ({ ...f, pin }));
+        setSuccessMsg(`Neue PIN generiert: ${pin}`);
+        setTimeout(() => setSuccessMsg(null), 2500);
     };
 
     // ── Student Stats laden (via RPC) ────────────────────────────────────────
@@ -142,7 +190,7 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                 console.warn('RPC list_students failed, trying direct query:', rpcErr);
                 const { data, error: fetchErr } = await supabase
                     .from('users')
-                    .select('id, name, email, whatsapp, role, level, difficulty, performance_index')
+                    .select('id, name, email, whatsapp, role, level, difficulty, performance_index, locked_until, failed_attempts')
                     .eq('role', 'student')
                     .order('name', { ascending: true });
 
@@ -179,12 +227,52 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
     });
 
     // ── Handlers ──────────────────────────────────────────────────────────────
-    const openAdd = () => {
+    const openAdd = async () => {
         setForm(EMPTY_FORM);
         setEditingId(null);
         setMode('add');
         setError(null);
         setSuccessMsg(null);
+
+        // Auto-generiere sichere PIN beim Öffnen des Add-Dialogs
+        // Verzögert, damit Dialog zuerst erscheint
+        setTimeout(async () => {
+            let pin = '';
+            let attempts = 0;
+            const maxAttempts = 50;
+
+            while (attempts < maxAttempts) {
+                pin = String(Math.floor(1000 + Math.random() * 9000));
+
+                // Check: Honeypot-PIN?
+                if (HONEYPOT_PINS.has(pin)) {
+                    attempts++;
+                    continue;
+                }
+
+                // Check: PIN bereits vergeben?
+                try {
+                    const { data, error } = await supabase.rpc('is_pin_taken', {
+                        p_pin: pin,
+                        p_exclude_user_id: null,
+                    });
+
+                    if (!error && data === false) {
+                        // PIN ist frei
+                        break;
+                    }
+                } catch {
+                    // Bei Fehler: PIN trotzdem verwenden
+                    break;
+                }
+
+                attempts++;
+            }
+
+            if (attempts < maxAttempts) {
+                setForm(f => ({ ...f, pin }));
+            }
+        }, 100);
     };
 
     const openEdit = (student: Student) => {
@@ -211,12 +299,18 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
             setError(t('students.error_name_required'));
             return;
         }
-        if (mode === 'add' && form.pin.length !== 6) {
-            setError(t('students.error_pin_6'));
+        if (mode === 'add' && form.pin.length !== 4) {
+            setError(t('students.error_pin_4'));
             return;
         }
-        if (mode === 'edit' && form.pin.length > 0 && form.pin.length !== 6) {
-            setError(t('students.error_pin_6'));
+        if (mode === 'edit' && form.pin.length > 0 && form.pin.length !== 4) {
+            setError(t('students.error_pin_4'));
+            return;
+        }
+
+        // Honeypot-Check (Client-seitig)
+        if (HONEYPOT_PINS.has(form.pin)) {
+            setError('PIN ungültig (Sicherheitsregel) – bitte neue PIN generieren');
             return;
         }
 
@@ -270,7 +364,7 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                     p_name: form.name.trim(),
                     p_email: form.email.trim() || null,
                     p_whatsapp: form.whatsapp.trim() || null,
-                    p_pin: form.pin.length === 6 ? form.pin : null,
+                    p_pin: form.pin.length === 4 ? form.pin : null,
                     p_level: form.level,
                     p_difficulty: form.difficulty,
                 });
@@ -286,7 +380,7 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                         difficulty: form.difficulty,
                         performance_index: indexKey,
                     };
-                    if (form.pin.length === 6) {
+                    if (form.pin.length === 4) {
                         updateData.pin = form.pin;
                     }
 
@@ -360,6 +454,24 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
             console.error('Delete failed:', err);
         }
         setDeleteConfirm(null);
+    };
+
+    const handleUnlock = async (id: string, name: string) => {
+        try {
+            const { data, error } = await supabase.rpc('unlock_user', { p_user_id: id });
+
+            if (error || (data && !data.success)) {
+                setError(`Entsperren fehlgeschlagen: ${error?.message || data?.error || 'Unbekannter Fehler'}`);
+                return;
+            }
+
+            await fetchStudents();
+            setSuccessMsg(`Account "${name}" wurde entsperrt`);
+            setTimeout(() => setSuccessMsg(null), 2000);
+        } catch (err) {
+            setError('Entsperren fehlgeschlagen');
+            console.error('Unlock failed:', err);
+        }
     };
 
     // ── Render ────────────────────────────────────────────────────────────────
@@ -487,6 +599,9 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                                                         <span style={tagLevel}>{student.level || 'A1'}</span>
                                                         <span style={tagDiff}>{student.difficulty || 'easy'}</span>
                                                         <span style={tagIndex}>{student.performance_index || '—'}</span>
+                                                        {student.locked_until && new Date(student.locked_until) > new Date() && (
+                                                            <span style={tagLocked}>🔒 Gesperrt</span>
+                                                        )}
                                                     </div>
                                                     <div style={{ fontSize: '11px', color: '#636366', marginTop: '2px', display: 'flex', gap: '10px' }}>
                                                         {student.email && <span>✉ {student.email}</span>}
@@ -494,6 +609,15 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                                                     </div>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                                                    {student.locked_until && new Date(student.locked_until) > new Date() && (
+                                                        <button
+                                                            onClick={() => handleUnlock(student.id, student.name)}
+                                                            style={btnUnlockRow}
+                                                            title="Account entsperren"
+                                                        >
+                                                            🔓
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => loadStudentStats(student.id)}
                                                         style={btnStatsRow}
@@ -611,13 +735,13 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                                         <input
                                             type="text"
                                             inputMode="numeric"
-                                            maxLength={6}
+                                            maxLength={4}
                                             value={form.pin}
                                             onChange={e => {
-                                                const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                                const val = e.target.value.replace(/\D/g, '').slice(0, 4);
                                                 setForm(f => ({ ...f, pin: val }));
                                             }}
-                                            placeholder="000000"
+                                            placeholder="0000"
                                             style={{
                                                 ...inputStyle,
                                                 letterSpacing: '6px',
@@ -940,4 +1064,23 @@ const statValue: React.CSSProperties = {
     color: '#fff',
     fontWeight: 700,
     fontFamily: 'monospace',
+};
+
+const tagLocked: React.CSSProperties = {
+    background: 'rgba(255, 59, 48, 0.15)',
+    color: '#FF3B30',
+    borderRadius: '5px',
+    padding: '1px 6px',
+    fontSize: '10px',
+    fontWeight: 600,
+};
+
+const btnUnlockRow: React.CSSProperties = {
+    background: 'rgba(52, 199, 89, 0.1)',
+    border: '1px solid rgba(52, 199, 89, 0.25)',
+    borderRadius: '6px',
+    padding: '4px 8px',
+    fontSize: '12px',
+    cursor: 'pointer',
+    lineHeight: 1,
 };
