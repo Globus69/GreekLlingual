@@ -101,13 +101,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [user, router]);
 
     const login = async (username: string, pin: string) => {
-        // 1. Versuch: Supabase verify_user_pin() (bcrypt-validiert)
+        // 1. Versuch: Supabase verify_user_pin() (bcrypt-validiert + Account Lockout)
         try {
             const { data, error } = await supabase
                 .rpc('verify_user_pin', { p_name: username, p_pin: pin });
 
             if (!error && data && data.length > 0) {
                 const dbUser = data[0];
+
+                // Check: Account locked?
+                if (dbUser.error === 'Account locked. Try again later.') {
+                    console.warn('Account is locked due to failed attempts');
+                    return false; // Login fehlgeschlagen (gesperrt)
+                }
+
+                // Check: Invalid credentials
+                if (dbUser.error) {
+                    // Record failed attempt für Account Lockout
+                    supabase.rpc('record_admin_failed_login_attempt', { p_name: username })
+                        .then(({ data: lockData, error: lockError }) => {
+                            if (lockError) console.warn('Failed attempt recording failed:', lockError);
+                            if (lockData?.locked) {
+                                console.warn('Admin account locked after 5 failed attempts:', lockData);
+                            }
+                        });
+                    return false; // Login fehlgeschlagen
+                }
+
+                // Erfolgreicher Login
                 const userData: User = {
                     id: dbUser.user_id,
                     email: dbUser.user_email,

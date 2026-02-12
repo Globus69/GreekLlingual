@@ -196,15 +196,22 @@ export default function PinLoginPage() {
             if (data && data.length > 0) {
                 const userData = data[0];
 
-                // Check: Fehler von RPC (IP banned, Honeypot, etc.)
+                // Check: Fehler von RPC (IP banned, Honeypot, Account locked, etc.)
                 if (userData.error) {
                     setAttemptCount(prev => prev + 1); // Increment on failure
+
+                    // Spezielle Fehlerbehandlung für verschiedene Fälle
+                    let errorLevel = 'PIN nicht gefunden';
+                    if (userData.error === 'IP banned') {
+                        errorLevel = 'IP gesperrt - Verdächtige Aktivität';
+                    } else if (userData.error === 'Account locked. Try again later.') {
+                        errorLevel = 'Account gesperrt - 15 Min. warten';
+                    }
+
                     setWelcomePopup({
                         show: true,
                         name: 'Fehler',
-                        level: userData.error === 'IP banned'
-                            ? 'IP gesperrt - Verdächtige Aktivität'
-                            : 'PIN nicht gefunden',
+                        level: errorLevel,
                         difficulty: '',
                     });
                     setPinDigits(['', '', '', '']);
@@ -213,6 +220,18 @@ export default function PinLoginPage() {
                         setWelcomePopup({ show: false, name: '', level: '', difficulty: '' });
                         setShake(false);
                     }, 2000);
+
+                    // Record failed attempt für Account Lockout (falls PIN bekannt ist)
+                    if (userData.error !== 'IP banned') {
+                        supabase.rpc('record_failed_login_attempt', { p_pin: pin })
+                            .then(({ data, error }) => {
+                                if (error) console.warn('Failed attempt recording failed:', error);
+                                if (data?.locked) {
+                                    console.warn('Account locked after 5 failed attempts:', data);
+                                }
+                            });
+                    }
+
                     return;
                 }
 
