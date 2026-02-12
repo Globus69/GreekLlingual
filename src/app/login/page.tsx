@@ -15,6 +15,7 @@ export default function LoginPage() {
     const [focusedField, setFocusedField] = useState<string | null>(null);
     const [captchaAnswer, setCaptchaAnswer] = useState('');
     const [captchaQuestion, setCaptchaQuestion] = useState({ num1: 0, num2: 0, answer: 0 });
+    const [attemptCount, setAttemptCount] = useState(0);
     const { login, user } = useAuth();
     const router = useRouter();
     const { locale, setLocale, syncLocaleFromUser } = useLanguage();
@@ -168,9 +169,22 @@ export default function LoginPage() {
         setCaptchaAnswer('');
     };
 
+    // Helper function for progressive delay
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        // Progressive delays: 0ms, 1s, 2s, 5s, 10s
+        const delays = [0, 1000, 2000, 5000, 10000];
+        const delay = delays[Math.min(attemptCount, delays.length - 1)];
+
+        if (delay > 0) {
+            setIsSubmitting(true);
+            await sleep(delay);
+            setIsSubmitting(false);
+        }
 
         // IP-Whitelisting-Check für Admin-Login
         const allowedIPs = process.env.NEXT_PUBLIC_ADMIN_ALLOWED_IPS || '';
@@ -194,6 +208,7 @@ export default function LoginPage() {
             if (clientIp && !whitelist.includes(clientIp)) {
                 setError('Access denied - IP not whitelisted');
                 setShake(true);
+                setAttemptCount(prev => prev + 1);
                 generateCaptcha();
                 setTimeout(() => setShake(false), 600);
                 return;
@@ -204,6 +219,7 @@ export default function LoginPage() {
         if (parseInt(captchaAnswer) !== captchaQuestion.answer) {
             setError('CAPTCHA incorrect');
             setShake(true);
+            setAttemptCount(prev => prev + 1);
             generateCaptcha();
             setTimeout(() => setShake(false), 600);
             return;
@@ -221,6 +237,7 @@ export default function LoginPage() {
 
         const success = await login(username, pin);
         if (success) {
+            setAttemptCount(0);
             // Nach Login: Sprache aus User-Profil laden (falls in DB gespeichert)
             try {
                 const storedUser = localStorage.getItem('greeklingua_user');
@@ -238,6 +255,7 @@ export default function LoginPage() {
         if (!success) {
             setError(t('login.error'));
             setShake(true);
+            setAttemptCount(prev => prev + 1);
             setPinDigits(['', '', '', '', '', '']);
             pinRefs.current[0]?.focus();
             generateCaptcha();
