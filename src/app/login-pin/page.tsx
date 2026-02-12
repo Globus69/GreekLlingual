@@ -1,0 +1,572 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
+import { useTranslation } from '@/lib/useTranslation';
+import { supabase } from '@/db/supabase';
+
+export default function PinLoginPage() {
+    const [pinDigits, setPinDigits] = useState<string[]>(['', '', '', '']);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [shake, setShake] = useState(false);
+    const { login, user } = useAuth();
+    const router = useRouter();
+    const { locale } = useLanguage();
+    const { t } = useTranslation();
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    // If already logged in, redirect to dashboard
+    useEffect(() => {
+        if (user) {
+            router.push('/dashboard');
+        }
+    }, [user, router]);
+
+    // Animated background particles
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        let animationId: number;
+        const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; hue: number }[] = [];
+
+        const resize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+        resize();
+        window.addEventListener('resize', resize);
+
+        const hueRange = locale === 'ru'
+            ? { base: 345, spread: 30 }
+            : locale === 'el'
+                ? { base: 190, spread: 30 }
+                : locale === 'de'
+                    ? { base: 35, spread: 20 }
+                    : { base: 200, spread: 40 };
+
+        for (let i = 0; i < 60; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                size: Math.random() * 2 + 0.5,
+                opacity: Math.random() * 0.4 + 0.1,
+                hue: Math.random() * hueRange.spread + hueRange.base,
+            });
+        }
+
+        const lineColor = locale === 'ru' ? '180, 60, 60' : locale === 'el' ? '13, 110, 253' : locale === 'de' ? '218, 165, 32' : '0, 122, 255';
+
+        const animate = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(${lineColor}, ${0.06 * (1 - dist / 150)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            for (const p of particles) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${p.hue % 360}, 80%, 65%, ${p.opacity})`;
+                ctx.fill();
+
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            }
+
+            animationId = requestAnimationFrame(animate);
+        };
+        animate();
+
+        return () => {
+            cancelAnimationFrame(animationId);
+            window.removeEventListener('resize', resize);
+        };
+    }, [locale]);
+
+    const handleNumberClick = (num: number) => {
+        const firstEmpty = pinDigits.findIndex(d => d === '');
+        if (firstEmpty >= 0) {
+            const newDigits = [...pinDigits];
+            newDigits[firstEmpty] = num.toString();
+            setPinDigits(newDigits);
+        }
+    };
+
+    const handleBackspace = () => {
+        const lastFilled = pinDigits.map((d, i) => d ? i : -1).filter(i => i >= 0).pop();
+        if (lastFilled !== undefined) {
+            const newDigits = [...pinDigits];
+            newDigits[lastFilled] = '';
+            setPinDigits(newDigits);
+        }
+    };
+
+    const handleClear = () => {
+        setPinDigits(['', '', '', '']);
+    };
+
+    const handleCancel = () => {
+        router.push('/login');
+    };
+
+    const handleSubmit = async () => {
+        const pin = pinDigits.join('');
+        if (pin.length !== 4) {
+            setShake(true);
+            setTimeout(() => setShake(false), 600);
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            // RPC-Funktion aufrufen
+            const { data, error } = await supabase.rpc('verify_user_4digit_pin', {
+                p_pin: pin
+            });
+
+            if (error) {
+                console.error('RPC error:', error);
+                throw error;
+            }
+
+            if (data && data.length > 0) {
+                const userData = data[0];
+                // Popup mit Willkommensnachricht
+                alert(
+                    `Willkommen, ${userData.user_name}!\nStufe: ${userData.user_level} | Level: ${userData.user_difficulty}`
+                );
+
+                // User einloggen (über den bestehenden AuthContext)
+                // Wir simulieren hier den Login-Flow
+                localStorage.setItem('greeklingua_user', JSON.stringify({
+                    id: userData.user_id,
+                    name: userData.user_name,
+                    email: userData.user_email,
+                    role: userData.user_role,
+                    level: userData.user_level,
+                    difficulty: userData.user_difficulty,
+                    performance_index: userData.user_performance_index,
+                    preferred_locale: userData.user_preferred_locale,
+                }));
+                localStorage.setItem('greeklingua_session_timestamp', Date.now().toString());
+
+                // Zum Dashboard weiterleiten
+                router.push('/dashboard');
+                window.location.reload(); // Force reload to update AuthContext
+            } else {
+                // PIN nicht gefunden
+                alert('PIN nicht gefunden');
+                setPinDigits(['', '', '', '']);
+                setShake(true);
+                setTimeout(() => setShake(false), 600);
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('PIN nicht gefunden');
+            setPinDigits(['', '', '', '']);
+            setShake(true);
+            setTimeout(() => setShake(false), 600);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const isFull = pinDigits.every(d => d !== '');
+
+    return (
+        <>
+            <style jsx global>{`
+                @keyframes loginFadeIn {
+                    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
+                }
+                @keyframes loginShake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+                    20%, 40%, 60%, 80% { transform: translateX(4px); }
+                }
+                @keyframes orbFloat1 {
+                    0%, 100% { transform: translate(0, 0) scale(1); }
+                    33% { transform: translate(30px, -40px) scale(1.1); }
+                    66% { transform: translate(-20px, 20px) scale(0.95); }
+                }
+                @keyframes orbFloat2 {
+                    0%, 100% { transform: translate(0, 0) scale(1); }
+                    33% { transform: translate(-40px, 30px) scale(0.9); }
+                    66% { transform: translate(25px, -25px) scale(1.05); }
+                }
+            `}</style>
+
+            <div style={{
+                position: 'fixed',
+                inset: 0,
+                background: locale === 'ru'
+                    ? 'radial-gradient(ellipse at 50% 50%, #3d1535 0%, #1a0818 50%, #0A0A0C 100%)'
+                    : locale === 'el'
+                        ? 'radial-gradient(ellipse at 50% 50%, #0d2847 0%, #091a35 50%, #0A0A0C 100%)'
+                        : locale === 'de'
+                            ? 'radial-gradient(ellipse at 50% 50%, #3d3010 0%, #1a1508 50%, #0A0A0C 100%)'
+                            : 'radial-gradient(ellipse at 50% 50%, #0f2555 0%, #0a1230 50%, #0A0A0C 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                transition: 'background 0.6s ease',
+            }}>
+                <canvas
+                    ref={canvasRef}
+                    style={{ position: 'absolute', inset: 0, zIndex: 0 }}
+                />
+
+                <div style={{
+                    position: 'absolute',
+                    width: '500px',
+                    height: '500px',
+                    borderRadius: '50%',
+                    background: locale === 'ru'
+                        ? 'radial-gradient(circle, rgba(224, 85, 85, 0.18) 0%, transparent 70%)'
+                        : locale === 'el'
+                            ? 'radial-gradient(circle, rgba(13, 110, 253, 0.18) 0%, transparent 70%)'
+                            : locale === 'de'
+                                ? 'radial-gradient(circle, rgba(218, 165, 32, 0.18) 0%, transparent 70%)'
+                                : 'radial-gradient(circle, rgba(0, 122, 255, 0.18) 0%, transparent 70%)',
+                    top: '-100px',
+                    right: '-100px',
+                    animation: 'orbFloat1 12s ease-in-out infinite',
+                    pointerEvents: 'none',
+                    transition: 'background 0.6s ease',
+                }} />
+
+                {/* Login Card */}
+                <div
+                    style={{
+                        position: 'relative',
+                        zIndex: 5,
+                        width: '420px',
+                        maxWidth: '92vw',
+                        background: 'rgba(22, 22, 26, 0.75)',
+                        backdropFilter: 'blur(60px) saturate(1.5)',
+                        WebkitBackdropFilter: 'blur(60px) saturate(1.5)',
+                        borderRadius: '32px',
+                        padding: '48px 40px 40px',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        boxShadow: '0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03) inset',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        animation: shake ? 'loginShake 0.6s ease-in-out' : 'loginFadeIn 0.8s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                    }}
+                >
+                    {/* Logo */}
+                    <div style={{
+                        fontSize: '56px',
+                        marginBottom: '8px',
+                        filter: 'drop-shadow(0 0 24px rgba(0, 122, 255, 0.3))',
+                    }}>
+                        🔐
+                    </div>
+
+                    {/* Title */}
+                    <h1 style={{
+                        fontSize: '26px',
+                        fontWeight: 800,
+                        color: '#fff',
+                        margin: '0 0 4px 0',
+                        letterSpacing: '-0.5px',
+                    }}>
+                        PIN-Login
+                    </h1>
+
+                    <p style={{
+                        fontSize: '14px',
+                        color: '#6E6E73',
+                        margin: '0 0 36px 0',
+                        textAlign: 'center',
+                        lineHeight: '1.5',
+                    }}>
+                        Geben Sie Ihren 4-stelligen PIN ein
+                    </p>
+
+                    {/* PIN Display */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '12px',
+                        marginBottom: '32px',
+                    }}>
+                        {pinDigits.map((digit, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    width: '64px',
+                                    height: '72px',
+                                    background: digit
+                                        ? 'rgba(0, 122, 255, 0.12)'
+                                        : 'rgba(0, 0, 0, 0.3)',
+                                    border: `2px solid ${digit
+                                        ? 'rgba(0, 122, 255, 0.4)'
+                                        : 'rgba(255, 255, 255, 0.08)'}`,
+                                    borderRadius: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '32px',
+                                    fontWeight: 700,
+                                    color: '#fff',
+                                    transition: 'all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                                    boxShadow: digit ? '0 4px 16px rgba(0, 122, 255, 0.2)' : 'none',
+                                }}
+                            >
+                                {digit || '•'}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Number Pad */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '12px',
+                        marginBottom: '24px',
+                        width: '100%',
+                    }}>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                            <button
+                                key={num}
+                                type="button"
+                                onClick={() => handleNumberClick(num)}
+                                disabled={isFull || isSubmitting}
+                                style={{
+                                    height: '64px',
+                                    background: 'rgba(255, 255, 255, 0.06)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '16px',
+                                    fontSize: '24px',
+                                    fontWeight: 700,
+                                    color: '#fff',
+                                    cursor: (isFull || isSubmitting) ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s',
+                                    opacity: (isFull || isSubmitting) ? 0.4 : 1,
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isFull && !isSubmitting) {
+                                        e.currentTarget.style.background = 'rgba(0, 122, 255, 0.15)';
+                                        e.currentTarget.style.transform = 'scale(1.05)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                }}
+                            >
+                                {num}
+                            </button>
+                        ))}
+
+                        {/* Backspace */}
+                        <button
+                            type="button"
+                            onClick={handleBackspace}
+                            disabled={pinDigits.every(d => !d) || isSubmitting}
+                            style={{
+                                height: '64px',
+                                background: 'rgba(255, 255, 255, 0.06)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '16px',
+                                fontSize: '20px',
+                                color: '#fff',
+                                cursor: (pinDigits.every(d => !d) || isSubmitting) ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s',
+                                opacity: (pinDigits.every(d => !d) || isSubmitting) ? 0.4 : 1,
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!pinDigits.every(d => !d) && !isSubmitting) {
+                                    e.currentTarget.style.background = 'rgba(255, 69, 58, 0.15)';
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                        >
+                            ⌫
+                        </button>
+
+                        {/* 0 */}
+                        <button
+                            type="button"
+                            onClick={() => handleNumberClick(0)}
+                            disabled={isFull || isSubmitting}
+                            style={{
+                                height: '64px',
+                                background: 'rgba(255, 255, 255, 0.06)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '16px',
+                                fontSize: '24px',
+                                fontWeight: 700,
+                                color: '#fff',
+                                cursor: (isFull || isSubmitting) ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s',
+                                opacity: (isFull || isSubmitting) ? 0.4 : 1,
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!isFull && !isSubmitting) {
+                                    e.currentTarget.style.background = 'rgba(0, 122, 255, 0.15)';
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                        >
+                            0
+                        </button>
+
+                        {/* Clear */}
+                        <button
+                            type="button"
+                            onClick={handleClear}
+                            disabled={pinDigits.every(d => !d) || isSubmitting}
+                            style={{
+                                height: '64px',
+                                background: 'rgba(255, 255, 255, 0.06)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '16px',
+                                fontSize: '14px',
+                                fontWeight: 600,
+                                color: '#fff',
+                                cursor: (pinDigits.every(d => !d) || isSubmitting) ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s',
+                                opacity: (pinDigits.every(d => !d) || isSubmitting) ? 0.4 : 1,
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!pinDigits.every(d => !d) && !isSubmitting) {
+                                    e.currentTarget.style.background = 'rgba(255, 69, 58, 0.15)';
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                        >
+                            C
+                        </button>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '12px',
+                        width: '100%',
+                    }}>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={isSubmitting}
+                            style={{
+                                flex: 1,
+                                background: 'rgba(255, 255, 255, 0.06)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '16px',
+                                padding: '16px',
+                                fontSize: '15px',
+                                fontWeight: 600,
+                                color: '#fff',
+                                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.3s',
+                                opacity: isSubmitting ? 0.4 : 1,
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!isSubmitting) {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                            }}
+                        >
+                            Abbrechen
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleSubmit}
+                            disabled={!isFull || isSubmitting}
+                            style={{
+                                flex: 1,
+                                background: (!isFull || isSubmitting)
+                                    ? 'rgba(0, 122, 255, 0.3)'
+                                    : 'linear-gradient(135deg, #007AFF 0%, #5856D6 100%)',
+                                border: 'none',
+                                borderRadius: '16px',
+                                padding: '16px',
+                                fontSize: '15px',
+                                fontWeight: 700,
+                                color: 'white',
+                                cursor: (!isFull || isSubmitting) ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.3s',
+                                boxShadow: (!isFull || isSubmitting)
+                                    ? 'none'
+                                    : '0 8px 32px rgba(0, 122, 255, 0.4)',
+                            }}
+                            onMouseEnter={(e) => {
+                                if (isFull && !isSubmitting) {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 12px 44px rgba(0, 122, 255, 0.6)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = (!isFull || isSubmitting)
+                                    ? 'none'
+                                    : '0 8px 32px rgba(0, 122, 255, 0.4)';
+                            }}
+                        >
+                            {isSubmitting ? '...' : 'Anmelden'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div style={{
+                    position: 'absolute',
+                    bottom: '24px',
+                    color: '#2C2C2E',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase',
+                    zIndex: 5,
+                }}>
+                    HellenicHorizons © {new Date().getFullYear()}
+                </div>
+            </div>
+        </>
+    );
+}
