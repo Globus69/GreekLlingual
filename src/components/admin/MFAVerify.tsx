@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import * as OTPAuth from 'otpauth';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/db/supabase';
 
 interface MFAVerifyProps {
   userId: string;

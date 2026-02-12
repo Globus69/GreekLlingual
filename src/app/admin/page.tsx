@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/lib/useTranslation';
 import { useLanguage } from '@/context/LanguageContext';
 import StudentManagementDialog from '@/components/admin/StudentManagementDialog';
+import AdminLoginLog from '@/components/admin/AdminLoginLog';
 
 export default function AdminPage() {
     const { user, isAdmin, isAuthenticated, loading } = useAuth();
@@ -320,6 +321,14 @@ export default function AdminPage() {
                             {t('admin.settings_desc')}
                         </p>
                     </div>
+                </div>
+
+                {/* Admin Login Log */}
+                <div style={{ marginTop: '32px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: '#fff' }}>
+                        🔐 Admin Login History
+                    </h3>
+                    <AdminLoginLog />
                 </div>
 
                 {/* User-Info */}
