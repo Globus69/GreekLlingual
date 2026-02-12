@@ -198,7 +198,7 @@ export default function PinLoginPage() {
                     setTimeout(() => {
                         setWelcomePopup({ show: false, name: '', level: '', difficulty: '' });
                         setShake(false);
-                    }, 1000);
+                    }, 2000);
                     return;
                 }
 
@@ -223,7 +223,7 @@ export default function PinLoginPage() {
                 }));
                 localStorage.setItem('greeklingua_session_timestamp', Date.now().toString());
 
-                // Welcome-Popup anzeigen (1 Sekunde) + direkter Login
+                // Welcome-Popup anzeigen (2 Sekunden) + direkter Login
                 setWelcomePopup({
                     show: true,
                     name: userData.user_name,
@@ -231,10 +231,10 @@ export default function PinLoginPage() {
                     difficulty: userData.user_difficulty,
                 });
 
-                // Nach 1 Sekunde: direkt zum Dashboard (ohne Reload)
+                // Nach 2 Sekunden: direkt zum Dashboard (ohne Reload)
                 setTimeout(() => {
                     router.push('/dashboard');
-                }, 1000);
+                }, 2000);
             } else {
                 // PIN nicht gefunden - modernes Popup
                 setWelcomePopup({
@@ -248,7 +248,7 @@ export default function PinLoginPage() {
                 setTimeout(() => {
                     setWelcomePopup({ show: false, name: '', level: '', difficulty: '' });
                     setShake(false);
-                }, 1000);
+                }, 2000);
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -263,7 +263,7 @@ export default function PinLoginPage() {
             setTimeout(() => {
                 setWelcomePopup({ show: false, name: '', level: '', difficulty: '' });
                 setShake(false);
-            }, 1000);
+            }, 2000);
         } finally {
             setIsSubmitting(false);
         }
