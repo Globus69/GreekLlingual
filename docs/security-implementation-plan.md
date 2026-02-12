@@ -158,7 +158,7 @@
 
 ---
 
-### 🔴 **Todo 8: IP-Whitelisting (Admin)** (20 Min.)
+### ✅ **Todo 8: IP-Whitelisting (Admin)** (20 Min.)
 **Ziel:** Admin-Login nur von bestimmten IPs
 
 **Dateien:**
@@ -166,11 +166,14 @@
 - `src/app/login/page.tsx`
 
 **Was passiert:**
-1. `.env.local`: `ADMIN_ALLOWED_IPS="192.168.1.100,88.77.66.55"`
-2. Bei Admin-Login: `if (!allowedIPs.includes(req.ip)) return error`
-3. Fallback: Temporäre IP via Admin-Panel hinzufügen
+1. `.env.local`: `NEXT_PUBLIC_ADMIN_ALLOWED_IPS=""` (leer = alle IPs erlaubt in Dev)
+2. Bei Admin-Login: Client-IP via ipify.org API holen
+3. IP gegen Whitelist prüfen VOR CAPTCHA
+4. Bei IP-Block: "Access denied - IP not whitelisted" + Shake-Animation
+5. Produktion-Beispiel: `NEXT_PUBLIC_ADMIN_ALLOWED_IPS="192.168.1.100,127.0.0.1"`
 
-**Komplexität:** 🟢 Einfach (Config-only)
+**Komplexität:** 🟢 Einfach (Config + Frontend-Check)
+**Status:** ✅ Implementiert (2026-02-12)
 
 ---
 

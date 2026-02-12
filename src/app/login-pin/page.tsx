@@ -149,9 +149,21 @@ export default function PinLoginPage() {
         setIsSubmitting(true);
 
         try {
+            // Client-IP holen (Best-Effort, funktioniert nicht bei Proxy/VPN)
+            let clientIp = null;
+            try {
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                clientIp = ipData.ip;
+            } catch {
+                // Ignorieren, IP ist optional
+            }
+
             // RPC-Funktion aufrufen
             const { data, error } = await supabase.rpc('verify_user_4digit_pin', {
-                p_pin: pin
+                p_pin: pin,
+                p_ip_address: clientIp,
+                p_user_agent: navigator.userAgent
             });
 
             if (error) {
@@ -161,6 +173,25 @@ export default function PinLoginPage() {
 
             if (data && data.length > 0) {
                 const userData = data[0];
+
+                // Check: Fehler von RPC (IP banned, Honeypot, etc.)
+                if (userData.error) {
+                    setWelcomePopup({
+                        show: true,
+                        name: 'Fehler',
+                        level: userData.error === 'IP banned'
+                            ? 'IP gesperrt - Verdächtige Aktivität'
+                            : 'PIN nicht gefunden',
+                        difficulty: '',
+                    });
+                    setPinDigits(['', '', '', '']);
+                    setShake(true);
+                    setTimeout(() => {
+                        setWelcomePopup({ show: false, name: '', level: '', difficulty: '' });
+                        setShake(false);
+                    }, 1000);
+                    return;
+                }
 
                 // Device-Typ in Datenbank speichern (fire-and-forget)
                 supabase.rpc('update_user_device', {
