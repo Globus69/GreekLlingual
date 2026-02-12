@@ -7,18 +7,25 @@ import { useLanguage, Locale } from '@/context/LanguageContext';
 import { useTranslation } from '@/lib/useTranslation';
 
 export default function LoginPage() {
-    const [username, setUsername] = useState('');
+    const [username, setUsername] = useState('Admin');
     const [pinDigits, setPinDigits] = useState<string[]>(['', '', '', '', '', '']);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [shake, setShake] = useState(false);
     const [focusedField, setFocusedField] = useState<string | null>(null);
+    const [captchaAnswer, setCaptchaAnswer] = useState('');
+    const [captchaQuestion, setCaptchaQuestion] = useState({ num1: 0, num2: 0, answer: 0 });
     const { login, user } = useAuth();
     const router = useRouter();
     const { locale, setLocale, syncLocaleFromUser } = useLanguage();
     const { t } = useTranslation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const pinRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+    // Generate CAPTCHA on mount
+    useEffect(() => {
+        generateCaptcha();
+    }, []);
 
     // If already logged in, redirect to dashboard
     useEffect(() => {
@@ -154,9 +161,25 @@ export default function LoginPage() {
         }
     };
 
+    const generateCaptcha = () => {
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        setCaptchaQuestion({ num1, num2, answer: num1 + num2 });
+        setCaptchaAnswer('');
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        // CAPTCHA-Validierung
+        if (parseInt(captchaAnswer) !== captchaQuestion.answer) {
+            setError('CAPTCHA incorrect');
+            setShake(true);
+            generateCaptcha();
+            setTimeout(() => setShake(false), 600);
+            return;
+        }
 
         const pin = pinDigits.join('');
         if (pin.length !== 6) {
@@ -189,6 +212,7 @@ export default function LoginPage() {
             setShake(true);
             setPinDigits(['', '', '', '', '', '']);
             pinRefs.current[0]?.focus();
+            generateCaptcha();
             setTimeout(() => setShake(false), 600);
             setIsSubmitting(false);
         }
@@ -541,6 +565,54 @@ export default function LoginPage() {
                             </div>
                         </div>
 
+                        {/* CAPTCHA Field */}
+                        <div style={{ marginBottom: '20px' }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                marginBottom: '8px',
+                            }}>
+                                <span style={{ fontSize: '16px', opacity: 0.4 }}>🔢</span>
+                                <span style={{ fontSize: '13px', color: '#6E6E73', fontWeight: 500 }}>
+                                    Security Check: {captchaQuestion.num1} + {captchaQuestion.num2} = ?
+                                </span>
+                            </div>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="Answer"
+                                value={captchaAnswer}
+                                onChange={(e) => setCaptchaAnswer(e.target.value.replace(/\D/g, ''))}
+                                onFocus={() => setFocusedField('captcha')}
+                                onBlur={() => setFocusedField(null)}
+                                required
+                                autoComplete="off"
+                                data-lpignore="true"
+                                data-1p-ignore
+                                style={{
+                                    width: '100%',
+                                    background: focusedField === 'captcha'
+                                        ? 'rgba(0, 0, 0, 0.5)'
+                                        : 'rgba(0, 0, 0, 0.25)',
+                                    border: `1.5px solid ${focusedField === 'captcha'
+                                        ? 'rgba(0, 122, 255, 0.5)'
+                                        : 'rgba(255, 255, 255, 0.06)'}`,
+                                    borderRadius: '16px',
+                                    padding: '16px 20px',
+                                    fontSize: '15px',
+                                    color: '#fff',
+                                    outline: 'none',
+                                    transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                                    boxSizing: 'border-box',
+                                    fontFamily: 'inherit',
+                                    boxShadow: focusedField === 'captcha'
+                                        ? '0 0 0 4px rgba(0, 122, 255, 0.1), 0 4px 16px rgba(0, 0, 0, 0.2)'
+                                        : 'none',
+                                }}
+                            />
+                        </div>
+
                         {/* Error Message */}
                         {error && (
                             <p style={{
@@ -607,55 +679,6 @@ export default function LoginPage() {
                         </button>
                     </form>
 
-                    {/* Divider */}
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        width: '100%',
-                        margin: '24px 0 20px',
-                        animation: 'slideUp 0.6s ease-out 0.5s both',
-                    }}>
-                        <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
-                        <span style={{ fontSize: '11px', color: '#4A4A4E', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                            {locale === 'ru' ? 'или' : locale === 'el' ? 'ή' : locale === 'de' ? 'oder' : 'or'}
-                        </span>
-                        <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
-                    </div>
-
-                    {/* PIN-Login Button */}
-                    <button
-                        type="button"
-                        onClick={() => router.push('/login-pin')}
-                        style={{
-                            width: '100%',
-                            background: 'rgba(255, 255, 255, 0.04)',
-                            border: '1px solid rgba(255, 255, 255, 0.06)',
-                            borderRadius: '14px',
-                            padding: '14px',
-                            color: '#007AFF',
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            transition: 'all 0.3s',
-                            animation: 'slideUp 0.6s ease-out 0.55s both',
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(0, 122, 255, 0.08)';
-                            e.currentTarget.style.borderColor = 'rgba(0, 122, 255, 0.2)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
-                        }}
-                    >
-                        <span style={{ fontSize: '18px' }}>🔐</span>
-                        4-Digit PIN Login
-                    </button>
                 </div>
 
                 {/* Footer branding */}
