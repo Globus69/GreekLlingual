@@ -16,15 +16,19 @@ interface TelegramRequest {
 }
 
 serve(async (req) => {
-  // CORS Headers
+  // CORS Headers - erlaube alle Origins (inkl. localhost)
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   };
 
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', {
+      status: 200,
+      headers: corsHeaders
+    });
   }
 
   try {

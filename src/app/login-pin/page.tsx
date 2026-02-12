@@ -159,21 +159,16 @@ export default function PinLoginPage() {
         ]);
 
         if (HONEYPOT_PINS.has(pin)) {
-            // Honeypot-PIN erkannt! Telegram-Alert senden
+            // Honeypot-PIN erkannt! Telegram-Alert senden (via API-Route = server-seitig, kein CORS)
             console.log('🍯 Honeypot-PIN detected:', pin);
             try {
-                const telegramResponse = await fetch('https://bzdzqmnxycnudflcnmzj.supabase.co/functions/v1/send-telegram', {
+                const alertResponse = await fetch('/api/honeypot-alert', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer sb_publishable_uT0wv5-tv95ETP0u16h8zg_Ni3WqAIo'
-                    },
-                    body: JSON.stringify({
-                        message: `🚨 <b>SECURITY ALERT</b>\n\nHoneypot-PIN detected!\n\nPIN: ${pin}\nTime: ${new Date().toISOString()}\n\n⚠️ Suspicious login attempt blocked.`
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pin })
                 });
-                const telegramData = await telegramResponse.json();
-                console.log('📱 Telegram response:', telegramData);
+                const alertData = await alertResponse.json();
+                console.log('📱 Telegram alert sent:', alertData);
             } catch (error) {
                 console.error('❌ Telegram alert failed:', error);
             }
