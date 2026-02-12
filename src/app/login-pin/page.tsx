@@ -11,6 +11,12 @@ export default function PinLoginPage() {
     const [pinDigits, setPinDigits] = useState<string[]>(['', '', '', '']);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [shake, setShake] = useState(false);
+    const [welcomePopup, setWelcomePopup] = useState<{ show: boolean; name: string; level: string; difficulty: string }>({
+        show: false,
+        name: '',
+        level: '',
+        difficulty: '',
+    });
     const { login, user } = useAuth();
     const router = useRouter();
     const { locale } = useLanguage();
@@ -154,13 +160,8 @@ export default function PinLoginPage() {
 
             if (data && data.length > 0) {
                 const userData = data[0];
-                // Popup mit Willkommensnachricht
-                alert(
-                    `Willkommen, ${userData.user_name}!\nStufe: ${userData.user_level} | Level: ${userData.user_difficulty}`
-                );
 
                 // User einloggen (über den bestehenden AuthContext)
-                // Wir simulieren hier den Login-Flow
                 localStorage.setItem('greeklingua_user', JSON.stringify({
                     id: userData.user_id,
                     name: userData.user_name,
@@ -173,22 +174,48 @@ export default function PinLoginPage() {
                 }));
                 localStorage.setItem('greeklingua_session_timestamp', Date.now().toString());
 
-                // Zum Dashboard weiterleiten
-                router.push('/dashboard');
-                window.location.reload(); // Force reload to update AuthContext
+                // Welcome-Popup anzeigen (1 Sekunde)
+                setWelcomePopup({
+                    show: true,
+                    name: userData.user_name,
+                    level: userData.user_level,
+                    difficulty: userData.user_difficulty,
+                });
+
+                // Nach 1 Sekunde: zum Dashboard weiterleiten
+                setTimeout(() => {
+                    router.push('/dashboard');
+                    window.location.reload(); // Force reload to update AuthContext
+                }, 1000);
             } else {
-                // PIN nicht gefunden
-                alert('PIN nicht gefunden');
+                // PIN nicht gefunden - modernes Popup
+                setWelcomePopup({
+                    show: true,
+                    name: 'Fehler',
+                    level: 'PIN nicht gefunden',
+                    difficulty: '',
+                });
                 setPinDigits(['', '', '', '']);
                 setShake(true);
-                setTimeout(() => setShake(false), 600);
+                setTimeout(() => {
+                    setWelcomePopup({ show: false, name: '', level: '', difficulty: '' });
+                    setShake(false);
+                }, 1000);
             }
         } catch (error) {
             console.error('Login error:', error);
-            alert('PIN nicht gefunden');
+            setWelcomePopup({
+                show: true,
+                name: 'Fehler',
+                level: 'PIN nicht gefunden',
+                difficulty: '',
+            });
             setPinDigits(['', '', '', '']);
             setShake(true);
-            setTimeout(() => setShake(false), 600);
+            setTimeout(() => {
+                setWelcomePopup({ show: false, name: '', level: '', difficulty: '' });
+                setShake(false);
+            }, 1000);
         } finally {
             setIsSubmitting(false);
         }
@@ -566,7 +593,131 @@ export default function PinLoginPage() {
                 }}>
                     HellenicHorizons © {new Date().getFullYear()}
                 </div>
+
+                {/* Welcome Popup - Glasmorphismus Design */}
+                {welcomePopup.show && (
+                    <div style={{
+                        position: 'fixed',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 9999,
+                        animation: 'fadeIn 0.2s ease-out',
+                    }}>
+                        {/* Backdrop */}
+                        <div style={{
+                            position: 'absolute',
+                            inset: 0,
+                            background: 'rgba(0, 0, 0, 0.6)',
+                            backdropFilter: 'blur(8px)',
+                            WebkitBackdropFilter: 'blur(8px)',
+                        }} />
+
+                        {/* Popup Card */}
+                        <div style={{
+                            position: 'relative',
+                            width: '380px',
+                            maxWidth: '90vw',
+                            background: welcomePopup.name === 'Fehler'
+                                ? 'rgba(40, 20, 20, 0.85)'
+                                : 'rgba(22, 22, 26, 0.85)',
+                            backdropFilter: 'blur(40px) saturate(1.8)',
+                            WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+                            borderRadius: '28px',
+                            padding: '40px 32px',
+                            border: welcomePopup.name === 'Fehler'
+                                ? '1px solid rgba(255, 69, 58, 0.3)'
+                                : '1px solid rgba(0, 122, 255, 0.3)',
+                            boxShadow: welcomePopup.name === 'Fehler'
+                                ? '0 24px 60px rgba(255, 69, 58, 0.3), 0 0 0 1px rgba(255, 69, 58, 0.1) inset'
+                                : '0 24px 60px rgba(0, 122, 255, 0.4), 0 0 0 1px rgba(0, 122, 255, 0.1) inset',
+                            textAlign: 'center',
+                            animation: 'popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                        }}>
+                            {/* Icon */}
+                            <div style={{
+                                fontSize: '56px',
+                                marginBottom: '16px',
+                                filter: welcomePopup.name === 'Fehler'
+                                    ? 'drop-shadow(0 0 20px rgba(255, 69, 58, 0.5))'
+                                    : 'drop-shadow(0 0 20px rgba(0, 122, 255, 0.5))',
+                            }}>
+                                {welcomePopup.name === 'Fehler' ? '❌' : '✅'}
+                            </div>
+
+                            {/* Title */}
+                            <h2 style={{
+                                fontSize: '24px',
+                                fontWeight: 800,
+                                color: '#fff',
+                                margin: '0 0 8px 0',
+                                letterSpacing: '-0.5px',
+                            }}>
+                                {welcomePopup.name === 'Fehler' ? 'Fehler' : `Willkommen, ${welcomePopup.name}!`}
+                            </h2>
+
+                            {/* Info */}
+                            {welcomePopup.name !== 'Fehler' && (
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '12px',
+                                    justifyContent: 'center',
+                                    marginTop: '20px',
+                                }}>
+                                    <div style={{
+                                        background: 'rgba(88, 86, 214, 0.15)',
+                                        border: '1px solid rgba(88, 86, 214, 0.3)',
+                                        borderRadius: '12px',
+                                        padding: '8px 16px',
+                                        fontSize: '14px',
+                                        fontWeight: 600,
+                                        color: '#A29BFE',
+                                    }}>
+                                        Stufe: {welcomePopup.level}
+                                    </div>
+                                    <div style={{
+                                        background: 'rgba(52, 199, 89, 0.15)',
+                                        border: '1px solid rgba(52, 199, 89, 0.3)',
+                                        borderRadius: '12px',
+                                        padding: '8px 16px',
+                                        fontSize: '14px',
+                                        fontWeight: 600,
+                                        color: '#5DD689',
+                                        textTransform: 'capitalize',
+                                    }}>
+                                        {welcomePopup.difficulty}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Error Message */}
+                            {welcomePopup.name === 'Fehler' && (
+                                <p style={{
+                                    fontSize: '15px',
+                                    color: '#FF6B6B',
+                                    margin: '12px 0 0 0',
+                                    fontWeight: 500,
+                                }}>
+                                    {welcomePopup.level}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Animations */}
+            <style jsx global>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes popIn {
+                    0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+                    100% { opacity: 1; transform: scale(1) translateY(0); }
+                }
+            `}</style>
         </>
     );
 }

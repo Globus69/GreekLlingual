@@ -721,6 +721,46 @@
 
 ---
 
+### 2026-02-12 – 4-stelliger PIN-Login + Modernes Glasmorphismus-Popup
+- **Aufgabe:** Neuer Login-Screen mit 4-stelligem PIN, numerischer Tastatur, modernem Welcome-Popup
+- **Was wurde gemacht:**
+  - **Neue Route `/login-pin`:**
+    - Neue Datei `src/app/login-pin/page.tsx` erstellt
+    - On-Screen numerische Tastatur (0-9, Backspace ⌫, Clear C)
+    - 4 grosse Ziffern-Boxen (64x72px) mit Live-Anzeige
+    - Buttons: "Abbrechen" (zurueck zu `/login`) + "Anmelden"
+    - Sprachabhängige Hintergrund-Animation (EN/RU/EL/DE)
+    - Glasmorphismus-Design analog zur gesamten App
+  - **Datenbank-Erweiterung:**
+    - SQL-Migration `supabase/extend_users_for_4digit_pin.sql` erstellt
+    - Neue Spalte `pin_4digit` in `users` Tabelle
+    - RPC-Funktion `verify_user_4digit_pin(p_pin)` fuer sichere PIN-Validierung
+    - 5 Testnutzer (A1-Beginner) mit PINs: 3741, 8192, 5624, 7358, 9103
+  - **Welcome-Popup (Glasmorphismus-Design):**
+    - Modernes Modal-Popup statt nativen Alerts
+    - Erfolgs-Popup (✅): Zeigt Name, Stufe (lila Badge), Level (gruen Badge)
+    - Fehler-Popup (❌): Roter Hintergrund, "PIN nicht gefunden"
+    - Backdrop: Blur-Effekt (backdrop-filter blur 8px)
+    - Animationen: fadeIn + popIn mit cubic-bezier bounce
+    - Auto-Close nach 1 Sekunde
+  - **Login-Flow optimiert:**
+    - Bei gültigem PIN: Welcome-Popup → 1 Sekunde → Dashboard
+    - Bei ungültigem PIN: Fehler-Popup → 1 Sekunde → Eingabe leeren
+    - Keine Verzögerung, direktes Einloggen nach PIN-Validierung
+  - **Navigation:**
+    - Alter Login (`/login`) hat Button "4-Digit PIN Login" (🔐 Icon)
+    - Button ersetzt bisherigen "Biometric"-Button
+  - **Dateien:**
+    - `src/app/login-pin/page.tsx` (neu)
+    - `supabase/extend_users_for_4digit_pin.sql` (neu)
+    - `src/app/login/page.tsx` (modifiziert: PIN-Login-Button)
+    - `scripts/create-test-pin-users.js` (Hilfsskript fuer Testnutzer)
+  - Build erfolgreich getestet ✅
+- **Commit:** `2026-02-12 15:45 | Neuer 4-Digit PIN-Login Dialog`
+- **Hinweis:** SQL-Migration muss in Supabase SQL Editor ausgefuehrt werden!
+
+---
+
 ### Projekt-Status
 - Phase 1 (Aufgaben 1-8): Mehrsprachige UI komplett ✅
 - Phase 2 (Aufgaben 9-19): Admin-Backend + Schueler-Management komplett ✅
