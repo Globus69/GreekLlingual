@@ -160,8 +160,9 @@ export default function PinLoginPage() {
 
         if (HONEYPOT_PINS.has(pin)) {
             // Honeypot-PIN erkannt! Telegram-Alert senden
+            console.log('🍯 Honeypot-PIN detected:', pin);
             try {
-                await fetch('https://bzdzqmnxycnudflcnmzj.supabase.co/functions/v1/send-telegram', {
+                const telegramResponse = await fetch('https://bzdzqmnxycnudflcnmzj.supabase.co/functions/v1/send-telegram', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -171,8 +172,10 @@ export default function PinLoginPage() {
                         message: `🚨 <b>SECURITY ALERT</b>\n\nHoneypot-PIN detected!\n\nPIN: ${pin}\nTime: ${new Date().toISOString()}\n\n⚠️ Suspicious login attempt blocked.`
                     })
                 });
-            } catch {
-                console.log('Telegram alert failed (network error)');
+                const telegramData = await telegramResponse.json();
+                console.log('📱 Telegram response:', telegramData);
+            } catch (error) {
+                console.error('❌ Telegram alert failed:', error);
             }
 
             // Zeige Fehler-Popup
@@ -901,12 +904,12 @@ export default function PinLoginPage() {
                             WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
                             borderRadius: '28px',
                             padding: '40px 32px',
-                            border: welcomePopup.name === 'Fehler'
-                                ? '1px solid rgba(255, 69, 58, 0.3)'
-                                : '1px solid rgba(0, 122, 255, 0.3)',
-                            boxShadow: welcomePopup.name === 'Fehler'
-                                ? '0 24px 60px rgba(255, 69, 58, 0.3), 0 0 0 1px rgba(255, 69, 58, 0.1) inset'
-                                : '0 24px 60px rgba(0, 122, 255, 0.4), 0 0 0 1px rgba(0, 122, 255, 0.1) inset',
+                            border: welcomePopup.success
+                                ? '1px solid rgba(0, 122, 255, 0.3)'
+                                : '1px solid rgba(255, 69, 58, 0.3)',
+                            boxShadow: welcomePopup.success
+                                ? '0 24px 60px rgba(0, 122, 255, 0.4), 0 0 0 1px rgba(0, 122, 255, 0.1) inset'
+                                : '0 24px 60px rgba(255, 69, 58, 0.3), 0 0 0 1px rgba(255, 69, 58, 0.1) inset',
                             textAlign: 'center',
                             animation: 'popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
                         }}>
@@ -914,11 +917,11 @@ export default function PinLoginPage() {
                             <div style={{
                                 fontSize: '56px',
                                 marginBottom: '16px',
-                                filter: welcomePopup.name === 'Fehler'
-                                    ? 'drop-shadow(0 0 20px rgba(255, 69, 58, 0.5))'
-                                    : 'drop-shadow(0 0 20px rgba(0, 122, 255, 0.5))',
+                                filter: welcomePopup.success
+                                    ? 'drop-shadow(0 0 20px rgba(0, 122, 255, 0.5))'
+                                    : 'drop-shadow(0 0 20px rgba(255, 69, 58, 0.5))',
                             }}>
-                                {welcomePopup.name === 'Fehler' ? '❌' : '✅'}
+                                {welcomePopup.success ? '✅' : '❌'}
                             </div>
 
                             {/* Title */}
