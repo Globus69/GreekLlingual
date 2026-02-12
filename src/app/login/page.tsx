@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useLanguage, Locale } from '@/context/LanguageContext';
 import { useTranslation } from '@/lib/useTranslation';
+import { supabase } from '@/db/supabase';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('Admin');
@@ -235,7 +236,32 @@ export default function LoginPage() {
 
         setIsSubmitting(true);
 
+        // Hole Client-IP für Audit-Log
+        let clientIp = 'unknown';
+        try {
+            const ipRes = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipRes.json();
+            clientIp = ipData.ip || 'unknown';
+        } catch {
+            // Fallback: keine IP
+        }
+
         const success = await login(username, pin);
+
+        // Audit-Log erstellen (unabhängig vom Login-Erfolg)
+        try {
+            await supabase.rpc('log_admin_login', {
+                p_username: username,
+                p_ip_address: clientIp,
+                p_success: success,
+                p_error_message: success ? null : 'Invalid credentials',
+                p_device_type: null,
+                p_user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null
+            });
+        } catch (logError) {
+            console.error('Audit log failed:', logError);
+            // Nicht blocken wenn Log fehlschlägt
+        }
         if (success) {
             setAttemptCount(0);
             // Nach Login: Sprache aus User-Profil laden (falls in DB gespeichert)

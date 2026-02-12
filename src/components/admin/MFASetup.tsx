@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/db/supabase';
 
 interface MFASetupProps {
   userId: string;
