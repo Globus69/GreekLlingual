@@ -250,6 +250,11 @@ export default function LoginPage() {
             } catch {
                 // Ignore – Sprache bleibt wie sie ist
             }
+
+            // TODO: MFA Check - wenn mfa_enabled, zeige MFAVerify Dialog
+            // const { MFAVerify } = await import('@/components/admin/MFAVerify');
+            // setShowMFAVerify(true);
+
             return;
         }
         if (!success) {

@@ -7,16 +7,14 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { checkRateLimit, getClientIP } from '@/lib/rateLimit';
+import { rateLimitLogin, rateLimitAdmin, getClientIP } from '@/lib/rateLimit';
 
 /**
  * Middleware für Rate Limiting auf Login-Routen
  *
  * Geschützte Routen:
- * - /login-pin (Schüler-Login)
- * - /login (Admin-Login)
- *
- * Rate Limit: 10 Versuche/Minute pro IP
+ * - /login-pin (Schüler-Login): 10 Versuche/Minute
+ * - /login (Admin-Login): 3 Versuche/5 Minuten
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -25,8 +23,11 @@ export async function middleware(request: NextRequest) {
   if (pathname === '/login-pin' || pathname === '/login') {
     const clientIp = getClientIP(request);
 
+    // Admin-Login: strengeres Rate Limiting (3/5min)
+    const rateLimit = pathname === '/login' ? rateLimitAdmin : rateLimitLogin;
+
     // Rate Limit prüfen
-    const { success, limit, remaining, reset } = await checkRateLimit(clientIp);
+    const { success, limit, remaining, reset } = await rateLimit.limit(clientIp);
 
     if (!success) {
       // Rate Limit überschritten

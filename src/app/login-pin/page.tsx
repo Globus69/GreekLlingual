@@ -162,6 +162,15 @@ export default function PinLoginPage() {
         setIsSubmitting(true);
 
         try {
+            // Device Fingerprint generieren
+            let fingerprint = null;
+            try {
+                const { getDeviceFingerprint } = await import('@/lib/useDeviceFingerprint');
+                fingerprint = await getDeviceFingerprint();
+            } catch {
+                // Ignorieren, Fingerprint ist optional
+            }
+
             // Client-IP holen (Best-Effort, funktioniert nicht bei Proxy/VPN)
             let clientIp = null;
             try {
@@ -242,6 +251,15 @@ export default function PinLoginPage() {
                 }).then(({ error }) => {
                     if (error) console.warn('Device update failed:', error);
                 });
+
+                // Fingerprint speichern (falls neu oder geändert)
+                if (fingerprint) {
+                    supabase.from('users').update({
+                        device_fingerprint: fingerprint
+                    }).eq('id', userData.user_id).then(({ error }) => {
+                        if (error) console.warn('Fingerprint update failed:', error);
+                    });
+                }
 
                 // User einloggen (über den bestehenden AuthContext)
                 localStorage.setItem('greeklingua_user', JSON.stringify({
