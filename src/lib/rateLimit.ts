@@ -17,7 +17,7 @@ const redis = new Redis({
 });
 
 /**
- * Rate Limiter für Login-Versuche
+ * Rate Limiter für Login-Versuche (Schüler)
  *
  * @limit 10 requests per minute per IP
  * @algorithm Sliding Window (präzise, keine Burst-Spitzen)
@@ -27,6 +27,19 @@ export const rateLimitLogin = new Ratelimit({
   limiter: Ratelimit.slidingWindow(10, '1 m'),
   analytics: true,
   prefix: 'greeklingua:ratelimit',
+});
+
+/**
+ * Rate Limiter für Admin-Login (strenger)
+ *
+ * @limit 3 requests per 5 minutes per IP
+ * @algorithm Sliding Window
+ */
+export const rateLimitAdmin = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, '5 m'),
+  analytics: true,
+  prefix: 'greeklingua:ratelimit:admin',
 });
 
 /**
