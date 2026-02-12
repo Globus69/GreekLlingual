@@ -731,11 +731,13 @@
     - Buttons: "Abbrechen" (zurueck zu `/login`) + "Anmelden"
     - Sprachabhängige Hintergrund-Animation (EN/RU/EL/DE)
     - Glasmorphismus-Design analog zur gesamten App
+    - **Admin-Button** oben rechts (👤 Admin, Gold-Style) → navigiert zu `/login`
   - **Datenbank-Erweiterung:**
     - SQL-Migration `supabase/extend_users_for_4digit_pin.sql` erstellt
     - Neue Spalte `pin_4digit` in `users` Tabelle
     - RPC-Funktion `verify_user_4digit_pin(p_pin)` fuer sichere PIN-Validierung
     - 5 Testnutzer (A1-Beginner) mit PINs: 3741, 8192, 5624, 7358, 9103
+    - **Admin-Info:** Keine separate Admin-Tabelle, Admins in `users` mit `role='admin'`
   - **Welcome-Popup (Glasmorphismus-Design):**
     - Modernes Modal-Popup statt nativen Alerts
     - Erfolgs-Popup (✅): Zeigt Name, Stufe (lila Badge), Level (gruen Badge)
@@ -744,19 +746,28 @@
     - Animationen: fadeIn + popIn mit cubic-bezier bounce
     - Auto-Close nach 1 Sekunde
   - **Login-Flow optimiert:**
-    - Bei gültigem PIN: Welcome-Popup → 1 Sekunde → Dashboard
+    - Bei gültigem PIN: Welcome-Popup → 1 Sekunde → **Direkter Login** (window.location.href)
     - Bei ungültigem PIN: Fehler-Popup → 1 Sekunde → Eingabe leeren
-    - Keine Verzögerung, direktes Einloggen nach PIN-Validierung
+    - Kein doppelter Dialog mehr, kein Force-Reload
+  - **Admin-Login (`/login`) modernisiert:**
+    - **Username vorausgefüllt:** "Admin"
+    - **CAPTCHA hinzugefügt:** Einfache Math-Aufgabe (z.B. "7 + 3 = ?")
+    - CAPTCHA-Validierung vor Login-Versuch
+    - Auto-Regenerate bei Fehler oder falschem Login
+    - **PIN-Login-Option entfernt** (war "4-Digit PIN Login" Button)
   - **Navigation:**
-    - Alter Login (`/login`) hat Button "4-Digit PIN Login" (🔐 Icon)
-    - Button ersetzt bisherigen "Biometric"-Button
+    - Standard-Route: `/login-pin` (für Schüler)
+    - Admin-Route: `/login` (für Admin, nur über Button auf PIN-Login erreichbar)
   - **Dateien:**
-    - `src/app/login-pin/page.tsx` (neu)
-    - `supabase/extend_users_for_4digit_pin.sql` (neu)
-    - `src/app/login/page.tsx` (modifiziert: PIN-Login-Button)
-    - `scripts/create-test-pin-users.js` (Hilfsskript fuer Testnutzer)
+    - `src/app/login-pin/page.tsx` (Admin-Button + direkter Login)
+    - `src/app/login/page.tsx` (CAPTCHA + Admin-Vorausfüllung)
+    - `supabase/extend_users_for_4digit_pin.sql`
+    - `scripts/create-test-pin-users.js`
   - Build erfolgreich getestet ✅
-- **Commit:** `2026-02-12 15:45 | Neuer 4-Digit PIN-Login Dialog`
+- **Commits:**
+  - `2026-02-12 15:45` – Neuer 4-Digit PIN-Login Dialog
+  - `2026-02-12 16:15` – PIN-Login Popup optimiert + CLAUDE.md
+  - `2026-02-12 17:00` – Login-Flow optimiert - PIN direkt + Admin-CAPTCHA
 - **Hinweis:** SQL-Migration muss in Supabase SQL Editor ausgefuehrt werden!
 
 ---
