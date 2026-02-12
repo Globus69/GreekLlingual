@@ -623,9 +623,10 @@ export default function LoginPage() {
                         <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
                     </div>
 
-                    {/* Biometric Button */}
+                    {/* PIN-Login Button */}
                     <button
                         type="button"
+                        onClick={() => router.push('/login-pin')}
                         style={{
                             width: '100%',
                             background: 'rgba(255, 255, 255, 0.04)',
@@ -653,7 +654,7 @@ export default function LoginPage() {
                         }}
                     >
                         <span style={{ fontSize: '18px' }}>🔐</span>
-                        {t('login.biometric')}
+                        4-Digit PIN Login
                     </button>
                 </div>
 
