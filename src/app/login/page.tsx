@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useLanguage, Locale } from '@/context/LanguageContext';
 import { useTranslation } from '@/lib/useTranslation';
 import { supabase } from '@/db/supabase';
+import dynamic from 'next/dynamic';
+
+const MFAVerify = dynamic(() => import('@/components/admin/MFAVerify'), { ssr: false });
 
 export default function LoginPage() {
     const [username, setUsername] = useState('Admin');
@@ -17,6 +20,9 @@ export default function LoginPage() {
     const [captchaAnswer, setCaptchaAnswer] = useState('');
     const [captchaQuestion, setCaptchaQuestion] = useState({ num1: 0, num2: 0, answer: 0 });
     const [attemptCount, setAttemptCount] = useState(0);
+    const [showMFAVerify, setShowMFAVerify] = useState(false);
+    const [mfaUserId, setMfaUserId] = useState<string | null>(null);
+    const [mfaSecret, setMfaSecret] = useState<string | null>(null);
     const { login, user } = useAuth();
     const router = useRouter();
     const { locale, setLocale, syncLocaleFromUser } = useLanguage();
@@ -264,23 +270,39 @@ export default function LoginPage() {
         }
         if (success) {
             setAttemptCount(0);
-            // Nach Login: Sprache aus User-Profil laden (falls in DB gespeichert)
+
+            // MFA-Check: Ist 2FA für diesen Admin aktiviert?
             try {
                 const storedUser = localStorage.getItem('greeklingua_user');
                 if (storedUser) {
                     const userData = JSON.parse(storedUser);
+
+                    // Sprache aus User-Profil laden
                     if (userData.preferred_locale) {
                         syncLocaleFromUser(userData.preferred_locale);
                     }
+
+                    // Prüfe ob MFA aktiviert ist
+                    const { data: mfaData, error: mfaError } = await supabase.rpc('get_admin_mfa_secret', {
+                        p_user_id: userData.user_id
+                    });
+
+                    if (!mfaError && mfaData && mfaData.mfa_enabled) {
+                        // MFA ist aktiviert → zeige Verify-Dialog
+                        setMfaUserId(userData.user_id);
+                        setMfaSecret(mfaData.mfa_secret);
+                        setShowMFAVerify(true);
+                        setIsSubmitting(false);
+                        return; // Nicht zum Dashboard weiterleiten
+                    }
                 }
-            } catch {
-                // Ignore – Sprache bleibt wie sie ist
+            } catch (err) {
+                console.error('MFA check failed:', err);
+                // Bei Fehler: Fortfahren ohne MFA
             }
 
-            // TODO: MFA Check - wenn mfa_enabled, zeige MFAVerify Dialog
-            // const { MFAVerify } = await import('@/components/admin/MFAVerify');
-            // setShowMFAVerify(true);
-
+            // Kein MFA oder MFA-Check fehlgeschlagen → direkt zum Dashboard
+            router.push('/dashboard');
             return;
         }
         if (!success) {
@@ -772,6 +794,45 @@ export default function LoginPage() {
                     HellenicHorizons &copy; {new Date().getFullYear()}
                 </div>
             </div>
+
+            {/* MFA Verify Dialog */}
+            {showMFAVerify && mfaUserId && mfaSecret && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                    backdropFilter: 'blur(12px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999,
+                    animation: 'fadeIn 0.3s ease-out',
+                }}>
+                    <div style={{
+                        maxWidth: '480px',
+                        width: '90%',
+                        animation: 'popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    }}>
+                        <MFAVerify
+                            userId={mfaUserId}
+                            userEmail={username}
+                            secret={mfaSecret}
+                            onSuccess={() => {
+                                setShowMFAVerify(false);
+                                router.push('/dashboard');
+                            }}
+                            onCancel={() => {
+                                setShowMFAVerify(false);
+                                setMfaUserId(null);
+                                setMfaSecret(null);
+                                // Logout - User muss neu einloggen
+                                localStorage.removeItem('greeklingua_user');
+                                localStorage.removeItem('greeklingua_session_ts');
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Spinner keyframe */}
             <style jsx global>{`
