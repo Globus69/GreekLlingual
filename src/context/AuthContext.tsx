@@ -26,8 +26,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Session-Timeout: 24 Stunden
-const SESSION_TIMEOUT_MS = 24 * 60 * 60 * 1000;
+// Session-Timeout: Role-basiert
+const ADMIN_TIMEOUT_MS = 15 * 60 * 1000;      // 15 Minuten
+const STUDENT_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 Stunden
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -40,19 +41,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const sessionTimestamp = localStorage.getItem('greeklingua_session_ts');
 
         if (storedUser && sessionTimestamp) {
-            const elapsed = Date.now() - parseInt(sessionTimestamp, 10);
-            if (elapsed > SESSION_TIMEOUT_MS) {
-                // Session abgelaufen
-                console.warn('Session expired after 24h, logging out.');
-                localStorage.removeItem('greeklingua_user');
-                localStorage.removeItem('greeklingua_session_ts');
-                setUser(null);
-                setLoading(false);
-                return;
-            }
-
             try {
                 const parsedUser = JSON.parse(storedUser);
+                const elapsed = Date.now() - parseInt(sessionTimestamp, 10);
+
+                // Role-basierter Timeout
+                const timeoutMs = parsedUser?.role === 'admin'
+                    ? ADMIN_TIMEOUT_MS
+                    : STUDENT_TIMEOUT_MS;
+
+                if (elapsed > timeoutMs) {
+                    // Session abgelaufen
+                    const timeoutLabel = parsedUser?.role === 'admin' ? '15 minutes' : '24 hours';
+                    console.warn(`Session expired after ${timeoutLabel}, logging out.`);
+                    localStorage.removeItem('greeklingua_user');
+                    localStorage.removeItem('greeklingua_session_ts');
+                    setUser(null);
+                    setLoading(false);
+                    return;
+                }
+
                 if (parsedUser && parsedUser.id) {
                     setUser(parsedUser);
                     setLoading(false);
@@ -69,6 +77,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setLoading(false);
     }, []);
+
+    // Periodischer Check: Admin-Session-Ablauf prüfen (alle 60 Sekunden)
+    useEffect(() => {
+        if (!user || user.role !== 'admin') return;
+
+        const interval = setInterval(() => {
+            const timestamp = localStorage.getItem('greeklingua_session_ts');
+            if (!timestamp) return;
+
+            const elapsed = Date.now() - parseInt(timestamp, 10);
+
+            if (elapsed > ADMIN_TIMEOUT_MS) {
+                console.warn('Admin session expired (periodic check), logging out.');
+                localStorage.removeItem('greeklingua_user');
+                localStorage.removeItem('greeklingua_session_ts');
+                setUser(null);
+                router.push('/login');
+            }
+        }, 60000); // Check every minute
+
+        return () => clearInterval(interval);
+    }, [user, router]);
 
     const login = async (username: string, pin: string) => {
         // 1. Versuch: Supabase verify_user_pin() (bcrypt-validiert)

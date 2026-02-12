@@ -326,6 +326,117 @@
 
 ---
 
+## Phase 7: PIN-Management-System + WhatsApp-Benachrichtigungen
+
+### 47. ⬜ Auto-PIN-Generierung bei User-Erstellung
+- **Ziel:** Beim Anlegen eines neuen Users im Admin-Backend (StudentManagementDialog) automatisch eine zufällige 4-stellige PIN generieren
+- **Implementierung:**
+  - Funktion `generateRandomPin()` erstellen (Client-seitig)
+  - Generiert zufällige 4-stellige Zahl (1000-9999)
+  - Auto-Fill des PIN-Feldes beim Klick auf "Neuer Schüler"
+  - Bereits vorhanden: 🎲 Button für manuelle Regenerierung (existiert für 6-stellig, muss auf 4-stellig angepasst werden)
+- **Validierung:** siehe Aufgaben 48 + 49
+- **Status:** ⬜ Offen
+
+### 48. ⬜ Duplikat-Prüfung bei PIN-Vergabe
+- **Ziel:** Sicherstellen, dass keine zwei User die gleiche PIN haben
+- **Implementierung:**
+  - Client-seitig: Vor dem Speichern prüfen ob `pin_4digit` bereits existiert (Supabase Query)
+  - Falls Duplikat gefunden: Neue PIN generieren und erneut prüfen (max. 10 Versuche)
+  - Server-seitig: UNIQUE Constraint auf `users.pin_4digit` Spalte in DB setzen
+  - RPC-Funktion `create_student()` + `update_student()` anpassen: Duplikat-Check vor INSERT/UPDATE
+- **Fehlermeldung:** "PIN bereits vergeben – neue PIN generiert"
+- **Status:** ⬜ Offen
+
+### 49. ⬜ Honeypot-PIN-Prüfung bei PIN-Vergabe
+- **Ziel:** Verhindern, dass User PINs bekommen, die in der Honeypot-Liste sind
+- **Verbotene PINs:** 0000, 1111, 2222, 3333, 4444, 5555, 6666, 7777, 8888, 9999, 1234, 4321, 1122, 2211, 5678 (15 PINs)
+- **Implementierung:**
+  - Client-seitig: Liste der 15 Honeypot-PINs als Konstante
+  - Vor Speichern: Prüfen ob PIN in Honeypot-Liste → Falls ja: Neue PIN generieren
+  - Server-seitig: RPC-Funktion prüft gegen `honeypot_pins` Tabelle
+  - Bei Konflikt: `generate_safe_pin()` RPC-Funktion mit automatischer Retry-Logik
+- **Fehlermeldung:** "PIN ungültig (Sicherheitsregel) – neue PIN generiert"
+- **Status:** ⬜ Offen
+
+### 50. ⬜ Admin: PIN neu generieren für bestehende User
+- **Ziel:** Admin kann für einen bestehenden User eine neue PIN vergeben
+- **Implementierung:**
+  - Im StudentManagementDialog (Edit-Modus): 🎲 Button neben PIN-Feld
+  - Klick generiert neue 4-stellige PIN (inkl. Duplikat- und Honeypot-Prüfung)
+  - Neue PIN wird in Formular übernommen (nicht sofort gespeichert)
+  - Admin kann vor Speichern prüfen/anpassen
+  - Beim Speichern: `update_student()` RPC mit neuer PIN
+- **Validierung:** Gleiche Checks wie bei Aufgaben 48 + 49
+- **Bestätigung:** Toast-Nachricht "Neue PIN generiert: XXXX"
+- **Status:** ⬜ Offen
+
+### 51. ⬜ Admin: User entsperren (IP-Ban + Account-Lock)
+- **Ziel:** Admin kann gebannte/gesperrte User entsperren
+- **Option 1 – IP-Entsperrung:**
+  - Button "IP entsperren" in StudentManagementDialog
+  - Zeigt alle IPs die mit diesem User verbunden sind (aus `honeypot_log`)
+  - Admin kann einzelne IPs aus `banned_ips` entfernen
+  - RPC-Funktion `unban_user_ips(user_id)` erstellt
+- **Option 2 – Account-Lock:**
+  - Neues Feld `users.locked` (BOOLEAN, DEFAULT false)
+  - Bei Honeypot-Versuch: User-Account sperren (`locked = true`)
+  - Admin-Button "Account entsperren" setzt `locked = false`
+  - Login prüft `locked` Flag (zusätzlich zu IP-Check)
+- **UI:**
+  - 🔓 Button nur sichtbar wenn User gesperrt ist
+  - Status-Badge in User-Liste: "🔒 Gesperrt" (rot) wenn `locked = true` oder IP gebannt
+- **Status:** ⬜ Offen
+
+### 52. ⬜ WhatsApp-Benachrichtigung bei User-Sperrung
+- **Ziel:** Wenn ein User durch Honeypot-PIN gesperrt wird, WhatsApp-Nachricht an Admin senden
+- **Empfänger:** +35796120069 (Admin-Telefonnummer)
+- **Nachricht-Inhalt:**
+  ```
+  🚨 Sicherheitsalarm – GreekLingua Dashboard
+
+  User: [Name]
+  PIN-Versuch: [PIN]
+  IP-Adresse: [IP]
+  Zeitpunkt: [Datum + Uhrzeit]
+  Aktion: 24h IP-Ban + Account gesperrt
+  ```
+- **Implementierung:**
+  - **Option A (bevorzugt):** Telegram Bot API statt WhatsApp (einfacher, keine Business-API nötig)
+  - **Option B:** WhatsApp Business API (Twilio, WhatsApp Cloud API)
+  - Server-seitige Integration: Edge Function oder RPC-Funktion mit HTTP-Request
+  - Trigger: Nach `ban_ip()` in `verify_user_4digit_pin()` RPC
+  - Fehlerbehandlung: Falls Nachricht fehlschlägt, trotzdem sperren (nur Log-Warnung)
+- **Reminder:** In 5 Stunden an ToDo erinnern + Telegram vs. WhatsApp entscheiden
+- **Status:** ⬜ Offen (Technologie-Entscheidung ausstehend)
+
+### 53. ⬜ Admin-Telefonnummer in Datenbank speichern
+- **Ziel:** Admin-User bekommt Telefonnummer-Feld für WhatsApp/Telegram-Benachrichtigungen
+- **Implementierung:**
+  - SQL-Migration: `users` Tabelle erweitern
+    - Neues Feld `contact_phone` TEXT (nullable, für alle User)
+    - Oder: Bestehendes `whatsapp` Feld auch für Admin nutzen
+  - Admin-User Update: `contact_phone = '+35796120069'`
+  - UI: Telefonnummer-Feld in StudentManagementDialog anzeigen
+    - Für Studenten: Zeigt `whatsapp` Feld (bereits vorhanden)
+    - Für Admin: Zeigt `contact_phone` / `whatsapp` Feld (editierbar)
+  - RPC-Funktion `get_admin_contact()` für Benachrichtigungs-System
+- **Anzeige:**
+  - In User-Liste: Tel.Nr. als Spalte
+  - In Edit-Dialog: Tel.Nr. als Eingabefeld (optional)
+  - Format-Validierung: `+[Ländercode][Nummer]` (z.B. +35796120069)
+- **Status:** ⬜ Offen
+
+### 54. ⬜ ToDo.md aktualisiert mit Phase 7
+- **Ziel:** Diese 7 neuen Aufgaben (47-53) in ToDo.md dokumentieren
+- **Struktur:**
+  - Phase 7: PIN-Management-System + WhatsApp-Benachrichtigungen
+  - Jede Aufgabe mit Ziel, Implementierung, Status
+  - Abhängigkeiten zwischen Aufgaben dokumentieren (47→48+49, 52→53)
+- **Status:** ✅ Erledigt (2026-02-12)
+
+---
+
 ## Legende
 - ⬜ = offen
 - 🔄 = in Arbeit
@@ -336,8 +447,10 @@
 ## Hinweise
 - Commit-Format: `YYYY-MM-DD HH:MM | Aufgabe X – Kurzbeschreibung`
 - Griechisch = immer Antwortsprache (Schueler-Seite der Karten)
-- `html lang` Attribut dynamisch setzen (en/ru)
-- PIN wird IMMER gehasht gespeichert (SHA-256 oder bcrypt)
+- `html lang` Attribut dynamisch setzen (en/ru/el/de)
+- PIN wird IMMER gehasht gespeichert (bcrypt via pgcrypto)
 - Index-Key Format: `"{level}-{difficulty}"` (z.B. `"A1-easy"`)
 - Admin-Routen sind geschuetzt (Server- UND Client-seitig)
 - Leistungsstufe wird automatisch bei Fortschritt angepasst
+- **NEU:** 4-stellige PINs müssen Duplikat- + Honeypot-Check durchlaufen
+- **NEU:** Benachrichtigungen bei Sicherheitsvorfällen (Telegram/WhatsApp)

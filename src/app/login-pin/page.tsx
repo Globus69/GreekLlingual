@@ -12,6 +12,7 @@ export default function PinLoginPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [shake, setShake] = useState(false);
     const [deviceType, setDeviceType] = useState<'desktop' | 'mobile'>('mobile');
+    const [attemptCount, setAttemptCount] = useState(0);
     const [welcomePopup, setWelcomePopup] = useState<{ show: boolean; name: string; level: string; difficulty: string }>({
         show: false,
         name: '',
@@ -138,12 +139,24 @@ export default function PinLoginPage() {
         router.push('/login');
     };
 
+    // Helper function for progressive delay
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
     const handleSubmit = async () => {
         const pin = pinDigits.join('');
         if (pin.length !== 4) {
             setShake(true);
             setTimeout(() => setShake(false), 600);
             return;
+        }
+
+        // Progressive delays: 0ms, 1s, 2s, 5s, 10s
+        const delays = [0, 1000, 2000, 5000, 10000];
+        const delay = delays[Math.min(attemptCount, delays.length - 1)];
+
+        if (delay > 0) {
+            setIsSubmitting(true);
+            await sleep(delay);
         }
 
         setIsSubmitting(true);
@@ -185,6 +198,7 @@ export default function PinLoginPage() {
 
                 // Check: Fehler von RPC (IP banned, Honeypot, etc.)
                 if (userData.error) {
+                    setAttemptCount(prev => prev + 1); // Increment on failure
                     setWelcomePopup({
                         show: true,
                         name: 'Fehler',
@@ -223,6 +237,9 @@ export default function PinLoginPage() {
                 }));
                 localStorage.setItem('greeklingua_session_timestamp', Date.now().toString());
 
+                // Reset attempt counter on success
+                setAttemptCount(0);
+
                 // Welcome-Popup anzeigen (2 Sekunden) + direkter Login
                 setWelcomePopup({
                     show: true,
@@ -237,6 +254,7 @@ export default function PinLoginPage() {
                 }, 2000);
             } else {
                 // PIN nicht gefunden - modernes Popup
+                setAttemptCount(prev => prev + 1); // Increment on failure
                 setWelcomePopup({
                     show: true,
                     name: 'Fehler',
@@ -252,6 +270,7 @@ export default function PinLoginPage() {
             }
         } catch (error) {
             console.error('Login error:', error);
+            setAttemptCount(prev => prev + 1); // Increment on failure
             setWelcomePopup({
                 show: true,
                 name: 'Fehler',
