@@ -13,17 +13,19 @@ export default function PinLoginPage() {
     const [shake, setShake] = useState(false);
     const [deviceType, setDeviceType] = useState<'desktop' | 'mobile'>('mobile');
     const [attemptCount, setAttemptCount] = useState(0);
-    const [welcomePopup, setWelcomePopup] = useState<{ show: boolean; name: string; level: string; difficulty: string }>({
+    const [welcomePopup, setWelcomePopup] = useState<{ show: boolean; name: string; level: string; difficulty: string; success: boolean }>({
         show: false,
         name: '',
         level: '',
         difficulty: '',
+        success: false,
     });
     const { login, user } = useAuth();
     const router = useRouter();
     const { locale } = useLanguage();
     const { t } = useTranslation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     // If already logged in, redirect to dashboard
     useEffect(() => {
@@ -927,11 +929,11 @@ export default function PinLoginPage() {
                                 margin: '0 0 8px 0',
                                 letterSpacing: '-0.5px',
                             }}>
-                                {welcomePopup.name === 'Fehler' ? 'Fehler' : `Willkommen, ${welcomePopup.name}!`}
+                                {welcomePopup.success ? `Willkommen, ${welcomePopup.name}!` : welcomePopup.name}
                             </h2>
 
                             {/* Info */}
-                            {welcomePopup.name !== 'Fehler' && (
+                            {welcomePopup.success && (
                                 <div style={{
                                     display: 'flex',
                                     gap: '12px',
