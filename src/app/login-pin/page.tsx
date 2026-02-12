@@ -152,19 +152,28 @@ export default function PinLoginPage() {
             // Client-IP holen (Best-Effort, funktioniert nicht bei Proxy/VPN)
             let clientIp = null;
             try {
-                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 3000); // 3 Sekunden Timeout
+                const ipRes = await fetch('https://api.ipify.org?format=json', {
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
                 const ipData = await ipRes.json();
                 clientIp = ipData.ip;
             } catch {
-                // Ignorieren, IP ist optional
+                // Ignorieren, IP ist optional (Timeout oder Netzwerkfehler)
             }
 
-            // RPC-Funktion aufrufen
-            const { data, error } = await supabase.rpc('verify_user_4digit_pin', {
+            // RPC-Funktion aufrufen (mit 10 Sekunden Timeout)
+            const rpcPromise = supabase.rpc('verify_user_4digit_pin', {
                 p_pin: pin,
                 p_ip_address: clientIp,
                 p_user_agent: navigator.userAgent
             });
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('RPC timeout')), 10000)
+            );
+            const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
 
             if (error) {
                 console.error('RPC error:', error);
@@ -224,7 +233,7 @@ export default function PinLoginPage() {
 
                 // Nach 1 Sekunde: direkt zum Dashboard (ohne Reload)
                 setTimeout(() => {
-                    window.location.href = '/dashboard';
+                    router.push('/dashboard');
                 }, 1000);
             } else {
                 // PIN nicht gefunden - modernes Popup
@@ -777,8 +786,8 @@ export default function PinLoginPage() {
                             position: 'absolute',
                             inset: 0,
                             background: 'rgba(0, 0, 0, 0.6)',
-                            backdropFilter: 'blur(8px)',
-                            WebkitBackdropFilter: 'blur(8px)',
+                            backdropFilter: 'blur(4px)',
+                            WebkitBackdropFilter: 'blur(4px)',
                         }} />
 
                         {/* Popup Card */}
