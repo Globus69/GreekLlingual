@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsCard from '@/components/dashboard/StatsCard';
-import ActionGrid from '@/components/dashboard/ActionGrid';
 import ModuleGrid from '@/components/dashboard/ModuleGrid';
 import '@/styles/liquid-glass.css';
 import VocabularyDialog from '@/components/learning/VocabularyDialog';
