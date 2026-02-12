@@ -11,6 +11,7 @@ export default function PinLoginPage() {
     const [pinDigits, setPinDigits] = useState<string[]>(['', '', '', '']);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [shake, setShake] = useState(false);
+    const [deviceType, setDeviceType] = useState<'desktop' | 'mobile'>('mobile');
     const [welcomePopup, setWelcomePopup] = useState<{ show: boolean; name: string; level: string; difficulty: string }>({
         show: false,
         name: '',
@@ -160,6 +161,14 @@ export default function PinLoginPage() {
 
             if (data && data.length > 0) {
                 const userData = data[0];
+
+                // Device-Typ in Datenbank speichern (fire-and-forget)
+                supabase.rpc('update_user_device', {
+                    p_user_id: userData.user_id,
+                    p_device_type: deviceType
+                }).then(({ error }) => {
+                    if (error) console.warn('Device update failed:', error);
+                });
 
                 // User einloggen (über den bestehenden AuthContext)
                 localStorage.setItem('greeklingua_user', JSON.stringify({
@@ -370,12 +379,100 @@ export default function PinLoginPage() {
                     <p style={{
                         fontSize: '14px',
                         color: '#6E6E73',
-                        margin: '0 0 36px 0',
+                        margin: '0 0 24px 0',
                         textAlign: 'center',
                         lineHeight: '1.5',
                     }}>
                         Geben Sie Ihren 4-stelligen PIN ein
                     </p>
+
+                    {/* Device Type Selection */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '12px',
+                        marginBottom: '24px',
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        borderRadius: '16px',
+                        padding: '6px',
+                    }}>
+                        <button
+                            type="button"
+                            onClick={() => setDeviceType('desktop')}
+                            style={{
+                                flex: 1,
+                                padding: '10px 20px',
+                                borderRadius: '12px',
+                                border: 'none',
+                                background: deviceType === 'desktop'
+                                    ? 'linear-gradient(135deg, #007AFF 0%, #5856D6 100%)'
+                                    : 'transparent',
+                                color: deviceType === 'desktop' ? '#fff' : '#8E8E93',
+                                fontSize: '13px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                                boxShadow: deviceType === 'desktop'
+                                    ? '0 2px 8px rgba(0, 122, 255, 0.3)'
+                                    : 'none',
+                            }}
+                            onMouseEnter={(e) => {
+                                if (deviceType !== 'desktop') {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (deviceType !== 'desktop') {
+                                    e.currentTarget.style.background = 'transparent';
+                                }
+                            }}
+                        >
+                            <span style={{ fontSize: '16px' }}>🖥️</span>
+                            Desktop
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setDeviceType('mobile')}
+                            style={{
+                                flex: 1,
+                                padding: '10px 20px',
+                                borderRadius: '12px',
+                                border: 'none',
+                                background: deviceType === 'mobile'
+                                    ? 'linear-gradient(135deg, #007AFF 0%, #5856D6 100%)'
+                                    : 'transparent',
+                                color: deviceType === 'mobile' ? '#fff' : '#8E8E93',
+                                fontSize: '13px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                                boxShadow: deviceType === 'mobile'
+                                    ? '0 2px 8px rgba(0, 122, 255, 0.3)'
+                                    : 'none',
+                            }}
+                            onMouseEnter={(e) => {
+                                if (deviceType !== 'mobile') {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (deviceType !== 'mobile') {
+                                    e.currentTarget.style.background = 'transparent';
+                                }
+                            }}
+                        >
+                            <span style={{ fontSize: '16px' }}>📱</span>
+                            Mobile
+                        </button>
+                    </div>
 
                     {/* PIN Display */}
                     <div style={{
