@@ -115,26 +115,14 @@ export default function PinLoginPage() {
         };
     }, [locale]);
 
-    const handleNumberClick = (num: number) => {
-        const firstEmpty = pinDigits.findIndex(d => d === '');
-        if (firstEmpty >= 0) {
-            const newDigits = [...pinDigits];
-            newDigits[firstEmpty] = num.toString();
-            setPinDigits(newDigits);
-        }
-    };
-
-    const handleBackspace = () => {
-        const lastFilled = pinDigits.map((d, i) => d ? i : -1).filter(i => i >= 0).pop();
-        if (lastFilled !== undefined) {
-            const newDigits = [...pinDigits];
-            newDigits[lastFilled] = '';
-            setPinDigits(newDigits);
-        }
-    };
+    // Auto-focus first input on mount
+    useEffect(() => {
+        inputRefs.current[0]?.focus();
+    }, []);
 
     const handleClear = () => {
         setPinDigits(['', '', '', '']);
+        inputRefs.current[0]?.focus();
     };
 
     const handleCancel = () => {
@@ -618,15 +606,45 @@ export default function PinLoginPage() {
                         </button>
                     </div>
 
-                    {/* PIN Display */}
+                    {/* PIN Input Fields - Native Keyboard */}
                     <div style={{
                         display: 'flex',
                         gap: '12px',
                         marginBottom: '32px',
                     }}>
                         {pinDigits.map((digit, index) => (
-                            <div
+                            <input
                                 key={index}
+                                ref={(el) => (inputRefs.current[index] = el)}
+                                type="tel"
+                                inputMode="numeric"
+                                maxLength={1}
+                                value={digit}
+                                disabled={isSubmitting}
+                                onChange={(e) => {
+                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                    if (value.length <= 1) {
+                                        const newDigits = [...pinDigits];
+                                        newDigits[index] = value;
+                                        setPinDigits(newDigits);
+
+                                        // Auto-advance to next input
+                                        if (value && index < 3) {
+                                            inputRefs.current[index + 1]?.focus();
+                                        }
+                                    }
+                                }}
+                                onKeyDown={(e) => {
+                                    // Handle backspace
+                                    if (e.key === 'Backspace' && !digit && index > 0) {
+                                        inputRefs.current[index - 1]?.focus();
+                                    }
+                                    // Submit on Enter
+                                    if (e.key === 'Enter' && isFull) {
+                                        handleSubmit();
+                                    }
+                                }}
+                                onFocus={(e) => e.target.select()}
                                 style={{
                                     width: '64px',
                                     height: '72px',
@@ -637,133 +655,34 @@ export default function PinLoginPage() {
                                         ? 'rgba(0, 122, 255, 0.4)'
                                         : 'rgba(255, 255, 255, 0.08)'}`,
                                     borderRadius: '16px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
                                     fontSize: '32px',
                                     fontWeight: 700,
                                     color: '#fff',
+                                    textAlign: 'center',
                                     transition: 'all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)',
                                     boxShadow: digit ? '0 4px 16px rgba(0, 122, 255, 0.2)' : 'none',
+                                    outline: 'none',
+                                    caretColor: 'transparent',
                                 }}
-                            >
-                                {digit || '•'}
-                            </div>
+                            />
                         ))}
                     </div>
 
-                    {/* Number Pad */}
+                    {/* Clear Button */}
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: '12px',
+                        display: 'flex',
+                        justifyContent: 'center',
                         marginBottom: '24px',
-                        width: '100%',
                     }}>
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                            <button
-                                key={num}
-                                type="button"
-                                onClick={() => handleNumberClick(num)}
-                                disabled={isFull || isSubmitting}
-                                style={{
-                                    height: '64px',
-                                    background: 'rgba(255, 255, 255, 0.06)',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                    borderRadius: '16px',
-                                    fontSize: '24px',
-                                    fontWeight: 700,
-                                    color: '#fff',
-                                    cursor: (isFull || isSubmitting) ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.2s',
-                                    opacity: (isFull || isSubmitting) ? 0.4 : 1,
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!isFull && !isSubmitting) {
-                                        e.currentTarget.style.background = 'rgba(0, 122, 255, 0.15)';
-                                        e.currentTarget.style.transform = 'scale(1.05)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                                    e.currentTarget.style.transform = 'scale(1)';
-                                }}
-                            >
-                                {num}
-                            </button>
-                        ))}
-
-                        {/* Backspace */}
-                        <button
-                            type="button"
-                            onClick={handleBackspace}
-                            disabled={pinDigits.every(d => !d) || isSubmitting}
-                            style={{
-                                height: '64px',
-                                background: 'rgba(255, 255, 255, 0.06)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '16px',
-                                fontSize: '20px',
-                                color: '#fff',
-                                cursor: (pinDigits.every(d => !d) || isSubmitting) ? 'not-allowed' : 'pointer',
-                                transition: 'all 0.2s',
-                                opacity: (pinDigits.every(d => !d) || isSubmitting) ? 0.4 : 1,
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!pinDigits.every(d => !d) && !isSubmitting) {
-                                    e.currentTarget.style.background = 'rgba(255, 69, 58, 0.15)';
-                                    e.currentTarget.style.transform = 'scale(1.05)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                                e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                        >
-                            ⌫
-                        </button>
-
-                        {/* 0 */}
-                        <button
-                            type="button"
-                            onClick={() => handleNumberClick(0)}
-                            disabled={isFull || isSubmitting}
-                            style={{
-                                height: '64px',
-                                background: 'rgba(255, 255, 255, 0.06)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '16px',
-                                fontSize: '24px',
-                                fontWeight: 700,
-                                color: '#fff',
-                                cursor: (isFull || isSubmitting) ? 'not-allowed' : 'pointer',
-                                transition: 'all 0.2s',
-                                opacity: (isFull || isSubmitting) ? 0.4 : 1,
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!isFull && !isSubmitting) {
-                                    e.currentTarget.style.background = 'rgba(0, 122, 255, 0.15)';
-                                    e.currentTarget.style.transform = 'scale(1.05)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                                e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                        >
-                            0
-                        </button>
-
-                        {/* Clear */}
                         <button
                             type="button"
                             onClick={handleClear}
                             disabled={pinDigits.every(d => !d) || isSubmitting}
                             style={{
-                                height: '64px',
                                 background: 'rgba(255, 255, 255, 0.06)',
                                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '16px',
+                                borderRadius: '12px',
+                                padding: '10px 24px',
                                 fontSize: '14px',
                                 fontWeight: 600,
                                 color: '#fff',
@@ -782,7 +701,7 @@ export default function PinLoginPage() {
                                 e.currentTarget.style.transform = 'scale(1)';
                             }}
                         >
-                            C
+                            Clear
                         </button>
                     </div>
 
