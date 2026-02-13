@@ -65,11 +65,14 @@
 - [ ] Liste erstellen: Welche Components brauchen Mobile-Varianten?
 - [ ] Naming Convention: `LoginPinDesktop.tsx` vs. `LoginPinMobile.tsx` vs. Shared `LoginPin.tsx`
 
-### 2026-02-13 ☐ Navigation Pattern für Mobile
-- [ ] Bottom Navigation vs. Hamburger Menu
-- [ ] Zurück-Button Strategie (Browser-History vs. In-App)
-- [ ] Deep-Linking: Wie funktioniert Direktzugriff auf Module?
-- [ ] **Rückfrage 6 beantworten** (siehe unten)
+### 2026-02-13 ✅ Navigation Pattern für Mobile
+- [x] **ENTSCHIEDEN:** Hybrid (Dashboard + Bottom Nav: Home, Stats, Settings)
+- [x] Bottom Navigation implementiert (3 Tabs: 🏠 Home | 📊 Stats | ⚙️ Settings)
+- [x] Mobile Layout erstellt (src/app/m/layout.tsx) ✅
+- [x] MobileBottomNav Component (src/components/mobile/MobileBottomNav.tsx) ✅
+- [x] Stats-Seite erstellt (src/app/m/stats/page.tsx) ✅
+- [x] Settings-Seite erstellt (src/app/m/settings/page.tsx) ✅
+- [x] **Rückfrage 6 beantwortet** → siehe ERLEDIGT-Sektion
 
 ### 2026-02-13 ☐ UX & Design Entscheidungen
 - [ ] Glasmorphism-Design beibehalten oder vereinfachen?
@@ -142,6 +145,25 @@
 - [x] **Phase 2 (später):**
   - Biometric Auth als **optionales Feature** (User aktiviert in Settings)
   - Face ID / Touch ID Support (WebAuthn API)
+
+### 2026-02-13 ✔ Rückfrage 6 beantwortet: Navigation Pattern
+- [x] **Entscheidung:** Hybrid (Dashboard + Bottom Nav: Home, Stats, Settings)
+- [x] **Begründung:**
+  - Dashboard bleibt Einstiegspunkt (4 Modul-Karten wie jetzt)
+  - Bottom Nav für Meta-Features (Stats, Settings)
+  - Flexible Erweiterung (neue Module = neue Dashboard-Karte)
+  - Beste Balance zwischen Direktzugriff und UI-Klarheit
+- [x] **Bottom Navigation (3 Tabs):**
+  - 🏠 Home → Dashboard mit 4 Modul-Karten
+  - 📊 Stats → Detaillierte Statistiken (Streak, Progress, Weekly Chart)
+  - ⚙️ Settings → Sprache, Account-Info, Logout
+- [x] **Implementiert:**
+  - ✅ MobileBottomNav Component (src/components/mobile/MobileBottomNav.tsx)
+  - ✅ Mobile Layout mit Fixed Bottom Nav (src/app/m/layout.tsx)
+  - ✅ Stats Page (src/app/m/stats/page.tsx) - Vollständig
+  - ✅ Settings Page (src/app/m/settings/page.tsx) - Vollständig
+  - ✅ Active Tab Indication (Blue highlight + indicator bar)
+  - ✅ Touch-optimized (44x44px minimum touch targets)
   - Fallback zu PIN bleibt verfügbar
   - Supabase Schema: `biometric_enabled`, `webauthn_credential_id`, `webauthn_public_key`
 - [x] **Implementierung:** Keine Änderungen nötig für Phase 1 (Desktop-Logik funktioniert 1:1)
