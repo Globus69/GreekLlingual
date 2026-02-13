@@ -94,16 +94,14 @@
   - **Accessibility:** System-Keyboard hat Screen-Reader Support
   - **Real-World-Pattern:** Banking-Apps, Authenticator-Apps nutzen das auch
 
-### 2026-02-13 ☐ Data-Sync Strategie
-- [ ] Offline-Modus: Welche Daten müssen gecacht werden?
-- [ ] Sync-Logik: Wie werden Vocabulary-Progress, Performance-Stats synchronisiert?
-- [ ] Conflict Resolution: Was passiert bei gleichzeitiger Desktop+Mobile Nutzung?
-- [ ] **Rückfrage 10 beantworten** (siehe unten)
+### 2026-02-13 ✅ Data-Sync Strategie & Offline-Modus
+- [x] **ENTSCHIEDEN:** Option D - Hybrid (Phase 1: Online-Only, Phase 2: Offline bei Bedarf)
+- [x] **Rückfrage 10 beantwortet** → siehe ERLEDIGT-Sektion
 
-### 2026-02-13 ☐ Admin-Features auf Mobile
-- [ ] Entscheiden: Admin-Backend auch auf Mobile verfügbar?
-- [ ] Oder ist Mobile rein für Students gedacht?
-- [ ] **Rückfrage 11 beantworten** (siehe unten)
+### 2026-02-13 ✅ Admin-Features auf Mobile
+- [x] **ENTSCHIEDEN:** Option E - Minimal Admin (nur User-Unlock)
+- [x] **Rückfrage 11 beantwortet** → siehe ERLEDIGT-Sektion
+- [ ] **TODO:** User-Unlock-Funktion implementieren (siehe unten)
 
 ---
 
@@ -228,9 +226,83 @@
   - Custom On-Screen-Keyboard (Buttons 0-9) entfernt
 - [x] **Real-World-Pattern:** N26, Revolut, Google Authenticator, Duolingo
 
+### 2026-02-13 ✔ Rückfrage 10 beantwortet: Offline-Modus & Data-Sync Strategy
+- [x] **Entscheidung:** Option D - Hybrid (Phase 1: Online-Only, Phase 2: Offline bei Bedarf)
+- [x] **Begründung:**
+  - **Kleine Nutzerbasis:** Nur 10-20 Personen
+  - **Gute Infrastruktur:** Internetverbindung vor Ort stabil
+  - **MVP-First:** Schnellster Launch ohne Offline-Komplexität
+  - **Feedback-Driven:** Erst User-Feedback sammeln, dann entscheiden ob Offline nötig
+  - **Später erweiterbar:** Offline-Modus kann in Phase 2 hinzugefügt werden (2-3 Tage Aufwand)
+- [x] **Phase 1 (JETZT):**
+  - Online-Only Betrieb
+  - Keine Cache-Strategie
+  - Keine Sync-Queue
+  - Einfaches Error-Handling bei Verbindungsabbruch
+- [x] **Phase 2 (bei Bedarf nach Feedback):**
+  - Basic Offline (Read-Only Cache für Vokabeln)
+  - Service Worker + Cache API
+  - Automatischer Reconnect-Handling
+- [x] **Feedback-Mechanismus:** User-Feedback-Popup nach Release (siehe TODO)
+
+### 2026-02-13 ✔ Rückfrage 11 beantwortet: Admin-Features auf Mobile
+- [x] **Entscheidung:** Option E (Custom) - Minimal Admin mit nur User-Unlock-Funktion
+- [x] **Begründung:**
+  - **Real-World Use-Case:** Schüler vor Ort fragt Lehrer "Mein Account ist gesperrt"
+  - **Schnelle Hilfe:** Lehrer kann sofort vom Handy entsperren (ohne zu Desktop zu gehen)
+  - **Minimaler Aufwand:** Nur eine Admin-Funktion statt komplettes Admin-Panel
+  - **Desktop-First:** Alle anderen Admin-Tasks (Content-Management, Analytics, User-Management) bleiben Desktop-Only
+- [x] **Mobile Admin-Features:**
+  - ✅ User-Unlock-Funktion (Account nach 5 fehlgeschlagenen Login-Versuchen entsperren)
+  - ❌ Kein User-Management (Create/Delete/Edit)
+  - ❌ Kein Content-Management (Vokabeln/Phrasen hochladen)
+  - ❌ Keine Analytics/Reports
+  - ❌ Keine Settings/Permissions
+- [x] **Implementierung:**
+  - Admin kann sich auf Mobile einloggen (kein Redirect zu Desktop)
+  - Admin sieht auf `/m` (Mobile-Dashboard) ein zusätzliches Icon "🔓 Admin"
+  - Tap auf Icon → Liste aller User mit Status (🔒 Locked / ✅ Active)
+  - "Unlock"-Button neben gesperrten Usern
+  - RPC-Call zu `unlock_user(user_id)` → setzt `locked_until` auf NULL
+  - Simple Touch-optimierte Liste (kein komplexes Admin-UI)
+- [x] **Aufwand:** 1-2 Stunden (einfache Liste + RPC-Call)
+
 ---
 
 ## 📋 GEPLANTE TO-DOs (noch nicht priorisiert)
+
+### 🔥 PRE-RELEASE (vor erstem Launch)
+- [ ] **User-Unlock-Funktion für Admin auf Mobile implementieren** 🔓
+  - Mobile-Dashboard: Admin sieht zusätzliches Icon "🔓 Admin" (nur wenn role=teacher/admin)
+  - Route `/m/admin/unlock` erstellen
+  - Liste aller User fetchen (Supabase: `select id, name, email, locked_until from users order by name`)
+  - Status-Anzeige: 🔒 Locked (wenn `locked_until > NOW()`) / ✅ Active
+  - "Unlock"-Button nur bei gesperrten Usern anzeigen
+  - RPC-Call: `supabase.rpc('unlock_user', { p_user_id: userId })`
+  - RPC-Funktion in DB erstellen (falls noch nicht vorhanden):
+    ```sql
+    CREATE OR REPLACE FUNCTION unlock_user(p_user_id UUID)
+    RETURNS VOID AS $$
+    BEGIN
+      UPDATE users SET locked_until = NULL, failed_attempts = 0 WHERE id = p_user_id;
+    END;
+    $$ LANGUAGE plpgsql SECURITY DEFINER;
+    ```
+  - Touch-optimierte Liste (44x44px Buttons)
+  - Success-Toast: "User [Name] wurde entsperrt"
+  - **Aufwand:** 1-2 Stunden
+
+### 🔥 POST-RELEASE (nach erstem Launch)
+- [ ] **User-Feedback-Popup implementieren** ⚠️ WICHTIG
+  - Modal-Popup nach 3-5 Tagen Nutzung
+  - Fragen:
+    - "Würdest du die App auch offline nutzen wollen?" (Ja/Nein)
+    - "Welche Features fehlen dir?" (Freitext)
+    - "Wie zufrieden bist du mit der App?" (1-5 Sterne)
+  - Feedback direkt an Supabase-Tabelle `mobile_app_feedback` senden
+  - Einmalige Anzeige pro User (Flag in localStorage)
+  - Popup kann übersprungen werden ("Später erinnern" Button)
+  - **Zweck:** Entscheiden ob Offline-Modus (Phase 2) entwickelt werden soll
 
 ### Architektur & Setup
 - [ ] Shared Module Strategy: Welche Module werden direkt importiert? (AuthContext, LanguageContext, useTranslation, etc.)
@@ -270,20 +342,22 @@
 
 ---
 
-## ❓ OFFENE FRAGEN (werden einzeln gestellt)
+## ❓ OFFENE FRAGEN
+
+**Status: ✅ ALLE 11 RÜCKFRAGEN BEANTWORTET (2026-02-13)**
 
 **Kritische Architektur-Entscheidungen:**
-1. Routing-Strategie (Subdomain vs. Route vs. Device-Detection)
-2. Monorepo vs. Separate Repository
-3. Framework-Wahl (Next.js vs. leichteres Framework)
-4. Initiale 2-3 Module-Auswahl
-5. Biometric Auth (Face ID / Touch ID)
-6. Navigation Pattern (Bottom Nav vs. Hamburger)
-7. Design-Konsistenz (Glasmorphism beibehalten?)
-8. Language-Switcher (Dropdown vs. Swipe)
-9. On-Screen-Keyboard (Custom vs. Native)
-10. Offline-Modus Scope
-11. Admin-Features auf Mobile?
+1. ✅ Routing-Strategie → Route-basiert `/m/*` mit Device-Detection
+2. ✅ Monorepo vs. Separate Repository → Single Project (Next.js 16)
+3. ✅ Framework-Wahl → Next.js 16 beibehalten
+4. ✅ Initiale 2-3 Module-Auswahl → 4 Kernmodule (Due Cards, Review, Train Weak, Daily Phrases)
+5. ✅ Biometric Auth → Phase 2 (optional später)
+6. ✅ Navigation Pattern → Hybrid (Dashboard + Bottom Nav)
+7. ✅ Design-Konsistenz → Glasmorphism beibehalten
+8. ✅ Language-Switcher → Auto-Detect + Manual Override (Settings)
+9. ✅ On-Screen-Keyboard → Native Mobile-Keyboard (type="tel")
+10. ✅ Offline-Modus Scope → Phase 1: Online-Only, Phase 2: bei Bedarf
+11. ✅ Admin-Features auf Mobile → Minimal Admin (nur User-Unlock)
 
 ---
 
@@ -334,4 +408,20 @@
 
 ---
 
-**Nächster Schritt:** Beantwortung der 11 kritischen Rückfragen (werden jetzt einzeln gestellt)
+## 🎉 MEILENSTEIN: Alle 11 Rückfragen beantwortet!
+
+**Status:** Planning-Phase abgeschlossen (2026-02-13)
+
+**Nächste Schritte:**
+1. ✅ Alle Architektur-Entscheidungen getroffen
+2. ✅ Mobile-Grundstruktur implementiert (Routes, Layout, Bottom Nav, Stats, Settings)
+3. ✅ Native Mobile-Keyboard implementiert
+4. ☐ **JETZT:** Implementierung der 4 Kernmodule
+   - Due Cards today
+   - Review Vocabulary
+   - Train weak words
+   - Daily Phrases
+5. ☐ User-Unlock-Funktion für Admin (1-2 Stunden)
+6. ☐ Testing & Bug-Fixes
+7. ☐ Production Deployment
+8. ☐ User-Feedback sammeln (Post-Release Popup)
