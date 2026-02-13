@@ -45,7 +45,10 @@ export default function MobileDashboardPage() {
   // Auth Guard: Redirect wenn nicht eingeloggt
   useEffect(() => {
     if (!authLoading) {
-      if (!user) {
+      // Check localStorage als Fallback (für Race-Condition)
+      const storedUser = localStorage.getItem('greeklingua_user');
+
+      if (!user && !storedUser) {
         router.push('/login-pin');
         return;
       }
