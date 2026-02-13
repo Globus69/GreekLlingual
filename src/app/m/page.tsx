@@ -176,6 +176,27 @@ export default function MobileDashboardPage() {
           </p>
         </div>
 
+        {/* Admin Panel Link (nur für Teacher/Admin) */}
+        {(user?.role === 'teacher' || user?.role === 'admin') && (
+          <div className="mb-4">
+            <button
+              onClick={() => router.push('/m/admin/unlock')}
+              className="w-full min-h-[56px] px-4 py-3 rounded-xl border-2 border-yellow-200 bg-yellow-50 flex items-center gap-4 transition-all duration-200 active:scale-95 hover:shadow-md"
+            >
+              <div className="text-3xl flex-shrink-0">🔓</div>
+              <div className="flex-1 text-left">
+                <div className="font-bold text-base text-yellow-700">
+                  Admin Panel
+                </div>
+                <div className="text-xs text-yellow-600">
+                  User entsperren
+                </div>
+              </div>
+              <div className="text-xl text-yellow-600 opacity-50">→</div>
+            </button>
+          </div>
+        )}
+
         {/* MODULE a) Due Cards today */}
         <ModuleTile
           icon="📅"
