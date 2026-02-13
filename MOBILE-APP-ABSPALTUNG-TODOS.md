@@ -74,7 +74,7 @@
 - [x] Settings-Seite erstellt (src/app/m/settings/page.tsx) ✅
 - [x] **Rückfrage 6 beantwortet** → siehe ERLEDIGT-Sektion
 
-### 2026-02-13 ✅ UX & Design Entscheidungen
+### 2026-02-13 ✅ UX & Design Entscheidungen (ABGESCHLOSSEN)
 - [x] **Rückfrage 7:** Glasmorphism-Design → **Option A (beibehalten)** ✅
   - Konsistenz mit Desktop
   - Modernes Aussehen
@@ -86,7 +86,12 @@
   - **Implementiert:** `syncLocaleFromUser()` in login-pin/page.tsx ✅
   - **Admin-Control:** Lehrer setzt Sprache pro Schüler im Backend
   - **Zero UI-Clutter:** Kein Language-Button im Dashboard nötig
-- [ ] **Rückfrage 9:** On-Screen-Keyboard Strategy
+- [x] **Rückfrage 9:** On-Screen-Keyboard Strategy → **Option B (Native Keyboard)** ✅
+  - **Native Mobile-Keyboard** (type="tel", inputMode="numeric")
+  - **Begründung:** Standard-UX, schnellste Eingabe, mehr Screen-Platz
+  - **Implementierung:** Trivial (input-Attribute ändern)
+  - **Accessibility:** System-Keyboard hat Screen-Reader Support
+  - **Real-World-Pattern:** Banking-Apps, Authenticator-Apps nutzen das auch
 
 ### 2026-02-13 ☐ Data-Sync Strategie
 - [ ] Offline-Modus: Welche Daten müssen gecacht werden?
@@ -202,6 +207,20 @@
   1. Schüler loggt ein → Sprache automatisch gesetzt
   2. Falls falsch → Settings → Language → manuell ändern
   3. Nächster Login → neue Sprache automatisch geladen
+
+### 2026-02-13 ✔ Rückfrage 9 beantwortet: On-Screen-Keyboard Strategy
+- [x] **Entscheidung:** Option B - Native Mobile-Keyboard (type="tel")
+- [x] **Begründung:**
+  - **Standard Mobile-UX:** Banking-Apps, Authenticator-Apps nutzen das auch
+  - **Schnellste Eingabe:** Haptic Feedback, Auto-Suggest (iOS)
+  - **Mehr Screen-Platz:** Keyboard überlagert nur wenn aktiv (nicht permanent)
+  - **Accessibility:** System-Keyboard hat Screen-Reader, Voice-Input Support
+  - **Einfachste Implementierung:** 5 Zeilen Code (input-Attribute)
+- [x] **Implementierung (später):**
+  - `<input type="tel" inputMode="numeric" pattern="[0-9]{4}" />`
+  - Custom On-Screen-Keyboard auf Mobile deaktivieren
+  - Focus-Management für Auto-Advance zwischen Digits
+- [x] **Real-World-Pattern:** N26, Revolut, Google Authenticator, Duolingo
 
 ---
 
