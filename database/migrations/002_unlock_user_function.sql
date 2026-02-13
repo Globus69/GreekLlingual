@@ -4,6 +4,10 @@
 -- Verwendung: Mobile Admin-Panel (Teacher entsperrt gesperrte Schüler)
 -- =====================================================
 
+-- Drop alte Version falls vorhanden (wegen Return-Type-Änderung)
+DROP FUNCTION IF EXISTS unlock_user(UUID);
+
+-- Neue Version mit erweiterten Return-Werten
 CREATE OR REPLACE FUNCTION unlock_user(p_user_id UUID)
 RETURNS TABLE(
     success BOOLEAN,
