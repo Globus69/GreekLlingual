@@ -1,23 +1,49 @@
 /**
- * Next.js Edge Middleware - Rate Limiting
+ * Next.js Edge Middleware - Rate Limiting + Device-Detection
  *
- * Schützt Login-Routen vor Brute-Force-Angriffen
- * Wird auf Edge Runtime ausgeführt (schnelle Antwortzeiten)
+ * Funktionen:
+ * 1. Schützt Login-Routen vor Brute-Force-Angriffen
+ * 2. Device-Detection: Redirect nach Login basierend auf Gerät
+ * 3. Wird auf Edge Runtime ausgeführt (schnelle Antwortzeiten)
  */
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { rateLimitLogin, rateLimitAdmin, getClientIP } from '@/lib/rateLimit';
+import { isMobileDevice } from '@/lib/device-utils';
 
 /**
- * Middleware für Rate Limiting auf Login-Routen
+ * Middleware für Rate Limiting + Device-Detection
  *
  * Geschützte Routen:
  * - /login-pin (Schüler-Login): 10 Versuche/Minute
  * - /login (Admin-Login): 3 Versuche/5 Minuten
+ *
+ * Device-Detection:
+ * - /redirect-after-login → /m (Mobile) oder /dashboard (Desktop)
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // ========================================
+  // 1. DEVICE-DETECTION: Redirect nach Login
+  // ========================================
+  if (pathname === '/redirect-after-login') {
+    const userAgent = request.headers.get('user-agent') || '';
+    const isMobile = isMobileDevice(userAgent);
+
+    if (isMobile) {
+      // Mobile → /m Dashboard
+      return NextResponse.redirect(new URL('/m', request.url));
+    } else {
+      // Desktop → /dashboard
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+  }
+
+  // ========================================
+  // 2. RATE LIMITING: Login-Routen
+  // ========================================
 
   // Nur Login-Routen schützen
   if (pathname === '/login-pin' || pathname === '/login') {
@@ -71,12 +97,14 @@ export async function middleware(request: NextRequest) {
  * Middleware-Konfiguration
  *
  * matcher: Definiert auf welchen Routen die Middleware läuft
- * - Schützt nur /login und /login-pin
+ * - Schützt nur /login und /login-pin (Rate Limiting)
+ * - /redirect-after-login (Device-Detection)
  * - Ignoriert statische Assets (_next/*, /api/*, etc.)
  */
 export const config = {
   matcher: [
     '/login',
     '/login-pin',
+    '/redirect-after-login',
   ],
 };
