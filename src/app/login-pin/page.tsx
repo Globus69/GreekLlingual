@@ -263,11 +263,12 @@ export default function PinLoginPage() {
                         name: 'Fehler',
                         level: errorLevel,
                         difficulty: '',
+                        success: false
                     });
                     setPinDigits(['', '', '', '']);
                     setShake(true);
                     setTimeout(() => {
-                        setWelcomePopup({ show: false, name: '', level: '', difficulty: '' });
+                        setWelcomePopup({ show: false, name: '', level: '', difficulty: '', success: false });
                         setShake(false);
                     }, 2000);
 
@@ -324,6 +325,7 @@ export default function PinLoginPage() {
                     name: userData.user_name,
                     level: userData.user_level,
                     difficulty: userData.user_difficulty,
+                    success: true
                 });
 
                 // Nach 2 Sekunden: direkt zum Dashboard (ohne Reload)
@@ -338,11 +340,12 @@ export default function PinLoginPage() {
                     name: 'Fehler',
                     level: 'PIN nicht gefunden',
                     difficulty: '',
+                    success: false
                 });
                 setPinDigits(['', '', '', '']);
                 setShake(true);
                 setTimeout(() => {
-                    setWelcomePopup({ show: false, name: '', level: '', difficulty: '' });
+                    setWelcomePopup({ show: false, name: '', level: '', difficulty: '', success: false });
                     setShake(false);
                 }, 2000);
             }
@@ -354,11 +357,12 @@ export default function PinLoginPage() {
                 name: 'Fehler',
                 level: 'PIN nicht gefunden',
                 difficulty: '',
+                success: false
             });
             setPinDigits(['', '', '', '']);
             setShake(true);
             setTimeout(() => {
-                setWelcomePopup({ show: false, name: '', level: '', difficulty: '' });
+                setWelcomePopup({ show: false, name: '', level: '', difficulty: '', success: false });
                 setShake(false);
             }, 2000);
         } finally {
