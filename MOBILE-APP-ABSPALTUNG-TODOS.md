@@ -74,11 +74,19 @@
 - [x] Settings-Seite erstellt (src/app/m/settings/page.tsx) ✅
 - [x] **Rückfrage 6 beantwortet** → siehe ERLEDIGT-Sektion
 
-### 2026-02-13 ☐ UX & Design Entscheidungen
-- [ ] Glasmorphism-Design beibehalten oder vereinfachen?
-- [ ] Language-Switcher Pattern (Dropdown vs. Swipe)
-- [ ] On-Screen-Keyboard Strategy
-- [ ] **Rückfragen 7, 8, 9 beantworten** (siehe unten)
+### 2026-02-13 ✅ UX & Design Entscheidungen
+- [x] **Rückfrage 7:** Glasmorphism-Design → **Option A (beibehalten)** ✅
+  - Konsistenz mit Desktop
+  - Modernes Aussehen
+  - Migration zu Option C (Hybrid) bei Bedarf trivial (nur CSS)
+- [x] **Rückfrage 8:** Language-Switcher Pattern → **Option E (Auto-Detect + Manual Override)** ✅
+  - **Auto-Detection beim Login:** `users.preferred_locale` wird aus DB geladen
+  - **Fallback:** Englisch (wenn NULL)
+  - **Manual Override:** Language-Switcher in Settings bleibt (User kann überschreiben)
+  - **Implementiert:** `syncLocaleFromUser()` in login-pin/page.tsx ✅
+  - **Admin-Control:** Lehrer setzt Sprache pro Schüler im Backend
+  - **Zero UI-Clutter:** Kein Language-Button im Dashboard nötig
+- [ ] **Rückfrage 9:** On-Screen-Keyboard Strategy
 
 ### 2026-02-13 ☐ Data-Sync Strategie
 - [ ] Offline-Modus: Welche Daten müssen gecacht werden?
@@ -164,10 +172,36 @@
   - ✅ Settings Page (src/app/m/settings/page.tsx) - Vollständig
   - ✅ Active Tab Indication (Blue highlight + indicator bar)
   - ✅ Touch-optimized (44x44px minimum touch targets)
-  - Fallback zu PIN bleibt verfügbar
-  - Supabase Schema: `biometric_enabled`, `webauthn_credential_id`, `webauthn_public_key`
-- [x] **Implementierung:** Keine Änderungen nötig für Phase 1 (Desktop-Logik funktioniert 1:1)
-- [x] **Session-Persistenz:** localStorage (überdauert Tab-Closes auf Mobile)
+
+### 2026-02-13 ✔ Rückfrage 7 beantwortet: Glasmorphism-Design
+- [x] **Entscheidung:** Option A - Glasmorphism beibehalten (wie Desktop)
+- [x] **Begründung:**
+  - Konsistenz mit Desktop-Version
+  - Modernes Aussehen (iOS/Android High-End Apps nutzen das auch)
+  - Performance-Test auf älteren Geräten geplant
+  - Migration zu Option C (Hybrid) bei Bedarf trivial (nur CSS-Änderung, 5-10 Min.)
+- [x] **Aktueller Stand:** Bereits implementiert in Stats, Settings, Dashboard
+- [x] **Fallback-Plan:** Bei Performance-Problemen → `backdrop-blur-md` entfernen
+
+### 2026-02-13 ✔ Rückfrage 8 beantwortet: Language-Switcher Pattern
+- [x] **Entscheidung:** Option E - Auto-Detect + Manual Override (User-Idee ⭐)
+- [x] **Begründung:**
+  - **Beste Lösung:** Lehrer setzt Sprache pro Schüler im Admin-Backend
+  - **Zero UI-Clutter:** Kein Language-Button im Dashboard nötig
+  - **Auto-Detection:** `users.preferred_locale` wird beim Login aus DB geladen
+  - **Fallback:** Englisch (wenn `preferred_locale` NULL)
+  - **Manual Override:** Language-Switcher in Settings bleibt (falls User ändern will)
+  - **Standard-Pattern:** Netflix, Spotify, etc. machen das auch so
+- [x] **Implementiert:**
+  - ✅ RPC `verify_user_4digit_pin` gibt `user_preferred_locale` zurück
+  - ✅ `syncLocaleFromUser()` in login-pin/page.tsx aufgerufen ✅
+  - ✅ LanguageContext synchronisiert UI automatisch ✅
+  - ✅ Language-Switcher in Settings bleibt (4 Flag-Buttons)
+  - ✅ Änderungen werden in DB persistiert (RPC `update_user_locale`)
+- [x] **User-Flow:**
+  1. Schüler loggt ein → Sprache automatisch gesetzt
+  2. Falls falsch → Settings → Language → manuell ändern
+  3. Nächster Login → neue Sprache automatisch geladen
 
 ---
 

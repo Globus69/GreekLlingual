@@ -22,7 +22,7 @@ export default function PinLoginPage() {
     });
     const { login, user } = useAuth();
     const router = useRouter();
-    const { locale } = useLanguage();
+    const { locale, syncLocaleFromUser } = useLanguage();
     const { t } = useTranslation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -315,6 +315,9 @@ export default function PinLoginPage() {
                     preferred_locale: userData.user_preferred_locale,
                 }));
                 localStorage.setItem('greeklingua_session_timestamp', Date.now().toString());
+
+                // Sync UI language from user profile (auto-detect locale)
+                syncLocaleFromUser(userData.user_preferred_locale);
 
                 // Reset attempt counter on success
                 setAttemptCount(0);
