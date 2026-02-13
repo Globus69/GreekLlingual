@@ -13,7 +13,7 @@ import { rateLimitLogin, rateLimitAdmin, getClientIP } from '@/lib/rateLimit';
 import { isMobileDevice } from '@/lib/device-utils';
 
 /**
- * Middleware für Rate Limiting + Device-Detection
+ * Proxy für Rate Limiting + Device-Detection (Next.js 16+)
  *
  * Geschützte Routen:
  * - /login-pin (Schüler-Login): 10 Versuche/Minute
@@ -22,7 +22,7 @@ import { isMobileDevice } from '@/lib/device-utils';
  * Device-Detection:
  * - /redirect-after-login → /m (Mobile) oder /dashboard (Desktop)
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ========================================
@@ -94,9 +94,9 @@ export async function middleware(request: NextRequest) {
 }
 
 /**
- * Middleware-Konfiguration
+ * Proxy-Konfiguration (Next.js 16+)
  *
- * matcher: Definiert auf welchen Routen die Middleware läuft
+ * matcher: Definiert auf welchen Routen der Proxy läuft
  * - Schützt nur /login und /login-pin (Rate Limiting)
  * - /redirect-after-login (Device-Detection)
  * - Ignoriert statische Assets (_next/*, /api/*, etc.)
