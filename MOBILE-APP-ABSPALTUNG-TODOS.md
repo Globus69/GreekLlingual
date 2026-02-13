@@ -86,10 +86,11 @@
   - **Implementiert:** `syncLocaleFromUser()` in login-pin/page.tsx ✅
   - **Admin-Control:** Lehrer setzt Sprache pro Schüler im Backend
   - **Zero UI-Clutter:** Kein Language-Button im Dashboard nötig
-- [x] **Rückfrage 9:** On-Screen-Keyboard Strategy → **Option B (Native Keyboard)** ✅
+- [x] **Rückfrage 9:** On-Screen-Keyboard Strategy → **Option B (Native Keyboard) ✅ IMPLEMENTIERT**
   - **Native Mobile-Keyboard** (type="tel", inputMode="numeric")
   - **Begründung:** Standard-UX, schnellste Eingabe, mehr Screen-Platz
-  - **Implementierung:** Trivial (input-Attribute ändern)
+  - **Implementierung:** ✅ Vollständig implementiert in login-pin/page.tsx
+  - **Features:** Auto-Advance, Backspace-Navigation, Enter-Submit, Auto-Focus
   - **Accessibility:** System-Keyboard hat Screen-Reader Support
   - **Real-World-Pattern:** Banking-Apps, Authenticator-Apps nutzen das auch
 
@@ -208,18 +209,23 @@
   2. Falls falsch → Settings → Language → manuell ändern
   3. Nächster Login → neue Sprache automatisch geladen
 
-### 2026-02-13 ✔ Rückfrage 9 beantwortet: On-Screen-Keyboard Strategy
+### 2026-02-13 ✔ Rückfrage 9 beantwortet + implementiert: On-Screen-Keyboard Strategy
 - [x] **Entscheidung:** Option B - Native Mobile-Keyboard (type="tel")
 - [x] **Begründung:**
   - **Standard Mobile-UX:** Banking-Apps, Authenticator-Apps nutzen das auch
   - **Schnellste Eingabe:** Haptic Feedback, Auto-Suggest (iOS)
   - **Mehr Screen-Platz:** Keyboard überlagert nur wenn aktiv (nicht permanent)
   - **Accessibility:** System-Keyboard hat Screen-Reader, Voice-Input Support
-  - **Einfachste Implementierung:** 5 Zeilen Code (input-Attribute)
-- [x] **Implementierung (später):**
-  - `<input type="tel" inputMode="numeric" pattern="[0-9]{4}" />`
-  - Custom On-Screen-Keyboard auf Mobile deaktivieren
-  - Focus-Management für Auto-Advance zwischen Digits
+  - **Einfachste Implementierung:** Input-Attribute + Auto-Advance Logic
+- [x] **Implementiert in login-pin/page.tsx:** ✅
+  - 4 separate `<input type="tel" inputMode="numeric" maxLength={1} />` Felder
+  - Auto-Advance zur nächsten Eingabe nach Ziffer-Eingabe
+  - Backspace navigiert zurück zur vorherigen Eingabe
+  - Enter-Key submittet beim letzten Digit
+  - Auto-Focus auf erstes Feld beim Mount
+  - Visual Feedback (Blue border bei gefüllten Feldern)
+  - Clear-Button zum Zurücksetzen aller Felder
+  - Custom On-Screen-Keyboard (Buttons 0-9) entfernt
 - [x] **Real-World-Pattern:** N26, Revolut, Google Authenticator, Duolingo
 
 ---
