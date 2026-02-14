@@ -27,10 +27,10 @@ export default function PinLoginPage() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    // If already logged in, redirect with device detection
+    // If already logged in, redirect to dashboard
     useEffect(() => {
         if (user) {
-            router.push('/redirect-after-login');
+            router.push('/dashboard');
         }
     }, [user, router]);
 
@@ -319,9 +319,9 @@ export default function PinLoginPage() {
                     success: true
                 });
 
-                // Nach 1.5 Sekunden: Device-Detection Redirect (Mobile → /m, Desktop → /dashboard)
+                // Nach 1.5 Sekunden: Redirect zum Dashboard
                 setTimeout(() => {
-                    router.push('/redirect-after-login');
+                    router.push('/dashboard');
                 }, 1500);
             } else {
                 // PIN nicht gefunden - modernes Popup
