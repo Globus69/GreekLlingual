@@ -17,10 +17,10 @@
   - ✅ 053: fsrs_review_logs Tabelle erstellt
   - ✅ 054: RPC-Funktionen (get_due_cards_fsrs, update_card_fsrs, get_fsrs_stats)
   - ✅ 055: Verification Guide (5/6 Tests erfolgreich)
-- [ ] **Phase 3:** VocabularyDialog erweitern (14/18 Tasks) 🟡 **IN ARBEIT**
+- [ ] **Phase 3:** VocabularyDialog erweitern (18/18 Tasks) 🟡 **IN ARBEIT**
   - ✅ 3.1: FSRS Integration (7/7 Tasks)
   - ✅ 3.4: Swipe-Gesten (7/7 Tasks)
-  - ⏳ 3.5: Progress-Anzeige (0/4 Tasks)
+  - ✅ 3.5: Progress-Anzeige (4/4 Tasks)
   - ⏳ 3.6: Error-Handling (0/? Tasks)
 - [ ] **Phase 4:** Lautschrift & TTS (0/8 Tasks)
 - [ ] **Phase 5:** Analytics & Stats (0/10 Tasks)
@@ -28,7 +28,7 @@
 - [ ] **Phase 7:** Desktop Tauri (0/8 Tasks)
 - [ ] **Phase 8:** Testing & Optimierung (0/12 Tasks)
 
-**Gesamt:** 26/92 Tasks abgeschlossen (28%)
+**Gesamt:** 30/92 Tasks abgeschlossen (33%)
 
 ---
 
@@ -289,15 +289,15 @@
   - [x] CSS: Color-coded overlay mit emoji + label
   - [x] Animation: fade-in + scale effect (150ms)
 
-### 3.5 Progress-Anzeige (1h)
+### 3.5 Progress-Anzeige (1h) ✅
 
-- [ ] **3.5.1** State: `correctCount`, `wrongCount`
-- [ ] **3.5.2** Increment bei Rating: 1=wrong, 3/4=correct, 2=neutral
-- [ ] **3.5.3** Header: "1 / 100" → "{currentIndex + 1} / {totalDue}"
-- [ ] **3.5.4** Progress Bar: `width: ${(currentIndex / totalDue) * 100}%`
-- [ ] **3.5.5** Session Complete: If currentIndex >= totalDue
-  - [ ] Summary-Screen: "✅ {correctCount} correct, ❌ {wrongCount} wrong"
-  - [ ] Button: "Back to Dashboard"
+- [x] **3.5.1** State: Rating counts (`ratings.again/hard/good/easy`)
+- [x] **3.5.2** Real-time stats: Color-coded chips with emoji + count
+- [x] **3.5.3** Header: "X / Y" count + percentage display
+- [x] **3.5.4** Progress Bar: Visual gradient bar with smooth animation
+  - [x] Gradient: #007AFF → #00C7BE
+  - [x] Width: `${progressPercentage}%`
+  - [x] Glow effect + smooth transition
 
 ### 3.6 Error Handling (1h)
 

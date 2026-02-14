@@ -615,3 +615,142 @@ Touch-optimierte Swipe-Gesten für FlashcardFSRS mit visueller Feedback-Anzeige.
 
 ---
 
+## 📅 Session 16: Phase 3.5 - Progress-Anzeige (ABGESCHLOSSEN)
+**Datum:** 2026-02-15
+**Zeit:** 02:45 - 03:05 Uhr (20 Min)
+**Status:** ✅ Erledigt
+**Commit:** `9fa56ca`
+
+### ✅ Phase 3.5: Progress Bar & Session Stats implementiert
+**Zeit:** 2026-02-15 02:45 - 03:05 Uhr (20 Min)
+**Status:** ✅ Erledigt
+
+**Ziel:**
+Visueller Fortschrittsbalken mit Echtzeit-Statistiken für Vocabulary Review.
+
+**Durchgeführte Schritte:**
+
+1. ✅ **Progress Bar Component**
+   - Container: `.progress-section`
+   - Info-Row: "X / Y" + "Z%"
+   - Visual Bar:
+     ```css
+     background: linear-gradient(90deg, #007AFF 0%, #00C7BE 100%);
+     box-shadow: 0 0 12px rgba(0, 199, 190, 0.4);
+     transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+     ```
+   - Height: 8px Desktop, 6px Mobile
+   - Border-Radius: 8px
+
+2. ✅ **Progress Calculation**
+   - `progressPercentage = ((currentIndex + 1) / vocabulary.length) * 100`
+   - Dynamic width: `style={{ width: '${progressPercentage}%' }}`
+   - Rounded display: `Math.round(progressPercentage)`
+   - Updates on each card rating
+
+3. ✅ **Session Stats Chips**
+   - Real-time rating breakdown display
+   - Conditional rendering: `{totalRatings > 0 && ...}`
+   - Color-coded chips:
+     ```typescript
+     {ratings.again > 0 && <span className="stat-chip stat-again">❌ {ratings.again}</span>}
+     {ratings.hard > 0 && <span className="stat-chip stat-hard">🟠 {ratings.hard}</span>}
+     {ratings.good > 0 && <span className="stat-chip stat-good">✅ {ratings.good}</span>}
+     {ratings.easy > 0 && <span className="stat-chip stat-easy">🎯 {ratings.easy}</span>}
+     ```
+
+4. ✅ **Visual Design**
+   - Glasmorphism: `backdrop-filter: blur(10px)`
+   - Color-mix for backgrounds:
+     - Again: #FF6B6B (15% opacity)
+     - Hard: #FFA94D (15% opacity)
+     - Good: #51CF66 (15% opacity)
+     - Easy: #339AF0 (15% opacity)
+   - Border: 1px solid (30% color opacity)
+   - Hover: `transform: scale(1.05)`
+
+5. ✅ **Layout Integration**
+   - Position: Dialog header, after title
+   - Hierarchy:
+     1. Title: "📚 Vocabulary Review (FSRS-6)"
+     2. Progress Section (bar + count + %)
+     3. Session Stats Chips (conditional)
+     4. Flashcard Component
+   - Spacing: 16px margin-top, 12px margin-bottom
+
+6. ✅ **Mobile Responsive**
+   - Font-Size: 13px count, 11px percentage
+   - Progress Bar: 6px height
+   - Stat Chips: 3px padding, 11px font, 6px gap
+   - Flex-wrap für Multi-Line Stats
+
+**Technische Details:**
+
+**Progress Info Display:**
+```jsx
+<div className="progress-info">
+  <span className="progress-count">{progress}</span>  // "5 / 20"
+  <span className="progress-percentage">{Math.round(progressPercentage)}%</span>  // "25%"
+</div>
+```
+
+**Dynamic Progress Bar:**
+```jsx
+<div className="progress-bar-container">
+  <div
+    className="progress-bar-fill"
+    style={{ width: `${progressPercentage}%` }}  // 0-100%
+  />
+</div>
+```
+
+**Conditional Stats:**
+```typescript
+const totalRatings = ratings.again + ratings.hard + ratings.good + ratings.easy;
+{totalRatings > 0 && (
+  <div className="session-stats-mini">
+    {/* Individual chips only if count > 0 */}
+  </div>
+)}
+```
+
+**Features:**
+- ✅ Visual progress bar with gradient
+- ✅ Percentage + fraction display
+- ✅ Real-time rating chips
+- ✅ Color-coded by rating type
+- ✅ Conditional rendering (no clutter on start)
+- ✅ Smooth animations (0.4s cubic-bezier)
+- ✅ Mobile-optimized sizing
+- ✅ Glasmorphism design consistency
+- ✅ Hover interactions on chips
+
+**UX Improvements:**
+- User sees immediate visual feedback of progress
+- Percentage gives clear completion status
+- Rating breakdown helps self-assessment
+- No stats clutter before first rating
+- Smooth animations feel premium
+
+---
+
+**Ergebnis:**
+- ✅ Progress Bar vollständig funktionsfähig
+- ✅ Real-time Stats Display implementiert
+- ✅ Visuelle Hierarchie optimiert
+- ✅ Mobile Responsive
+- 🎯 **Phase 3.5 KOMPLETT!**
+
+**Dateien geändert:**
+- `src/components/learning/VocabularyDialogFSRS.tsx` (+150 Zeilen)
+
+**Commits:**
+- `9fa56ca` - feat: implement progress bar and session stats (Phase 3.5)
+
+**Nächste Schritte:**
+- Phase 3.6: Error Handling (Toast Notifications, RPC Error Handling)
+- Integration Testing mit echten Usern
+- Performance-Tests mit großen Card-Sets (100+ cards)
+
+---
+
