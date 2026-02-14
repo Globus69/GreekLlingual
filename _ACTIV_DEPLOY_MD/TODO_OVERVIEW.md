@@ -78,7 +78,13 @@
 
 ---
 
-## 🔵 PENDING (Ready to Integrate)
+## 🟣 PENDING (Ready to Integrate)
+
+### Coordination & Content Tracking
+- [ ] Implement SRS logic integration for `DueCardsToday.md`
+- [ ] Populate `A1_CONTEND.md` with existing A1 vocabulary
+- [ ] Populate `A2_CONTEND.md` with existing A2 vocabulary
+- [ ] Integrate instructions from `LERNDIALOGE_ALLGEMEIN.md` into AI workflow
 
 ### Security Features (Ready, Not Activated)
 

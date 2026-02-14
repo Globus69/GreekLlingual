@@ -302,7 +302,7 @@ export default function PinLoginPage() {
                     performance_index: userData.user_performance_index,
                     preferred_locale: userData.user_preferred_locale,
                 }));
-                localStorage.setItem('greeklingua_session_timestamp', Date.now().toString());
+                localStorage.setItem('greeklingua_session_ts', Date.now().toString());
 
                 // Sync UI language from user profile (auto-detect locale)
                 syncLocaleFromUser(userData.user_preferred_locale);
@@ -310,7 +310,7 @@ export default function PinLoginPage() {
                 // Reset attempt counter on success
                 setAttemptCount(0);
 
-                // Welcome-Popup anzeigen (2 Sekunden) + direkter Login
+                // Welcome-Popup anzeigen (1.5 Sekunden) + direkter Login
                 setWelcomePopup({
                     show: true,
                     name: userData.user_name,
@@ -319,10 +319,10 @@ export default function PinLoginPage() {
                     success: true
                 });
 
-                // Nach 2 Sekunden: Device-Detection Redirect (Mobile → /m, Desktop → /dashboard)
+                // Nach 1.5 Sekunden: Device-Detection Redirect (Mobile → /m, Desktop → /dashboard)
                 setTimeout(() => {
                     router.push('/redirect-after-login');
-                }, 2000);
+                }, 1500);
             } else {
                 // PIN nicht gefunden - modernes Popup
                 setAttemptCount(prev => prev + 1); // Increment on failure
@@ -475,13 +475,13 @@ export default function PinLoginPage() {
                         zIndex: 5,
                         width: '420px',
                         maxWidth: '92vw',
-                        background: 'rgba(22, 22, 26, 0.75)',
+                        background: 'rgba(42, 42, 48, 0.85)', // Aufgehellt von rgba(22, 22, 26, 0.75)
                         backdropFilter: 'blur(60px) saturate(1.5)',
                         WebkitBackdropFilter: 'blur(60px) saturate(1.5)',
                         borderRadius: '32px',
                         padding: '48px 40px 40px',
-                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                        boxShadow: '0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03) inset',
+                        border: '1px solid rgba(255, 255, 255, 0.12)', // Aufgehellt von 0.08
+                        boxShadow: '0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06) inset', // Aufgehellt
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
@@ -510,7 +510,7 @@ export default function PinLoginPage() {
 
                     <p style={{
                         fontSize: '14px',
-                        color: '#6E6E73',
+                        color: '#A8A8AD', // Aufgehellt von #6E6E73
                         margin: '0 0 24px 0',
                         textAlign: 'center',
                         lineHeight: '1.5',
