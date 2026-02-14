@@ -8,6 +8,7 @@ import { useTranslation } from '@/lib/use-translation';
 import { usePerformanceEvaluation } from '@/lib/use-performance-evaluation';
 import { FSRSScheduler } from '@/lib/fsrs/fsrs-scheduler';
 import type { Card, Rating } from '@/lib/fsrs/fsrs-types';
+import { useToast, ToastContainer } from '@/components/ui/toast';
 import '@/styles/liquid-glass.css';
 
 // Extended LearningItem with FSRS fields
@@ -45,6 +46,7 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
     const { user } = useAuth();
     const { t, locale } = useTranslation();
     const { evaluate } = usePerformanceEvaluation();
+    const { toasts, showToast, removeToast, error, warning, success, info } = useToast();
 
     // FSRS Scheduler instance (memoized)
     const scheduler = useMemo(() => new FSRSScheduler(), []);
@@ -56,11 +58,36 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
     const [correct, setCorrect] = useState(0);
     const [total, setTotal] = useState(0);
     const [showSummary, setShowSummary] = useState(false);
-    const [showToast, setShowToast] = useState(false);
     const [flipped, setFlipped] = useState(false);
     const [perfMessage, setPerfMessage] = useState<string | null>(null);
+    const [isOnline, setIsOnline] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
 
     const STUDENT_ID = user?.id || '';
+
+    // Offline/Online detection
+    useEffect(() => {
+        const handleOnline = () => {
+            setIsOnline(true);
+            info('Connection restored');
+        };
+
+        const handleOffline = () => {
+            setIsOnline(false);
+            warning('You are offline. Changes may not be saved.');
+        };
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        // Check initial state
+        setIsOnline(navigator.onLine);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     // Load due cards on open
     useEffect(() => {
@@ -72,6 +99,7 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
             setRatings({ again: 0, hard: 0, good: 0, easy: 0 });
             setCorrect(0);
             setTotal(0);
+            setLoadError(null);
         }
     }, [isOpen, mode, STUDENT_ID]);
 
@@ -149,17 +177,28 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
      */
     const loadDueCards = async () => {
         setLoading(true);
+        setLoadError(null);
         console.log(`🔄 Loading FSRS cards (mode: ${mode}, user: ${STUDENT_ID}, level: ${user?.level})`);
 
+        // Check online status
+        if (!navigator.onLine) {
+            setLoadError('No internet connection');
+            error('Unable to load cards. Please check your internet connection.');
+            setLoading(false);
+            return;
+        }
+
         try {
-            const { data, error } = await supabase.rpc('get_due_cards_fsrs', {
+            const { data, error: rpcError } = await supabase.rpc('get_due_cards_fsrs', {
                 p_user_id: STUDENT_ID,
                 p_level: user?.level || 'A1',
                 p_limit: 100
             });
 
-            if (error) {
-                console.error('❌ FSRS RPC error:', error);
+            if (rpcError) {
+                console.error('❌ FSRS RPC error:', rpcError);
+                setLoadError(rpcError.message || 'Failed to load cards');
+                error('Failed to load cards. Please try again.');
                 setVocabulary([]);
                 setLoading(false);
                 return;
@@ -168,12 +207,17 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
             if (data && data.length > 0) {
                 console.log(`✅ Loaded ${data.length} due cards`);
                 setVocabulary(data as FSRSLearningItem[]);
+                setLoadError(null);
             } else {
                 console.log('⚠️ No due cards found');
                 setVocabulary([]);
+                setLoadError(null); // Not an error, just empty
             }
         } catch (err) {
             console.error('❌ Load error:', err);
+            const errMessage = err instanceof Error ? err.message : 'Unknown error';
+            setLoadError(errMessage);
+            error('An error occurred while loading cards. Please try again.');
             setVocabulary([]);
         } finally {
             setLoading(false);
@@ -227,30 +271,37 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
         else if (rating === 4) setRatings(prev => ({ ...prev, easy: prev.easy + 1 }));
 
         try {
-            // Call RPC to update card in database
-            const { data: rpcData, error: rpcError } = await supabase.rpc('update_card_fsrs', {
-                p_card_id: item.id,
-                p_user_id: STUDENT_ID,
-                p_rating: rating,
-                p_new_difficulty: updatedCard.difficulty,
-                p_new_stability: updatedCard.stability,
-                p_new_due: updatedCard.due.toISOString(),
-                p_new_reps: updatedCard.reps,
-                p_new_lapses: updatedCard.lapses,
-                p_new_state: updatedCard.state,
-                p_interval_days: intervalDays,
-                p_old_difficulty: currentCard.difficulty,
-                p_old_stability: currentCard.stability,
-            });
-
-            if (rpcError) {
-                console.error('❌ Update RPC error:', rpcError);
-                // Continue anyway (optimistic update)
+            // Check online status before updating
+            if (!navigator.onLine) {
+                warning('Offline - changes will not be saved');
             } else {
-                console.log('✅ Card updated in DB:', rpcData);
+                // Call RPC to update card in database
+                const { data: rpcData, error: rpcError } = await supabase.rpc('update_card_fsrs', {
+                    p_card_id: item.id,
+                    p_user_id: STUDENT_ID,
+                    p_rating: rating,
+                    p_new_difficulty: updatedCard.difficulty,
+                    p_new_stability: updatedCard.stability,
+                    p_new_due: updatedCard.due.toISOString(),
+                    p_new_reps: updatedCard.reps,
+                    p_new_lapses: updatedCard.lapses,
+                    p_new_state: updatedCard.state,
+                    p_interval_days: intervalDays,
+                    p_old_difficulty: currentCard.difficulty,
+                    p_old_stability: currentCard.stability,
+                });
+
+                if (rpcError) {
+                    console.error('❌ Update RPC error:', rpcError);
+                    warning('Failed to save progress. Continuing anyway...');
+                    // Continue anyway (optimistic update)
+                } else {
+                    console.log('✅ Card updated in DB:', rpcData);
+                }
             }
         } catch (err) {
             console.error('❌ Update error:', err);
+            warning('Failed to save progress. Please check your connection.');
         }
 
         // Move to next card
@@ -309,17 +360,35 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
         );
     }
 
-    // No cards available
+    // No cards available (differentiate between error and empty)
     if (vocabulary.length === 0) {
         return (
             <div className="dialog-overlay">
                 <div className="dialog-content">
                     <div className="empty-state">
-                        <h2>🎉 {t('vocab.no_items')}</h2>
-                        <p>{t('vocab.no_items_msg')}</p>
-                        <button onClick={handleCancel} className="btn-primary">
-                            {t('vocab.back_to_dashboard')}
-                        </button>
+                        {loadError ? (
+                            <>
+                                <h2>❌ Error Loading Cards</h2>
+                                <p className="error-message">{loadError}</p>
+                                <div className="empty-actions">
+                                    <button onClick={() => loadDueCards()} className="btn-primary">
+                                        🔄 Retry
+                                    </button>
+                                    <button onClick={handleCancel} className="btn-secondary">
+                                        {t('vocab.back_to_dashboard')}
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <h2>🎉 {t('vocab.no_items')}</h2>
+                                <p>{t('vocab.no_items_msg')}</p>
+                                <p className="empty-hint">All caught up! No cards are due for review right now.</p>
+                                <button onClick={handleCancel} className="btn-primary">
+                                    {t('vocab.back_to_dashboard')}
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -474,6 +543,85 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                 .dialog-header {
                     text-align: center;
                     margin-bottom: 24px;
+                }
+
+                /* Empty State & Error State */
+                .empty-state {
+                    text-align: center;
+                    padding: 40px 20px;
+                }
+
+                .empty-state h2 {
+                    font-size: 24px;
+                    margin-bottom: 16px;
+                    color: #fff;
+                }
+
+                .empty-state p {
+                    color: rgba(255, 255, 255, 0.7);
+                    margin-bottom: 12px;
+                    line-height: 1.5;
+                }
+
+                .empty-hint {
+                    font-size: 14px;
+                    color: rgba(255, 255, 255, 0.5);
+                    margin-top: 8px;
+                    font-style: italic;
+                }
+
+                .error-message {
+                    color: #FF453A !important;
+                    background: rgba(255, 69, 58, 0.1);
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(255, 69, 58, 0.3);
+                    margin: 16px 0;
+                    font-family: monospace;
+                    font-size: 13px;
+                }
+
+                .empty-actions {
+                    display: flex;
+                    gap: 12px;
+                    justify-content: center;
+                    margin-top: 24px;
+                }
+
+                .btn-primary {
+                    padding: 12px 24px;
+                    border-radius: 12px;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                    background: rgba(0, 122, 255, 0.3);
+                    color: #007AFF;
+                }
+
+                .btn-primary:hover {
+                    background: rgba(0, 122, 255, 0.4);
+                    transform: translateY(-2px);
+                }
+
+                /* Loading State */
+                .loading-state {
+                    text-align: center;
+                    padding: 60px 20px;
+                }
+
+                .spinner {
+                    width: 48px;
+                    height: 48px;
+                    border: 4px solid rgba(255, 255, 255, 0.1);
+                    border-top-color: #007AFF;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 24px;
+                }
+
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
                 }
 
                 .progress-text {
@@ -665,6 +813,9 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     }
                 }
             `}</style>
+
+            {/* Toast Notifications */}
+            <ToastContainer toasts={toasts} onRemove={removeToast} />
         </div>
     );
 }
