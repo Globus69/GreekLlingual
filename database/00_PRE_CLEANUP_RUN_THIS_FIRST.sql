@@ -42,6 +42,9 @@ DROP FUNCTION IF EXISTS list_students() CASCADE;
 DROP FUNCTION IF EXISTS record_admin_failed_login_attempt(text) CASCADE;
 DROP FUNCTION IF EXISTS record_admin_failed_login_attempt(text, inet) CASCADE;
 DROP FUNCTION IF EXISTS record_admin_failed_login_attempt(text, inet, text) CASCADE;
+DROP FUNCTION IF EXISTS record_failed_login_attempt(text) CASCADE;
+DROP FUNCTION IF EXISTS record_failed_login_attempt(text, inet) CASCADE;
+DROP FUNCTION IF EXISTS record_failed_login_attempt(text, inet, text) CASCADE;
 
 -- ========================================
 -- SCHRITT 4: Verifikation
@@ -63,7 +66,8 @@ BEGIN
           'update_student',
           'delete_student',
           'list_students',
-          'record_admin_failed_login_attempt'
+          'record_admin_failed_login_attempt',
+          'record_failed_login_attempt'
       );
 
     IF v_count = 0 THEN
@@ -86,7 +90,8 @@ BEGIN
                   'update_student',
                   'delete_student',
                   'list_students',
-                  'record_admin_failed_login_attempt'
+                  'record_admin_failed_login_attempt',
+                  'record_failed_login_attempt'
               )
         LOOP
             RAISE NOTICE '  - %', v_count;
