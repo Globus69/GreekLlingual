@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { useLanguage } from '@/context/LanguageContext';
-import { useTranslation } from '@/lib/useTranslation';
+import { useLanguage } from '@/context/language-context';
+import { useTranslation } from '@/lib/use-translation';
 import { supabase } from '@/db/supabase';
 
 export default function PinLoginPage() {
@@ -194,7 +194,7 @@ export default function PinLoginPage() {
             // Device Fingerprint generieren
             let fingerprint = null;
             try {
-                const { getDeviceFingerprint } = await import('@/lib/useDeviceFingerprint');
+                const { getDeviceFingerprint } = await import('@/lib/use-device-fingerprint');
                 fingerprint = await getDeviceFingerprint();
             } catch {
                 // Ignorieren, Fingerprint ist optional

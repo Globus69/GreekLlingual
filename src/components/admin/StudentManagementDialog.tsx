@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/db/supabase';
-import { useTranslation } from '@/lib/useTranslation';
+import { useTranslation } from '@/lib/use-translation';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

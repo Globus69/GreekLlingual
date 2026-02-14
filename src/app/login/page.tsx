@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { useLanguage, Locale } from '@/context/LanguageContext';
-import { useTranslation } from '@/lib/useTranslation';
+import { useLanguage, Locale } from '@/context/language-context';
+import { useTranslation } from '@/lib/use-translation';
 import { supabase } from '@/db/supabase';
 import dynamic from 'next/dynamic';
 

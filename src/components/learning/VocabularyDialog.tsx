@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/db/supabase';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 import Flashcard from '@/components/learning/Flashcard';
-import { useTranslation } from '@/lib/useTranslation';
-import { usePerformanceEvaluation } from '@/lib/usePerformanceEvaluation';
+import { useTranslation } from '@/lib/use-translation';
+import { usePerformanceEvaluation } from '@/lib/use-performance-evaluation';
 import '@/styles/liquid-glass.css';
 
 interface LearningItem {

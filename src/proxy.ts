@@ -9,7 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { rateLimitLogin, rateLimitAdmin, getClientIP } from '@/lib/rateLimit';
+import { rateLimitLogin, rateLimitAdmin, getClientIP } from '@/lib/rate-limit';
 import { isMobileDevice } from '@/lib/device-utils';
 
 /**

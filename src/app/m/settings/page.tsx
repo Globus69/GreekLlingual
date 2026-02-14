@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/auth-context';
+import { useLanguage } from '@/context/language-context';
 import { useRouter } from 'next/navigation';
-import { useTranslation } from '@/lib/useTranslation';
+import { useTranslation } from '@/lib/use-translation';
 
 export default function MobileSettingsPage() {
   const { user, isAuthenticated, logout } = useAuth();

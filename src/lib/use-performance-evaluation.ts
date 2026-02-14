@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from 'react';
 import { supabase } from '@/db/supabase';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 
 /**
  * Performance-Evaluation Result from Supabase RPC

@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { useTranslation } from '@/lib/useTranslation';
-import { supabase } from '@/lib/supabase';
+import { useTranslation } from '@/lib/use-translation';
+import { supabase } from '@/db/supabase';
 
 interface Stats {
   totalWords: number;

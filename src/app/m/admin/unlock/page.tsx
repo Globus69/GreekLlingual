@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/db/supabase';
 
 interface User {
   id: string;
@@ -202,11 +202,10 @@ export default function MobileAdminUnlockPage() {
       {/* Toast Notification */}
       {toast.show && (
         <div
-          className={`fixed bottom-24 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-2xl shadow-lg backdrop-blur-md ${
-            toast.success
+          className={`fixed bottom-24 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-2xl shadow-lg backdrop-blur-md ${toast.success
               ? 'bg-green-500/90 text-white'
               : 'bg-red-500/90 text-white'
-          }`}
+            }`}
           style={{ animation: 'slideUp 0.3s ease-out' }}
         >
           <div className="font-semibold flex items-center gap-2">

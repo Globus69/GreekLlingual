@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useTranslation } from '@/lib/useTranslation';
-import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/auth-context';
+import { useTranslation } from '@/lib/use-translation';
+import { useLanguage } from '@/context/language-context';
 import StudentManagementDialog from '@/components/admin/StudentManagementDialog';
 import AdminLoginLog from '@/components/admin/AdminLoginLog';
 
