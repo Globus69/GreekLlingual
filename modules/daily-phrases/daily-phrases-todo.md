@@ -17,14 +17,18 @@
   - ✅ 053: fsrs_review_logs Tabelle erstellt
   - ✅ 054: RPC-Funktionen (get_due_cards_fsrs, update_card_fsrs, get_fsrs_stats)
   - ✅ 055: Verification Guide (5/6 Tests erfolgreich)
-- [ ] **Phase 3:** VocabularyDialog erweitern (0/18 Tasks)
+- [ ] **Phase 3:** VocabularyDialog erweitern (14/18 Tasks) 🟡 **IN ARBEIT**
+  - ✅ 3.1: FSRS Integration (7/7 Tasks)
+  - ✅ 3.4: Swipe-Gesten (7/7 Tasks)
+  - ⏳ 3.5: Progress-Anzeige (0/4 Tasks)
+  - ⏳ 3.6: Error-Handling (0/? Tasks)
 - [ ] **Phase 4:** Lautschrift & TTS (0/8 Tasks)
 - [ ] **Phase 5:** Analytics & Stats (0/10 Tasks)
 - [ ] **Phase 6:** Mobile PWA (0/9 Tasks)
 - [ ] **Phase 7:** Desktop Tauri (0/8 Tasks)
 - [ ] **Phase 8:** Testing & Optimierung (0/12 Tasks)
 
-**Gesamt:** 12/92 Tasks abgeschlossen (13%)
+**Gesamt:** 26/92 Tasks abgeschlossen (28%)
 
 ---
 
@@ -219,25 +223,25 @@
 **Abhängigkeiten:** Phase 1 + Phase 2
 **Ziel:** 4 Rating-Buttons, FSRS-Integration, Swipe-Gesten
 
-### 3.1 FSRS Integration (3h)
+### 3.1 FSRS Integration (3h) ✅
 
-- [ ] **3.1.1** Import: `import { FSRSScheduler } from '@/lib/fsrs/fsrs-scheduler'`
-- [ ] **3.1.2** Import: `import type { Card, Rating } from '@/lib/fsrs/fsrs-types'`
-- [ ] **3.1.3** State: `const scheduler = useMemo(() => new FSRSScheduler(), [])`
-- [ ] **3.1.4** Funktion: `loadDueCards()` anpassen
-  - [ ] RPC-Call: `supabase.rpc('get_due_cards_fsrs', {p_user_id, p_level, p_limit: 100})`
-  - [ ] Map results zu items State
-  - [ ] Set totalDue = items.length
-- [ ] **3.1.5** Funktion: `handleRating(rating: Rating)` erstellen
-  - [ ] Create `currentCard: Card` from items[currentIndex]
-  - [ ] Call `scheduler.rate(currentCard, rating, new Date())`
-  - [ ] Calculate `intervalDays = scheduler.calculateInterval(updatedCard.stability)`
-  - [ ] RPC-Call: `supabase.rpc('update_card_fsrs', {...})`
-  - [ ] Error handling
-  - [ ] Increment currentIndex
-  - [ ] Update stats (correct/wrong counter)
-- [ ] **3.1.6** useEffect: Load due cards on mount
-- [ ] **3.1.7** Loading-State während RPC-Call
+- [x] **3.1.1** Import: `import { FSRSScheduler } from '@/lib/fsrs/fsrs-scheduler'`
+- [x] **3.1.2** Import: `import type { Card, Rating } from '@/lib/fsrs/fsrs-types'`
+- [x] **3.1.3** State: `const scheduler = useMemo(() => new FSRSScheduler(), [])`
+- [x] **3.1.4** Funktion: `loadDueCards()` anpassen
+  - [x] RPC-Call: `supabase.rpc('get_due_cards_fsrs', {p_user_id, p_level, p_limit: 100})`
+  - [x] Map results zu items State
+  - [x] Set totalDue = items.length
+- [x] **3.1.5** Funktion: `handleRating(rating: Rating)` erstellen
+  - [x] Create `currentCard: Card` from items[currentIndex]
+  - [x] Call `scheduler.rate(currentCard, rating, new Date())`
+  - [x] Calculate `intervalDays = scheduler.calculateInterval(updatedCard.stability)`
+  - [x] RPC-Call: `supabase.rpc('update_card_fsrs', {...})`
+  - [x] Error handling
+  - [x] Increment currentIndex
+  - [x] Update stats (correct/wrong counter)
+- [x] **3.1.6** useEffect: Load due cards on mount
+- [x] **3.1.7** Loading-State während RPC-Call
 
 ### 3.2 UI: 4 Rating-Buttons (2h)
 
@@ -269,21 +273,21 @@
 - [ ] **3.3.6** Key 'Space' → flip card
 - [ ] **3.3.7** Cleanup: removeEventListener on unmount
 
-### 3.4 Swipe-Gesten (2h)
+### 3.4 Swipe-Gesten (2h) ✅
 
-- [ ] **3.4.1** Install: `npm install react-swipeable`
-- [ ] **3.4.2** Import: `import { useSwipeable } from 'react-swipeable'`
-- [ ] **3.4.3** Hook: `const handlers = useSwipeable({...})`
-  - [ ] onSwipedRight: handleRating(3) // Good
-  - [ ] onSwipedLeft: handleRating(1) // Again
-  - [ ] onSwipedUp: handleRating(4) // Easy
-  - [ ] onSwipedDown: handleRating(2) // Hard
-  - [ ] trackMouse: true (Desktop-Support)
-- [ ] **3.4.4** JSX: `<div {...handlers}>` um Flashcard
-- [ ] **3.4.5** Visual Feedback: Swipe-Indikator während Geste
-  - [ ] State: `swipeDirection: 'left' | 'right' | 'up' | 'down' | null`
-  - [ ] CSS: Arrow-Icon am Rand einblenden
-  - [ ] Opacity basierend auf Swipe-Progress
+- [x] **3.4.1** Install: `npm install react-swipeable`
+- [x] **3.4.2** Import: `import { useSwipeable } from 'react-swipeable'`
+- [x] **3.4.3** Hook: `const handlers = useSwipeable({...})`
+  - [x] onSwipedRight: handleRating(4) // Easy
+  - [x] onSwipedLeft: handleRating(1) // Again
+  - [x] onSwipedUp: handleRating(3) // Good
+  - [x] onSwipedDown: handleRating(2) // Hard
+  - [x] trackTouch: true (Touch-Support, trackMouse disabled)
+- [x] **3.4.4** JSX: `<div {...handlers}>` um Flashcard
+- [x] **3.4.5** Visual Feedback: Swipe-Indikator während Geste
+  - [x] State: `swipeDirection: 'left' | 'right' | 'up' | 'down' | null`
+  - [x] CSS: Color-coded overlay mit emoji + label
+  - [x] Animation: fade-in + scale effect (150ms)
 
 ### 3.5 Progress-Anzeige (1h)
 
