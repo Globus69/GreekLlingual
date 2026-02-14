@@ -22,18 +22,18 @@
   - ✅ 3.4: Swipe-Gesten (7/7 Tasks)
   - ✅ 3.5: Progress-Anzeige (4/4 Tasks)
   - ✅ 3.6: Error-Handling (4/4 Tasks)
-- [x] **Phase 4:** Lautschrift & TTS (20/22 Tasks) ✅ **FAST ABGESCHLOSSEN**
+- [x] **Phase 4:** Lautschrift & TTS (22/22 Tasks) ✅ **ABGESCHLOSSEN**
   - ✅ 4.1: Lautschrift Display (5/5)
   - ✅ 4.2: TTS Library (7/7)
   - ✅ 4.3: Auto-Play (4/4)
-  - ⚠️ 4.4: Audio Button (3/5, 2 accessibility TODO)
+  - ✅ 4.4: Audio Button (5/5)
   - ✅ 4.5: Speed Toggle (4/4)
 - [ ] **Phase 5:** Analytics & Stats (0/10 Tasks)
 - [ ] **Phase 6:** Mobile PWA (0/9 Tasks)
 - [ ] **Phase 7:** Desktop Tauri (0/8 Tasks)
 - [ ] **Phase 8:** Testing & Optimierung (0/12 Tasks)
 
-**Gesamt:** 54/122 Tasks abgeschlossen (44%)
+**Gesamt:** 56/122 Tasks abgeschlossen (46%)
 
 ---
 
@@ -374,13 +374,20 @@
   - [x] Toast notification on toggle
 - [x] **4.3.4** localStorage: 'tts-autoplay' persistence
 
-### 4.4 Audio-Button (1h) ✅ **BEREITS IMPLEMENTIERT**
+### 4.4 Audio-Button (1h) ✅
 
-- [x] **4.4.1** JSX: Button mit 🔊 Icon (VocabularyDialogFSRS:512)
-- [x] **4.4.2** onClick: `playAudio()` (inline implementation)
-- [x] **4.4.3** Position: Dialog footer (unten)
-- [ ] **4.4.4** TODO: Visual Feedback während TTS spielt
-- [ ] **4.4.5** TODO: Accessibility aria-label
+- [x] **4.4.1** JSX: Button mit 🔊 Icon (VocabularyDialogFSRS)
+- [x] **4.4.2** onClick: `playAudio()` mit TTS library
+- [x] **4.4.3** Position: Dialog footer
+- [x] **4.4.4** Visual Feedback: Pulse animation während TTS
+  - [x] className="playing" state
+  - [x] @keyframes pulse animation
+  - [x] Disabled state während playback
+- [x] **4.4.5** Accessibility improvements
+  - [x] aria-label mit dynamic state
+  - [x] aria-busy während playback
+  - [x] aria-live announcements
+  - [x] Screen reader support (.sr-only)
 
 ### 4.5 Slow/Normal/Fast Speed Toggle (1h) ✅
 
