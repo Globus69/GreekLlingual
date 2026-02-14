@@ -17,18 +17,18 @@
   - ✅ 053: fsrs_review_logs Tabelle erstellt
   - ✅ 054: RPC-Funktionen (get_due_cards_fsrs, update_card_fsrs, get_fsrs_stats)
   - ✅ 055: Verification Guide (5/6 Tests erfolgreich)
-- [ ] **Phase 3:** VocabularyDialog erweitern (18/18 Tasks) 🟡 **IN ARBEIT**
+- [x] **Phase 3:** VocabularyDialog erweitern (22/22 Tasks) ✅ **ABGESCHLOSSEN**
   - ✅ 3.1: FSRS Integration (7/7 Tasks)
   - ✅ 3.4: Swipe-Gesten (7/7 Tasks)
   - ✅ 3.5: Progress-Anzeige (4/4 Tasks)
-  - ⏳ 3.6: Error-Handling (0/? Tasks)
+  - ✅ 3.6: Error-Handling (4/4 Tasks)
 - [ ] **Phase 4:** Lautschrift & TTS (0/8 Tasks)
 - [ ] **Phase 5:** Analytics & Stats (0/10 Tasks)
 - [ ] **Phase 6:** Mobile PWA (0/9 Tasks)
 - [ ] **Phase 7:** Desktop Tauri (0/8 Tasks)
 - [ ] **Phase 8:** Testing & Optimierung (0/12 Tasks)
 
-**Gesamt:** 30/92 Tasks abgeschlossen (33%)
+**Gesamt:** 34/96 Tasks abgeschlossen (35%)
 
 ---
 
@@ -299,12 +299,22 @@
   - [x] Width: `${progressPercentage}%`
   - [x] Glow effect + smooth transition
 
-### 3.6 Error Handling (1h)
+### 3.6 Error Handling (1h) ✅
 
-- [ ] **3.6.1** RPC Error: Toast-Notification "Failed to load cards"
-- [ ] **3.6.2** Update Error: Retry-Button oder Skip
-- [ ] **3.6.3** Empty State: "No cards due today 🎉"
-- [ ] **3.6.4** Network Error: "Check your connection"
+- [x] **3.6.1** RPC Error: Toast-Notification "Failed to load cards"
+  - [x] Created Toast component system (4 types)
+  - [x] useToast hook integration
+  - [x] RPC error display with retry button
+- [x] **3.6.2** Update Error: Optimistic updates + warning toast
+  - [x] Continue on error (no blocking)
+  - [x] Toast notification for failed saves
+- [x] **3.6.3** Empty State: "No cards due today 🎉"
+  - [x] Differentiated error vs empty state
+  - [x] Success message for all caught up
+- [x] **3.6.4** Network Error: Offline detection + warnings
+  - [x] Online/Offline event listeners
+  - [x] Toast on connection change
+  - [x] Check connectivity before operations
 
 ---
 
