@@ -1,4 +1,4 @@
-import StudentPageMockComplex from "@/components/StudentPageMockComplex";
+import StudentPageMockComplex from "@/components/student-page-mock-complex";
 
 export default function ComplexMockupPage() {
     return <StudentPageMockComplex />;

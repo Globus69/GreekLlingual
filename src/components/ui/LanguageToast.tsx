@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLanguage, Locale } from '@/context/LanguageContext';
+import { useLanguage, Locale } from '@/context/language-context';
 
 const TOAST_MESSAGES: Record<Locale, string> = {
     en: 'Language changed to English.',

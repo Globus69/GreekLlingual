@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/db/supabase';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsCard from '@/components/dashboard/StatsCard';

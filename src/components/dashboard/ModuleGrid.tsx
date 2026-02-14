@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import PerformanceHub from './PerformanceHub';
-import { useTranslation } from '@/lib/useTranslation';
+import { useTranslation } from '@/lib/use-translation';
 
 export default function ModuleGrid() {
     const router = useRouter();

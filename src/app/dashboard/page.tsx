@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ModuleGrid from '@/components/dashboard/ModuleGrid';
@@ -13,7 +13,7 @@ import ComprehensionDialog from '@/components/learning/ComprehensionDialog';
 import ListeningDialog from '@/components/learning/ListeningDialog';
 import LessonDialog from '@/components/learning/LessonDialog';
 import { supabase } from '@/db/supabase';
-import { useTranslation } from '@/lib/useTranslation';
+import { useTranslation } from '@/lib/use-translation';
 import Link from 'next/link';
 
 interface ActionTileProps {

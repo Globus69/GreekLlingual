@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useTranslation } from '@/lib/useTranslation';
-import { useStatsData } from '@/hooks/useStatsData';
+import { useAuth } from '@/context/auth-context';
+import { useTranslation } from '@/lib/use-translation';
+import { useStatsData } from '@/hooks/use-stats-data';
 import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
 import { DueCardsSheet } from '@/components/mobile/DueCardsSheet';
 import '@/styles/liquid-glass.css';

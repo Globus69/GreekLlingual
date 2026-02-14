@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/db/supabase';
-import { useAuth } from '@/context/AuthContext';
-import { useTranslation } from '@/lib/useTranslation';
+import { useAuth } from '@/context/auth-context';
+import { useTranslation } from '@/lib/use-translation';
 import '@/styles/liquid-glass.css';
 
 interface LessonSession {

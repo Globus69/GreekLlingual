@@ -1,4 +1,4 @@
-import StudentMockup from "@/components/StudentMockup";
+import StudentMockup from "@/components/student-mockup";
 
 export default function MockupPage() {
     return <StudentMockup />;

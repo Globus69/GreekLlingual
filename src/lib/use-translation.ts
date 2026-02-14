@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/db/supabase';
-import { useLanguage, Locale } from '@/context/LanguageContext';
+import { useLanguage, Locale } from '@/context/language-context';
 
 // Global cache: translations per locale
 const translationCache: Record<Locale, Record<string, string> | null> = {

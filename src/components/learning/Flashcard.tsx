@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useTranslation } from '@/lib/useTranslation';
+import { useTranslation } from '@/lib/use-translation';
 
 interface FlashcardProps {
     term: string;
