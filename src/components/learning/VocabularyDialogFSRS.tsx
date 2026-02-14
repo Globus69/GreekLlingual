@@ -9,6 +9,7 @@ import { usePerformanceEvaluation } from '@/lib/use-performance-evaluation';
 import { FSRSScheduler } from '@/lib/fsrs/fsrs-scheduler';
 import type { Card, Rating } from '@/lib/fsrs/fsrs-types';
 import { useToast, ToastContainer } from '@/components/ui/toast';
+import { speakGreek, isSpeaking, stopSpeaking } from '@/lib/tts/greek-tts';
 import '@/styles/liquid-glass.css';
 
 // Extended LearningItem with FSRS fields
@@ -62,8 +63,18 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
     const [perfMessage, setPerfMessage] = useState<string | null>(null);
     const [isOnline, setIsOnline] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
+    const [autoPlay, setAutoPlay] = useState(true); // Auto-play TTS on flip
+    const [isPlaying, setIsPlaying] = useState(false); // TTS playing state
 
     const STUDENT_ID = user?.id || '';
+
+    // Load auto-play preference from localStorage
+    useEffect(() => {
+        const saved = localStorage.getItem('tts-autoplay');
+        if (saved !== null) {
+            setAutoPlay(saved === 'true');
+        }
+    }, []);
 
     // Offline/Online detection
     useEffect(() => {
@@ -104,27 +115,38 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
     }, [isOpen, mode, STUDENT_ID]);
 
     // TTS Audio
-    const playAudio = () => {
+    const playAudio = async () => {
         if (vocabulary.length === 0 || currentIndex >= vocabulary.length) return;
 
         const currentVocab = vocabulary[currentIndex];
         if (!currentVocab) return;
 
         const text = currentVocab.greek_word || currentVocab.greek;
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'el-GR';
-            utterance.rate = 0.9;
-            utterance.pitch = 1;
+        if (!text) return;
 
-            const voices = window.speechSynthesis.getVoices();
-            const greekVoice = voices.find(v => v.lang.startsWith('el'));
-            if (greekVoice) utterance.voice = greekVoice;
+        setIsPlaying(true);
+        const result = await speakGreek(text, { rate: 0.9 });
 
-            window.speechSynthesis.speak(utterance);
+        if (!result.success) {
+            warning(result.message || 'Failed to play audio');
         }
+
+        // Reset playing state after a delay (speech duration estimate)
+        setTimeout(() => {
+            setIsPlaying(false);
+        }, text.length * 100); // Rough estimate: 100ms per character
     };
+
+    // Auto-play TTS when card flips (if enabled)
+    useEffect(() => {
+        if (flipped && autoPlay && vocabulary.length > 0) {
+            // Small delay to let flip animation complete
+            const timer = setTimeout(() => {
+                playAudio();
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [flipped, currentIndex, autoPlay, vocabulary.length]);
 
     // Keyboard shortcuts (1=Again, 2=Hard, 3=Good, 4=Easy, Space=Flip)
     useEffect(() => {
@@ -509,8 +531,26 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     <button onClick={handleRestart} className="btn-secondary">
                         ↻ {t('btn.restart')}
                     </button>
-                    <button onClick={playAudio} className="btn-audio">
-                        🔊 {t('btn.audio')}
+                    <button
+                        onClick={playAudio}
+                        className={`btn-audio ${isPlaying ? 'playing' : ''}`}
+                        aria-label="Play pronunciation"
+                        title="Play audio (A)"
+                    >
+                        {isPlaying ? '🔊' : '🔊'} {t('btn.audio')}
+                    </button>
+                    <button
+                        onClick={() => {
+                            const newValue = !autoPlay;
+                            setAutoPlay(newValue);
+                            localStorage.setItem('tts-autoplay', String(newValue));
+                            info(newValue ? 'Auto-play enabled' : 'Auto-play disabled');
+                        }}
+                        className={`btn-autoplay ${autoPlay ? 'active' : ''}`}
+                        aria-label="Toggle auto-play"
+                        title={`Auto-play: ${autoPlay ? 'ON' : 'OFF'}`}
+                    >
+                        {autoPlay ? '🔊' : '🔇'} Auto
                     </button>
                     <button onClick={handleCancel} className="btn-cancel">
                         × {t('btn.cancel')}
@@ -732,7 +772,7 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     justify-content: center;
                 }
 
-                .btn-secondary, .btn-audio, .btn-cancel {
+                .btn-secondary, .btn-audio, .btn-autoplay, .btn-cancel {
                     padding: 12px 24px;
                     border-radius: 12px;
                     border: none;
@@ -746,14 +786,60 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     color: #007AFF;
                 }
 
+                .btn-secondary:hover {
+                    background: rgba(0, 122, 255, 0.3);
+                }
+
                 .btn-audio {
                     background: rgba(52, 199, 89, 0.2);
                     color: #34C759;
+                    position: relative;
+                }
+
+                .btn-audio:hover {
+                    background: rgba(52, 199, 89, 0.3);
+                }
+
+                .btn-audio.playing {
+                    animation: pulse 1s ease-in-out infinite;
+                }
+
+                @keyframes pulse {
+                    0%, 100% {
+                        transform: scale(1);
+                        opacity: 1;
+                    }
+                    50% {
+                        transform: scale(1.05);
+                        opacity: 0.9;
+                    }
+                }
+
+                .btn-autoplay {
+                    background: rgba(255, 159, 10, 0.15);
+                    color: rgba(255, 159, 10, 0.7);
+                    font-size: 13px;
+                    padding: 12px 16px;
+                }
+
+                .btn-autoplay:hover {
+                    background: rgba(255, 159, 10, 0.25);
+                    color: rgba(255, 159, 10, 0.9);
+                }
+
+                .btn-autoplay.active {
+                    background: rgba(255, 159, 10, 0.3);
+                    color: #FF9F0A;
+                    border: 1px solid rgba(255, 159, 10, 0.4);
                 }
 
                 .btn-cancel {
                     background: rgba(255, 69, 58, 0.2);
                     color: #FF453A;
+                }
+
+                .btn-cancel:hover {
+                    background: rgba(255, 69, 58, 0.3);
                 }
 
                 .summary-content {
