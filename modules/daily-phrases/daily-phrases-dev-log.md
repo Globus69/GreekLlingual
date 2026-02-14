@@ -1315,10 +1315,23 @@ const cycleSpeed = () => {
 - 4.4.5: Accessibility → TODO (aria-live, bessere keyboard support)
 
 **Nächste Schritte:**
-- Phase 4 finale Accessibility-Verbesserungen (2 tasks)
+- Phase 4 finale Accessibility-Verbesserungen (2 tasks) → JETZT
 - Integration Testing (alle TTS features)
 - Phase 1: FSRS-6 Core Library abschließen
 - Phase 5: Analytics Dashboard starten
+
+---
+
+## 📅 Session 20: Phase 4 Finalisierung - Accessibility (IN ARBEIT)
+**Datum:** 2026-02-15
+**Zeit:** 04:35 - ... Uhr
+**Status:** 🟡 In Arbeit
+
+**Ziel:** Phase 4 zu 100% abschließen mit finalen Accessibility-Verbesserungen.
+
+**Verbleibende Tasks:**
+- [ ] 4.4.4: Visual Feedback während TTS → Prüfen (pulse animation bereits vorhanden?)
+- [ ] 4.4.5: aria-live Announcements für Screen Reader
 
 ---
 
