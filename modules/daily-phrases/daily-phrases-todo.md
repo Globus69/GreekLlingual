@@ -22,7 +22,7 @@
   - ✅ 3.4: Swipe-Gesten (7/7 Tasks)
   - ✅ 3.5: Progress-Anzeige (4/4 Tasks)
   - ✅ 3.6: Error-Handling (4/4 Tasks)
-- [ ] **Phase 4:** Lautschrift & TTS (0/8 Tasks)
+- [ ] **Phase 4:** Lautschrift & TTS (5/15 Tasks) 🟡 **IN ARBEIT**
 - [ ] **Phase 5:** Analytics & Stats (0/10 Tasks)
 - [ ] **Phase 6:** Mobile PWA (0/9 Tasks)
 - [ ] **Phase 7:** Desktop Tauri (0/8 Tasks)
@@ -324,26 +324,26 @@
 **Abhängigkeiten:** Phase 3
 **Ziel:** Griechisch + Lautschrift anzeigen, TTS-Audio
 
-### 4.1 Lautschrift anzeigen (1h)
+### 4.1 Lautschrift anzeigen (1h) ✅ **BEREITS IMPLEMENTIERT**
 
-- [ ] **4.1.1** Flashcard.tsx: Rückseite erweitern
-- [ ] **4.1.2** JSX: `<div className="greek-word">{item.greek_word}</div>`
-- [ ] **4.1.3** JSX: `<div className="phonetic">/{item.phonetic}/</div>`
-- [ ] **4.1.4** CSS: greek-word = 32px, bold, color: white
-- [ ] **4.1.5** CSS: phonetic = 18px, color: #A8A8AD, margin-top: 8px
+- [x] **4.1.1** FlashcardFSRS.tsx: Rückseite erweitert (Phase 3.1)
+- [x] **4.1.2** JSX: `<div className="greek-word">{back}</div>` (line 122)
+- [x] **4.1.3** JSX: `{phonetic && <div className="phonetic">/{phonetic}/</div>}` (lines 123-124)
+- [x] **4.1.4** CSS: greek-word = 40px, bold, color: white (line 234)
+- [x] **4.1.5** CSS: phonetic = 18px, color: #A8A8AD, italic (line 242)
 
-### 4.2 TTS Library erstellen (2h)
+### 4.2 TTS Library erstellen (2h) ⚠️ **TEILWEISE IMPLEMENTIERT**
 
-- [ ] **4.2.1** Datei: `src/lib/tts/greek-tts.ts` erstellen
-- [ ] **4.2.2** Check: `if (!window.speechSynthesis) return false`
-- [ ] **4.2.3** Funktion: `speakGreek(text: string, rate?: number)`
-  - [ ] Create: `new SpeechSynthesisUtterance(text)`
-  - [ ] Set: `utterance.lang = 'el-GR'`
-  - [ ] Set: `utterance.rate = rate || 0.8` (langsamer)
-  - [ ] Call: `window.speechSynthesis.speak(utterance)`
-- [ ] **4.2.4** Funktion: `stopSpeaking()`
-  - [ ] Call: `window.speechSynthesis.cancel()`
-- [ ] **4.2.5** Export beide Funktionen
+- [ ] **4.2.1** Datei: `src/lib/tts/greek-tts.ts` erstellen (TODO: Extrahieren)
+- [x] **4.2.2** Check: `if ('speechSynthesis' in window)` (VocabularyDialogFSRS:114)
+- [x] **4.2.3** Funktion: `playAudio()` implementiert (inline, VocabularyDialogFSRS:107-127)
+  - [x] Create: `new SpeechSynthesisUtterance(text)`
+  - [x] Set: `utterance.lang = 'el-GR'`
+  - [x] Set: `utterance.rate = 0.9`
+  - [x] Voice selection: Greek voice detection
+  - [x] Call: `window.speechSynthesis.speak(utterance)`
+- [x] **4.2.4** Stop: `window.speechSynthesis.cancel()` (inline)
+- [ ] **4.2.5** TODO: In separates Modul extrahieren + erweitern
 
 ### 4.3 Auto-Play beim Flip (1h)
 
@@ -353,13 +353,20 @@
   - [ ] Call: `speakGreek(item.greek_word)`
 - [ ] **4.3.4** Settings-Toggle: Auto-Play ein/aus
 
-### 4.4 Audio-Button (1h)
+### 4.3 Auto-Play beim Flip (1h)
 
-- [ ] **4.4.1** JSX: Button mit 🔊 Icon
-- [ ] **4.4.2** onClick: `speakGreek(item.greek_word)`
-- [ ] **4.4.3** Position: Oben rechts auf Karten-Rückseite
-- [ ] **4.4.4** Visual Feedback: Animation während TTS spielt
-- [ ] **4.4.5** Accessibility: aria-label="Play pronunciation"
+- [ ] **4.3.1** State: `autoPlayEnabled` (default: true)
+- [ ] **4.3.2** useEffect: Auto-play when card flips to back
+- [ ] **4.3.3** Settings-Toggle: Auto-Play ein/aus
+- [ ] **4.3.4** localStorage: Persist auto-play preference
+
+### 4.4 Audio-Button (1h) ✅ **BEREITS IMPLEMENTIERT**
+
+- [x] **4.4.1** JSX: Button mit 🔊 Icon (VocabularyDialogFSRS:512)
+- [x] **4.4.2** onClick: `playAudio()` (inline implementation)
+- [x] **4.4.3** Position: Dialog footer (unten)
+- [ ] **4.4.4** TODO: Visual Feedback während TTS spielt
+- [ ] **4.4.5** TODO: Accessibility aria-label
 
 ### 4.5 Slow/Normal Speed Toggle (1h)
 
