@@ -946,3 +946,212 @@ useEffect(() => {
 
 ---
 
+## 📅 Session 18: Phase 4 - Greek TTS Library & Auto-Play (ABGESCHLOSSEN)
+**Datum:** 2026-02-15
+**Zeit:** 03:40 - 04:20 Uhr (40 Min)
+**Status:** ✅ Erledigt
+**Commit:** `baaa9fc`
+
+### ✅ Phase 4.1-4.4: TTS Library & Auto-Play implementiert
+**Zeit:** 2026-02-15 03:40 - 04:20 Uhr (40 Min)
+**Status:** ✅ Erledigt
+
+**Ziel:**
+Griechische TTS-Bibliothek erstellen + Auto-Play beim Karten-Flip.
+
+**Durchgeführte Schritte:**
+
+1. ✅ **Greek TTS Library erstellt** (194 Zeilen)
+   - Datei: `src/lib/tts/greek-tts.ts`
+   - Core Functions:
+     ```typescript
+     speakGreek(text: string, options?: GreekTTSOptions): Promise<TTSResult>
+     stopSpeaking(): void
+     pauseSpeaking(): void
+     resumeSpeaking(): void
+     isTTSSupported(): boolean
+     isSpeaking(): boolean
+     isPaused(): boolean
+     getGreekVoices(): SpeechSynthesisVoice[]
+     getBestGreekVoice(): SpeechSynthesisVoice | null
+     useGreekTTS(defaultOptions): TTSHook
+     ```
+   - Options Interface:
+     ```typescript
+     interface GreekTTSOptions {
+       rate?: number;    // 0.1-10 (default: 0.9)
+       pitch?: number;   // 0-2 (default: 1)
+       volume?: number;  // 0-1 (default: 1)
+       voice?: string;   // Specific voice name
+     }
+     ```
+   - Result Interface:
+     ```typescript
+     interface TTSResult {
+       success: boolean;
+       message?: string;
+       speaking: boolean;
+     }
+     ```
+
+2. ✅ **Voice Selection System**
+   - `getGreekVoices()`: Filters all voices for 'el' or 'gr' lang
+   - `getBestGreekVoice()`: Prefers local over network voices
+   - Auto-selection in speakGreek()
+   - Manual voice override via options.voice
+
+3. ✅ **Promise-based API**
+   - Returns Promise<TTSResult>
+   - Resolves on start/error
+   - Error handling: onstart, onerror events
+   - Console logging für debugging
+
+4. ✅ **VocabularyDialogFSRS Refactoring**
+   - Import: speakGreek, isSpeaking, stopSpeaking
+   - Removed inline TTS code
+   - Async playAudio():
+     ```typescript
+     const result = await speakGreek(text, { rate: 0.9 });
+     if (!result.success) {
+       warning(result.message || 'Failed to play audio');
+     }
+     ```
+   - State: isPlaying für visual feedback
+   - Duration estimate: text.length * 100ms
+
+5. ✅ **Auto-Play on Flip (Phase 4.3)**
+   - State: `autoPlay` (boolean, default: true)
+   - useEffect:
+     ```typescript
+     useEffect(() => {
+       if (flipped && autoPlay && vocabulary.length > 0) {
+         const timer = setTimeout(() => playAudio(), 300);
+         return () => clearTimeout(timer);
+       }
+     }, [flipped, currentIndex, autoPlay, vocabulary.length]);
+     ```
+   - 300ms delay: Wartet auf Flip-Animation
+
+6. ✅ **Auto-Play Toggle Button**
+   - Position: Dialog footer (neben Audio button)
+   - Icon: 🔊 (on) / 🔇 (off)
+   - Label: "Auto"
+   - onClick:
+     ```typescript
+     const newValue = !autoPlay;
+     setAutoPlay(newValue);
+     localStorage.setItem('tts-autoplay', String(newValue));
+     info(newValue ? 'Auto-play enabled' : 'Auto-play disabled');
+     ```
+   - Styling: Orange, active state
+   - localStorage: Persistence über Sessions
+
+7. ✅ **Enhanced Audio Button**
+   - aria-label: "Play pronunciation"
+   - title: "Play audio (A)"
+   - Playing state: className="playing"
+   - Animation:
+     ```css
+     @keyframes pulse {
+       0%, 100% { transform: scale(1); opacity: 1; }
+       50% { transform: scale(1.05); opacity: 0.9; }
+     }
+     ```
+
+8. ✅ **UI/UX Improvements**
+   - Hover effects auf allen buttons
+   - Auto-play active state: Orange border + brighter color
+   - Pulse animation während TTS läuft
+   - Toast notifications für auto-play toggle
+
+**Technische Details:**
+
+**TTS Voice Selection Logic:**
+```typescript
+export function getBestGreekVoice(): SpeechSynthesisVoice | null {
+  const greekVoices = getGreekVoices();
+  if (greekVoices.length === 0) return null;
+
+  // Prefer local voices (better quality, faster)
+  const localVoice = greekVoices.find(v => v.localService);
+  if (localVoice) return localVoice;
+
+  // Fallback to first Greek voice
+  return greekVoices[0];
+}
+```
+
+**Auto-Play Flow:**
+1. User flips card (onFlip called)
+2. setFlipped(true) triggers useEffect
+3. Check: flipped && autoPlay && hasCards
+4. setTimeout 300ms (flip animation)
+5. playAudio() called
+6. speakGreek() starts TTS
+7. isPlaying = true → pulse animation
+8. After duration: isPlaying = false
+
+**localStorage Integration:**
+```typescript
+// Load on mount
+useEffect(() => {
+  const saved = localStorage.getItem('tts-autoplay');
+  if (saved !== null) setAutoPlay(saved === 'true');
+}, []);
+
+// Save on change
+localStorage.setItem('tts-autoplay', String(newValue));
+```
+
+**Features:**
+- ✅ Comprehensive TTS library (9 functions + 1 hook)
+- ✅ Auto-play on card flip (300ms delay)
+- ✅ Toggle button with persistence
+- ✅ Visual feedback (pulse animation)
+- ✅ Voice selection (auto + manual)
+- ✅ Error handling with toasts
+- ✅ Accessibility (aria-label, title)
+- ✅ Promise-based API
+- ✅ Browser compatibility check
+
+**Verified bereits implementiert (Phase 3.1):**
+- ✅ 4.1: Phonetic display in FlashcardFSRS
+- ✅ 4.1: Greek word styling (40px, bold)
+- ✅ 4.1: Phonetic styling (18px, italic, #A8A8AD)
+
+---
+
+**Ergebnis:**
+- ✅ Greek TTS Library vollständig (194 Zeilen)
+- ✅ Auto-Play implementiert + toggleable
+- ✅ Visual feedback funktioniert
+- ✅ localStorage Persistence aktiv
+- ✅ Phase 4.1-4.4 FAST KOMPLETT (16/20 Tasks)
+- 🎯 **Noch TODO: 4.4 accessibility (2 tasks), 4.5 Speed Toggle (4 tasks)**
+
+**Dateien erstellt:**
+- `src/lib/tts/greek-tts.ts` (194 Zeilen)
+
+**Dateien geändert:**
+- `src/components/learning/VocabularyDialogFSRS.tsx` (+90 Zeilen, -40 refactored)
+- `modules/daily-phrases/daily-phrases-todo.md` (Progress update)
+
+**Commits:**
+- `baaa9fc` - feat: implement Greek TTS library and auto-play (Phase 4)
+
+**Phase 4 - Aktueller Stand:**
+- ✅ 4.1: Lautschrift Display (5/5) - bereits Phase 3
+- ✅ 4.2: TTS Library (7/7) - Session 18
+- ✅ 4.3: Auto-Play (4/4) - Session 18
+- ⚠️ 4.4: Audio Button (3/5) - 2 TODO accessibility
+- ⏳ 4.5: Speed Toggle (0/4) - noch offen
+- **Total: 16/20 Tasks (80%)**
+
+**Nächste Schritte:**
+- 4.5: Speed Toggle (Slow/Normal/Fast) implementieren
+- 4.4: Accessibility verbessern (aria-live, keyboard)
+- Integration Testing mit verschiedenen Browsern/Stimmen
+- Phase 1: FSRS-6 Core Library Unit Tests
+
+---
+

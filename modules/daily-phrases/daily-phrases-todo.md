@@ -22,13 +22,18 @@
   - ✅ 3.4: Swipe-Gesten (7/7 Tasks)
   - ✅ 3.5: Progress-Anzeige (4/4 Tasks)
   - ✅ 3.6: Error-Handling (4/4 Tasks)
-- [ ] **Phase 4:** Lautschrift & TTS (5/15 Tasks) 🟡 **IN ARBEIT**
+- [ ] **Phase 4:** Lautschrift & TTS (16/20 Tasks) 🟡 **IN ARBEIT**
+  - ✅ 4.1: Lautschrift Display (5/5)
+  - ✅ 4.2: TTS Library (7/7)
+  - ✅ 4.3: Auto-Play (4/4)
+  - ✅ 4.4: Audio Button (3/5, 2 TODO)
+  - ⏳ 4.5: Speed Toggle (0/4)
 - [ ] **Phase 5:** Analytics & Stats (0/10 Tasks)
 - [ ] **Phase 6:** Mobile PWA (0/9 Tasks)
 - [ ] **Phase 7:** Desktop Tauri (0/8 Tasks)
 - [ ] **Phase 8:** Testing & Optimierung (0/12 Tasks)
 
-**Gesamt:** 34/96 Tasks abgeschlossen (35%)
+**Gesamt:** 50/116 Tasks abgeschlossen (43%)
 
 ---
 
@@ -332,18 +337,21 @@
 - [x] **4.1.4** CSS: greek-word = 40px, bold, color: white (line 234)
 - [x] **4.1.5** CSS: phonetic = 18px, color: #A8A8AD, italic (line 242)
 
-### 4.2 TTS Library erstellen (2h) ⚠️ **TEILWEISE IMPLEMENTIERT**
+### 4.2 TTS Library erstellen (2h) ✅
 
-- [ ] **4.2.1** Datei: `src/lib/tts/greek-tts.ts` erstellen (TODO: Extrahieren)
-- [x] **4.2.2** Check: `if ('speechSynthesis' in window)` (VocabularyDialogFSRS:114)
-- [x] **4.2.3** Funktion: `playAudio()` implementiert (inline, VocabularyDialogFSRS:107-127)
+- [x] **4.2.1** Datei: `src/lib/tts/greek-tts.ts` erstellt (194 Zeilen)
+- [x] **4.2.2** Check: `isTTSSupported()` function
+- [x] **4.2.3** Funktion: `speakGreek(text, options)` mit Promise API
   - [x] Create: `new SpeechSynthesisUtterance(text)`
   - [x] Set: `utterance.lang = 'el-GR'`
-  - [x] Set: `utterance.rate = 0.9`
-  - [x] Voice selection: Greek voice detection
-  - [x] Call: `window.speechSynthesis.speak(utterance)`
-- [x] **4.2.4** Stop: `window.speechSynthesis.cancel()` (inline)
-- [ ] **4.2.5** TODO: In separates Modul extrahieren + erweitern
+  - [x] Options: rate, pitch, volume, voice
+  - [x] Voice selection: `getBestGreekVoice()`
+  - [x] Error handling: onstart, onerror events
+  - [x] Returns: TTSResult { success, message, speaking }
+- [x] **4.2.4** Playback controls: stop, pause, resume functions
+- [x] **4.2.5** State checks: isSpeaking(), isPaused()
+- [x] **4.2.6** Voice helpers: getGreekVoices(), getBestGreekVoice()
+- [x] **4.2.7** React hook: useGreekTTS()
 
 ### 4.3 Auto-Play beim Flip (1h)
 
@@ -353,12 +361,18 @@
   - [ ] Call: `speakGreek(item.greek_word)`
 - [ ] **4.3.4** Settings-Toggle: Auto-Play ein/aus
 
-### 4.3 Auto-Play beim Flip (1h)
+### 4.3 Auto-Play beim Flip (1h) ✅
 
-- [ ] **4.3.1** State: `autoPlayEnabled` (default: true)
-- [ ] **4.3.2** useEffect: Auto-play when card flips to back
-- [ ] **4.3.3** Settings-Toggle: Auto-Play ein/aus
-- [ ] **4.3.4** localStorage: Persist auto-play preference
+- [x] **4.3.1** State: `autoPlay` (default: true)
+- [x] **4.3.2** useEffect: Auto-play 300ms after flip
+  - [x] Check: flipped && autoPlay
+  - [x] Call: playAudio()
+  - [x] Cleanup: clearTimeout on unmount
+- [x] **4.3.3** Toggle button in dialog footer
+  - [x] Icon: 🔊 (on) / 🔇 (off)
+  - [x] Click: toggles autoPlay + saves to localStorage
+  - [x] Toast notification on toggle
+- [x] **4.3.4** localStorage: 'tts-autoplay' persistence
 
 ### 4.4 Audio-Button (1h) ✅ **BEREITS IMPLEMENTIERT**
 
