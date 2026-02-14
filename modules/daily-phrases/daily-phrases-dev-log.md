@@ -494,3 +494,124 @@ WHERE routine_name LIKE '%fsrs%';
 
 ---
 
+## 📅 Session 15: Phase 3.4 - Swipe-Gesten (ABGESCHLOSSEN)
+**Datum:** 2026-02-15
+**Zeit:** 02:15 - 02:45 Uhr (30 Min)
+**Status:** ✅ Erledigt
+**Commit:** `6e1c4ab`
+
+### ✅ Phase 3.4: Swipe-Gesten implementiert
+**Zeit:** 2026-02-15 02:15 - 02:45 Uhr (30 Min)
+**Status:** ✅ Erledigt
+
+**Ziel:**
+Touch-optimierte Swipe-Gesten für FlashcardFSRS mit visueller Feedback-Anzeige.
+
+**Durchgeführte Schritte:**
+
+1. ✅ **react-swipeable Installation**
+   - `npm install react-swipeable`
+   - Library für Touch/Swipe-Events
+   - Zero-Dependencies, lightweight
+
+2. ✅ **Swipe-Handlers implementiert**
+   - Import: `import { useSwipeable } from 'react-swipeable'`
+   - Hook-Konfiguration:
+     ```typescript
+     const handlers = useSwipeable({
+       onSwipedLeft: () => onRating(1),   // Again (❌)
+       onSwipedRight: () => onRating(4),  // Easy (🎯)
+       onSwipedUp: () => onRating(3),     // Good (✅)
+       onSwipedDown: () => onRating(2),   // Hard (🟠)
+       trackTouch: true,
+       trackMouse: false,  // Verhindert Konflikte mit onClick
+       delta: 50,          // Min 50px Swipe-Distance
+       preventScrollOnSwipe: true
+     });
+     ```
+   - Nur aktiv wenn Karte geflippt (flipped=true)
+   - onClick auf Vorderseite zum Flippen erhalten
+
+3. ✅ **Visual Feedback Overlay**
+   - State: `swipeDirection: 'left' | 'right' | 'up' | 'down' | null`
+   - Overlay-Component:
+     - Fullscreen-Overlay mit blur backdrop
+     - Color-coded (matching rating button colors)
+     - Large emoji (64px Desktop, 48px Mobile)
+     - Label mit text-shadow
+   - Animation:
+     - 150ms delay vor Rating-Submission
+     - Fade-in + Scale-Animation
+     - Smooth transition
+
+4. ✅ **Swipe-Hint hinzugefügt**
+   - Text: "← Again | ↓ Hard | ↑ Good | Easy →"
+   - Position: Unten auf Card-Rückseite
+   - Font-Size: 11px Desktop, 10px Mobile
+   - Color: rgba(255, 255, 255, 0.4)
+
+5. ✅ **CSS Anpassungen**
+   - `.swipe-overlay` Styles
+   - `.swipe-feedback` mit Flexbox Centering
+   - `.swipe-hint` absolut positioniert
+   - `@keyframes swipeFadeIn` + `swipeScale`
+   - `.flashcard.swiping` Cursor: grabbing
+
+6. ✅ **Mobile Optimierung**
+   - Swipe-Emoji: 48px (Mobile)
+   - Swipe-Label: 18px (Mobile)
+   - Hint: 10px (Mobile)
+   - Touch-Target: min 50px Swipe-Distance
+
+**Technische Details:**
+
+**Swipe-Mapping:**
+| Richtung | Rating | Label | Color | Emoji |
+|----------|--------|-------|-------|-------|
+| ← Left   | 1      | Again | #FF6B6B | ❌ |
+| ↓ Down   | 2      | Hard  | #FFA94D | 🟠 |
+| ↑ Up     | 3      | Good  | #51CF66 | ✅ |
+| → Right  | 4      | Easy  | #339AF0 | 🎯 |
+
+**Event-Flow:**
+1. User swipes auf geflippter Card
+2. `onSwiped*` Handler fired
+3. `setSwipeDirection(direction)` → Overlay erscheint
+4. 150ms Timeout für visuelle Feedback
+5. `onRating(rating)` aufgerufen
+6. `setSwipeDirection(null)` → Overlay verschwindet
+7. Parent-Component zeigt nächste Card
+
+**Features:**
+- ✅ 4-Richtungs-Swipe-Erkennung
+- ✅ Visual Feedback mit Overlay
+- ✅ Color-Coded per Rating
+- ✅ Touch-optimiert (trackMouse disabled)
+- ✅ Verhindert Scroll während Swipe
+- ✅ Smooth Animationen
+- ✅ Swipe-Hint auf Card-Rückseite
+- ✅ Mobile Responsive
+
+---
+
+**Ergebnis:**
+- ✅ Swipe-Gesten vollständig implementiert
+- ✅ Visual Feedback funktioniert smooth
+- ✅ Keine Konflikte mit onClick/Flip
+- ✅ Mobile UX deutlich verbessert
+- 🎯 **Phase 3.4 KOMPLETT!**
+
+**Dateien geändert:**
+- `src/components/learning/FlashcardFSRS.tsx` (+150 Zeilen)
+- `package.json` (react-swipeable dependency)
+
+**Commits:**
+- `6e1c4ab` - feat: implement swipe gestures for FlashcardFSRS (Phase 3.4)
+
+**Nächste Schritte:**
+- Phase 3.5: Progress-Anzeige (Progress Bar + Stats)
+- Phase 3.6: Error Handling (Toast Notifications)
+- Tests mit echten Usern auf Touchscreen-Devices
+
+---
+
