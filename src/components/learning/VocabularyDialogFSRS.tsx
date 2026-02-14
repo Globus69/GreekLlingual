@@ -65,14 +65,20 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
     const [loadError, setLoadError] = useState<string | null>(null);
     const [autoPlay, setAutoPlay] = useState(true); // Auto-play TTS on flip
     const [isPlaying, setIsPlaying] = useState(false); // TTS playing state
+    const [speechRate, setSpeechRate] = useState<number>(0.9); // 0.6 = slow, 0.9 = normal, 1.2 = fast
 
     const STUDENT_ID = user?.id || '';
 
-    // Load auto-play preference from localStorage
+    // Load preferences from localStorage
     useEffect(() => {
-        const saved = localStorage.getItem('tts-autoplay');
-        if (saved !== null) {
-            setAutoPlay(saved === 'true');
+        const savedAutoPlay = localStorage.getItem('tts-autoplay');
+        if (savedAutoPlay !== null) {
+            setAutoPlay(savedAutoPlay === 'true');
+        }
+
+        const savedRate = localStorage.getItem('tts-speed');
+        if (savedRate !== null) {
+            setSpeechRate(parseFloat(savedRate));
         }
     }, []);
 
@@ -125,16 +131,18 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
         if (!text) return;
 
         setIsPlaying(true);
-        const result = await speakGreek(text, { rate: 0.9 });
+        const result = await speakGreek(text, { rate: speechRate });
 
         if (!result.success) {
             warning(result.message || 'Failed to play audio');
         }
 
-        // Reset playing state after a delay (speech duration estimate)
+        // Reset playing state after a delay (speech duration estimate adjusted for rate)
+        const baseDuration = text.length * 100; // 100ms per character
+        const adjustedDuration = baseDuration / speechRate; // Slower rate = longer duration
         setTimeout(() => {
             setIsPlaying(false);
-        }, text.length * 100); // Rough estimate: 100ms per character
+        }, adjustedDuration);
     };
 
     // Auto-play TTS when card flips (if enabled)
@@ -147,6 +155,28 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
             return () => clearTimeout(timer);
         }
     }, [flipped, currentIndex, autoPlay, vocabulary.length]);
+
+    // Speed control helper
+    const getSpeedLabel = (rate: number): { label: string; emoji: string } => {
+        if (rate <= 0.7) return { label: 'Slow', emoji: '🐢' };
+        if (rate <= 1.0) return { label: 'Normal', emoji: '▶️' };
+        return { label: 'Fast', emoji: '🐇' };
+    };
+
+    const cycleSpeed = () => {
+        let newRate: number;
+        if (speechRate <= 0.7) {
+            newRate = 0.9; // Slow → Normal
+        } else if (speechRate <= 1.0) {
+            newRate = 1.2; // Normal → Fast
+        } else {
+            newRate = 0.6; // Fast → Slow
+        }
+        setSpeechRate(newRate);
+        localStorage.setItem('tts-speed', String(newRate));
+        const speedInfo = getSpeedLabel(newRate);
+        info(`Speed: ${speedInfo.emoji} ${speedInfo.label}`);
+    };
 
     // Keyboard shortcuts (1=Again, 2=Hard, 3=Good, 4=Easy, Space=Flip)
     useEffect(() => {
@@ -552,6 +582,14 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     >
                         {autoPlay ? '🔊' : '🔇'} Auto
                     </button>
+                    <button
+                        onClick={cycleSpeed}
+                        className="btn-speed"
+                        aria-label="Change speech speed"
+                        title={`Speed: ${getSpeedLabel(speechRate).label}`}
+                    >
+                        {getSpeedLabel(speechRate).emoji}
+                    </button>
                     <button onClick={handleCancel} className="btn-cancel">
                         × {t('btn.cancel')}
                     </button>
@@ -772,7 +810,7 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     justify-content: center;
                 }
 
-                .btn-secondary, .btn-audio, .btn-autoplay, .btn-cancel {
+                .btn-secondary, .btn-audio, .btn-autoplay, .btn-speed, .btn-cancel {
                     padding: 12px 24px;
                     border-radius: 12px;
                     border: none;
@@ -831,6 +869,23 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     background: rgba(255, 159, 10, 0.3);
                     color: #FF9F0A;
                     border: 1px solid rgba(255, 159, 10, 0.4);
+                }
+
+                .btn-speed {
+                    background: rgba(94, 92, 230, 0.15);
+                    color: rgba(94, 92, 230, 0.9);
+                    font-size: 20px;
+                    padding: 12px 16px;
+                    min-width: 56px;
+                }
+
+                .btn-speed:hover {
+                    background: rgba(94, 92, 230, 0.25);
+                    transform: scale(1.1);
+                }
+
+                .btn-speed:active {
+                    transform: scale(0.95);
                 }
 
                 .btn-cancel {
@@ -896,6 +951,22 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     .stat-chip {
                         padding: 3px 10px;
                         font-size: 11px;
+                    }
+
+                    .dialog-footer {
+                        flex-wrap: wrap;
+                        gap: 8px;
+                    }
+
+                    .btn-secondary, .btn-audio, .btn-autoplay, .btn-speed, .btn-cancel {
+                        padding: 10px 16px;
+                        font-size: 13px;
+                    }
+
+                    .btn-speed {
+                        font-size: 18px;
+                        padding: 10px 12px;
+                        min-width: 48px;
                     }
                 }
             `}</style>
