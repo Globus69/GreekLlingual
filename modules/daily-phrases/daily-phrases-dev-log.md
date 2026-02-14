@@ -754,3 +754,195 @@ const totalRatings = ratings.again + ratings.hard + ratings.good + ratings.easy;
 
 ---
 
+## 📅 Session 17: Phase 3.6 - Error Handling (ABGESCHLOSSEN)
+**Datum:** 2026-02-15
+**Zeit:** 03:05 - 03:40 Uhr (35 Min)
+**Status:** ✅ Erledigt
+**Commit:** `ba65b49`
+
+### ✅ Phase 3.6: Error Handling & Toast Notifications implementiert
+**Zeit:** 2026-02-15 03:05 - 03:40 Uhr (35 Min)
+**Status:** ✅ Erledigt
+
+**Ziel:**
+Robustes Error Handling mit Toast Notifications für alle Fehlerszenarien.
+
+**Durchgeführte Schritte:**
+
+1. ✅ **Toast Component System erstellt**
+   - Datei: `src/components/ui/toast.tsx` (220 Zeilen)
+   - Toast Component:
+     - Props: message, type, duration, onClose
+     - Auto-dismiss: 3000ms default
+     - Manual close: × button
+     - Animations: fade-in + slide-down (0.3s)
+   - 4 Toast Types:
+     ```typescript
+     success: { emoji: '✅', color: '#34C759' }
+     error:   { emoji: '❌', color: '#FF453A' }
+     warning: { emoji: '⚠️', color: '#FF9F0A' }
+     info:    { emoji: 'ℹ️', color: '#007AFF' }
+     ```
+   - useToast Hook:
+     - `showToast(message, type, duration?)`
+     - Convenience methods: `success()`, `error()`, `warning()`, `info()`
+     - Toast queue management
+   - ToastContainer: Multi-toast rendering
+
+2. ✅ **Offline/Online Detection**
+   - useEffect mit window event listeners
+   - Events: 'online', 'offline'
+   - State: `isOnline` (boolean)
+   - Auto-Toast:
+     - Online: info('Connection restored')
+     - Offline: warning('You are offline...')
+   - Initial check: `navigator.onLine`
+
+3. ✅ **loadDueCards Error Handling**
+   - Offline check vor RPC-Call
+   - RPC error → error toast + retry button
+   - Network error → error toast mit details
+   - State: `loadError` für Error UI
+   - Empty State differenziert:
+     - Error: ❌ + error message + Retry button
+     - Empty: 🎉 + "All caught up!" message
+
+4. ✅ **handleRating Error Handling**
+   - Offline check vor Update
+   - Offline → warning toast, continue anyway
+   - RPC error → warning toast, optimistic update
+   - Catch error → warning toast, continue
+   - Keine Blockierung der User-Experience
+
+5. ✅ **UI States implementiert**
+   - Loading State:
+     - Spinner animation (rotate 360deg, 1s)
+     - Text: "Loading..." (i18n)
+   - Empty State (Error):
+     - ❌ headline
+     - Error message (monospace, red bordered)
+     - Buttons: Retry + Back to Dashboard
+   - Empty State (Success):
+     - 🎉 headline
+     - Success message
+     - Hint text: "All caught up!"
+     - Button: Back to Dashboard
+
+6. ✅ **CSS Styles hinzugefügt**
+   - `.empty-state`: padding, center align
+   - `.error-message`: red background, monospace, border
+   - `.empty-actions`: button group flex
+   - `.loading-state`: spinner + text
+   - `.spinner`: 48px, border-top blue, rotate animation
+   - `@keyframes spin`: 360deg rotation
+
+**Technische Details:**
+
+**Toast System:**
+```typescript
+// Usage in component
+const { toasts, removeToast, error, warning, success, info } = useToast();
+
+// Show toast
+error('Failed to load cards. Please try again.');
+warning('Offline - changes will not be saved');
+success('Card updated successfully!');
+info('Connection restored');
+
+// Render toasts
+<ToastContainer toasts={toasts} onRemove={removeToast} />
+```
+
+**Offline Detection:**
+```typescript
+useEffect(() => {
+  const handleOnline = () => {
+    setIsOnline(true);
+    info('Connection restored');
+  };
+  const handleOffline = () => {
+    setIsOnline(false);
+    warning('You are offline. Changes may not be saved.');
+  };
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+  setIsOnline(navigator.onLine); // Initial state
+  return () => {
+    window.removeEventListener('online', handleOnline);
+    window.removeEventListener('offline', handleOffline);
+  };
+}, []);
+```
+
+**Error State Differentiation:**
+```jsx
+{loadError ? (
+  <>
+    <h2>❌ Error Loading Cards</h2>
+    <p className="error-message">{loadError}</p>
+    <button onClick={() => loadDueCards()}>🔄 Retry</button>
+  </>
+) : (
+  <>
+    <h2>🎉 No cards due</h2>
+    <p>All caught up! ...</p>
+  </>
+)}
+```
+
+**Features:**
+- ✅ Toast notification system (4 types)
+- ✅ Offline/Online detection
+- ✅ RPC error handling with toasts
+- ✅ Retry button for failed loads
+- ✅ Optimistic updates (continue on error)
+- ✅ Empty state differentiation
+- ✅ Loading state with spinner
+- ✅ Error message styling
+- ✅ Mobile responsive toasts
+- ✅ Auto-dismiss + manual close
+
+**Error Scenarios Handled:**
+1. ❌ RPC error beim Laden → Error toast + Retry
+2. ❌ RPC error beim Update → Warning toast, continue
+3. ⚠️ Offline detection → Warning toast
+4. 🎉 No cards due → Success state (not error)
+5. 🔄 Network timeout → Error toast + Retry
+6. ℹ️ Connection restored → Info toast
+
+---
+
+**Ergebnis:**
+- ✅ Vollständiges Error Handling System
+- ✅ Toast Notifications funktionsfähig
+- ✅ Offline/Online Detection aktiv
+- ✅ User-friendly Error Messages
+- ✅ Retry-Mechanismus implementiert
+- ✅ Optimistic Updates (keine Blockierung)
+- 🎯 **Phase 3.6 KOMPLETT!**
+- 🎉 **PHASE 3 ZU 100% ABGESCHLOSSEN!**
+
+**Dateien erstellt:**
+- `src/components/ui/toast.tsx` (220 Zeilen)
+
+**Dateien geändert:**
+- `src/components/learning/VocabularyDialogFSRS.tsx` (+185 Zeilen)
+
+**Commits:**
+- `ba65b49` - feat: implement comprehensive error handling (Phase 3.6)
+
+**Phase 3 - Finale Statistik:**
+- ✅ 3.1: FSRS Integration (7/7) - Commit 25470b0
+- ✅ 3.4: Swipe-Gesten (7/7) - Commit 6e1c4ab
+- ✅ 3.5: Progress-Anzeige (4/4) - Commit 9fa56ca
+- ✅ 3.6: Error-Handling (4/4) - Commit ba65b49
+- **Total: 22/22 Tasks (100%)**
+
+**Nächste Schritte:**
+- 🧪 Integration Testing (alle Features zusammen testen)
+- 📚 Phase 1: FSRS-6 Core Library abschließen
+- 🔊 Phase 4: Lautschrift & TTS erweitern
+- 📊 Phase 5: Analytics & Stats Dashboard
+
+---
+
