@@ -352,21 +352,145 @@ WHERE routine_name LIKE '%fsrs%';
 
 ---
 
-### 🔄 Phase 1 Start: FSRS-6 Core Library
-**Zeit:** 2026-02-15 00:50 Uhr
-**Status:** 🟡 In Arbeit
+### ✅ Phase 1: FSRS-6 Core Library (BEREITS ABGESCHLOSSEN)
+**Zeit:** 2026-02-14 23:56 - 00:10 Uhr
+**Status:** ✅ Erledigt (siehe Session Log oben)
 
-**Aktueller Task:** 1.1 Setup & Typen (2h, 3 Sub-Tasks)
+**Hinweis:** Phase 1 wurde bereits gestern Abend vollständig implementiert:
+- ✅ fsrs-types.ts (120 Zeilen)
+- ✅ fsrs-constants.ts (100 Zeilen)
+- ✅ fsrs-scheduler.ts (250 Zeilen)
+- ✅ Unit-Tests (300 Zeilen)
 
-**Ziel:**
-- Ordner `src/lib/fsrs/` erstellen
-- TypeScript Interfaces definieren (Card, Rating, State, etc.)
-- FSRS-6 Konstanten (21 Parameter, Retention 90%)
+---
+
+### ✅ Phase 3.1: FSRS Integration in VocabularyDialog (ABGESCHLOSSEN)
+**Zeit:** 2026-02-15 01:00 - 02:15 Uhr (75 Min)
+**Status:** ✅ Erledigt
+
+**Durchgeführte Schritte:**
+
+1. ✅ **VocabularyDialogFSRS.tsx** erstellt (660 Zeilen)
+   - Import: FSRSScheduler aus `@/lib/fsrs/fsrs-scheduler`
+   - Import: Card, Rating Types aus `@/lib/fsrs/fsrs-types`
+   - Extended Interface: FSRSLearningItem mit allen FSRS-Feldern
+     - fsrs_difficulty, fsrs_stability, fsrs_due, fsrs_reps, fsrs_lapses, fsrs_state
+     - phonetic (IPA Lautschrift)
+     - greek_word (alternative zu greek)
+   - useMemo: FSRSScheduler instance (Performance-Optimierung)
+
+2. ✅ **loadDueCards() Funktion**
+   - RPC-Call: `get_due_cards_fsrs(p_user_id, p_level, p_limit: 100)`
+   - Filter nach User-Level (A1, A2, B1, B2)
+   - Nur fällige Karten (fsrs_due <= NOW())
+   - Error-Handling + Loading-States
+
+3. ✅ **handleRating() Funktion - FSRS-Algorithmus**
+   - Erstellt FSRS Card-Objekt aus DB-Item
+   - Ruft `scheduler.rate(card, rating, now)` auf
+   - Berechnet neuen Interval via `scheduler.calculateInterval(stability)`
+   - Logging: Difficulty/Stability Before/After, Interval, State-Transition
+   - RPC-Call: `update_card_fsrs` mit 12 Parametern:
+     - p_card_id, p_user_id, p_rating
+     - p_new_difficulty, p_new_stability, p_new_due
+     - p_new_reps, p_new_lapses, p_new_state
+     - p_interval_days, p_old_difficulty, p_old_stability
+   - Optimistic Update: Geht zum nächsten Card auch bei RPC-Fehler
+
+4. ✅ **Ratings-System: 4 Buttons**
+   - 1 = Again (❌ Rot) → Difficulty steigt, Stability sinkt, State → relearning
+   - 2 = Hard (🟠 Orange) → Kleinerer Interval-Anstieg
+   - 3 = Good (✅ Grün) → Standard-Interval
+   - 4 = Easy (🎯 Blau) → Größerer Interval-Anstieg
+   - Stats-Counter: again, hard, good, easy getrennt gezählt
+   - Correct-Counter: rating >= 3 = correct
+
+5. ✅ **Keyboard Shortcuts**
+   - Space: Flip card
+   - 1/2/3/4: Rating (nur wenn geflippt)
+   - A: Audio abspielen (TTS)
+   - Escape: Blockiert (Dialog nur über Button schließbar)
+
+6. ✅ **TTS Audio-Support**
+   - playAudio(): Web Speech API
+   - Sprache: el-GR (Griechisch)
+   - Rate: 0.9 (etwas langsamer für Lernen)
+   - Automatische Greek Voice Selection
+
+7. ✅ **Session-Summary**
+   - Correct/Total Anzeige
+   - Accuracy Percentage
+   - Rating-Breakdown (Again/Hard/Good/Easy Counts)
+   - Performance Evaluation Hook (bestehendes System)
+   - Restart & Back-to-Dashboard Buttons
+
+---
+
+**Neue Datei: FlashcardFSRS.tsx** (230 Zeilen)
+
+1. ✅ **Props-Interface**
+   - front (English/Russian)
+   - back (Greek)
+   - phonetic (IPA)
+   - example (Greek sentence)
+   - flipped (Boolean State)
+   - onFlip, onRating Callbacks
+
+2. ✅ **Flip-Animation**
+   - CSS transform: rotateY(180deg)
+   - Perspective: 1000px
+   - Transition: 0.6s cubic-bezier
+   - Backface-visibility: hidden
+
+3. ✅ **4-Button Rating-Interface**
+   - RATING_BUTTONS Konstante:
+     - Rating 1-4, Label, Color, Emoji, Keyboard-Key
+   - Grid Layout: 4 Spalten Desktop, 2 Spalten Mobile
+   - Color-Coded: CSS Custom Properties (--btn-color)
+   - Hover-Effekt: translateY(-4px) + Shadow
+   - Active-Effekt: scale(0.98)
+
+4. ✅ **Visual Design**
+   - Glasmorphismus: backdrop-filter blur(10px)
+   - Border-Radius: 16-24px
+   - Button-Height: min 80px (Touch-Target)
+   - Emoji: 28px (24px Mobile)
+   - Keyboard-Hint: Top-Right Corner Badge
+
+5. ✅ **Phonetic Display**
+   - Font-Style: Italic
+   - Color: #A8A8AD (dezent grau)
+   - Format: /phonetic/
+   - Position: Unter Greek Word
+
+6. ✅ **Responsive Design**
+   - Mobile: 2-Column Grid
+   - Button-Height: 70px (Mobile)
+   - Font-Sizes skalieren
+   - Card-Height: 350px (Mobile)
+
+---
+
+**Ergebnis:**
+- ✅ Vollständige FSRS-6 Integration
+- ✅ 4-Rating-System funktionsfähig
+- ✅ DB-Persistenz via RPC
+- ✅ Keyboard Shortcuts
+- ✅ TTS Audio
+- ✅ Mobile Responsive
+- 🎯 **Bereit für Tests mit echten Usern!**
+
+**Dateien:**
+- `src/components/learning/VocabularyDialogFSRS.tsx` (660 Zeilen)
+- `src/components/learning/FlashcardFSRS.tsx` (230 Zeilen)
+
+**Commits:**
+- `25470b0` - feat: implement FSRS-6 integration for VocabularyDialog (Phase 3.1)
 
 **Nächste Schritte:**
-1. [ ] **1.1.1** Ordner erstellen: `src/lib/fsrs/`
-2. [ ] **1.1.2** Datei: `fsrs-types.ts` erstellen
-3. [ ] **1.1.3** Datei: `fsrs-constants.ts` erstellen
+- Phase 3.4: Swipe-Gesten (react-swipeable)
+- Phase 3.5: Progress-Anzeige (Progress Bar)
+- Phase 3.6: Error Handling (Toast Notifications)
 
 ---
 
