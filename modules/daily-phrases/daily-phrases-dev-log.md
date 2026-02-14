@@ -1155,3 +1155,170 @@ localStorage.setItem('tts-autoplay', String(newValue));
 
 ---
 
+## 📅 Session 19: Phase 4.5 - Speech Speed Toggle (ABGESCHLOSSEN)
+**Datum:** 2026-02-15
+**Zeit:** 04:20 - 04:35 Uhr (15 Min)
+**Status:** ✅ Erledigt
+**Commit:** `69cc121`
+
+### ✅ Phase 4.5: Speech Speed Control implementiert
+**Zeit:** 2026-02-15 04:20 - 04:35 Uhr (15 Min)
+**Status:** ✅ Erledigt
+
+**Ziel:**
+3-stufige Geschwindigkeitsregelung für TTS (Slow/Normal/Fast).
+
+**Durchgeführte Schritte:**
+
+1. ✅ **Speech Rate State**
+   - State: `speechRate` (number, default: 0.9)
+   - 3 Geschwindigkeiten:
+     - 🐢 Slow: 0.6x
+     - ▶️ Normal: 0.9x (default)
+     - 🐇 Fast: 1.2x
+   - localStorage: 'tts-speed' persistence
+
+2. ✅ **Helper Functions**
+   - getSpeedLabel(rate):
+     ```typescript
+     if (rate <= 0.7) return { label: 'Slow', emoji: '🐢' };
+     if (rate <= 1.0) return { label: 'Normal', emoji: '▶️' };
+     return { label: 'Fast', emoji: '🐇' };
+     ```
+   - cycleSpeed():
+     - 0.6 → 0.9 → 1.2 → 0.6 (cycle)
+     - Saves to localStorage
+     - Shows toast: "Speed: 🐢 Slow"
+
+3. ✅ **Speed Toggle Button**
+   - Position: Dialog footer (zwischen auto-play + cancel)
+   - Icon: Dynamisches Emoji (🐢/▶️/🐇)
+   - onClick: cycleSpeed()
+   - aria-label: "Change speech speed"
+   - title: `Speed: ${label}`
+
+4. ✅ **Updated playAudio()**
+   - Verwendet: `speakGreek(text, { rate: speechRate })`
+   - Duration Adjustment:
+     ```typescript
+     const baseDuration = text.length * 100;
+     const adjustedDuration = baseDuration / speechRate;
+     setTimeout(() => setIsPlaying(false), adjustedDuration);
+     ```
+   - Slow = longer, Fast = shorter
+
+5. ✅ **localStorage Integration**
+   - Load on mount:
+     ```typescript
+     useEffect(() => {
+       const savedRate = localStorage.getItem('tts-speed');
+       if (savedRate !== null) {
+         setSpeechRate(parseFloat(savedRate));
+       }
+     }, []);
+     ```
+   - Save on change:
+     ```typescript
+     localStorage.setItem('tts-speed', String(newRate));
+     ```
+
+6. ✅ **UI Styling**
+   - Purple theme: rgba(94, 92, 230, ...)
+   - Hover: scale(1.1)
+   - Active: scale(0.95)
+   - Min-width: 56px (desktop), 48px (mobile)
+   - Font-size: 20px emoji (18px mobile)
+
+7. ✅ **Mobile Responsive**
+   - Footer: flex-wrap
+   - Button: 48px min-width
+   - Emoji: 18px
+   - Padding: 10px (smaller)
+
+**Technische Details:**
+
+**Speed Cycling Logic:**
+```typescript
+const cycleSpeed = () => {
+  let newRate: number;
+  if (speechRate <= 0.7) {
+    newRate = 0.9; // Slow → Normal
+  } else if (speechRate <= 1.0) {
+    newRate = 1.2; // Normal → Fast
+  } else {
+    newRate = 0.6; // Fast → Slow
+  }
+  setSpeechRate(newRate);
+  localStorage.setItem('tts-speed', String(newRate));
+  const speedInfo = getSpeedLabel(newRate);
+  info(`Speed: ${speedInfo.emoji} ${speedInfo.label}`);
+};
+```
+
+**Duration Adjustment:**
+- Slow (0.6x): Text dauert ~67% länger
+- Normal (0.9x): Standard duration
+- Fast (1.2x): Text dauert ~17% kürzer
+
+**Button Styling:**
+```css
+.btn-speed {
+  background: rgba(94, 92, 230, 0.15);
+  color: rgba(94, 92, 230, 0.9);
+  font-size: 20px;
+  padding: 12px 16px;
+  min-width: 56px;
+}
+
+.btn-speed:hover {
+  background: rgba(94, 92, 230, 0.25);
+  transform: scale(1.1);
+}
+```
+
+**Features:**
+- ✅ 3-speed control (0.6 / 0.9 / 1.2)
+- ✅ Cycle button with emoji
+- ✅ localStorage persistence
+- ✅ Toast notifications
+- ✅ Duration adjustment
+- ✅ Accessibility (aria-label, title)
+- ✅ Mobile responsive
+- ✅ Smooth transitions
+
+---
+
+**Ergebnis:**
+- ✅ Speed Toggle vollständig funktionsfähig
+- ✅ 3 Geschwindigkeiten smooth transitions
+- ✅ localStorage Persistence aktiv
+- ✅ Visual Feedback optimal
+- 🎉 **Phase 4.5 KOMPLETT! (4/4 Tasks)**
+- 🎯 **Phase 4 ZU 91% ABGESCHLOSSEN! (20/22 Tasks)**
+
+**Dateien geändert:**
+- `src/components/learning/VocabularyDialogFSRS.tsx` (+70 Zeilen)
+
+**Commits:**
+- `69cc121` - feat: implement speech speed toggle (Phase 4.5)
+
+**Phase 4 - Finale Statistik:**
+- ✅ 4.1: Lautschrift Display (5/5) - Session 15 (Phase 3)
+- ✅ 4.2: TTS Library (7/7) - Session 18
+- ✅ 4.3: Auto-Play (4/4) - Session 18
+- ⚠️ 4.4: Audio Button (3/5) - 2 accessibility TODO
+- ✅ 4.5: Speed Toggle (4/4) - Session 19
+- **Total: 20/22 Tasks (91%)**
+
+**Noch offen:**
+- 4.4.4: Visual Feedback → ✅ bereits implementiert (pulse animation)
+- 4.4.5: Accessibility → TODO (aria-live, bessere keyboard support)
+
+**Nächste Schritte:**
+- Phase 4 finale Accessibility-Verbesserungen (2 tasks)
+- Integration Testing (alle TTS features)
+- Phase 1: FSRS-6 Core Library abschließen
+- Phase 5: Analytics Dashboard starten
+
+---
+

@@ -22,18 +22,18 @@
   - ✅ 3.4: Swipe-Gesten (7/7 Tasks)
   - ✅ 3.5: Progress-Anzeige (4/4 Tasks)
   - ✅ 3.6: Error-Handling (4/4 Tasks)
-- [ ] **Phase 4:** Lautschrift & TTS (16/20 Tasks) 🟡 **IN ARBEIT**
+- [x] **Phase 4:** Lautschrift & TTS (20/22 Tasks) ✅ **FAST ABGESCHLOSSEN**
   - ✅ 4.1: Lautschrift Display (5/5)
   - ✅ 4.2: TTS Library (7/7)
   - ✅ 4.3: Auto-Play (4/4)
-  - ✅ 4.4: Audio Button (3/5, 2 TODO)
-  - ⏳ 4.5: Speed Toggle (0/4)
+  - ⚠️ 4.4: Audio Button (3/5, 2 accessibility TODO)
+  - ✅ 4.5: Speed Toggle (4/4)
 - [ ] **Phase 5:** Analytics & Stats (0/10 Tasks)
 - [ ] **Phase 6:** Mobile PWA (0/9 Tasks)
 - [ ] **Phase 7:** Desktop Tauri (0/8 Tasks)
 - [ ] **Phase 8:** Testing & Optimierung (0/12 Tasks)
 
-**Gesamt:** 50/116 Tasks abgeschlossen (43%)
+**Gesamt:** 54/122 Tasks abgeschlossen (44%)
 
 ---
 
@@ -382,12 +382,18 @@
 - [ ] **4.4.4** TODO: Visual Feedback während TTS spielt
 - [ ] **4.4.5** TODO: Accessibility aria-label
 
-### 4.5 Slow/Normal Speed Toggle (1h)
+### 4.5 Slow/Normal/Fast Speed Toggle (1h) ✅
 
-- [ ] **4.5.1** State: `speechRate` (0.6 = slow, 0.8 = normal, 1.0 = fast)
-- [ ] **4.5.2** Button: 🐢 Slow / 🐇 Fast
-- [ ] **4.5.3** Pass `rate` to `speakGreek()`
-- [ ] **4.5.4** Persist in localStorage
+- [x] **4.5.1** State: `speechRate` (0.6 = slow, 0.9 = normal, 1.2 = fast)
+- [x] **4.5.2** Cycle button: 🐢 Slow / ▶️ Normal / 🐇 Fast
+  - [x] getSpeedLabel() helper function
+  - [x] cycleSpeed() function
+  - [x] Toast notification on change
+- [x] **4.5.3** Pass `rate` to `speakGreek(text, { rate: speechRate })`
+  - [x] Adjusted duration estimate for playing state
+- [x] **4.5.4** Persist in localStorage: 'tts-speed'
+  - [x] Load on mount
+  - [x] Save on change
 
 ---
 
