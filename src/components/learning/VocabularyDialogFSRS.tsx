@@ -66,6 +66,7 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
     const [autoPlay, setAutoPlay] = useState(true); // Auto-play TTS on flip
     const [isPlaying, setIsPlaying] = useState(false); // TTS playing state
     const [speechRate, setSpeechRate] = useState<number>(0.9); // 0.6 = slow, 0.9 = normal, 1.2 = fast
+    const [announceMessage, setAnnounceMessage] = useState<string>(''); // Screen reader announcements
 
     const STUDENT_ID = user?.id || '';
 
@@ -131,10 +132,13 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
         if (!text) return;
 
         setIsPlaying(true);
+        setAnnounceMessage(`Playing pronunciation: ${text}`);
+
         const result = await speakGreek(text, { rate: speechRate });
 
         if (!result.success) {
             warning(result.message || 'Failed to play audio');
+            setAnnounceMessage('Audio playback failed');
         }
 
         // Reset playing state after a delay (speech duration estimate adjusted for rate)
@@ -142,6 +146,7 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
         const adjustedDuration = baseDuration / speechRate; // Slower rate = longer duration
         setTimeout(() => {
             setIsPlaying(false);
+            setAnnounceMessage('Playback complete');
         }, adjustedDuration);
     };
 
@@ -175,7 +180,9 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
         setSpeechRate(newRate);
         localStorage.setItem('tts-speed', String(newRate));
         const speedInfo = getSpeedLabel(newRate);
-        info(`Speed: ${speedInfo.emoji} ${speedInfo.label}`);
+        const message = `Speed: ${speedInfo.emoji} ${speedInfo.label}`;
+        setAnnounceMessage(message);
+        info(message);
     };
 
     // Keyboard shortcuts (1=Again, 2=Hard, 3=Good, 4=Easy, Space=Flip)
@@ -564,8 +571,10 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     <button
                         onClick={playAudio}
                         className={`btn-audio ${isPlaying ? 'playing' : ''}`}
-                        aria-label="Play pronunciation"
+                        aria-label={isPlaying ? 'Playing pronunciation' : 'Play pronunciation'}
+                        aria-busy={isPlaying}
                         title="Play audio (A)"
+                        disabled={isPlaying}
                     >
                         {isPlaying ? '🔊' : '🔊'} {t('btn.audio')}
                     </button>
@@ -574,10 +583,12 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                             const newValue = !autoPlay;
                             setAutoPlay(newValue);
                             localStorage.setItem('tts-autoplay', String(newValue));
+                            setAnnounceMessage(newValue ? 'Auto-play enabled' : 'Auto-play disabled');
                             info(newValue ? 'Auto-play enabled' : 'Auto-play disabled');
                         }}
                         className={`btn-autoplay ${autoPlay ? 'active' : ''}`}
                         aria-label="Toggle auto-play"
+                        aria-pressed={autoPlay}
                         title={`Auto-play: ${autoPlay ? 'ON' : 'OFF'}`}
                     >
                         {autoPlay ? '🔊' : '🔇'} Auto
@@ -585,7 +596,7 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     <button
                         onClick={cycleSpeed}
                         className="btn-speed"
-                        aria-label="Change speech speed"
+                        aria-label={`Change speech speed. Current: ${getSpeedLabel(speechRate).label}`}
                         title={`Speed: ${getSpeedLabel(speechRate).label}`}
                     >
                         {getSpeedLabel(speechRate).emoji}
@@ -842,6 +853,11 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     animation: pulse 1s ease-in-out infinite;
                 }
 
+                .btn-audio:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+
                 @keyframes pulse {
                     0%, 100% {
                         transform: scale(1);
@@ -973,6 +989,30 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
 
             {/* Toast Notifications */}
             <ToastContainer toasts={toasts} onRemove={removeToast} />
+
+            {/* Screen Reader Announcements */}
+            <div
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                className="sr-only"
+            >
+                {announceMessage}
+            </div>
+
+            <style jsx>{`
+                .sr-only {
+                    position: absolute;
+                    width: 1px;
+                    height: 1px;
+                    padding: 0;
+                    margin: -1px;
+                    overflow: hidden;
+                    clip: rect(0, 0, 0, 0);
+                    white-space: nowrap;
+                    border-width: 0;
+                }
+            `}</style>
         </div>
     );
 }
