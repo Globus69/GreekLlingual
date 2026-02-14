@@ -1,6 +1,7 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useSwipeable } from 'react-swipeable';
 import { useTranslation } from '@/lib/use-translation';
 import type { Rating } from '@/lib/fsrs/fsrs-types';
 
@@ -33,17 +34,81 @@ export default function FlashcardFSRS({
     showRatingButtons = true
 }: FlashcardFSRSProps) {
     const { t } = useTranslation();
+    const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | 'up' | 'down' | null>(null);
 
     const handleRatingClick = (e: React.MouseEvent, rating: Rating) => {
         e.stopPropagation();
         onRating(rating);
     };
 
+    // Swipe gesture handlers (only active when flipped)
+    const handlers = useSwipeable({
+        onSwipedLeft: () => {
+            if (flipped) {
+                setSwipeDirection('left');
+                setTimeout(() => {
+                    onRating(1); // Again
+                    setSwipeDirection(null);
+                }, 150);
+            }
+        },
+        onSwipedRight: () => {
+            if (flipped) {
+                setSwipeDirection('right');
+                setTimeout(() => {
+                    onRating(4); // Easy
+                    setSwipeDirection(null);
+                }, 150);
+            }
+        },
+        onSwipedUp: () => {
+            if (flipped) {
+                setSwipeDirection('up');
+                setTimeout(() => {
+                    onRating(3); // Good
+                    setSwipeDirection(null);
+                }, 150);
+            }
+        },
+        onSwipedDown: () => {
+            if (flipped) {
+                setSwipeDirection('down');
+                setTimeout(() => {
+                    onRating(2); // Hard
+                    setSwipeDirection(null);
+                }, 150);
+            }
+        },
+        trackMouse: false, // Disable mouse tracking to prevent conflicts with click
+        trackTouch: true,
+        delta: 50, // Minimum swipe distance in pixels
+        preventScrollOnSwipe: true,
+    });
+
+    // Get swipe feedback data
+    const getSwipeFeedback = () => {
+        switch (swipeDirection) {
+            case 'left':
+                return { color: '#FF6B6B', emoji: '❌', label: 'Again' };
+            case 'right':
+                return { color: '#339AF0', emoji: '🎯', label: 'Easy' };
+            case 'up':
+                return { color: '#51CF66', emoji: '✅', label: 'Good' };
+            case 'down':
+                return { color: '#FFA94D', emoji: '🟠', label: 'Hard' };
+            default:
+                return null;
+        }
+    };
+
+    const swipeFeedback = getSwipeFeedback();
+
     return (
         <div className="flashcard-container">
             <div
-                className={`flashcard ${flipped ? 'flipped' : ''}`}
-                onClick={onFlip}
+                {...(flipped ? handlers : {})}
+                className={`flashcard ${flipped ? 'flipped' : ''} ${swipeDirection ? 'swiping' : ''}`}
+                onClick={!flipped ? onFlip : undefined}
             >
                 {/* Front Face */}
                 <div className="flashcard-face flashcard-front">
@@ -61,7 +126,27 @@ export default function FlashcardFSRS({
                     {example && (
                         <div className="example-sentence">{example}</div>
                     )}
+                    {flipped && (
+                        <div className="swipe-hint">
+                            ← Again | ↓ Hard | ↑ Good | Easy →
+                        </div>
+                    )}
                 </div>
+
+                {/* Swipe Feedback Overlay */}
+                {swipeFeedback && (
+                    <div
+                        className="swipe-overlay"
+                        style={{
+                            '--overlay-color': swipeFeedback.color
+                        } as React.CSSProperties}
+                    >
+                        <div className="swipe-feedback">
+                            <span className="swipe-emoji">{swipeFeedback.emoji}</span>
+                            <span className="swipe-label">{swipeFeedback.label}</span>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Rating Buttons (4-Button FSRS System) */}
@@ -176,6 +261,82 @@ export default function FlashcardFSRS({
                     font-weight: 500;
                 }
 
+                .swipe-hint {
+                    position: absolute;
+                    bottom: 16px;
+                    font-size: 11px;
+                    color: rgba(255, 255, 255, 0.4);
+                    font-weight: 600;
+                    letter-spacing: 0.5px;
+                    text-align: center;
+                    width: 100%;
+                    padding: 0 20px;
+                }
+
+                /* Swipe Overlay */
+                .swipe-overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: color-mix(in srgb, var(--overlay-color) 25%, rgba(0, 0, 0, 0.7));
+                    backdrop-filter: blur(8px);
+                    border-radius: 24px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    animation: swipeFadeIn 0.15s ease-out;
+                    z-index: 10;
+                    pointer-events: none;
+                }
+
+                .swipe-feedback {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 12px;
+                    animation: swipeScale 0.15s ease-out;
+                }
+
+                .swipe-emoji {
+                    font-size: 64px;
+                    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+                }
+
+                .swipe-label {
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #fff;
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
+                    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+                }
+
+                @keyframes swipeFadeIn {
+                    from {
+                        opacity: 0;
+                    }
+                    to {
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes swipeScale {
+                    from {
+                        transform: scale(0.8);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: scale(1);
+                        opacity: 1;
+                    }
+                }
+
+                .flashcard.swiping {
+                    cursor: grabbing;
+                }
+
                 /* Rating Buttons */
                 .rating-buttons {
                     display: grid;
@@ -251,6 +412,19 @@ export default function FlashcardFSRS({
 
                     .phonetic {
                         font-size: 16px;
+                    }
+
+                    .swipe-hint {
+                        font-size: 10px;
+                        bottom: 12px;
+                    }
+
+                    .swipe-emoji {
+                        font-size: 48px;
+                    }
+
+                    .swipe-label {
+                        font-size: 18px;
                     }
 
                     .rating-buttons {
