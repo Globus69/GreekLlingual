@@ -389,13 +389,38 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
     // Main vocabulary review interface
     const currentVocab = vocabulary[currentIndex];
     const progress = `${currentIndex + 1} / ${vocabulary.length}`;
+    const progressPercentage = vocabulary.length > 0 ? ((currentIndex + 1) / vocabulary.length) * 100 : 0;
+    const totalRatings = ratings.again + ratings.hard + ratings.good + ratings.easy;
 
     return (
         <div className="dialog-overlay">
             <div className="dialog-content vocabulary-dialog">
                 <div className="dialog-header">
                     <h2>📚 Vocabulary Review (FSRS-6)</h2>
-                    <p className="progress-text">{progress}</p>
+
+                    {/* Progress Bar */}
+                    <div className="progress-section">
+                        <div className="progress-info">
+                            <span className="progress-count">{progress}</span>
+                            <span className="progress-percentage">{Math.round(progressPercentage)}%</span>
+                        </div>
+                        <div className="progress-bar-container">
+                            <div
+                                className="progress-bar-fill"
+                                style={{ width: `${progressPercentage}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Session Stats (if any ratings) */}
+                    {totalRatings > 0 && (
+                        <div className="session-stats-mini">
+                            {ratings.again > 0 && <span className="stat-chip stat-again">❌ {ratings.again}</span>}
+                            {ratings.hard > 0 && <span className="stat-chip stat-hard">🟠 {ratings.hard}</span>}
+                            {ratings.good > 0 && <span className="stat-chip stat-good">✅ {ratings.good}</span>}
+                            {ratings.easy > 0 && <span className="stat-chip stat-easy">🎯 {ratings.easy}</span>}
+                        </div>
+                    )}
                 </div>
 
                 <div className="card-container">
@@ -457,6 +482,98 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     margin-top: 8px;
                 }
 
+                /* Progress Section */
+                .progress-section {
+                    margin-top: 16px;
+                    margin-bottom: 12px;
+                }
+
+                .progress-info {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 8px;
+                }
+
+                .progress-count {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: rgba(255, 255, 255, 0.9);
+                }
+
+                .progress-percentage {
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: rgba(255, 255, 255, 0.5);
+                }
+
+                .progress-bar-container {
+                    width: 100%;
+                    height: 8px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    overflow: hidden;
+                    position: relative;
+                }
+
+                .progress-bar-fill {
+                    height: 100%;
+                    background: linear-gradient(90deg, #007AFF 0%, #00C7BE 100%);
+                    border-radius: 8px;
+                    transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+                    box-shadow: 0 0 12px rgba(0, 199, 190, 0.4);
+                }
+
+                /* Session Stats Mini */
+                .session-stats-mini {
+                    display: flex;
+                    gap: 8px;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                    margin-top: 12px;
+                }
+
+                .stat-chip {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 4px 12px;
+                    border-radius: 12px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid;
+                    transition: transform 0.2s;
+                }
+
+                .stat-chip:hover {
+                    transform: scale(1.05);
+                }
+
+                .stat-again {
+                    background: color-mix(in srgb, #FF6B6B 15%, rgba(28, 28, 32, 0.8));
+                    border-color: color-mix(in srgb, #FF6B6B 30%, transparent);
+                    color: #FF6B6B;
+                }
+
+                .stat-hard {
+                    background: color-mix(in srgb, #FFA94D 15%, rgba(28, 28, 32, 0.8));
+                    border-color: color-mix(in srgb, #FFA94D 30%, transparent);
+                    color: #FFA94D;
+                }
+
+                .stat-good {
+                    background: color-mix(in srgb, #51CF66 15%, rgba(28, 28, 32, 0.8));
+                    border-color: color-mix(in srgb, #51CF66 30%, transparent);
+                    color: #51CF66;
+                }
+
+                .stat-easy {
+                    background: color-mix(in srgb, #339AF0 15%, rgba(28, 28, 32, 0.8));
+                    border-color: color-mix(in srgb, #339AF0 30%, transparent);
+                    color: #339AF0;
+                }
+
                 .card-container {
                     margin: 24px 0;
                 }
@@ -513,6 +630,39 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                     gap: 12px;
                     justify-content: center;
                     margin-top: 24px;
+                }
+
+                /* Mobile Responsive */
+                @media (max-width: 600px) {
+                    .dialog-content {
+                        padding: 24px 16px;
+                    }
+
+                    .progress-info {
+                        font-size: 13px;
+                    }
+
+                    .progress-count {
+                        font-size: 13px;
+                    }
+
+                    .progress-percentage {
+                        font-size: 11px;
+                    }
+
+                    .progress-bar-container {
+                        height: 6px;
+                    }
+
+                    .session-stats-mini {
+                        gap: 6px;
+                        margin-top: 10px;
+                    }
+
+                    .stat-chip {
+                        padding: 3px 10px;
+                        font-size: 11px;
+                    }
                 }
             `}</style>
         </div>
