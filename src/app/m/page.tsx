@@ -4,269 +4,313 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/lib/useTranslation';
-import { supabase } from '@/db/supabase';
+import { useStatsData } from '@/hooks/useStatsData';
+import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
+import { DueCardsSheet } from '@/components/mobile/DueCardsSheet';
 import '@/styles/liquid-glass.css';
 
-/**
- * Mobile Dashboard - Hauptseite der Mobile Web App
- *
- * Features:
- * - 4 Kernmodule: Due Cards, Review, Train Weak Words, Daily Phrases
- * - Minimal Statistics Header (Streak, Due Count, Level)
- * - Touch-optimierte Buttons (min 56px Höhe)
- * - Glassmorphism Design (reduziert für Mobile Performance)
- *
- * Architektur:
- * - Wiederverwendet AuthContext, LanguageContext, useTranslation
- * - Shared Supabase Client
- * - Shared Styles (liquid-glass.css)
- */
-
-interface MobileStats {
-  streak: number;
-  dueCount: number;
-  level: string;
-  totalWords: number;
-}
-
 export default function MobileDashboardPage() {
-  const { user, loading: authLoading } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<MobileStats>({
-    streak: 0,
-    dueCount: 0,
-    level: 'A1',
-    totalWords: 0,
-  });
+  const { user: authUser, loading: authLoading } = useAuth();
   const [showDetailedStats, setShowDetailedStats] = useState(false);
+  const [showWeakWordsSheet, setShowWeakWordsSheet] = useState(false);
+  const [showDueCardsSheet, setShowDueCardsSheet] = useState(false);
   const router = useRouter();
   const { t } = useTranslation();
 
-  // Auth Guard: Redirect wenn nicht eingeloggt
+  // Fallback: Lade User aus localStorage, falls AuthContext keinen hat
+  const [localUser, setLocalUser] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('greeklingua_user');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (error) {
+          console.error('Error parsing initial user:', error);
+        }
+      }
+    }
+    return null;
+  });
+
+  const user = authUser || localUser;
+
+  // Verwende den zentralen Stats Hook
+  const { stats, loading: statsLoading } = useStatsData(user?.id);
+
   useEffect(() => {
     if (!authLoading) {
-      // Check localStorage als Fallback (für Race-Condition)
       const storedUser = localStorage.getItem('greeklingua_user');
 
-      if (!user && !storedUser) {
-        router.push('/login-pin');
-        return;
+      // Lade User aus localStorage, falls AuthContext keinen hat
+      if (!authUser && storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          console.log('🔍 Loading user from localStorage:', parsedUser);
+          setLocalUser(parsedUser);
+        } catch (error) {
+          console.error('Error parsing stored user:', error);
+        }
       }
-      fetchMobileStats();
-      setLoading(false);
+
+      console.log('🔍 Debug User:', { authUser, localUser, storedUser: storedUser ? JSON.parse(storedUser) : null });
+
+      if (!authUser && !storedUser) {
+        router.push('/login-pin');
+      }
     }
-  }, [user, authLoading, router]);
+  }, [authUser, authLoading, router]);
 
-  /**
-   * Lädt minimale Statistiken für Mobile Header
-   */
-  const fetchMobileStats = async () => {
-    try {
-      if (!user?.id) return;
-
-      // Streak berechnen (Placeholder - später aus DB)
-      const streak = 5; // TODO: Aus student_progress berechnen
-
-      // Due Count: Vokabeln die heute fällig sind
-      const { data: dueItems } = await supabase
-        .from('student_progress')
-        .select('id')
-        .eq('student_id', user.id)
-        .lte('next_review', new Date().toISOString())
-        .limit(100);
-
-      // Total Words (gelernt)
-      const { data: totalItems } = await supabase
-        .from('student_progress')
-        .select('id')
-        .eq('student_id', user.id)
-        .gte('correct_count', 1);
-
-      // Level (aus student.level)
-      const { data: studentData } = await supabase
-        .from('students')
-        .select('level')
-        .eq('id', user.id)
-        .single();
-
-      setStats({
-        streak,
-        dueCount: dueItems?.length || 0,
-        level: studentData?.level || 'A1',
-        totalWords: totalItems?.length || 0,
-      });
-    } catch (error) {
-      console.error('Error fetching mobile stats:', error);
-    }
-  };
-
-  if (loading || authLoading) {
+  if (statsLoading || authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100">
-        <div className="text-xl text-gray-600">Loading...</div>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0F0F11'
+      }}>
+        <div style={{ fontSize: '20px', color: 'white' }}>Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
-      {/* ========================================
-          MOBILE STATS HEADER (Minimal)
-          Tap zum Erweitern (X1 - später)
-          ======================================== */}
+    <div style={{ minHeight: '100vh', backgroundColor: '#0F0F11', paddingBottom: '80px' }}>
+      {/* Stats Header */}
       <div
-        className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50 px-4 py-3"
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          backgroundColor: 'rgba(28, 28, 30, 0.95)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '12px 16px'
+        }}
         onClick={() => setShowDetailedStats(!showDetailedStats)}
       >
-        <div className="flex items-center justify-between max-w-md mx-auto">
-          <div className="flex items-center gap-4">
-            {/* Streak */}
-            <div className="flex items-center gap-1">
-              <span className="text-2xl">🔥</span>
-              <span className="font-bold text-gray-800">{stats.streak}</span>
+        <div style={{ maxWidth: '448px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '24px' }}>🔥</span>
+              <span style={{ fontWeight: 'bold', color: 'white' }}>{stats.streak}</span>
             </div>
-
-            {/* Due Count */}
-            <div className="flex items-center gap-1">
-              <span className="text-2xl">📚</span>
-              <span className="font-bold text-blue-600">{stats.dueCount}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '24px' }}>📚</span>
+              <span style={{ fontWeight: 'bold', color: '#007AFF' }}>{stats.dueCount}</span>
             </div>
-
-            {/* Level */}
-            <div className="flex items-center gap-1">
-              <span className="text-2xl">⭐</span>
-              <span className="font-bold text-purple-600">{stats.level}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '24px' }}>⭐</span>
+              <span style={{ fontWeight: 'bold', color: '#FFD60A' }}>{stats.level}</span>
             </div>
           </div>
-
-          {/* Expand Icon */}
-          <div className="text-gray-400">
+          <div style={{ color: '#8E8E93' }}>
             {showDetailedStats ? '▲' : '▼'}
           </div>
         </div>
 
-        {/* X1: Detailed Stats (später implementieren) */}
         {showDetailedStats && (
-          <div className="mt-3 pt-3 border-t border-gray-200/50 text-sm text-gray-600">
-            <div className="max-w-md mx-auto space-y-1">
-              <div className="flex justify-between">
+          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '14px', color: '#8E8E93' }}>
+            <div style={{ maxWidth: '448px', margin: '0 auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                 <span>Total Words Learned:</span>
-                <span className="font-semibold">{stats.totalWords}</span>
+                <span style={{ fontWeight: '600', color: 'white' }}>{stats.totalWords}</span>
               </div>
-              <div className="flex justify-between">
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Current Level:</span>
-                <span className="font-semibold">{stats.level}</span>
-              </div>
-              <div className="text-xs text-gray-400 mt-2 text-center">
-                (More details coming soon)
+                <span style={{ fontWeight: '600', color: 'white' }}>{stats.level}</span>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* ========================================
-          MAIN CONTENT: 4 Kernmodule
-          ======================================== */}
-      <div className="max-w-md mx-auto px-4 py-6 space-y-4">
-        {/* Welcome Message */}
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-1">
-            {t('welcome')}, {user?.name?.split(' ')[0] || 'Student'}! 👋
+      {/* Main Content */}
+      <div style={{ maxWidth: '448px', margin: '0 auto', padding: '24px 16px' }}>
+        {/* Welcome */}
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', marginBottom: '4px' }}>
+            Welcome, {(() => {
+              const name = user?.name;
+              console.log('🔍 User name:', name, 'Full user:', user);
+              return name ? name.split(' ')[0] : 'Student';
+            })()}! 👋
           </h1>
-          <p className="text-sm text-gray-600">
-            {t('ready_to_learn') || 'Ready to learn Greek today?'}
-          </p>
         </div>
 
-        {/* Admin Panel Link (nur für Teacher/Admin) */}
+        {/* Admin Panel */}
         {(user?.role === 'teacher' || user?.role === 'admin') && (
-          <div className="mb-4">
-            <button
-              onClick={() => router.push('/m/admin/unlock')}
-              className="w-full min-h-[56px] px-4 py-3 rounded-xl border-2 border-yellow-200 bg-yellow-50 flex items-center gap-4 transition-all duration-200 active:scale-95 hover:shadow-md"
-            >
-              <div className="text-3xl flex-shrink-0">🔓</div>
-              <div className="flex-1 text-left">
-                <div className="font-bold text-base text-yellow-700">
-                  Admin Panel
-                </div>
-                <div className="text-xs text-yellow-600">
-                  User entsperren
-                </div>
-              </div>
-              <div className="text-xl text-yellow-600 opacity-50">→</div>
-            </button>
-          </div>
+          <button
+            onClick={() => router.push('/m/admin/unlock')}
+            style={{
+              width: '100%',
+              minHeight: '64px',
+              padding: '12px 16px',
+              borderRadius: '16px',
+              backgroundColor: 'rgba(255, 204, 0, 0.2)',
+              border: '1px solid rgba(255, 204, 0, 0.4)',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              marginBottom: '16px',
+              cursor: 'pointer'
+            }}
+          >
+            <span style={{ fontSize: '32px' }}>🔓</span>
+            <div style={{ flex: 1, textAlign: 'left' }}>
+              <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#FFCC00' }}>Admin Panel</div>
+              <div style={{ fontSize: '12px', color: 'rgba(255, 204, 0, 0.7)' }}>User entsperren</div>
+            </div>
+            <span style={{ fontSize: '20px', color: '#FFCC00', opacity: 0.5 }}>→</span>
+          </button>
         )}
 
-        {/* MODULE a) Due Cards today */}
+        {/* Module: Due Cards */}
         <ModuleTile
           icon="📅"
-          title={t('due_cards_today') || 'Due Cards Today'}
-          subtitle={`${stats.dueCount} ${t('cards_waiting') || 'cards waiting'}`}
+          title="Due Cards Today"
+          subtitle={`${stats.dueCount} cards waiting`}
           color="blue"
-          disabled={stats.dueCount === 0}
-          onClick={() => {
-            // TODO: Navigate to Due Cards Dialog
-            alert('Due Cards - Coming soon!');
-          }}
+          onClick={() => setShowDueCardsSheet(true)}
         />
 
-        {/* MODULE b) Review Vocabulary */}
+        {/* Module: Review */}
         <ModuleTile
           icon="📖"
-          title={t('review_vocabulary') || 'Review Vocabulary'}
-          subtitle={t('practice_learned_words') || 'Practice learned words'}
+          title="Review Vocabulary"
+          subtitle="practice_learned_words"
           color="green"
-          onClick={() => {
-            // TODO: Navigate to Review Dialog
-            alert('Review Vocabulary - Coming soon!');
-          }}
+          onClick={() => alert('Review - Coming soon!')}
         />
 
-        {/* MODULE c) Train Weak Words */}
+        {/* Module: Weak Words */}
         <ModuleTile
           icon="💪"
-          title={t('train_weak_words') || 'Train Weak Words'}
-          subtitle={t('focus_on_difficult') || 'Focus on difficult words'}
+          title="Train Weak Words"
+          subtitle="focus_on_difficult"
           color="orange"
-          onClick={() => {
-            // TODO: Navigate to Weak Words Dialog
-            alert('Train Weak Words - Coming soon!');
-          }}
+          onClick={() => setShowWeakWordsSheet(true)}
         />
 
-        {/* MODULE e) Daily Phrases */}
+        {/* Module: Daily Phrases */}
         <ModuleTile
           icon="💬"
-          title={t('daily_phrases') || 'Daily Phrases'}
-          subtitle={t('learn_useful_phrases') || 'Learn useful phrases'}
+          title="Daily Phrases"
+          subtitle="learn_useful_phrases"
           color="purple"
-          onClick={() => {
-            // TODO: Navigate to Daily Phrases Dialog (NEU entwickeln)
-            alert('Daily Phrases - Coming soon!');
-          }}
+          onClick={() => alert('Daily Phrases - Coming soon!')}
         />
 
-        {/* Footer: Desktop Version Link */}
-        <div className="pt-6 text-center">
+        {/* Module: 20 min Quick Lesson */}
+        <ModuleTile
+          icon="⚡"
+          title="20 min Quick Lesson"
+          subtitle="Fast-paced learning session"
+          color="blue"
+          onClick={() => alert('Quick Lesson - Coming soon!')}
+        />
+
+        {/* Module: Test */}
+        <ModuleTile
+          icon="📝"
+          title="Test"
+          subtitle="Check your knowledge"
+          color="orange"
+          onClick={() => alert('Test - Coming soon!')}
+        />
+
+        {/* Module: Quiz go ahead */}
+        <ModuleTile
+          icon="🎯"
+          title="Quiz go ahead"
+          subtitle="Challenge yourself with quick quizzes"
+          color="green"
+          onClick={() => alert('Quiz - Coming soon!')}
+        />
+
+      </div>
+
+      {/* Bottom Navigation */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          backgroundColor: 'rgba(28, 28, 30, 0.95)',
+          backdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '8px 16px 12px'
+        }}
+      >
+        <div style={{ maxWidth: '448px', margin: '0 auto', display: 'flex', justifyContent: 'space-around' }}>
           <button
-            onClick={() => router.push('/dashboard')}
-            className="text-sm text-gray-500 underline"
+            onClick={() => router.push('/m')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer'
+            }}
           >
-            {t('switch_to_desktop') || 'Switch to Desktop Version'}
+            <span style={{ fontSize: '24px' }}>🏠</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#007AFF' }}>Home</span>
+          </button>
+          <button
+            onClick={() => alert('Stats - Coming soon!')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <span style={{ fontSize: '24px' }}>📊</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Stats</span>
+          </button>
+          <button
+            onClick={() => alert('Settings - Coming soon!')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <span style={{ fontSize: '24px' }}>⚙️</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Settings</span>
           </button>
         </div>
       </div>
+
+      {/* Bottom Sheets */}
+      <TrainWeakWordsSheet
+        isOpen={showWeakWordsSheet}
+        onClose={() => setShowWeakWordsSheet(false)}
+      />
+      <DueCardsSheet
+        isOpen={showDueCardsSheet}
+        onClose={() => setShowDueCardsSheet(false)}
+        dueCount={stats.dueCount}
+      />
     </div>
   );
 }
 
-/**
- * Mobile Module Tile Component
- * Touch-optimiert (56px Höhe)
- */
 interface ModuleTileProps {
   icon: string;
   title: string;
@@ -277,40 +321,42 @@ interface ModuleTileProps {
 }
 
 function ModuleTile({ icon, title, subtitle, color, disabled, onClick }: ModuleTileProps) {
-  const colorClasses = {
-    blue: 'bg-blue-50 border-blue-200 text-blue-700',
-    green: 'bg-green-50 border-green-200 text-green-700',
-    orange: 'bg-orange-50 border-orange-200 text-orange-700',
-    purple: 'bg-purple-50 border-purple-200 text-purple-700',
+  const colors = {
+    blue: { bg: 'rgba(0, 122, 255, 0.25)', border: 'rgba(0, 122, 255, 0.5)', text: '#007AFF' },
+    green: { bg: 'rgba(52, 199, 89, 0.25)', border: 'rgba(52, 199, 89, 0.5)', text: '#34C759' },
+    orange: { bg: 'rgba(255, 159, 10, 0.25)', border: 'rgba(255, 159, 10, 0.5)', text: '#FF9F0A' },
+    purple: { bg: 'rgba(191, 90, 242, 0.25)', border: 'rgba(191, 90, 242, 0.5)', text: '#BF5AF2' },
   };
+
+  const c = colors[color];
 
   return (
     <button
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      className={`
-        w-full min-h-[56px] px-4 py-3
-        rounded-xl border-2
-        flex items-center gap-4
-        transition-all duration-200
-        ${disabled ? 'opacity-40 cursor-not-allowed' : 'active:scale-95 hover:shadow-md'}
-        ${colorClasses[color]}
-      `}
+      style={{
+        width: '100%',
+        minHeight: '64px',
+        padding: '12px 16px',
+        borderRadius: '16px',
+        backgroundColor: c.bg,
+        border: `1px solid ${c.border}`,
+        backdropFilter: 'blur(10px)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        marginBottom: '12px',
+        opacity: disabled ? 0.4 : 1,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+      }}
     >
-      {/* Icon */}
-      <div className="text-3xl flex-shrink-0">
-        {icon}
+      <span style={{ fontSize: '32px' }}>{icon}</span>
+      <div style={{ flex: 1, textAlign: 'left' }}>
+        <div style={{ fontWeight: 'bold', fontSize: '16px', color: 'white' }}>{title}</div>
+        <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>{subtitle}</div>
       </div>
-
-      {/* Text */}
-      <div className="flex-1 text-left">
-        <div className="font-bold text-base">{title}</div>
-        <div className="text-xs opacity-80">{subtitle}</div>
-      </div>
-
-      {/* Arrow */}
       {!disabled && (
-        <div className="text-xl opacity-50">→</div>
+        <span style={{ fontSize: '20px', color: c.text, opacity: 0.7 }}>→</span>
       )}
     </button>
   );
