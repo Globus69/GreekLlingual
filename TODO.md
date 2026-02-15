@@ -22,15 +22,16 @@
 
 ## 🔴 KRITISCH (Blocker für Production)
 
-### 0. **RPC-Fehler beheben: start_learning_session 404** (30 Min.)
+### 0. **RPC-Fehler beheben: start_learning_session 404** ✅ ERLEDIGT
 **Priorität:** 🔴 **KRITISCH**
 **Aufwand:** 30 Minuten
 **Fehler:** `POST .../rpc/start_learning_session 404 (Not Found)`
 **Location:** VocabularyDialogFSRS oder ähnliche Komponenten
+**Status:** ✅ **FIXED (2026-02-15)**
 
-**Problem:**
-- Supabase RPC-Funktion `start_learning_session` gibt 404
-- Typische Ursachen: Funktion existiert nicht, falsches Schema, fehlende Permissions
+**Problem (gelöst):**
+- Supabase RPC-Funktion `start_learning_session` gab 404
+- Ursache: Fehlende GRANT EXECUTE Permissions
 
 **Systematische Fehlersuche:**
 
@@ -154,7 +155,21 @@ console.log('Result:', data, 'Error:', error);
 // Erwartung: data = UUID, error = null
 ```
 
-**Status:** ❌ **PENDING**
+**Lösung:**
+- Migration `059_fix_permissions.sql` erstellt und ausgeführt
+- GRANT EXECUTE für alle 4 Session-Funktionen
+- Schema-Cache neu geladen (NOTIFY pgrst)
+- Verifiziert: Alle Funktionen accessible für authenticated + anon
+
+**Verification successful:**
+```
+✅ start_learning_session - can_execute: true
+✅ end_learning_session - can_execute: true
+✅ get_session_stats - can_execute: true
+✅ get_recent_sessions - can_execute: true
+```
+
+**Status:** ✅ **FIXED (2026-02-15)**
 
 ---
 
