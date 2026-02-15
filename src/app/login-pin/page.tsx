@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { useLanguage } from '@/context/language-context';
+import { useLanguage, Locale } from '@/context/language-context';
 import { useTranslation } from '@/lib/use-translation';
 import { supabase } from '@/db/supabase';
 
@@ -22,7 +22,7 @@ export default function PinLoginPage() {
     });
     const { setUser, user } = useAuth();
     const router = useRouter();
-    const { locale, syncLocaleFromUser } = useLanguage();
+    const { locale, setLocale, syncLocaleFromUser } = useLanguage();
     const { t } = useTranslation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -127,6 +127,10 @@ export default function PinLoginPage() {
 
     const handleCancel = () => {
         router.push('/login');
+    };
+
+    const handleLanguageChange = (lang: Locale) => {
+        setLocale(lang);
     };
 
     // Helper function for progressive delay
@@ -413,6 +417,77 @@ export default function PinLoginPage() {
                     ref={canvasRef}
                     style={{ position: 'absolute', inset: 0, zIndex: 0 }}
                 />
+
+                {/* Language Selector – Top Right */}
+                <div style={{
+                    position: 'absolute',
+                    top: '24px',
+                    right: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    background: 'rgba(28, 28, 30, 0.7)',
+                    backdropFilter: 'blur(30px)',
+                    WebkitBackdropFilter: 'blur(30px)',
+                    borderRadius: '14px',
+                    padding: '6px 8px 6px 14px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    zIndex: 10,
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+                }}>
+                    <span style={{ fontSize: '14px' }}>🌐</span>
+                    <div style={{
+                        display: 'flex',
+                        gap: '4px',
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        borderRadius: '10px',
+                        padding: '3px',
+                    }}>
+                        {(['en', 'ru', 'el', 'de'] as Locale[]).map((lang) => {
+                            const langGradient: Record<Locale, string> = {
+                                en: 'linear-gradient(135deg, #007AFF, #5856D6)',
+                                ru: 'linear-gradient(135deg, #E05555, #C0392B)',
+                                el: 'linear-gradient(135deg, #0D6EFD, #0A58CA)',
+                                de: 'linear-gradient(135deg, #DAA520, #B8860B)',
+                            };
+                            const langShadow: Record<Locale, string> = {
+                                en: '0 2px 8px rgba(0, 122, 255, 0.3)',
+                                ru: '0 2px 8px rgba(224, 85, 85, 0.3)',
+                                el: '0 2px 8px rgba(13, 110, 253, 0.3)',
+                                de: '0 2px 8px rgba(218, 165, 32, 0.3)',
+                            };
+                            const langLabel: Record<Locale, string> = {
+                                en: 'EN',
+                                ru: 'RU',
+                                el: 'EL',
+                                de: 'DE',
+                            };
+                            return (
+                                <button
+                                    key={lang}
+                                    type="button"
+                                    onClick={() => handleLanguageChange(lang)}
+                                    style={{
+                                        padding: '8px 14px',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        background: locale === lang ? langGradient[lang] : 'transparent',
+                                        color: locale === lang ? '#fff' : '#8E8E93',
+                                        fontSize: '13px',
+                                        fontWeight: 700,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                                        letterSpacing: '1px',
+                                        textTransform: 'uppercase',
+                                        boxShadow: locale === lang ? langShadow[lang] : 'none',
+                                    }}
+                                >
+                                    {langLabel[lang]}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
 
                 <div style={{
                     position: 'absolute',
