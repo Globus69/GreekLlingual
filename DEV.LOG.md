@@ -10,6 +10,72 @@
 
 ---
 
+## 2026-02-15 - Progress Statistics: Backend + Frontend Integration ✅
+
+### ✅ Phase 1: Backend RPC Functions - COMPLETED
+**Commit:** `3def13c`
+
+**Ziel:** Advanced progress tracking and analytics backend
+
+**Erstellt:**
+1. **Migration 060** (`database/migrations/060_create_progress_stats_functions.sql`)
+   - 3 PostgreSQL RPC Functions:
+     - `get_progress_overview(user_id, days)` - 11 comprehensive metrics
+     - `get_learning_trends(user_id, days)` - Daily trend data for charts
+     - `get_weekly_activity(user_id, weeks)` - Heatmap visualization data
+
+2. **Testing Guide** (`database/migrations/060_TESTING_GUIDE.md`)
+   - Step-by-step installation instructions
+   - Test queries with expected outputs
+   - Validation criteria
+   - Troubleshooting section
+   - Frontend integration examples
+
+**Features:**
+- Review statistics (total, correct, accuracy)
+- Learning progress (learned, mastered, new cards)
+- Time tracking (study minutes, session averages)
+- Improvement metrics (rate, consistency score)
+- Complete date series (includes zero-activity days)
+- Activity scoring (0-100 relative to max)
+
+---
+
+### ✅ Phase 2: Frontend Integration - COMPLETED
+**Commit:** `d536f79`
+
+**Ziel:** Integrate RPC functions into frontend hook and UI
+
+**Implementiert:**
+1. **useStatsData Hook Extension** (`src/hooks/use-stats-data.ts`)
+   - Added TypeScript interfaces: `ProgressOverview`, `LearningTrendPoint`, `WeeklyActivityPoint`
+   - Extended `StatsData` interface with new fields
+   - Integrated 3 RPC function calls
+   - Parallel API requests for performance
+   - Helper functions: `formatStudyTime()`, `calculateTrend()`
+
+2. **Mobile Stats Page Update** (`src/app/m/stats/page.tsx`)
+   - Replaced manual queries with `useStatsData` hook
+   - Integrated progressOverview data
+   - Updated stats cards: Streak, Total, Learned, Mastered, Due, Accuracy
+   - Detailed stats: Reviews, Sessions, Study Time, Consistency, Improvement Rate
+
+3. **WeeklyActivityChart Component** (`src/components/weekly-activity-chart.tsx`)
+   - Heatmap visualization (4 weeks × 7 days)
+   - Color-coded activity levels (5 gradients)
+   - Tooltips on hover (reviews + study time)
+   - Highlights current day with ring
+   - Legend for activity scale
+   - Empty state handling
+
+**Ergebnis:**
+- Comprehensive progress analytics dashboard
+- Real-time data from FSRS-6 system
+- Visual activity tracking
+- Improved performance (parallel queries)
+
+---
+
 ## 2026-02-15 - Content Population: A1/A2 Vocabulary ✅
 
 ### ✅ Task: A1/A2 Vocabulary Content - COMPLETED
@@ -200,6 +266,12 @@
 
 ## 🚧 Pending Work
 
+### Migration 060: Database Execution
+- ⚠️ **ACTION REQUIRED:** Execute Migration 060 in Supabase
+- Run SQL via Supabase Dashboard → SQL Editor
+- Verify functions exist (see TESTING_GUIDE.md)
+- Test RPC functions with real user data
+
 ### Phase 4: Daily Phrases Backend
 - Supabase table: `daily_phrases`
 - RPC: `get_daily_phrases(p_student_id, p_level)`
@@ -212,12 +284,13 @@
 - `grammar_progress` table for FSRS tracking
 
 ### Content Population
-- A1/A2 Vocabulary (empty)
+- ✅ A1/A2 Vocabulary (150 items ready)
+- ⚠️ Import vocabulary via `/admin/import`
 - Daily Phrases content
 - Grammar Rules content
 
 ### SQL Migrations
-- 6 pending migrations (see TODO.md)
+- 5 remaining migrations (see TODO.md)
 
 ---
 
