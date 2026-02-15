@@ -1147,6 +1147,94 @@ const handleCardClick = () => {
 
 ---
 
+### **8. Konsistenz: Alle Learning-Module vereinheitlichen** 🎨
+**Priorität:** 🟡 **HOCH** (UX-Konsistenz)
+**Aufwand:** 6-8 Stunden (alle 3 Module)
+**Status:** ❌ **OFFEN**
+
+**Problem:**
+- Aktuell haben Learning-Module unterschiedliche Layouts und UX
+- VocabularyDialogFSRS (Review Vocabulary) ist am modernsten und hat FSRS-6
+- Andere Module (Weak Words, Due Cards, Daily Phrases) müssen angleichen werden
+- Inkonsistente User Experience über verschiedene Lern-Modi hinweg
+
+**Ziel:**
+Alle Learning-Dialoge haben **identisches Layout und identische Funktionsweise**
+
+**Template (Referenz):** VocabularyDialogFSRS (Review Vocabulary)
+- ✅ FSRS-6 Algorithm (4 Ratings: Again/Hard/Good/Easy)
+- ✅ Progress Bar oben (current/total, %)
+- ✅ Flashcard in der Mitte (Flip-Animation)
+- ✅ Rating Buttons unten (4-Button-Layout)
+- ✅ Audio Button (🔊 TTS)
+- ✅ Swipe-Gesten (Mobile: ←/→/↑/↓)
+- ✅ Glasmorphismus-Design (backdrop-blur, rgba)
+- ✅ Summary Screen nach Session
+- ✅ Stats-Tracking (Hard/Good/Easy counts)
+
+**Clone-Aufgaben:**
+
+**1. Weak Words (VocabularyDialog.tsx) → VocabularyDialogFSRS Clone (2-3h)**
+- [ ] **Layout Migration:**
+  - [ ] Progress Bar wie VocabularyDialogFSRS
+  - [ ] Flashcard-Struktur wie VocabularyDialogFSRS
+  - [ ] 4-Button-Layout (Currently: 3 Buttons Hard/Good/Easy)
+  - [ ] Button-Farben angleichen
+- [ ] **Feature-Parity:**
+  - [ ] FSRS-6 Integration (statt SM-2)
+  - [ ] Swipe-Gesten hinzufügen
+  - [ ] Summary Screen nach Session
+  - [ ] Stats-Tracking erweitern
+- [ ] **Filter beibehalten:** ease_factor < 2.0 für "Weak Words"
+
+**2. Due Cards (noch nicht implementiert) → VocabularyDialogFSRS Clone (2-3h)**
+- [ ] **Neue Komponente erstellen:** DueCardsDialog.tsx
+- [ ] **Basierend auf:** VocabularyDialogFSRS (kompletter Clone)
+- [ ] **Layout:** Identisch zu VocabularyDialogFSRS
+- [ ] **Features:** Alle Features von VocabularyDialogFSRS
+- [ ] **Filter:** next_review < NOW() für "Due Cards"
+- [ ] **Backend:** RPC get_due_cards_today(student_id)
+
+**3. Daily Phrases → VocabularyDialogFSRS Clone (2-3h)**
+- [ ] **Layout Migration:**
+  - [ ] Progress Bar wie VocabularyDialogFSRS
+  - [ ] Flashcard-Struktur verwenden (statt 2-Panel-Layout)
+  - [ ] 4-Button-Layout (Currently: 3 Buttons Hard/Good/Easy)
+  - [ ] Swipe-Gesten hinzufügen
+- [ ] **Feature-Parity:**
+  - [ ] Summary Screen nach Session
+  - [ ] Stats-Tracking (Hard/Good/Easy counts)
+- [ ] **Unterschiede erlaubt:**
+  - [ ] Content: Phrases statt Vocabulary
+  - [ ] Kein FSRS-6 nötig (Phrases sind nicht SRS-basiert)
+
+**Einheitliche Features (alle Module):**
+- ✅ Identischer Progress-Bar-Style (1/10, 2/10, ... + %)
+- ✅ Gleiche Button-Anordnung (4 Buttons horizontal)
+- ✅ Gleiche Farben (Again: #FF6B6B, Hard: #FFA94D, Good: #51CF66, Easy: #339AF0)
+- ✅ Gleiche Button-Größen und Abstände
+- ✅ Gleiche Animations (Flip, Swipe, Transitions)
+- ✅ Gleiche Swipe-Gesten (←Again, ↓Hard, ↑Good, →Easy)
+- ✅ Glasmorphismus-Design (backdrop-blur, rgba backgrounds)
+- ✅ Summary Screen nach Session (Stats-Übersicht)
+
+**Vorteile:**
+- Konsistente User Experience über alle Lern-Modi
+- Wiederverwendung bewährter UX-Patterns
+- Einfachere Wartung (ein Design-System)
+- Höhere Code-Qualität durch Wiederverwendung
+
+**Dependencies:**
+- VocabularyDialogFSRS existiert bereits (✅)
+- Weak Words (VocabularyDialog) existiert (⚠️ Refactoring nötig)
+- Daily Phrases existiert (⚠️ Refactoring nötig)
+- Due Cards existiert noch nicht (❌ Neu erstellen)
+
+**Aufwand:** 6-8 Stunden (alle 3 Module)
+**Status:** ❌ **OFFEN**
+
+---
+
 ## 🧪 TESTING & QA
 
 ### **Testing: Mobile Learning Modules** 📱
