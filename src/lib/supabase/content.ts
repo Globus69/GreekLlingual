@@ -47,7 +47,28 @@ export async function fetchContent(params: FilterParams): Promise<{ data: Conten
 }
 
 export async function createContent(item: ContentInsert): Promise<Content | null> {
-    const { data, error } = await supabase.from('content').insert(item).select().single();
+    // Get user from localStorage
+    const storedUser = localStorage.getItem('greeklingua_user');
+    if (!storedUser) {
+        toast.error('Fehler beim Erstellen: Nicht angemeldet');
+        return null;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    // Use RPC function instead of direct insert (bypasses RLS with custom auth)
+    const { data, error } = await supabase.rpc('admin_create_content', {
+        p_user_id: user.id,
+        p_type: item.type,
+        p_english: item.english,
+        p_greek: item.greek,
+        p_level: item.level,
+        p_difficulty: item.difficulty,
+        p_phonetic: item.phonetic || null,
+        p_example_en: item.example_en || null,
+        p_example_gr: item.example_gr || null,
+        p_audio_url: item.audio_url || null,
+    });
 
     if (error) {
         toast.error('Fehler beim Erstellen: ' + error.message);
@@ -58,7 +79,29 @@ export async function createContent(item: ContentInsert): Promise<Content | null
 }
 
 export async function updateContent(id: string, updates: ContentUpdate): Promise<Content | null> {
-    const { data, error } = await supabase.from('content').update(updates).eq('id', id).select().single();
+    // Get user from localStorage
+    const storedUser = localStorage.getItem('greeklingua_user');
+    if (!storedUser) {
+        toast.error('Fehler beim Aktualisieren: Nicht angemeldet');
+        return null;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    // Use RPC function instead of direct update (bypasses RLS with custom auth)
+    const { data, error } = await supabase.rpc('admin_update_content', {
+        p_user_id: user.id,
+        p_content_id: id,
+        p_type: updates.type,
+        p_english: updates.english,
+        p_greek: updates.greek,
+        p_level: updates.level,
+        p_difficulty: updates.difficulty,
+        p_phonetic: updates.phonetic || null,
+        p_example_en: updates.example_en || null,
+        p_example_gr: updates.example_gr || null,
+        p_audio_url: updates.audio_url || null,
+    });
 
     if (error) {
         toast.error('Fehler beim Aktualisieren: ' + error.message);
@@ -69,7 +112,20 @@ export async function updateContent(id: string, updates: ContentUpdate): Promise
 }
 
 export async function deleteContent(id: string): Promise<boolean> {
-    const { error } = await supabase.from('content').delete().eq('id', id);
+    // Get user from localStorage
+    const storedUser = localStorage.getItem('greeklingua_user');
+    if (!storedUser) {
+        toast.error('Fehler beim Löschen: Nicht angemeldet');
+        return false;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    // Use RPC function instead of direct delete (bypasses RLS with custom auth)
+    const { error } = await supabase.rpc('admin_delete_content', {
+        p_user_id: user.id,
+        p_content_id: id,
+    });
 
     if (error) {
         toast.error('Fehler beim Löschen: ' + error.message);
@@ -146,13 +202,33 @@ export async function importFromCSV(file: File): Promise<{ validItems: ContentIn
 }
 
 export async function bulkImport(items: ContentInsert[]): Promise<{ success: number; errors: string[] }> {
-    const { data, error } = await supabase.from('content').insert(items).select();
+    // Get user from localStorage
+    const storedUser = localStorage.getItem('greeklingua_user');
+    if (!storedUser) {
+        return { success: 0, errors: ['Nicht angemeldet'] };
+    }
+
+    const user = JSON.parse(storedUser);
+
+    // Use RPC function for bulk import (bypasses RLS with custom auth)
+    const { data, error } = await supabase.rpc('admin_bulk_import_content', {
+        p_user_id: user.id,
+        p_items: items,
+    });
 
     if (error) {
         return { success: 0, errors: [error.message] };
     }
 
-    return { success: data?.length || 0, errors: [] };
+    if (data && data.length > 0) {
+        const result = data[0];
+        return {
+            success: result.success_count || 0,
+            errors: result.errors || [],
+        };
+    }
+
+    return { success: 0, errors: ['Unbekannter Fehler'] };
 }
 
 export function generateTemplateCSV(): string {

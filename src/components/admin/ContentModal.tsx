@@ -1,31 +1,12 @@
-// components/admin/ContentModal.tsx – zentrierter Glass-Modal für New/Edit
+// components/admin/ContentModal.tsx – Student Management Style
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, CSSProperties } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import type { Content, ContentFormData } from '@/types/content';
-import { Loader2 } from 'lucide-react';
 
 const contentSchema = z.object({
     type: z.enum(['vocabulary', 'phrase', 'grammar'], {
@@ -129,197 +110,326 @@ export function ContentModal({
         }
     };
 
+    if (!isOpen) return null;
+
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[620px] backdrop-blur-xl bg-background/40 dark:bg-black/40 border border-border/50 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">
-                        {isCreating ? 'Create New Content' : 'Edit Content'}
-                    </DialogTitle>
-                </DialogHeader>
-
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                    {/* Type */}
-                    <div className="space-y-2">
-                        <Label htmlFor="type" className="text-sm font-medium">
-                            Type <span className="text-red-500">*</span>
-                        </Label>
-                        <Select
-                            value={selectedType}
-                            onValueChange={(value) => setValue('type', value as any)}
-                        >
-                            <SelectTrigger id="type">
-                                <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="vocabulary">Vocabulary</SelectItem>
-                                <SelectItem value="phrase">Phrase</SelectItem>
-                                <SelectItem value="grammar">Grammar</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        {errors.type && (
-                            <p className="text-sm text-red-500">{errors.type.message}</p>
-                        )}
+        <div
+            style={backdropStyle}
+            onClick={onClose}
+        >
+            <div
+                style={modalStyle}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div style={headerStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '18px' }}>
+                            {isCreating ? '✨' : '✏️'}
+                        </span>
+                        <h2 style={titleStyle}>
+                            {isCreating ? 'Create New Content' : 'Edit Content'}
+                        </h2>
                     </div>
+                    <button onClick={onClose} style={btnClose} type="button">
+                        ✕
+                    </button>
+                </div>
 
-                    {/* Level */}
-                    <div className="space-y-2">
-                        <Label htmlFor="level" className="text-sm font-medium">
-                            Level <span className="text-red-500">*</span>
-                        </Label>
-                        <Select
-                            value={selectedLevel}
-                            onValueChange={(value) => setValue('level', value as any)}
-                        >
-                            <SelectTrigger id="level">
-                                <SelectValue placeholder="Select level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="A1">A1</SelectItem>
-                                <SelectItem value="A2">A2</SelectItem>
-                                <SelectItem value="B1">B1</SelectItem>
-                                <SelectItem value="B2">B2</SelectItem>
-                                <SelectItem value="C1">C1</SelectItem>
-                                <SelectItem value="C2">C2</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        {errors.level && (
-                            <p className="text-sm text-red-500">{errors.level.message}</p>
-                        )}
-                    </div>
+                {/* Body */}
+                <div style={bodyStyle}>
+                    <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {/* Type */}
+                        <label style={labelStyle}>
+                            <span>Type <span style={{ color: '#FF3B30' }}>*</span></span>
+                            <select
+                                value={selectedType}
+                                onChange={(e) => setValue('type', e.target.value as any)}
+                                style={selectStyle}
+                            >
+                                <option value="vocabulary">Vocabulary</option>
+                                <option value="phrase">Phrase</option>
+                                <option value="grammar">Grammar</option>
+                            </select>
+                            {errors.type && <span style={errorStyle}>{errors.type.message}</span>}
+                        </label>
 
-                    {/* Difficulty */}
-                    <div className="space-y-2">
-                        <Label htmlFor="difficulty" className="text-sm font-medium">
-                            Difficulty <span className="text-red-500">*</span>
-                        </Label>
-                        <Select
-                            value={selectedDifficulty}
-                            onValueChange={(value) => setValue('difficulty', value as any)}
-                        >
-                            <SelectTrigger id="difficulty">
-                                <SelectValue placeholder="Select difficulty" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="easy">Easy</SelectItem>
-                                <SelectItem value="medium">Medium</SelectItem>
-                                <SelectItem value="hard">Hard</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        {errors.difficulty && (
-                            <p className="text-sm text-red-500">{errors.difficulty.message}</p>
-                        )}
-                    </div>
+                        {/* Level */}
+                        <label style={labelStyle}>
+                            <span>Level <span style={{ color: '#FF3B30' }}>*</span></span>
+                            <select
+                                value={selectedLevel}
+                                onChange={(e) => setValue('level', e.target.value as any)}
+                                style={selectStyle}
+                            >
+                                <option value="A1">A1</option>
+                                <option value="A2">A2</option>
+                                <option value="B1">B1</option>
+                                <option value="B2">B2</option>
+                                <option value="C1">C1</option>
+                                <option value="C2">C2</option>
+                            </select>
+                            {errors.level && <span style={errorStyle}>{errors.level.message}</span>}
+                        </label>
 
-                    {/* English */}
-                    <div className="space-y-2">
-                        <Label htmlFor="english" className="text-sm font-medium">
-                            English <span className="text-red-500">*</span>
-                        </Label>
-                        <Textarea
-                            id="english"
-                            {...register('english')}
-                            placeholder="Enter English text"
-                            className="min-h-[90px] resize-none"
-                        />
-                        {errors.english && (
-                            <p className="text-sm text-red-500">{errors.english.message}</p>
-                        )}
-                    </div>
+                        {/* Difficulty */}
+                        <label style={labelStyle}>
+                            <span>Difficulty <span style={{ color: '#FF3B30' }}>*</span></span>
+                            <select
+                                value={selectedDifficulty}
+                                onChange={(e) => setValue('difficulty', e.target.value as any)}
+                                style={selectStyle}
+                            >
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                            {errors.difficulty && <span style={errorStyle}>{errors.difficulty.message}</span>}
+                        </label>
 
-                    {/* Greek */}
-                    <div className="space-y-2">
-                        <Label htmlFor="greek" className="text-sm font-medium">
-                            Greek <span className="text-red-500">*</span>
-                        </Label>
-                        <Textarea
-                            id="greek"
-                            {...register('greek')}
-                            placeholder="Εισάγετε ελληνικό κείμενο"
-                            className="min-h-[90px] resize-none font-sans"
-                        />
-                        {errors.greek && (
-                            <p className="text-sm text-red-500">{errors.greek.message}</p>
-                        )}
-                    </div>
-
-                    {/* Divider */}
-                    <div className="border-t border-border/30 pt-4 space-y-5">
-                        {/* Phonetic */}
-                        <div className="space-y-2">
-                            <Label htmlFor="phonetic" className="text-sm font-medium text-muted-foreground">
-                                Phonetic
-                            </Label>
-                            <Input
-                                id="phonetic"
-                                {...register('phonetic')}
-                                placeholder="e.g., YAH-soo"
+                        {/* English */}
+                        <label style={labelStyle}>
+                            <span>English <span style={{ color: '#FF3B30' }}>*</span></span>
+                            <textarea
+                                {...register('english')}
+                                placeholder="Enter English text"
+                                style={textareaStyle}
+                                rows={4}
                             />
+                            {errors.english && <span style={errorStyle}>{errors.english.message}</span>}
+                        </label>
+
+                        {/* Greek */}
+                        <label style={labelStyle}>
+                            <span>Greek <span style={{ color: '#FF3B30' }}>*</span></span>
+                            <textarea
+                                {...register('greek')}
+                                placeholder="Εισάγετε ελληνικό κείμενο"
+                                style={textareaStyle}
+                                rows={4}
+                            />
+                            {errors.greek && <span style={errorStyle}>{errors.greek.message}</span>}
+                        </label>
+
+                        {/* Divider */}
+                        <div style={dividerStyle} />
+
+                        {/* Optional Fields */}
+                        <div style={{ fontSize: '11px', fontWeight: 600, color: '#636366', marginTop: '4px' }}>
+                            Optional Fields
                         </div>
+
+                        {/* Phonetic */}
+                        <label style={labelStyle}>
+                            <span>Phonetic</span>
+                            <input
+                                {...register('phonetic')}
+                                type="text"
+                                placeholder="e.g., YAH-soo"
+                                style={inputStyle}
+                            />
+                        </label>
 
                         {/* Audio URL */}
-                        <div className="space-y-2">
-                            <Label htmlFor="audio_url" className="text-sm font-medium text-muted-foreground">
-                                Audio URL
-                            </Label>
-                            <Input
-                                id="audio_url"
-                                type="url"
+                        <label style={labelStyle}>
+                            <span>Audio URL</span>
+                            <input
                                 {...register('audio_url')}
+                                type="url"
                                 placeholder="https://example.com/audio.mp3"
+                                style={inputStyle}
                             />
-                            {errors.audio_url && (
-                                <p className="text-sm text-red-500">{errors.audio_url.message}</p>
-                            )}
-                        </div>
+                            {errors.audio_url && <span style={errorStyle}>{errors.audio_url.message}</span>}
+                        </label>
 
                         {/* Example English */}
-                        <div className="space-y-2">
-                            <Label htmlFor="example_en" className="text-sm font-medium text-muted-foreground">
-                                Example (English)
-                            </Label>
-                            <Textarea
-                                id="example_en"
+                        <label style={labelStyle}>
+                            <span>Example (English)</span>
+                            <textarea
                                 {...register('example_en')}
                                 placeholder="Example sentence in English"
-                                className="min-h-[60px] resize-none"
+                                style={textareaSmallStyle}
+                                rows={2}
                             />
-                        </div>
+                        </label>
 
                         {/* Example Greek */}
-                        <div className="space-y-2">
-                            <Label htmlFor="example_gr" className="text-sm font-medium text-muted-foreground">
-                                Example (Greek)
-                            </Label>
-                            <Textarea
-                                id="example_gr"
+                        <label style={labelStyle}>
+                            <span>Example (Greek)</span>
+                            <textarea
                                 {...register('example_gr')}
                                 placeholder="Παράδειγμα πρότασης στα ελληνικά"
-                                className="min-h-[60px] resize-none font-sans"
+                                style={textareaSmallStyle}
+                                rows={2}
                             />
-                        </div>
-                    </div>
+                        </label>
 
-                    <DialogFooter className="gap-2 sm:gap-0 pt-2">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={onClose}
-                            disabled={isSubmitting}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="min-w-[140px] bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isCreating ? 'Save' : 'Update'}
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
+                        {/* Footer Buttons */}
+                        <div style={footerStyle}>
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                style={btnSecondary}
+                                disabled={isSubmitting}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                style={btnPrimary}
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? '⏳ Saving...' : isCreating ? 'Save' : 'Update'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     );
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+const backdropStyle: CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0,0,0,0.85)',
+    backdropFilter: 'blur(16px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+    padding: '20px',
+};
+
+const modalStyle: CSSProperties = {
+    width: '100%',
+    maxWidth: '560px',
+    maxHeight: '90vh',
+    background: 'rgba(22, 22, 26, 0.98)',
+    backdropFilter: 'blur(60px)',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    border: '1px solid rgba(255,255,255,0.1)',
+    boxShadow: '0 25px 80px rgba(0,0,0,0.6)',
+    display: 'flex',
+    flexDirection: 'column',
+};
+
+const headerStyle: CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '12px 18px',
+    borderBottom: '1px solid rgba(255,255,255,0.08)',
+    flexShrink: 0,
+};
+
+const titleStyle: CSSProperties = {
+    margin: 0,
+    fontSize: '15px',
+    fontWeight: 700,
+    color: '#fff',
+};
+
+const bodyStyle: CSSProperties = {
+    padding: '18px',
+    overflowY: 'auto',
+    flex: 1,
+};
+
+const labelStyle: CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    fontSize: '11px',
+    fontWeight: 600,
+    color: '#8E8E93',
+};
+
+const inputStyle: CSSProperties = {
+    width: '100%',
+    background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: '8px',
+    padding: '8px 10px',
+    color: '#fff',
+    fontSize: '13px',
+    outline: 'none',
+    boxSizing: 'border-box',
+};
+
+const selectStyle: CSSProperties = {
+    ...inputStyle,
+    cursor: 'pointer',
+};
+
+const textareaStyle: CSSProperties = {
+    ...inputStyle,
+    resize: 'vertical' as any,
+    fontFamily: 'inherit',
+};
+
+const textareaSmallStyle: CSSProperties = {
+    ...textareaStyle,
+};
+
+const dividerStyle: CSSProperties = {
+    height: '1px',
+    background: 'rgba(255,255,255,0.08)',
+    margin: '8px 0',
+};
+
+const footerStyle: CSSProperties = {
+    display: 'flex',
+    gap: '8px',
+    justifyContent: 'flex-end',
+    marginTop: '12px',
+    paddingTop: '12px',
+    borderTop: '1px solid rgba(255,255,255,0.08)',
+};
+
+const btnPrimary: CSSProperties = {
+    background: 'rgba(0, 122, 255, 0.12)',
+    border: '1px solid rgba(0, 122, 255, 0.25)',
+    borderRadius: '8px',
+    padding: '7px 18px',
+    color: '#007AFF',
+    fontSize: '12px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    minWidth: '100px',
+};
+
+const btnSecondary: CSSProperties = {
+    background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: '8px',
+    padding: '7px 18px',
+    color: '#8E8E93',
+    fontSize: '12px',
+    fontWeight: 600,
+    cursor: 'pointer',
+};
+
+const btnClose: CSSProperties = {
+    background: 'rgba(255, 59, 48, 0.1)',
+    border: '1px solid rgba(255, 59, 48, 0.2)',
+    borderRadius: '8px',
+    padding: '5px 9px',
+    color: '#FF3B30',
+    fontSize: '13px',
+    cursor: 'pointer',
+    lineHeight: 1,
+};
+
+const errorStyle: CSSProperties = {
+    fontSize: '11px',
+    color: '#FF3B30',
+    marginTop: '2px',
+};
