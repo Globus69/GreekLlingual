@@ -778,6 +778,43 @@ export default function LoginPage() {
                         </button>
                     </form>
 
+                    {/* Back to User Login */}
+                    <div style={{
+                        marginTop: '20px',
+                        textAlign: 'center',
+                        width: '100%',
+                    }}>
+                        <button
+                            type="button"
+                            onClick={() => router.push('/login-pin')}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#8E8E93',
+                                fontSize: '13px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                transition: 'all 0.3s ease',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.color = '#007AFF';
+                                e.currentTarget.style.background = 'rgba(0, 122, 255, 0.1)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.color = '#8E8E93';
+                                e.currentTarget.style.background = 'transparent';
+                            }}
+                        >
+                            <span style={{ fontSize: '14px' }}>←</span>
+                            Back to User Login
+                        </button>
+                    </div>
+
                 </div>
 
                 {/* Footer branding */}
