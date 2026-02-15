@@ -803,9 +803,15 @@ export default function VocabularyDialog({ isOpen, onClose, mode = 'review' }: V
                 {/* Main Card Area - Daily Phrases Style */}
                 <div className="main-card-area">
                     {/* Phrase Card with Flip Functionality */}
-                    <div 
+                    <div
                         className={`phrase-card ${flipped ? 'flipped' : ''}`}
-                        onClick={() => setFlipped(!flipped)}
+                        onClick={() => {
+                            if (!flipped) {
+                                setFlipped(true);
+                            } else {
+                                playAudio();
+                            }
+                        }}
                         style={{ cursor: 'pointer' }}
                     >
                         <div className="card-content">

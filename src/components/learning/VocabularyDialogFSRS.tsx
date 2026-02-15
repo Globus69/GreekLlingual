@@ -637,6 +637,7 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                         flipped={flipped}
                         showRatingButtons={true}
                         onRating={handleRating}
+                        onBackClick={playAudio}
                     />
                 </div>
 
