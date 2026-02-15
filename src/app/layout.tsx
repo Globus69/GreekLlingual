@@ -23,6 +23,21 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "GreekLingua Dashboard",
   description: "Master Greek with Spaced Repetition",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0F0F11' },
+  ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'GreekLingua',
+  },
 };
 
 export default function RootLayout({

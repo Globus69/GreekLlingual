@@ -196,3 +196,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Import responsive design styles */
+@import '../styles/responsive.css';
+@import '../styles/admin-responsive.css';
