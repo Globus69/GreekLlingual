@@ -43,6 +43,45 @@
 
 ---
 
+## 2026-02-15 (später) – Backend Integration & RPC Functions
+
+### Was wurde gemacht?
+1. **RPC-Funktionen erstellt** (`database/migrations/064_create_grammar_rpc_functions.sql`)
+   - `get_due_grammar_cards(p_user_id, p_limit)` – Lädt fällige Grammar-Cards
+   - `update_grammar_card_progress(...)` – Aktualisiert FSRS-Daten in `student_progress` (korrekt!)
+   - **Fix:** FSRS-Daten werden jetzt pro User in `student_progress` gespeichert (nicht mehr in `learning_items`)
+
+2. **Frontend aktualisiert** (`grammar-dialog-fsrs.tsx`)
+   - `loadDueCards()` ruft jetzt `get_due_grammar_cards` RPC auf
+   - `handleRating()` ruft jetzt `update_grammar_card_progress` RPC auf
+   - Fallback auf Mock-Daten bei DB-Fehler beibehalten
+   - Ausführliches Error-Handling und Logging
+
+3. **Migration Guide erstellt** (`064_APPLY_GUIDE.md`)
+   - Schritt-für-Schritt-Anleitung für Deployment
+   - Test-Szenarien und erwartete Ergebnisse
+   - Troubleshooting für bekannte Probleme
+   - Rollback-Anleitung
+
+### Erkenntnisse
+- **Design-Fix:** FSRS-Daten in `learning_items` waren ein Problem (Multi-User Überschreibung)
+- Neue RPC `update_grammar_card_progress` verwendet UPSERT auf `student_progress`
+- Frontend hat jetzt robust Fallback auf Mock-Daten (offline-first)
+- Migration ist abwärtskompatibel (alte `update_card_fsrs` bleibt bestehen)
+
+### Nächste Schritte
+1. Migration in Supabase ausführen (`064_create_grammar_rpc_functions.sql`)
+2. Frontend deployen
+3. End-to-End testen (Desktop + Mobile)
+4. Performance monitoring (RPC-Call-Dauer, Error-Rate)
+
+### Offene Fragen
+- [ ] Soll `update_card_fsrs` (alte Funktion) auch gefixet werden, um `student_progress` zu nutzen?
+- [ ] Brauchen wir Migration, um FSRS-Felder aus `learning_items` zu entfernen?
+- [ ] Soll Mobile auch `get_due_grammar_cards` nutzen oder hat Mobile eigene Logik?
+
+---
+
 ## Template für zukünftige Einträge
 
 ### YYYY-MM-DD – [Titel der Änderung]

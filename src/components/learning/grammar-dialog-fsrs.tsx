@@ -240,13 +240,8 @@ export default function GrammarDialogFSRS({ isOpen, onClose }: GrammarDialogFSRS
         setLoadError(null);
         console.log(`🔄 Loading grammar rules...`);
 
-        // TODO: Replace with actual RPC call when backend is ready
-        // For now, use mock data
-        try {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            const mockGrammarRules: FSRSLearningItem[] = [
+        // Mock data as fallback
+        const mockGrammarRules: FSRSLearningItem[] = [
                 {
                     id: 'grammar-1',
                     type: 'grammar',
@@ -349,15 +344,69 @@ export default function GrammarDialogFSRS({ isOpen, onClose }: GrammarDialogFSRS
                 },
             ];
 
-            console.log(`✅ Loaded ${mockGrammarRules.length} grammar rules (mock data)`);
+        // Try RPC call first, fallback to mock data on error
+        try {
+            if (!STUDENT_ID) {
+                console.warn('⚠️ No user ID - using mock data');
+                setVocabulary(mockGrammarRules);
+                setLoadError(null);
+                setLoading(false);
+                return;
+            }
+
+            console.log(`📡 Calling RPC: get_due_grammar_cards for user ${STUDENT_ID}`);
+
+            const { data: rpcData, error: rpcError } = await supabase.rpc('get_due_grammar_cards', {
+                p_user_id: STUDENT_ID,
+                p_limit: 20
+            });
+
+            if (rpcError) {
+                console.error('❌ RPC error:', rpcError);
+                console.warn('⚠️ Falling back to mock data');
+                warning('Using offline grammar data');
+                setVocabulary(mockGrammarRules);
+                setLoadError(null);
+            } else if (!rpcData || rpcData.length === 0) {
+                console.log('📭 No grammar cards due');
+                setVocabulary([]);
+                setLoadError(null);
+            } else {
+                console.log(`✅ Loaded ${rpcData.length} grammar cards from DB`);
+
+                // Transform RPC data to FSRSLearningItem format
+                const grammarCards: FSRSLearningItem[] = rpcData.map((item: any) => ({
+                    id: item.id,
+                    type: item.type,
+                    english: item.english,
+                    russian: item.russian,
+                    greek: item.greek,
+                    greek_word: item.greek_word || item.greek,
+                    phonetic: item.phonetic,
+                    example_en: item.example_en,
+                    example_gr: item.example_gr,
+                    audio_url: item.audio_url,
+                    level: item.level,
+                    difficulty: item.difficulty,
+                    fsrs_difficulty: item.fsrs_difficulty,
+                    fsrs_stability: item.fsrs_stability,
+                    fsrs_last_review: item.fsrs_last_review,
+                    fsrs_due: item.fsrs_due,
+                    fsrs_reps: item.fsrs_reps,
+                    fsrs_lapses: item.fsrs_lapses,
+                    fsrs_state: item.fsrs_state,
+                    created_at: item.created_at,
+                }));
+
+                setVocabulary(grammarCards);
+                setLoadError(null);
+            }
+        } catch (err) {
+            console.error('❌ Unexpected error:', err);
+            console.warn('⚠️ Falling back to mock data');
+            warning('Using offline grammar data');
             setVocabulary(mockGrammarRules);
             setLoadError(null);
-        } catch (err) {
-            console.error('❌ Load error:', err);
-            const errMessage = err instanceof Error ? err.message : 'Unknown error';
-            setLoadError(errMessage);
-            error('An error occurred while loading grammar rules. Please try again.');
-            setVocabulary([]);
         } finally {
             setLoading(false);
         }
@@ -414,8 +463,8 @@ export default function GrammarDialogFSRS({ isOpen, onClose }: GrammarDialogFSRS
             if (!navigator.onLine) {
                 warning('Offline - changes will not be saved');
             } else {
-                // Call RPC to update card in database
-                const { data: rpcData, error: rpcError } = await supabase.rpc('update_card_fsrs', {
+                // Call Grammar-specific RPC to update card progress in student_progress
+                const { data: rpcData, error: rpcError } = await supabase.rpc('update_grammar_card_progress', {
                     p_card_id: item.id,
                     p_user_id: STUDENT_ID,
                     p_rating: rating,
