@@ -9,6 +9,7 @@ import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
 import { DueCardsSheet } from '@/components/mobile/DueCardsSheet';
 import VocabularyDialogFSRS from '@/components/learning/VocabularyDialogFSRS';
 import VocabularyDialog from '@/components/learning/VocabularyDialog';
+import DailyPhrasesDialog from '@/components/learning/daily-phrases-dialog';
 import '@/styles/liquid-glass.css';
 
 export default function MobileDashboardPage() {
@@ -18,6 +19,7 @@ export default function MobileDashboardPage() {
   const [showDueCardsSheet, setShowDueCardsSheet] = useState(false);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [showWeakWordsDialog, setShowWeakWordsDialog] = useState(false);
+  const [showDailyPhrasesDialog, setShowDailyPhrasesDialog] = useState(false);
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -238,7 +240,7 @@ export default function MobileDashboardPage() {
             title="Daily Phrases"
             subtitle="Useful phrases"
             color="purple"
-            onClick={() => alert('Daily Phrases - Coming soon!')}
+            onClick={() => setShowDailyPhrasesDialog(true)}
           />
           <ModuleTile
             icon="⚡"
@@ -391,6 +393,14 @@ export default function MobileDashboardPage() {
           isOpen={showWeakWordsDialog}
           onClose={() => setShowWeakWordsDialog(false)}
           mode="weak"
+        />
+      )}
+
+      {/* Daily Phrases Dialog */}
+      {showDailyPhrasesDialog && (
+        <DailyPhrasesDialog
+          isOpen={showDailyPhrasesDialog}
+          onClose={() => setShowDailyPhrasesDialog(false)}
         />
       )}
     </div>
