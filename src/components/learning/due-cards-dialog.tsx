@@ -660,6 +660,7 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                         showRatingButtons={true}
                         onRating={handleRating}
                         onBackClick={playAudio}
+                        useFSRS={true}
                     />
                 </div>
 

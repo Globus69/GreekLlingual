@@ -7,12 +7,12 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ModuleGrid from '@/components/dashboard/ModuleGrid';
 import '@/styles/liquid-glass.css';
-import VocabularyDialogFSRS from '@/components/learning/vocabulary-dialog-fsrs';
-import GrammarDialogFSRS from '@/components/learning/grammar-dialog-fsrs';
+import VocabularyDialog from '@/components/learning/vocabulary-dialog';
+import GrammarDialog from '@/components/learning/grammar-dialog';
 import ComprehensionDialog from '@/components/learning/comprehension-dialog';
 import ListeningDialog from '@/components/learning/listening-dialog';
 import LessonDialog from '@/components/learning/lesson-dialog';
-import DailyPhrasesDialogFSRS from '@/components/learning/daily-phrases-dialog-fsrs';
+import DailyPhrasesDialog from '@/components/learning/daily-phrases-dialog';
 import DueCardsDialog from '@/components/learning/due-cards-dialog';
 import WeakWordsDialog from '@/components/learning/weak-words-dialog';
 import { supabase } from '@/db/supabase';
@@ -362,14 +362,14 @@ export default function DashboardPage() {
             </main>
 
             {/* Vocabulary Dialog - NEW FSRS Version */}
-            <VocabularyDialogFSRS
+            <VocabularyDialog
                 isOpen={isVocabDialogOpen}
                 onClose={() => setIsVocabDialogOpen(false)}
                 mode={vocabDialogMode}
             />
 
             {/* Grammar Dialog - FSRS Version */}
-            <GrammarDialogFSRS
+            <GrammarDialog
                 isOpen={isGrammarDialogOpen}
                 onClose={() => setIsGrammarDialogOpen(false)}
             />
@@ -395,7 +395,7 @@ export default function DashboardPage() {
             />
 
             {/* Daily Phrases Dialog - FSRS Version */}
-            <DailyPhrasesDialogFSRS
+            <DailyPhrasesDialog
                 isOpen={isDailyPhrasesDialogOpen}
                 onClose={() => setIsDailyPhrasesDialogOpen(false)}
             />
