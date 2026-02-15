@@ -1,0 +1,9 @@
+type,english,greek,phonetic,example_en,example_gr,level,difficulty,audio_url
+vocabulary,Hello,Γεια σου,YAH-soo,Hello friend,Γεια σου φίλε,A1,easy,
+vocabulary,Thank you,Ευχαριστώ,ef-kha-ree-STOH,Thank you very much,Ευχαριστώ πολύ,A1,easy,
+vocabulary,Water,Νερό,neh-ROH,I want water,Θέλω νερό,A1,easy,
+vocabulary,Bread,Ψωμί,pso-MEE,Fresh bread,Φρέσκο ψωμί,A1,easy,
+vocabulary,Coffee,Καφές,ka-FES,I drink coffee,Πίνω καφέ,A1,easy,
+phrase,How are you?,Πώς είσαι;,pos EE-seh,How are you today?,Πώς είσαι σήμερα;,A1,medium,
+phrase,Good morning,Καλημέρα,ka-lee-MEH-ra,Good morning everyone,Καλημέρα σε όλους,A1,easy,
+phrase,See you later,Τα λέμε,ta LEH-meh,See you later friend,Τα λέμε φίλε,A1,medium,
