@@ -20,7 +20,7 @@ export default function PinLoginPage() {
         difficulty: '',
         success: false,
     });
-    const { login, user } = useAuth();
+    const { setUser, user } = useAuth();
     const router = useRouter();
     const { locale, syncLocaleFromUser } = useLanguage();
     const { t } = useTranslation();
@@ -292,7 +292,7 @@ export default function PinLoginPage() {
                 }
 
                 // User einloggen (über den bestehenden AuthContext)
-                localStorage.setItem('greeklingua_user', JSON.stringify({
+                const userObject = {
                     id: userData.user_id,
                     name: userData.user_name,
                     email: userData.user_email,
@@ -301,8 +301,13 @@ export default function PinLoginPage() {
                     difficulty: userData.user_difficulty,
                     performance_index: userData.user_performance_index,
                     preferred_locale: userData.user_preferred_locale,
-                }));
+                };
+
+                localStorage.setItem('greeklingua_user', JSON.stringify(userObject));
                 localStorage.setItem('greeklingua_session_ts', Date.now().toString());
+
+                // CRITICAL: Update AuthContext so dashboard doesn't redirect back to login
+                setUser(userObject);
 
                 // Sync UI language from user profile (auto-detect locale)
                 syncLocaleFromUser(userData.user_preferred_locale);
