@@ -28,15 +28,23 @@ export default function MobileStatsPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 space-y-4">
+    <div className="min-h-screen p-4 space-y-4 pb-20">
       {/* Header */}
-      <div className="text-center py-6">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          📊 {t('perf.title') || 'Performance Statistics'}
-        </h1>
-        <p className="text-blue-200">
-          {user?.name || 'Student'}
-        </p>
+      <div className="flex items-center gap-3 py-6">
+        <button
+          onClick={() => router.push('/m')}
+          className="text-2xl text-white"
+        >
+          ←
+        </button>
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-white">
+            📊 {t('perf.title') || 'Performance Statistics'}
+          </h1>
+          <p className="text-sm text-blue-200">
+            {user?.name || 'Student'}
+          </p>
+        </div>
       </div>
 
       {/* Main Stats Grid */}
@@ -131,6 +139,72 @@ export default function MobileStatsPage() {
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
         <h2 className="text-xl font-bold text-white mb-4">📊 Weekly Activity</h2>
         <WeeklyActivityChart data={stats.weeklyActivity || []} />
+      </div>
+
+      {/* Bottom Navigation */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          backgroundColor: 'rgba(28, 28, 30, 0.95)',
+          backdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '8px 16px 12px',
+        }}
+      >
+        <div style={{ maxWidth: '448px', margin: '0 auto', display: 'flex', justifyContent: 'space-around' }}>
+          <button
+            onClick={() => router.push('/m')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontSize: '24px' }}>🏠</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Home</span>
+          </button>
+          <button
+            onClick={() => router.push('/m/stats')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontSize: '24px' }}>📊</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#007AFF' }}>Stats</span>
+          </button>
+          <button
+            onClick={() => router.push('/m/settings')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontSize: '24px' }}>⚙️</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Settings</span>
+          </button>
+        </div>
       </div>
     </div>
   );

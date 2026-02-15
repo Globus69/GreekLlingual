@@ -1,192 +1,248 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/auth-context';
-import { useLanguage } from '@/context/language-context';
 import { useRouter } from 'next/navigation';
-import { useTranslation } from '@/lib/use-translation';
+import { useAuth } from '@/context/auth-context';
 
 export default function MobileSettingsPage() {
-  const { user, isAuthenticated, logout } = useAuth();
-  const { locale, setLocale } = useLanguage();
   const router = useRouter();
-  const { t } = useTranslation();
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { user, logout } = useAuth();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
+  const handleLogout = async () => {
+    if (confirm('Are you sure you want to logout?')) {
+      await logout();
       router.push('/login-pin');
     }
-  }, [isAuthenticated]);
-
-  const handleLogout = () => {
-    logout();
-    router.push('/login-pin');
   };
 
-  const languages = [
-    { code: 'en', flag: '🇬🇧', name: 'English' },
-    { code: 'ru', flag: '🇷🇺', name: 'Русский' },
-    { code: 'el', flag: '🇬🇷', name: 'Ελληνικά' },
-    { code: 'de', flag: '🇩🇪', name: 'Deutsch' },
-  ];
-
   return (
-    <div className="min-h-screen p-4 space-y-6">
+    <div style={{ minHeight: '100vh', backgroundColor: '#0F0F11', paddingBottom: '80px' }}>
       {/* Header */}
-      <div className="text-center py-6">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          ⚙️ {t('header.settings') || 'Settings'}
-        </h1>
-        <p className="text-blue-200">{user?.name || 'Student'}</p>
-      </div>
-
-      {/* User Info Section */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 space-y-4">
-        <h2 className="text-xl font-bold text-white mb-4">Account</h2>
-
-        <div className="space-y-3">
-          <InfoRow label="Name" value={user?.name || '-'} />
-          <InfoRow label="Email" value={user?.email || '-'} />
-          <InfoRow label="Level" value={user?.level || 'A1'} />
-          <InfoRow label="Difficulty" value={user?.difficulty || 'easy'} />
-        </div>
-      </div>
-
-      {/* Language Section */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
-        <h2 className="text-xl font-bold text-white mb-4">
-          🌐 {t('settings.language') || 'Language'}
-        </h2>
-
-        <div className="grid grid-cols-2 gap-3">
-          {languages.map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => setLocale(lang.code as any)}
-              className={`
-                p-4 rounded-xl
-                flex flex-col items-center justify-center
-                transition-all duration-200
-                ${
-                  locale === lang.code
-                    ? 'bg-blue-500 shadow-lg shadow-blue-500/50'
-                    : 'bg-white/5 hover:bg-white/10'
-                }
-              `}
-            >
-              <span className="text-4xl mb-2">{lang.flag}</span>
-              <span
-                className={`text-sm font-medium ${
-                  locale === lang.code ? 'text-white' : 'text-blue-200'
-                }`}
-              >
-                {lang.name}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Appearance Section */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
-        <h2 className="text-xl font-bold text-white mb-4">
-          🎨 Appearance
-        </h2>
-
-        <div className="space-y-3">
+      <div
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          backgroundColor: 'rgba(28, 28, 30, 0.95)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '16px',
+        }}
+      >
+        <div style={{ maxWidth: '448px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
-            onClick={() => router.push('/dashboard')}
-            className="w-full p-4 rounded-xl bg-white/5 hover:bg-white/10 text-left transition-all"
+            onClick={() => router.back()}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              padding: 0,
+              color: 'white',
+            }}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">💻</span>
-                <span className="text-white font-medium">
-                  Switch to Desktop Version
-                </span>
-              </div>
-              <span className="text-blue-300">→</span>
-            </div>
+            ←
+          </button>
+          <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: 'white', margin: 0 }}>⚙️ Settings</h1>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ maxWidth: '448px', margin: '0 auto', padding: '16px' }}>
+        {/* User Info */}
+        <div
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '16px',
+            padding: '16px',
+            marginBottom: '16px',
+          }}
+        >
+          <div style={{ fontSize: '14px', color: '#8E8E93', marginBottom: '8px' }}>Account</div>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', marginBottom: '4px' }}>
+            {user?.name || 'Student'}
+          </div>
+          <div style={{ fontSize: '14px', color: '#8E8E93' }}>{user?.email || 'No email'}</div>
+          <div style={{ fontSize: '14px', color: '#8E8E93', marginTop: '8px' }}>
+            Level: <span style={{ color: '#FFD60A', fontWeight: 'bold' }}>{user?.level || 'A1'}</span>
+          </div>
+        </div>
+
+        {/* Settings Options */}
+        <div style={{ marginBottom: '16px' }}>
+          <SettingButton
+            icon="🌍"
+            title="Language"
+            subtitle="Change app language"
+            onClick={() => alert('Language settings - Coming soon!')}
+          />
+          <SettingButton
+            icon="🔔"
+            title="Notifications"
+            subtitle="Manage notifications"
+            onClick={() => alert('Notification settings - Coming soon!')}
+          />
+          <SettingButton
+            icon="🎨"
+            title="Appearance"
+            subtitle="Theme & display"
+            onClick={() => alert('Appearance settings - Coming soon!')}
+          />
+          <SettingButton
+            icon="📊"
+            title="Learning Goals"
+            subtitle="Set daily targets"
+            onClick={() => alert('Learning goals - Coming soon!')}
+          />
+          <SettingButton
+            icon="🔐"
+            title="Privacy"
+            subtitle="Data & security"
+            onClick={() => alert('Privacy settings - Coming soon!')}
+          />
+        </div>
+
+        {/* Danger Zone */}
+        <div
+          style={{
+            backgroundColor: 'rgba(255, 59, 48, 0.15)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '16px',
+            padding: '16px',
+            border: '1px solid rgba(255, 59, 48, 0.3)',
+          }}
+        >
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: 'rgba(255, 59, 48, 0.2)',
+              border: '1px solid rgba(255, 59, 48, 0.4)',
+              borderRadius: '12px',
+              color: '#FF3B30',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+            }}
+          >
+            🚪 Logout
+          </button>
+        </div>
+
+        {/* App Info */}
+        <div style={{ textAlign: 'center', marginTop: '32px', color: '#8E8E93', fontSize: '12px' }}>
+          <div>GreekLingua Dashboard</div>
+          <div style={{ marginTop: '4px' }}>Version 1.0.0 • Made with ❤️</div>
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          backgroundColor: 'rgba(28, 28, 30, 0.95)',
+          backdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '8px 16px 12px',
+        }}
+      >
+        <div style={{ maxWidth: '448px', margin: '0 auto', display: 'flex', justifyContent: 'space-around' }}>
+          <button
+            onClick={() => router.push('/m')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontSize: '24px' }}>🏠</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Home</span>
+          </button>
+          <button
+            onClick={() => router.push('/m/stats')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontSize: '24px' }}>📊</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Stats</span>
+          </button>
+          <button
+            onClick={() => router.push('/m/settings')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '8px 16px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontSize: '24px' }}>⚙️</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#007AFF' }}>Settings</span>
           </button>
         </div>
       </div>
-
-      {/* Biometric Auth (Phase 2) */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 opacity-50">
-        <h2 className="text-xl font-bold text-white mb-4">
-          🔒 Security
-        </h2>
-
-        <div className="space-y-3">
-          <div className="p-4 rounded-xl bg-white/5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">📱</span>
-                <span className="text-white font-medium">
-                  Biometric Login (Face ID/Touch ID)
-                </span>
-              </div>
-              <span className="text-xs text-blue-300 bg-blue-500/20 px-2 py-1 rounded">
-                Coming Soon
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Logout Section */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
-        <button
-          onClick={() => setShowLogoutConfirm(true)}
-          className="w-full p-4 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold transition-all"
-        >
-          🚪 {t('header.logout') || 'Logout'}
-        </button>
-      </div>
-
-      {/* App Info */}
-      <div className="text-center py-4 space-y-2 text-blue-200/50 text-sm">
-        <p>HellenicHorizons GreekLingua</p>
-        <p>Mobile App v1.0.0</p>
-      </div>
-
-      {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 max-w-sm w-full">
-            <h3 className="text-xl font-bold text-white mb-4">
-              Confirm Logout
-            </h3>
-            <p className="text-blue-200 mb-6">
-              Are you sure you want to log out?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 p-3 rounded-xl bg-white/10 text-white font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex-1 p-3 rounded-xl bg-red-500 text-white font-semibold"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+interface SettingButtonProps {
+  icon: string;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+}
+
+function SettingButton({ icon, title, subtitle, onClick }: SettingButtonProps) {
   return (
-    <div className="flex justify-between items-center py-2 border-b border-white/10">
-      <span className="text-blue-200">{label}</span>
-      <span className="text-white font-semibold">{value}</span>
-    </div>
+    <button
+      onClick={onClick}
+      style={{
+        width: '100%',
+        padding: '14px',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        marginBottom: '8px',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+      }}
+    >
+      <span style={{ fontSize: '28px' }}>{icon}</span>
+      <div style={{ flex: 1, textAlign: 'left' }}>
+        <div style={{ fontSize: '15px', fontWeight: 'bold', color: 'white', marginBottom: '2px' }}>{title}</div>
+        <div style={{ fontSize: '12px', color: '#8E8E93' }}>{subtitle}</div>
+      </div>
+      <span style={{ fontSize: '16px', color: '#8E8E93' }}>→</span>
+    </button>
   );
 }
