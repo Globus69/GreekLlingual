@@ -273,43 +273,53 @@ UPSTASH_REDIS_REST_TOKEN=...
 
 ---
 
-### **Task 3: 12 Module definieren** (WARTET AUF USER)
+### **Task 3: 12 Module definieren** ✅ ERLEDIGT
 **Priorität:** 🟡 **HOCH**
-**Status:** ⏳ **WARTET AUF USER-FEEDBACK**
+**Status:** ✅ **DEFINIERT**
 
-**Aktuell vorhanden (7 Module):**
-1. ✅ Admin Panel (nur für teacher/admin)
-2. ✅ Due Cards Today
-3. ✅ Review Vocabulary
-4. ✅ Train Weak Words
-5. ✅ Daily Phrases
-6. ✅ 20 min Quick Lesson
-7. ✅ Test
-8. ✅ Quiz go ahead
+**Desktop Dashboard (16 Module - nummeriert für Debug):**
+1. ✅ Magic Round (👩‍🏫) - Dein Unterricht
+2. ✅ Quick Lesson (⚡) - 20 min schnelles Lernen
+3. ✅ Daily Phrases (💬) - Tägliche Phrasen
+4. ✅ Short Stories (📚) - Kurzgeschichten
+5. ✅ Train Weak (⚠️) - Schwache Wörter trainieren
+6. ✅ Review Vocab (🔄) - Vokabeln wiederholen
+7. ✅ Due Cards (📅) - Fällige Karten
+8. ✅ Grammar Hits (📐) - Grammatik üben
+9. ✅ Listening (👂) - Hörverständnis
+10. ✅ Pronunciation (🗣️) - Aussprache
+11. ✅ Comprehension (🧠) - Textverständnis
+12. ✅ Audio Immersion (🎧) - Audio-Immersion
+13. ✅ Test (📝) - Wissenstest
+14. ✅ Cyprus Exam (🏛️) - Zypern-Prüfung
+15. ✅ Book Recs (📕) - Buchempfehlungen
+16. ✅ Progress History (📊) - Fortschritts-Historie
 
-**Fehlende Module (5 Module):**
-- [ ] ❓ **Modul 9:** (User muss spezifizieren)
-- [ ] ❓ **Modul 10:** (User muss spezifizieren)
-- [ ] ❓ **Modul 11:** (User muss spezifizieren)
-- [ ] ❓ **Modul 12:** (User muss spezifizieren)
-- [ ] ❓ **Modul 13:** (User muss spezifizieren)
+**Mobile Dashboard (aktuell nur 7 Module):**
+1. ✅ Due Cards Today (📅)
+2. ✅ Review Vocabulary (📖)
+3. ✅ Train Weak Words (💪)
+4. ✅ Daily Phrases (💬)
+5. ✅ 20 min Quick Lesson (⚡)
+6. ✅ Test (📝)
+7. ✅ Quiz go ahead (🎯)
 
-**Aufgabe für User:**
-> Bitte liste die fehlenden 5 Module auf, dann kann ich das optimale Layout berechnen.
+**Aufgabe:** Portiere die wichtigsten 12 Module von Desktop → Mobile
+**Empfohlene 12 Module für Mobile:**
+1. Magic Round (wichtigste Funktion)
+2. Due Cards Today
+3. Review Vocabulary
+4. Train Weak Words
+5. Daily Phrases
+6. Quick Lesson (20 min)
+7. Short Stories
+8. Grammar Hits
+9. Listening
+10. Pronunciation
+11. Test
+12. Progress History
 
-**Mögliche Kandidaten:**
-- Grammar Lessons
-- Vocabulary Builder
-- Audio Practice
-- Conversation Practice
-- Cultural Notes
-- Level Test
-- Progress Report
-- Achievements
-- Leaderboard
-- Settings
-
-**Status:** ⏳ **WARTET AUF USER-INPUT**
+**Status:** ✅ **LISTE DEFINIERT** → Bereit für Task 4 (Grid-Layout)
 
 ---
 
