@@ -10,6 +10,7 @@ import VocabularyDialogFSRS from '@/components/learning/VocabularyDialogFSRS';
 import DailyPhrasesDialogFSRS from '@/components/learning/daily-phrases-dialog-fsrs';
 import DueCardsDialog from '@/components/learning/due-cards-dialog';
 import WeakWordsDialog from '@/components/learning/weak-words-dialog';
+import GrammarDialogFSRS from '@/components/learning/grammar-dialog-fsrs';
 import '@/styles/liquid-glass.css';
 
 export default function MobileDashboardPage() {
@@ -20,6 +21,7 @@ export default function MobileDashboardPage() {
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [showWeakWordsDialog, setShowWeakWordsDialog] = useState(false);
   const [showDailyPhrasesDialog, setShowDailyPhrasesDialog] = useState(false);
+  const [showGrammarDialog, setShowGrammarDialog] = useState(false);
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -263,7 +265,7 @@ export default function MobileDashboardPage() {
             title="Grammar"
             subtitle="Practice rules"
             color="orange"
-            onClick={() => alert('Grammar - Coming soon!')}
+            onClick={() => setShowGrammarDialog(true)}
           />
 
           {/* Row 5 */}
@@ -403,6 +405,14 @@ export default function MobileDashboardPage() {
         <DueCardsDialog
           isOpen={showDueCardsSheet}
           onClose={() => setShowDueCardsSheet(false)}
+        />
+      )}
+
+      {/* Grammar Dialog */}
+      {showGrammarDialog && (
+        <GrammarDialogFSRS
+          isOpen={showGrammarDialog}
+          onClose={() => setShowGrammarDialog(false)}
         />
       )}
     </div>
