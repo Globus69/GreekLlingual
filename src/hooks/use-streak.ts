@@ -26,19 +26,64 @@ export function useStreak() {
 
     // Fetch current streak info
     const fetchStreakInfo = useCallback(async () => {
-        if (!user?.id) return;
+        if (!user?.id) {
+            setLoading(false);
+            return;
+        }
 
         try {
             const { data, error } = await supabase
                 .rpc('get_user_streak', { p_user_id: user.id });
 
-            if (error) throw error;
+            if (error) {
+                // Enhanced error logging
+                console.error('Error fetching streak:', {
+                    message: error.message,
+                    details: error.details,
+                    hint: error.hint,
+                    code: error.code,
+                    fullError: error
+                });
+
+                // Check if RPC function doesn't exist
+                if (error.code === '42883' || error.message?.includes('does not exist')) {
+                    console.warn('⚠️ RPC function get_user_streak does not exist. Using fallback values.');
+                    // Set fallback values
+                    setStreakInfo({
+                        current_streak: 0,
+                        longest_streak: 0,
+                        last_activity: null,
+                        streak_status: 'inactive'
+                    });
+                }
+                return;
+            }
 
             if (data && data.length > 0) {
                 setStreakInfo(data[0]);
+            } else {
+                // No data returned - set fallback
+                setStreakInfo({
+                    current_streak: 0,
+                    longest_streak: 0,
+                    last_activity: null,
+                    streak_status: 'inactive'
+                });
             }
         } catch (error) {
-            console.error('Error fetching streak:', error);
+            console.error('Error fetching streak (caught):', {
+                error,
+                type: typeof error,
+                stringified: JSON.stringify(error, null, 2)
+            });
+
+            // Set fallback values on error
+            setStreakInfo({
+                current_streak: 0,
+                longest_streak: 0,
+                last_activity: null,
+                streak_status: 'inactive'
+            });
         } finally {
             setLoading(false);
         }
@@ -53,7 +98,22 @@ export function useStreak() {
             const { data, error } = await supabase
                 .rpc('update_user_streak', { p_user_id: user.id });
 
-            if (error) throw error;
+            if (error) {
+                // Enhanced error logging
+                console.error('Error updating streak:', {
+                    message: error.message,
+                    details: error.details,
+                    hint: error.hint,
+                    code: error.code,
+                    fullError: error
+                });
+
+                // Check if RPC function doesn't exist
+                if (error.code === '42883' || error.message?.includes('does not exist')) {
+                    console.warn('⚠️ RPC function update_user_streak does not exist. Skipping streak update.');
+                }
+                return null;
+            }
 
             if (data && data.length > 0) {
                 const result = data[0];
@@ -65,7 +125,11 @@ export function useStreak() {
             }
             return null;
         } catch (error) {
-            console.error('Error updating streak:', error);
+            console.error('Error updating streak (caught):', {
+                error,
+                type: typeof error,
+                stringified: JSON.stringify(error, null, 2)
+            });
             return null;
         } finally {
             setUpdating(false);
