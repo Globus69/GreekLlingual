@@ -265,7 +265,10 @@ export default function MobileDashboardPage() {
             title="Grammar"
             subtitle="Practice rules"
             color="orange"
-            onClick={() => setShowGrammarDialog(true)}
+            onClick={() => {
+              console.log('🔵 Grammar button clicked, setting showGrammarDialog to true');
+              setShowGrammarDialog(true);
+            }}
           />
 
           {/* Row 5 */}

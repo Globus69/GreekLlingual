@@ -7,6 +7,7 @@ import FlashcardFSRS from '@/components/learning/flashcard-fsrs';
 import { useTranslation } from '@/lib/use-translation';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { speakGreek } from '@/lib/tts/greek-tts';
+import { DialogPortalWrapper } from '@/components/ui/dialog-portal';
 import '@/styles/liquid-glass.css';
 
 interface GrammarRule {
@@ -30,6 +31,7 @@ interface GrammarDialogProps {
 }
 
 export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
+    console.log('🔍 GrammarDialog render - isOpen:', isOpen);
     const { user } = useAuth();
     const { t, locale } = useTranslation();
     const { toasts, showToast, removeToast, error, warning, success, info } = useToast();
@@ -245,10 +247,11 @@ export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
     const currentItem = queue[currentIndex];
     const speedInfo = getSpeedLabel(speechRate);
 
+    if (!isOpen) return null;
+
     return (
-        <>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm" onClick={onClose}>
-                <div className="liquid-glass-panel w-full max-w-2xl p-8 rounded-3xl relative" onClick={(e) => e.stopPropagation()}>
+        <div className="vocabulary-dialog-overlay" onClick={onClose}>
+            <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()}>
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-white">📖 Grammar Practice</h2>
@@ -337,10 +340,9 @@ export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
                             )}
                         </>
                     ) : null}
-                </div>
             </div>
 
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <ToastContainer toasts={toasts} onRemove={removeToast} />
 
             <style jsx>{`
                 .liquid-glass-panel {
@@ -399,6 +401,6 @@ export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
                     cursor: not-allowed;
                 }
             `}</style>
-        </>
+        </div>
     );
 }
