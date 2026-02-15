@@ -15,9 +15,10 @@ import { isMobileDevice } from '@/lib/device-utils';
 /**
  * Proxy für Rate Limiting + Device-Detection (Next.js 16+)
  *
- * Geschützte Routen:
+ * Geschützte Routen (nur POST-Requests):
  * - /login-pin (Schüler-Login): 10 Versuche/Minute
  * - /login (Admin-Login): 3 Versuche/5 Minuten
+ * - GET-Requests (Seiten-Navigation) sind NICHT limitiert
  *
  * Device-Detection:
  * - /redirect-after-login → /m (Mobile) oder /dashboard (Desktop)
@@ -45,8 +46,9 @@ export async function proxy(request: NextRequest) {
   // 2. RATE LIMITING: Login-Routen
   // ========================================
 
-  // Nur Login-Routen schützen
-  if (pathname === '/login-pin' || pathname === '/login') {
+  // Nur Login-Routen schützen UND nur bei POST-Requests (tatsächliche Login-Versuche)
+  // GET-Requests (Seiten-Navigation) werden NICHT limitiert
+  if ((pathname === '/login-pin' || pathname === '/login') && request.method === 'POST') {
     const clientIp = getClientIP(request);
 
     // Admin-Login: strengeres Rate Limiting (3/5min)
