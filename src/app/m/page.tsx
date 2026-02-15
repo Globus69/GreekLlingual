@@ -6,7 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import { useTranslation } from '@/lib/use-translation';
 import { useStatsData } from '@/hooks/use-stats-data';
 import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
-import VocabularyDialogFSRS from '@/components/learning/VocabularyDialogFSRS';
+import VocabularyDialogFSRS from '@/components/learning/vocabulary-dialog-fsrs';
 import DailyPhrasesDialogFSRS from '@/components/learning/daily-phrases-dialog-fsrs';
 import DueCardsDialog from '@/components/learning/due-cards-dialog';
 import WeakWordsDialog from '@/components/learning/weak-words-dialog';
