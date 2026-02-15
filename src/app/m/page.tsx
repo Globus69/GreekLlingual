@@ -150,10 +150,10 @@ export default function MobileDashboardPage() {
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: '448px', margin: '0 auto', padding: '24px 16px' }}>
+      <div style={{ maxWidth: '448px', margin: '0 auto', padding: '16px 16px 24px' }}>
         {/* Welcome - COMPACT VERSION */}
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', marginBottom: '0' }}>
+        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 'bold', color: 'white', marginBottom: '0' }}>
             Welcome, {(() => {
               const name = user?.name;
               return name ? name.split(' ')[0] : 'Student';
@@ -167,90 +167,131 @@ export default function MobileDashboardPage() {
             onClick={() => router.push('/m/admin/unlock')}
             style={{
               width: '100%',
-              minHeight: '64px',
-              padding: '12px 16px',
-              borderRadius: '16px',
+              minHeight: '56px',
+              padding: '10px 14px',
+              borderRadius: '14px',
               backgroundColor: 'rgba(255, 204, 0, 0.2)',
               border: '1px solid rgba(255, 204, 0, 0.4)',
               backdropFilter: 'blur(10px)',
               display: 'flex',
               alignItems: 'center',
-              gap: '16px',
-              marginBottom: '16px',
+              gap: '12px',
+              marginBottom: '12px',
               cursor: 'pointer'
             }}
           >
-            <span style={{ fontSize: '32px' }}>🔓</span>
+            <span style={{ fontSize: '28px' }}>🔓</span>
             <div style={{ flex: 1, textAlign: 'left' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#FFCC00' }}>Admin Panel</div>
-              <div style={{ fontSize: '12px', color: 'rgba(255, 204, 0, 0.7)' }}>User entsperren</div>
+              <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#FFCC00' }}>Admin Panel</div>
+              <div style={{ fontSize: '11px', color: 'rgba(255, 204, 0, 0.7)' }}>User entsperren</div>
             </div>
-            <span style={{ fontSize: '20px', color: '#FFCC00', opacity: 0.5 }}>→</span>
+            <span style={{ fontSize: '18px', color: '#FFCC00', opacity: 0.5 }}>→</span>
           </button>
         )}
 
-        {/* Module: Due Cards */}
-        <ModuleTile
-          icon="📅"
-          title="Due Cards Today"
-          subtitle={`${stats.dueCount} cards waiting`}
-          color="blue"
-          onClick={() => setShowDueCardsSheet(true)}
-        />
+        {/* 2×6 Grid Layout - 12 Modules */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '8px',
+          marginBottom: '16px'
+        }}>
+          {/* Row 1 */}
+          <ModuleTile
+            icon="👩‍🏫"
+            title="Magic Round"
+            subtitle="Your lesson"
+            color="purple"
+            onClick={() => alert('Magic Round - Coming soon!')}
+          />
+          <ModuleTile
+            icon="📅"
+            title="Due Cards"
+            subtitle={`${stats.dueCount} waiting`}
+            color="blue"
+            onClick={() => setShowDueCardsSheet(true)}
+          />
 
-        {/* Module: Review */}
-        <ModuleTile
-          icon="📖"
-          title="Review Vocabulary"
-          subtitle="practice_learned_words"
-          color="green"
-          onClick={() => alert('Review - Coming soon!')}
-        />
+          {/* Row 2 */}
+          <ModuleTile
+            icon="📖"
+            title="Review Vocab"
+            subtitle="Practice words"
+            color="green"
+            onClick={() => alert('Review - Coming soon!')}
+          />
+          <ModuleTile
+            icon="💪"
+            title="Weak Words"
+            subtitle="Train difficult"
+            color="orange"
+            onClick={() => setShowWeakWordsSheet(true)}
+          />
 
-        {/* Module: Weak Words */}
-        <ModuleTile
-          icon="💪"
-          title="Train Weak Words"
-          subtitle="focus_on_difficult"
-          color="orange"
-          onClick={() => setShowWeakWordsSheet(true)}
-        />
+          {/* Row 3 */}
+          <ModuleTile
+            icon="💬"
+            title="Daily Phrases"
+            subtitle="Useful phrases"
+            color="purple"
+            onClick={() => alert('Daily Phrases - Coming soon!')}
+          />
+          <ModuleTile
+            icon="⚡"
+            title="Quick Lesson"
+            subtitle="20 min session"
+            color="blue"
+            onClick={() => alert('Quick Lesson - Coming soon!')}
+          />
 
-        {/* Module: Daily Phrases */}
-        <ModuleTile
-          icon="💬"
-          title="Daily Phrases"
-          subtitle="learn_useful_phrases"
-          color="purple"
-          onClick={() => alert('Daily Phrases - Coming soon!')}
-        />
+          {/* Row 4 */}
+          <ModuleTile
+            icon="📚"
+            title="Short Stories"
+            subtitle="Read & learn"
+            color="green"
+            onClick={() => alert('Short Stories - Coming soon!')}
+          />
+          <ModuleTile
+            icon="📐"
+            title="Grammar"
+            subtitle="Practice rules"
+            color="orange"
+            onClick={() => alert('Grammar - Coming soon!')}
+          />
 
-        {/* Module: 20 min Quick Lesson */}
-        <ModuleTile
-          icon="⚡"
-          title="20 min Quick Lesson"
-          subtitle="Fast-paced learning session"
-          color="blue"
-          onClick={() => alert('Quick Lesson - Coming soon!')}
-        />
+          {/* Row 5 */}
+          <ModuleTile
+            icon="👂"
+            title="Listening"
+            subtitle="Audio practice"
+            color="blue"
+            onClick={() => alert('Listening - Coming soon!')}
+          />
+          <ModuleTile
+            icon="🗣️"
+            title="Pronunciation"
+            subtitle="Speak Greek"
+            color="purple"
+            onClick={() => alert('Pronunciation - Coming soon!')}
+          />
 
-        {/* Module: Test */}
-        <ModuleTile
-          icon="📝"
-          title="Test"
-          subtitle="Check your knowledge"
-          color="orange"
-          onClick={() => alert('Test - Coming soon!')}
-        />
-
-        {/* Module: Quiz go ahead */}
-        <ModuleTile
-          icon="🎯"
-          title="Quiz go ahead"
-          subtitle="Challenge yourself with quick quizzes"
-          color="green"
-          onClick={() => alert('Quiz - Coming soon!')}
-        />
+          {/* Row 6 */}
+          <ModuleTile
+            icon="📝"
+            title="Test"
+            subtitle="Check progress"
+            color="orange"
+            onClick={() => alert('Test - Coming soon!')}
+          />
+          <ModuleTile
+            icon="📊"
+            title="Progress"
+            subtitle="View history"
+            color="green"
+            onClick={() => alert('Progress - Coming soon!')}
+          />
+        </div>
 
       </div>
 
@@ -359,16 +400,15 @@ function ModuleTile({ icon, title, subtitle, color, disabled, onClick }: ModuleT
       disabled={disabled}
       style={{
         width: '100%',
-        minHeight: '56px',
-        padding: '10px 14px',
-        borderRadius: '14px',
+        minHeight: '48px',
+        padding: '8px 10px',
+        borderRadius: '12px',
         backgroundColor: c.bg,
         border: `1px solid ${c.border}`,
         backdropFilter: 'blur(10px)',
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
-        marginBottom: '10px',
+        gap: '8px',
         opacity: disabled ? 0.4 : 1,
         cursor: disabled ? 'not-allowed' : 'pointer',
         transition: 'transform 0.2s ease, opacity 0.2s ease',
@@ -385,13 +425,13 @@ function ModuleTile({ icon, title, subtitle, color, disabled, onClick }: ModuleT
         e.currentTarget.style.transform = 'scale(1)';
       }}
     >
-      <span style={{ fontSize: '28px' }}>{icon}</span>
+      <span style={{ fontSize: '24px' }}>{icon}</span>
       <div style={{ flex: 1, textAlign: 'left' }}>
-        <div style={{ fontWeight: 'bold', fontSize: '15px', color: 'white', lineHeight: '1.2' }}>{title}</div>
-        <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.65)', marginTop: '2px' }}>{subtitle}</div>
+        <div style={{ fontWeight: 'bold', fontSize: '13px', color: 'white', lineHeight: '1.2' }}>{title}</div>
+        <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.65)', marginTop: '1px' }}>{subtitle}</div>
       </div>
       {!disabled && (
-        <span style={{ fontSize: '18px', color: c.text, opacity: 0.7 }}>→</span>
+        <span style={{ fontSize: '16px', color: c.text, opacity: 0.7 }}>→</span>
       )}
     </button>
   );
