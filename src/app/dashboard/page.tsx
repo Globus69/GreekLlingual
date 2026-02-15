@@ -9,11 +9,13 @@ import ModuleGrid from '@/components/dashboard/ModuleGrid';
 import '@/styles/liquid-glass.css';
 import VocabularyDialog from '@/components/learning/VocabularyDialog';
 import VocabularyDialogFSRS from '@/components/learning/VocabularyDialogFSRS';
-import GrammarDialog from '@/components/learning/GrammarDialog';
+import GrammarDialogFSRS from '@/components/learning/grammar-dialog-fsrs';
 import ComprehensionDialog from '@/components/learning/ComprehensionDialog';
 import ListeningDialog from '@/components/learning/ListeningDialog';
 import LessonDialog from '@/components/learning/LessonDialog';
 import DailyPhrasesDialogFSRS from '@/components/learning/daily-phrases-dialog-fsrs';
+import DueCardsDialog from '@/components/learning/due-cards-dialog';
+import WeakWordsDialog from '@/components/learning/weak-words-dialog';
 import { supabase } from '@/db/supabase';
 import { useTranslation } from '@/lib/use-translation';
 import Link from 'next/link';
@@ -58,6 +60,8 @@ export default function DashboardPage() {
     const [listeningDialogMode, setListeningDialogMode] = useState<'weak' | 'review' | 'due'>('review');
     const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
     const [isDailyPhrasesDialogOpen, setIsDailyPhrasesDialogOpen] = useState(false);
+    const [isDueCardsDialogOpen, setIsDueCardsDialogOpen] = useState(false);
+    const [isWeakWordsDialogOpen, setIsWeakWordsDialogOpen] = useState(false);
     const [masteryProgress, setMasteryProgress] = useState(38);
     const [stats, setStats] = useState({ streak: 0, words: 47, weak: 'Verbs' });
     const { t } = useTranslation();
@@ -250,13 +254,10 @@ export default function DashboardPage() {
                     {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
                     <div className="quick-actions-grid">
                         {/* Row 1 - Reordered: 7, 2, 3, 6 */}
-                        <ActionTile 
-                            icon="📅" 
+                        <ActionTile
+                            icon="📅"
                             label={`7. ${t('action.due_cards')}`}
-                            onClick={() => {
-                                setVocabDialogMode('due');
-                                setIsVocabDialogOpen(true);
-                            }}
+                            onClick={() => setIsDueCardsDialogOpen(true)}
                         />
                         <ActionTile 
                             icon="⚡" 
@@ -289,10 +290,7 @@ export default function DashboardPage() {
                         <ActionTile
                             icon="⚠️"
                             label={`5. ${t('action.train_weak')}`}
-                            onClick={() => {
-                                setVocabDialogMode('all');
-                                setIsVocabDialogOpen(true);
-                            }}
+                            onClick={() => setIsWeakWordsDialogOpen(true)}
                         />
 
                         <ActionTile 
@@ -371,11 +369,10 @@ export default function DashboardPage() {
                 mode={vocabDialogMode}
             />
 
-            {/* Grammar Dialog */}
-            <GrammarDialog
+            {/* Grammar Dialog - FSRS Version */}
+            <GrammarDialogFSRS
                 isOpen={isGrammarDialogOpen}
                 onClose={() => setIsGrammarDialogOpen(false)}
-                mode={grammarDialogMode}
             />
 
             {/* Comprehension Dialog */}
@@ -402,6 +399,18 @@ export default function DashboardPage() {
             <DailyPhrasesDialogFSRS
                 isOpen={isDailyPhrasesDialogOpen}
                 onClose={() => setIsDailyPhrasesDialogOpen(false)}
+            />
+
+            {/* Due Cards Dialog - Specialized Dialog from Mobile */}
+            <DueCardsDialog
+                isOpen={isDueCardsDialogOpen}
+                onClose={() => setIsDueCardsDialogOpen(false)}
+            />
+
+            {/* Weak Words Dialog - Specialized Dialog from Mobile */}
+            <WeakWordsDialog
+                isOpen={isWeakWordsDialogOpen}
+                onClose={() => setIsWeakWordsDialogOpen(false)}
             />
         </div>
     );
