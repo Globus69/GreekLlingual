@@ -768,6 +768,86 @@ const langGradient: Record<Locale, string> = {
 
 ---
 
+#### E) **Hilfefenster (Help Window) integrieren** (3-4h)
+**Priorität:** 🟢 **NIEDRIG** (Feature für Beta-Phase)
+**Scope:** Frontend - Alle Sprachen (EN/RU/EL/DE/ES)
+
+**Problem:**
+- App benötigt kontextsensitive Hilfe für User
+- Muss in allen 4 (später 5) Sprachen verfügbar sein
+- Content wird erst in Beta-Phase ausformuliert
+
+**Aufgaben:**
+
+**1. UI-Komponente erstellen:**
+- [ ] **Help Button/Icon** in Navigation/Header
+  - [ ] Icon: 🆘 oder ❓ (diskret, aber sichtbar)
+  - [ ] Position: Top-Right oder Bottom-Right (FAB)
+- [ ] **Help Dialog/Modal erstellen:**
+  - [ ] `components/ui/HelpDialog.tsx`
+  - [ ] Glasmorphismus-Design (konsistent mit App)
+  - [ ] Responsive (Mobile + Desktop)
+  - [ ] Schließen via X-Button oder Overlay-Klick
+
+**2. Content-Struktur:**
+- [ ] **i18n-Keys für Help-Texte:**
+  - [ ] `help.general.title` - "Help & Support"
+  - [ ] `help.general.intro` - Einführungstext
+  - [ ] `help.dashboard.title` - "Dashboard Help"
+  - [ ] `help.learning.title` - "Learning Modules Help"
+  - [ ] `help.settings.title` - "Settings Help"
+- [ ] **Placeholder-Texte einfügen** (für alle 4 Sprachen)
+  - [ ] EN, RU, EL, DE
+  - [ ] Später ES hinzufügen (wenn TODO D umgesetzt)
+
+**3. Kontextsensitive Hilfe:**
+- [ ] **Help-Context ermitteln:**
+  - [ ] Dashboard → Dashboard-Hilfe
+  - [ ] Learning Dialog → Modul-Hilfe
+  - [ ] Settings → Einstellungen-Hilfe
+- [ ] **useHelp Hook erstellen:**
+  ```typescript
+  const { openHelp } = useHelp();
+  openHelp('dashboard'); // Öffnet Dashboard-Hilfe
+  ```
+
+**4. Beta-Phase Vorbereitung:**
+- [ ] **Content-Template erstellen:**
+  - [ ] Markdown-Format für einfache Bearbeitung
+  - [ ] Sektionen: FAQ, Tutorials, Troubleshooting
+- [ ] **Admin-Interface für Help-Content** (optional, später)
+  - [ ] CRUD für Help-Texte
+  - [ ] Preview-Modus
+
+**Design-Vorschlag:**
+```typescript
+// Help Button (Bottom-Right FAB)
+<button style={{
+  position: 'fixed',
+  bottom: '80px',
+  right: '16px',
+  width: '48px',
+  height: '48px',
+  borderRadius: '50%',
+  background: 'rgba(0, 122, 255, 0.9)',
+  boxShadow: '0 4px 12px rgba(0, 122, 255, 0.4)',
+  fontSize: '24px',
+  zIndex: 100
+}}>
+  ❓
+</button>
+```
+
+**Hinweis:**
+- Content bleibt zunächst Platzhalter (Lorem Ipsum)
+- Finaler Content wird in Beta-Phase von Team ausformuliert
+- Fokus: Technische Integration, nicht Content-Erstellung
+
+**Aufwand:** 3-4 Stunden (nur Frontend, ohne Content)
+**Status:** ❌ **OFFEN**
+
+---
+
 ## 📚 MODUL-SPEZIFISCHE TODOs
 
 ### **1. Due Cards Today** 🎯
