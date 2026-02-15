@@ -20,6 +20,7 @@ interface User {
 
 interface AuthContextType {
     user: User | null;
+    setUser: (user: User | null) => void;
     login: (username: string, pin: string) => Promise<boolean>;
     logout: () => void;
     isAuthenticated: boolean;
@@ -212,7 +213,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isAdmin: user?.role === 'admin', loading }}>
+        <AuthContext.Provider value={{ user, setUser, login, logout, isAuthenticated: !!user, isAdmin: user?.role === 'admin', loading }}>
             {children}
         </AuthContext.Provider>
     );
