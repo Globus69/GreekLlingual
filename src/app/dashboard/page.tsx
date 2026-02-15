@@ -52,7 +52,7 @@ export default function DashboardPage() {
     const [listeningDialogMode, setListeningDialogMode] = useState<'weak' | 'review' | 'due'>('review');
     const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
     const [masteryProgress, setMasteryProgress] = useState(38);
-    const [stats, setStats] = useState({ streak: 5, words: 47, weak: 'Verbs' });
+    const [stats, setStats] = useState({ streak: 0, words: 47, weak: 'Verbs' });
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -92,15 +92,27 @@ export default function DashboardPage() {
                 const totalItems = 120; // Assume target is 120 words
                 const calculatedProgress = Math.min(100, Math.round((totalCorrect / totalItems) * 100));
                 setMasteryProgress(calculatedProgress || 38);
-                setStats(prev => ({ ...prev, words: totalCorrect }));
+                setStats(prev => ({
+                    ...prev,
+                    words: totalCorrect,
+                    streak: user?.streak_days || 0
+                }));
             } else {
                 // No data found, use defaults
                 setMasteryProgress(38);
+                setStats(prev => ({
+                    ...prev,
+                    streak: user?.streak_days || 0
+                }));
             }
         } catch (err) {
             console.error("Stats fetching error:", err);
             // Set defaults on error
             setMasteryProgress(38);
+            setStats(prev => ({
+                ...prev,
+                streak: user?.streak_days || 0
+            }));
         }
     };
 

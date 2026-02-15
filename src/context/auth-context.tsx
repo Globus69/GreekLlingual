@@ -13,6 +13,9 @@ interface User {
     difficulty?: string;
     performance_index?: string;
     preferred_locale?: 'en' | 'ru' | 'el' | 'de';
+    streak_days?: number;
+    last_activity_date?: string;
+    longest_streak?: number;
 }
 
 interface AuthContextType {

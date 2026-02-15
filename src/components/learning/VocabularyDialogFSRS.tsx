@@ -371,6 +371,27 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
             // Session complete
             setShowSummary(true);
 
+            // Update user streak
+            if (user && user.id) {
+                try {
+                    const { data: streakData, error: streakError } = await supabase.rpc('update_user_streak', {
+                        p_user_id: user.id
+                    });
+
+                    if (streakError) {
+                        console.warn('Streak update failed:', streakError);
+                    } else if (streakData && streakData.length > 0) {
+                        const result = streakData[0];
+                        console.log(`🔥 Streak updated: ${result.new_streak} days - ${result.message}`);
+                        if (result.is_new_record) {
+                            success(`${result.message} 🏆`);
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Streak update error:', err);
+                }
+            }
+
             // Performance evaluation (existing system)
             if (user && user.id !== 'admin-local') {
                 try {

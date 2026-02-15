@@ -65,7 +65,7 @@ export default function MobileStatsPage() {
         learnedWords,
         weakWords,
         dueToday,
-        streakDays: 0, // TODO: Add streak_days to User type
+        streakDays: user?.streak_days || 0,
         totalSessions: totalAttempts,
         correctRate,
         avgSessionTime: 0, // TODO: Implement session time tracking
