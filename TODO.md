@@ -702,45 +702,49 @@ Task 7 (FAB - optional)
 
 ---
 
-#### D) **Spanisch als 5. Sprache integrieren** (4-6h)
+#### D) **Spanisch als 5. Sprache integrieren** (2-3h)
 **Priorität:** 🟢 **NIEDRIG** (Feature-Erweiterung)
-**Scope:** Gesamte App (Frontend + Backend)
+**Scope:** Nur Frontend (Backend bleibt Englisch)
 
 **Problem:**
 - App unterstützt aktuell 4 Sprachen: EN, RU, EL, DE
 - Spanisch (ES) als wichtige europäische Sprache fehlt
 
+**Wichtig:**
+- ✅ **Backend bleibt auf Englisch** (keine DB-Änderungen)
+- ✅ **Nur Frontend UI-Übersetzungen** (useTranslation Hook)
+- ✅ **Vokabular-Content bleibt auf Englisch** (learning_items)
+
 **Aufgaben:**
 
-**1. Backend (Supabase):**
-- [ ] **Locale-Type erweitern** in TypeScript:
+**1. TypeScript Type erweitern:**
+- [ ] **Locale-Type erweitern** in `context/language-context.tsx`:
   ```typescript
-  // context/language-context.tsx
   export type Locale = 'en' | 'ru' | 'el' | 'de' | 'es';
   ```
-- [ ] **ui_translations Tabelle aktualisieren:**
-  - [ ] Neue Spalte `translation_es TEXT` hinzufügen
-  - [ ] Alle ~270 Keys mit spanischen Übersetzungen füllen
-- [ ] **learning_items Tabelle aktualisieren:**
-  - [ ] Neue Spalte `translation_es TEXT` hinzufügen
-  - [ ] Vokabular mit spanischen Übersetzungen füllen
-- [ ] **SQL-Migration erstellen:** `add_spanish_locale.sql`
 
-**2. Frontend (UI):**
+**2. Frontend Translations (i18n):**
+- [ ] **Übersetzungsdatei erstellen:** `lib/translations/es.ts`
+  - [ ] Alle UI-Keys übersetzen (~270 Strings)
+  - [ ] Struktur wie `en.ts`, `ru.ts`, `el.ts`, `de.ts`
+- [ ] **Translation Hook erweitern:** `lib/use-translation.ts`
+  - [ ] Spanish translations importieren
+  - [ ] Fallback zu EN sicherstellen
+
+**3. UI-Komponenten erweitern:**
 - [ ] **Language Selector erweitern:**
   - [ ] `/login/page.tsx` - 5. Button "ES" hinzufügen
   - [ ] `/login-pin/page.tsx` - 5. Button "ES" hinzufügen
-  - [ ] Gradient/Shadow für ES definieren (z.B. Spanien-Rot: #C60B1E)
+  - [ ] Gradient/Shadow für ES definieren (Spanien-Rot: #C60B1E)
 - [ ] **Background-Farben erweitern:**
-  - [ ] Partikel-Farbe für ES (z.B. Hue 0-20 für Rot)
-  - [ ] Gradient Orbs für ES (z.B. rgba(198, 11, 30, 0.18))
-- [ ] **Flag-Emoji hinzufügen** (optional):
-  - [ ] 🇪🇸 als visueller Indikator
+  - [ ] Partikel-Farbe für ES (Hue 0-20 für Rot)
+  - [ ] Gradient Orbs für ES (rgba(198, 11, 30, 0.18))
+- [ ] **Flag-Emoji hinzufügen** (optional): 🇪🇸
 
-**3. Testing:**
+**4. Testing:**
 - [ ] **Sprachauswahl testen:** ES-Button funktioniert
 - [ ] **Alle UI-Texte prüfen:** 270+ Keys auf Spanisch
-- [ ] **Vokabeltraining testen:** Spanische Übersetzungen korrekt
+- [ ] **Fallback zu EN testen:** Fehlende Keys zeigen EN
 - [ ] **Mobile/Desktop konsistent:** Beide Plattformen unterstützen ES
 
 **Gradient-Vorschlag für Spanisch:**
@@ -754,11 +758,12 @@ const langGradient: Record<Locale, string> = {
 };
 ```
 
-**Dependencies:**
-- Content-Übersetzungen (externe Übersetzungsarbeit notwendig)
-- SQL-Migration muss VOR Frontend-Deployment ausgeführt werden
+**Hinweis:**
+- Vokabel-Content (learning_items) bleibt auf Englisch
+- Nur UI-Elemente (Buttons, Labels, Titles) werden übersetzt
+- Backend-Kommunikation bleibt auf Englisch
 
-**Aufwand:** 4-6 Stunden (ohne Übersetzungsarbeit)
+**Aufwand:** 2-3 Stunden (ohne Übersetzungsarbeit)
 **Status:** ❌ **OFFEN**
 
 ---
