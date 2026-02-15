@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/auth-context";
 import { LanguageProvider } from "@/context/language-context";
 import LanguageToast from "@/components/ui/LanguageToast";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <LanguageProvider>
           <LanguageToast />
@@ -38,6 +39,7 @@ export default function RootLayout({
             {children}
           </AuthProvider>
         </LanguageProvider>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
