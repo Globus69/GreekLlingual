@@ -190,8 +190,8 @@ export default function MobileDashboardPage() {
           >
             <span style={{ fontSize: '28px' }}>🔓</span>
             <div style={{ flex: 1, textAlign: 'left' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#FFCC00' }}>1. Admin Panel</div>
-              <div style={{ fontSize: '11px', color: 'rgba(255, 204, 0, 0.7)' }}>User entsperren</div>
+              <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#FFCC00' }}>Admin Panel</div>
+              <div style={{ fontSize: '11px', color: 'rgba(255, 204, 0, 0.7)' }}>Manage users</div>
             </div>
             <span style={{ fontSize: '18px', color: '#FFCC00', opacity: 0.5 }}>→</span>
           </button>
@@ -295,9 +295,9 @@ export default function MobileDashboardPage() {
           <ModuleTile
             icon="📊"
             title="Progress"
-            subtitle="View history"
+            subtitle="View stats"
             color="green"
-            onClick={() => alert('Progress - Coming soon!')}
+            onClick={() => router.push('/m/stats')}
           />
         </div>
 
@@ -332,10 +332,10 @@ export default function MobileDashboardPage() {
             }}
           >
             <span style={{ fontSize: '24px' }}>🏠</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#007AFF' }}>14. Home</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#007AFF' }}>Home</span>
           </button>
           <button
-            onClick={() => alert('Stats - Coming soon!')}
+            onClick={() => router.push('/m/stats')}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -348,10 +348,10 @@ export default function MobileDashboardPage() {
             }}
           >
             <span style={{ fontSize: '24px' }}>📊</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>15. Stats</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Stats</span>
           </button>
           <button
-            onClick={() => alert('Settings - Coming soon!')}
+            onClick={() => router.push('/m/settings')}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -364,7 +364,7 @@ export default function MobileDashboardPage() {
             }}
           >
             <span style={{ fontSize: '24px' }}>⚙️</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>16. Settings</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Settings</span>
           </button>
         </div>
       </div>
