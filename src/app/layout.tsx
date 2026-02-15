@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/auth-context";
@@ -23,21 +23,22 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "GreekLingua Dashboard",
   description: "Master Greek with Spaced Repetition",
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0F0F11' },
-  ],
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'GreekLingua',
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0F0F11' },
+  ],
 };
 
 export default function RootLayout({
