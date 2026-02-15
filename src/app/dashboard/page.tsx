@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { StreakDisplay } from '@/components/dashboard/streak-display';
 import { StreakMilestoneToast } from '@/components/dashboard/streak-milestone-toast';
 import { useStreak } from '@/hooks/use-streak';
+import { useDeviceDetection } from '@/hooks/use-device-detection';
 
 interface ActionTileProps {
     icon: string;
@@ -45,6 +46,7 @@ export default function DashboardPage() {
     const { user, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { isMobile, isTablet } = useDeviceDetection();
     const [isVocabDialogOpen, setIsVocabDialogOpen] = useState(false);
     const [vocabDialogMode, setVocabDialogMode] = useState<'due' | 'new' | 'all'>('due');
     const [isGrammarDialogOpen, setIsGrammarDialogOpen] = useState(false);

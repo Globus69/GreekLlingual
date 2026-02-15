@@ -1,0 +1,359 @@
+/* src/styles/admin-responsive.css */
+/* Responsive Design for Admin Pages */
+
+/* ─── Tablet (768px - 1024px) ────────────────────────────────────────────── */
+
+@media (max-width: 1024px) and (min-width: 768px) {
+    /* Admin container */
+    .admin-container {
+        padding: 20px;
+    }
+
+    /* Admin header */
+    .admin-header {
+        padding: 16px 20px;
+    }
+
+    /* Content table - reduce font sizes */
+    .content-table {
+        font-size: 13px;
+    }
+
+    .content-table th,
+    .content-table td {
+        padding: 10px 8px;
+    }
+
+    /* Filter section */
+    .filter-section {
+        padding: 16px;
+    }
+
+    /* Modal adjustments */
+    .modal-overlay .modal-content {
+        max-width: 90%;
+        padding: 20px;
+    }
+}
+
+/* ─── Mobile (< 768px) ───────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+    /* Admin container */
+    .admin-container {
+        padding: 12px;
+    }
+
+    /* Admin header - stack vertically */
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 16px;
+    }
+
+    .admin-header h1 {
+        font-size: 20px !important;
+    }
+
+    /* Admin navigation - horizontal scroll */
+    .admin-nav {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        width: 100%;
+        padding: 8px 0;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-nav-item {
+        white-space: nowrap;
+        padding: 8px 12px;
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
+    /* Filter section - stack vertically */
+    .filter-section {
+        padding: 12px;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    .filter-input,
+    .filter-select {
+        width: 100% !important;
+        font-size: 14px !important;
+        padding: 10px 12px !important;
+    }
+
+    /* Action buttons - stack or reduce size */
+    .action-buttons-row {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .action-button {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    /* Content table - card view on mobile */
+    .content-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .content-table {
+        min-width: 600px; /* Allow horizontal scroll */
+        font-size: 12px;
+    }
+
+    .content-table th,
+    .content-table td {
+        padding: 8px 6px;
+    }
+
+    /* Alternatively: Card layout for table rows */
+    .mobile-card-view .content-table thead {
+        display: none;
+    }
+
+    .mobile-card-view .content-table,
+    .mobile-card-view .content-table tbody,
+    .mobile-card-view .content-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .mobile-card-view .content-table tr {
+        margin-bottom: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(28, 28, 30, 0.8);
+    }
+
+    .mobile-card-view .content-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border: none;
+    }
+
+    .mobile-card-view .content-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #8E8E93;
+        flex-shrink: 0;
+        margin-right: 12px;
+    }
+
+    /* Modal - full screen on mobile */
+    .modal-overlay {
+        padding: 0;
+    }
+
+    .modal-overlay .modal-content {
+        width: 100%;
+        max-width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        padding: 16px;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: 12px 0;
+        margin-bottom: 16px;
+    }
+
+    .modal-header h2 {
+        font-size: 18px;
+    }
+
+    .modal-body {
+        padding: 0;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px 0 0 0;
+    }
+
+    .modal-footer button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Form fields - full width on mobile */
+    .form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .form-label {
+        font-size: 13px;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
+        width: 100% !important;
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+
+    .form-textarea {
+        min-height: 100px;
+    }
+
+    /* Stats cards - stack vertically */
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-card h3 {
+        font-size: 14px;
+    }
+
+    .stat-card .stat-value {
+        font-size: 24px;
+    }
+
+    /* CSV import modal */
+    .csv-import-modal .dropzone {
+        padding: 20px;
+        font-size: 13px;
+    }
+
+    .csv-import-modal .import-preview {
+        max-height: 250px;
+    }
+
+    .csv-import-modal .preview-table {
+        font-size: 11px;
+    }
+
+    /* Toast notifications - adjust position */
+    .toast-notification {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        width: auto;
+    }
+}
+
+/* ─── Extra Small Mobile (< 375px) ───────────────────────────────────────── */
+
+@media (max-width: 374px) {
+    .admin-header h1 {
+        font-size: 18px !important;
+    }
+
+    .admin-nav-item {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .action-button {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .content-table {
+        min-width: 500px;
+        font-size: 11px;
+    }
+
+    .modal-header h2 {
+        font-size: 16px;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+}
+
+/* ─── Touch Device Optimizations ─────────────────────────────────────────── */
+
+@media (hover: none) and (pointer: coarse) {
+    /* Increase touch targets */
+    .admin-nav-item,
+    .action-button,
+    .table-action-btn,
+    .checkbox-input {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Remove hover effects */
+    .admin-nav-item:hover,
+    .action-button:hover,
+    .table-row:hover {
+        transform: none;
+    }
+
+    /* Add active states */
+    .admin-nav-item:active {
+        transform: scale(0.95);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .action-button:active {
+        transform: scale(0.98);
+    }
+
+    .table-row:active {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Improve scrolling */
+    .content-table-wrapper,
+    .admin-nav {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+}
+
+/* ─── Landscape Mode on Mobile ───────────────────────────────────────────── */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .admin-header {
+        padding: 8px 16px;
+    }
+
+    .admin-header h1 {
+        font-size: 18px !important;
+    }
+
+    .modal-overlay .modal-content {
+        padding: 12px;
+    }
+
+    .form-input,
+    .form-textarea {
+        padding: 8px 10px;
+    }
+
+    .form-textarea {
+        min-height: 80px;
+    }
+}

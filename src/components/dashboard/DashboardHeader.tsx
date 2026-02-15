@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { useTranslation } from '@/lib/use-translation';
 import { useLanguage } from '@/context/language-context';
+import { useDeviceDetection } from '@/hooks/use-device-detection';
 
 interface HeaderProps {
     studentName?: string;
@@ -12,10 +13,12 @@ interface HeaderProps {
 
 export default function DashboardHeader({ studentName }: HeaderProps) {
     const [dateTime, setDateTime] = useState('');
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
     const { logout, isAdmin } = useAuth();
     const { t } = useTranslation();
     const { locale, setLocale } = useLanguage();
     const router = useRouter();
+    const { isMobile } = useDeviceDetection();
 
     useEffect(() => {
         const updateDateTime = () => {
@@ -38,21 +41,48 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
         <header>
             <div className="brand">
                 <span className="brand-icon">🏛️</span>
-                GreekLingua {studentName && <span style={{ opacity: 0.6, fontSize: '0.8em', marginLeft: '8px' }}>• {studentName}</span>}
+                GreekLingua {!isMobile && studentName && <span style={{ opacity: 0.6, fontSize: '0.8em', marginLeft: '8px' }}>• {studentName}</span>}
             </div>
 
-            <div className="datetime-display" id="datetime">
-                {dateTime}
-            </div>
+            {!isMobile && (
+                <div className="datetime-display" id="datetime">
+                    {dateTime}
+                </div>
+            )}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '12px', position: 'relative' }}>
                 <div className="user-profile">
                     <div className="avatar">{studentName ? studentName.substring(0, 2).toUpperCase() : 'GU'}</div>
                     <span className="username">{studentName || 'Guest'}</span>
                 </div>
 
-                {/* Flaggen-Anzeige: Klick rotiert durch 3 Sprachen (EN → RU → EL → EN) */}
-                <button
+                {/* Mobile menu toggle */}
+                {isMobile && (
+                    <button
+                        onClick={() => setShowMobileMenu(!showMobileMenu)}
+                        style={{
+                            background: 'rgba(255,255,255,0.06)',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            borderRadius: '8px',
+                            padding: '8px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s',
+                            fontSize: '18px',
+                            lineHeight: 1,
+                        }}
+                    >
+                        {showMobileMenu ? '✕' : '☰'}
+                    </button>
+                )}
+
+                {/* Desktop menu or mobile dropdown */}
+                {(!isMobile || showMobileMenu) && (
+                    <div style={isMobile ? mobileMenuStyle : { display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {/* Flaggen-Anzeige: Klick rotiert durch Sprachen */}
+                        <button
                     onClick={() => {
                         const nextLocale = locale === 'en' ? 'ru' : locale === 'ru' ? 'el' : locale === 'el' ? 'de' : 'en';
                         setLocale(nextLocale);
@@ -146,7 +176,28 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
                 >
                     <span style={{ fontSize: '15px' }}>↪</span> {t('header.logout')}
                 </button>
+                    </div>
+                )}
             </div>
         </header>
     );
 }
+
+// Mobile menu dropdown style
+const mobileMenuStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '100%',
+    right: 0,
+    marginTop: '8px',
+    background: 'rgba(28, 28, 30, 0.98)',
+    backdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: '12px',
+    padding: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    zIndex: 1000,
+    minWidth: '200px',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+};

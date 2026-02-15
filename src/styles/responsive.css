@@ -1,0 +1,532 @@
+/* src/styles/responsive.css */
+/* Responsive Design for Mobile & Tablet Devices */
+
+/* ============================================================================
+   BREAKPOINTS
+   - Mobile: < 768px
+   - Tablet: 768px - 1024px
+   - Desktop: > 1024px
+   ============================================================================ */
+
+/* ─── Tablet (768px - 1024px) ────────────────────────────────────────────── */
+
+@media (max-width: 1024px) and (min-width: 768px) {
+    /* Header adjustments for tablet */
+    header {
+        padding: 0 24px;
+        height: 65px;
+    }
+
+    .brand {
+        font-size: 18px;
+    }
+
+    .datetime-display {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    /* Dashboard content */
+    .dashboard-content {
+        padding: 20px 24px;
+        gap: 20px;
+    }
+
+    .hero-section {
+        gap: 20px;
+        height: auto;
+        min-height: 180px;
+    }
+
+    /* Stats card adjustment */
+    .stats-card {
+        width: 300px;
+    }
+
+    /* Dashboard footer area */
+    .dashboard-footer-area {
+        gap: 24px;
+    }
+
+    /* Mastery box */
+    .mastery-box {
+        padding: 20px;
+    }
+
+    /* Quick actions grid - 3 columns on tablet */
+    .quick-actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: auto;
+        gap: 12px;
+    }
+
+    .at-icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+
+    .at-label {
+        font-size: 12px;
+    }
+}
+
+/* ─── Mobile (< 768px) ───────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+    /* Header - Compact mobile layout */
+    header {
+        padding: 0 16px;
+        height: 60px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .brand {
+        font-size: 16px;
+        gap: 8px;
+    }
+
+    .brand-icon {
+        font-size: 20px;
+    }
+
+    /* Hide datetime on very small screens */
+    .datetime-display {
+        display: none;
+    }
+
+    /* User profile - more compact */
+    .user-profile {
+        padding: 4px 12px 4px 4px;
+        gap: 8px;
+    }
+
+    .avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .username {
+        font-size: 13px;
+    }
+
+    /* Header buttons - stack vertically or reduce size */
+    header > div:last-child {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    header button {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+        border-radius: 8px !important;
+    }
+
+    /* Dashboard content */
+    .dashboard-content {
+        padding: 16px;
+        gap: 16px;
+        overflow-y: auto;
+    }
+
+    /* Hero section - vertical stack on mobile */
+    .hero-section {
+        flex-direction: column;
+        height: auto;
+        gap: 16px;
+    }
+
+    /* Stats card - full width on mobile */
+    .stats-card {
+        width: 100%;
+        min-width: auto;
+        padding: 20px;
+    }
+
+    /* Action area adjustments */
+    .action-area {
+        padding-left: 0 !important;
+    }
+
+    .action-area h2 {
+        font-size: 24px !important;
+    }
+
+    .action-area p {
+        font-size: 14px !important;
+    }
+
+    /* Streak display - more compact */
+    .action-area > div:last-child {
+        margin-top: 16px !important;
+    }
+
+    /* Dashboard footer - vertical stack on mobile */
+    .dashboard-footer-area {
+        flex-direction: column;
+        gap: 16px;
+        overflow-y: auto;
+    }
+
+    /* Mastery box - full width */
+    .mastery-box {
+        width: 100%;
+        padding: 16px;
+        flex: none;
+        min-height: auto;
+    }
+
+    .mastery-title-v3 {
+        font-size: 12px;
+    }
+
+    .mastery-total-time {
+        font-size: 22px;
+    }
+
+    .mastery-bar-icon {
+        font-size: 16px;
+        width: 20px;
+    }
+
+    .mastery-bar-label {
+        font-size: 12px;
+        width: 35px;
+    }
+
+    /* Rating tiles - adjust for mobile */
+    .rating-tiles-grid {
+        gap: 8px;
+    }
+
+    .rating-tile {
+        padding: 10px 6px;
+    }
+
+    .rating-tile-val {
+        font-size: 14px;
+    }
+
+    .rating-tile-lbl {
+        font-size: 9px;
+    }
+
+    .vocab-status-text {
+        font-size: 12px;
+    }
+
+    .mastery-suggestion {
+        font-size: 12px;
+    }
+
+    /* Quick actions grid - 2 columns on mobile */
+    .quick-actions-grid {
+        width: 100%;
+        flex: none;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: auto;
+        gap: 10px;
+        min-height: auto;
+        height: auto;
+    }
+
+    .action-tile-clean {
+        min-height: 100px;
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .at-icon {
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .at-label {
+        font-size: 11px;
+        padding: 0 4px;
+    }
+
+    /* Streak display - mobile optimized */
+    .streak-display-container {
+        padding: 16px;
+    }
+
+    /* Streak toast - adjust position for mobile */
+    .toast-container {
+        top: 60px !important;
+        right: 16px !important;
+        left: 16px !important;
+        width: auto !important;
+    }
+
+    /* Vocabulary dialog - full screen on mobile */
+    .vocabulary-dialog.compact,
+    .vocabulary-dialog.daily-phrases-layout {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px 16px;
+        min-height: 100vh;
+    }
+
+    .mode-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .mode-header p {
+        font-size: 0.9rem;
+    }
+
+    /* Phrase card - more compact on mobile */
+    .phrase-card {
+        padding: 20px 16px;
+        min-height: 320px;
+    }
+
+    .english-translation {
+        font-size: 1.25rem;
+    }
+
+    .greek-phrase {
+        font-size: 1.5rem;
+    }
+
+    /* Button bar - stack vertically on mobile */
+    .button-bar {
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .rating-group {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .rating-btn {
+        flex: 1;
+        min-width: auto;
+        padding: 14px 12px;
+        font-size: 0.8125rem;
+    }
+
+    .action-group {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 16px;
+    }
+
+    /* Navigation arrows - smaller on mobile */
+    .nav-arrow-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+
+    /* Dialog close button - ensure it's accessible */
+    .dialog-close-btn {
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        font-size: 22px;
+    }
+
+    /* Progress bar */
+    .progress-bar-mini {
+        width: 100px;
+    }
+
+    /* Card counter */
+    .card-counter {
+        font-size: 0.75rem;
+    }
+}
+
+/* ─── Extra Small Mobile (< 375px) ───────────────────────────────────────── */
+
+@media (max-width: 374px) {
+    /* Ultra compact for very small screens */
+    header {
+        padding: 0 12px;
+        height: 56px;
+    }
+
+    .brand {
+        font-size: 14px;
+    }
+
+    .brand-icon {
+        font-size: 18px;
+    }
+
+    .dashboard-content {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .action-area h2 {
+        font-size: 20px !important;
+    }
+
+    .action-area p {
+        font-size: 13px !important;
+    }
+
+    /* Quick actions - ensure 2 columns fit */
+    .quick-actions-grid {
+        gap: 8px;
+    }
+
+    .action-tile-clean {
+        min-height: 90px;
+        padding: 8px;
+    }
+
+    .at-icon {
+        font-size: 24px;
+        margin-bottom: 4px;
+    }
+
+    .at-label {
+        font-size: 10px;
+    }
+
+    /* Rating buttons - smaller */
+    .rating-btn {
+        padding: 12px 8px;
+        font-size: 0.75rem;
+        min-width: auto;
+    }
+
+    /* Phrase card - ultra compact */
+    .phrase-card {
+        padding: 16px 12px;
+        min-height: 280px;
+    }
+
+    .english-translation {
+        font-size: 1.1rem;
+    }
+
+    .greek-phrase {
+        font-size: 1.3rem;
+    }
+}
+
+/* ─── Touch Device Optimizations ─────────────────────────────────────────── */
+
+@media (hover: none) and (pointer: coarse) {
+    /* Increase touch target sizes for better UX */
+    .action-tile-clean,
+    .btn,
+    .rating-btn,
+    .action-btn,
+    .nav-arrow-btn,
+    .dialog-close-btn {
+        min-height: 44px; /* iOS recommended minimum touch target */
+        min-width: 44px;
+    }
+
+    /* Remove hover effects on touch devices */
+    .action-tile-clean:hover,
+    .btn:hover,
+    .rating-btn:hover,
+    .action-btn:hover {
+        transform: none;
+    }
+
+    /* Add active states instead */
+    .action-tile-clean:active {
+        transform: scale(0.95);
+        background: var(--bg-card-hover);
+    }
+
+    .rating-btn:active {
+        transform: scale(0.95);
+    }
+
+    .action-btn:active {
+        transform: scale(0.98);
+    }
+}
+
+/* ─── Landscape Mode on Mobile ───────────────────────────────────────────── */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    /* Optimize for landscape mobile */
+    header {
+        height: 50px;
+        padding: 0 16px;
+    }
+
+    .dashboard-content {
+        padding: 12px 16px;
+    }
+
+    .hero-section {
+        flex-direction: row;
+        height: auto;
+        min-height: auto;
+    }
+
+    .stats-card {
+        width: 280px;
+    }
+
+    /* Reduce vertical spacing */
+    .mastery-box,
+    .phrase-card {
+        padding: 16px;
+    }
+
+    /* Make grid more horizontal */
+    .quick-actions-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ─── High DPI Displays (Retina) ─────────────────────────────────────────── */
+
+@media (-webkit-min-device-pixel-ratio: 2),
+       (min-resolution: 192dpi) {
+    /* Ensure borders are crisp on retina displays */
+    .action-tile-clean,
+    .mastery-box,
+    .stats-card,
+    .phrase-card,
+    .rating-btn,
+    .action-btn {
+        border-width: 0.5px;
+    }
+}
+
+/* ─── Print Styles (Bonus) ───────────────────────────────────────────────── */
+
+@media print {
+    header,
+    .dialog-close-btn,
+    .action-btn,
+    .rating-btn,
+    .nav-arrow-btn {
+        display: none !important;
+    }
+
+    .dashboard-content,
+    .vocabulary-dialog {
+        background: white !important;
+        color: black !important;
+    }
+
+    .phrase-card,
+    .mastery-box {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+    }
+}
