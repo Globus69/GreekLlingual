@@ -60,6 +60,21 @@ export default function MobileStatsPage() {
       const totalCorrect = progressData?.reduce((sum: number, p: any) => sum + (p.correct_count || 0), 0) || 0;
       const correctRate = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
 
+      // Fetch session stats
+      let avgSessionTime = 0;
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.rpc('get_session_stats', {
+          p_student_id: user.id,
+          p_days: 30
+        });
+
+        if (!sessionError && sessionData && sessionData.length > 0) {
+          avgSessionTime = sessionData[0].avg_session_minutes || 0;
+        }
+      } catch (err) {
+        console.warn('Session stats query failed:', err);
+      }
+
       setStats({
         totalWords,
         learnedWords,
@@ -68,7 +83,7 @@ export default function MobileStatsPage() {
         streakDays: user?.streak_days || 0,
         totalSessions: totalAttempts,
         correctRate,
-        avgSessionTime: 0, // TODO: Implement session time tracking
+        avgSessionTime,
       });
     } catch (error) {
       console.error('Error loading stats:', error);
