@@ -666,39 +666,56 @@ Task 7 (FAB - optional)
 
 ---
 
-#### C) **Sprachauswahl im PIN-Login-Dialog umsetzen** (1-2h)
+#### C) **Sprachauswahl im PIN-Login-Dialog umsetzen** (1-2h) ✅ IMPLEMENTIERT
 **Priorität:** 🟡 **MITTEL**
 **Location:** `/app/login-pin/page.tsx`
+**Status:** ✅ **IMPLEMENTIERT (2026-02-15)** - Testing ausstehend
 
-**Problem:**
+**Problem (gelöst):**
 - Sprachauswahl (🌐 EN/RU/EL/DE) wurde oben rechts integriert
 - Dialog-Texte (Titel, Untertitel, Buttons) wechseln noch nicht mit Sprache
 - Aktuell hardcoded auf Deutsch: "PIN-Login", "Geben Sie Ihren 4-stelligen PIN ein"
 
 **Aufgaben:**
-- [ ] **i18n-Keys definieren** für Login-PIN Dialog:
-  - [ ] `login_pin.title` (z.B. "PIN Login", "PIN-Вход", "Σύνδεση PIN", "PIN-Anmeldung")
-  - [ ] `login_pin.subtitle` (z.B. "Enter your 4-digit PIN", "Введите 4-значный PIN", ...)
-  - [ ] `login_pin.admin_button` (z.B. "Admin", "Администратор", ...)
-  - [ ] `login_pin.user_button` (z.B. "User", "Пользователь", "Χρήστης", "Benutzer")
-- [ ] **Translation-Strings in DB einfügen** (`ui_translations` Tabelle)
-- [ ] **useTranslation Hook anwenden** im login-pin Dialog
-- [ ] **Hardcoded Strings ersetzen** mit `t('login_pin.title')` etc.
-- [ ] **Testen:** Alle 4 Sprachen durchklicken und Dialog-Text prüfen
+- [x] **i18n-Keys definieren** für Login-PIN Dialog:
+  - [x] `login_pin.title` (z.B. "PIN Login", "PIN-Вход", "Σύνδεση PIN", "PIN-Anmeldung")
+  - [x] `login_pin.subtitle` (z.B. "Enter your 4-digit PIN", "Введите 4-значный PIN", ...)
+  - [x] `login_pin.admin_button` (z.B. "Admin", "Администратор", ...)
+  - [x] `login_pin.user_button` (z.B. "User", "Пользователь", "Χρήστης", "Benutzer")
+- [x] **Translation-Strings hinzugefügt:**
+  - [x] FALLBACK_EN (use-translation.ts) - Offline fallback
+  - [x] FALLBACK_EL (use-translation.ts) - Greek offline fallback
+  - [x] FALLBACK_DE (use-translation.ts) - German offline fallback
+  - [x] SQL Migration erstellt (`add_login_pin_translations.sql`) für alle 4 Sprachen
+- [x] **useTranslation Hook anwenden** im login-pin Dialog (bereits importiert)
+- [x] **Hardcoded Strings ersetzen** mit `t('login_pin.title')` etc.
+- [ ] **Testen:** Alle 4 Sprachen durchklicken und Dialog-Text prüfen (→ TESTING TODO)
 
-**Beispiel-Code:**
+**Implementierung:**
 ```typescript
-// Aktuell:
+// Vorher:
 <h1>PIN-Login</h1>
 <p>Geben Sie Ihren 4-stelligen PIN ein</p>
+<button>Admin</button>
+<button>User</button>
 
-// Neu:
+// Nachher:
 <h1>{t('login_pin.title')}</h1>
 <p>{t('login_pin.subtitle')}</p>
+<button>{t('login_pin.admin_button')}</button>
+<button>{t('login_pin.user_button')}</button>
 ```
 
+**Files Modified:**
+- `src/lib/use-translation.ts` - Added 4 keys × 3 languages (EN/EL/DE)
+- `src/app/login-pin/page.tsx` - Replaced 4 hardcoded strings
+- `database/migrations/add_login_pin_translations.sql` - SQL for DB (EN/RU/EL/DE)
+- Build: ✅ Successful
+
+**Next Step:** SQL Migration ausführen + Comprehensive Testing (siehe TESTING TODO)
+
 **Aufwand:** 1-2 Stunden
-**Status:** ❌ **OFFEN**
+**Status:** ✅ **IMPLEMENTIERT** - ⏳ Testing ausstehend
 
 ---
 
@@ -1219,6 +1236,60 @@ const handleCardClick = () => {
 - 🔴 Minimum: Tests 1, 2, 3 (Funktionalität + UI)
 - 🟡 Empfohlen: Tests 4, 5 (Cross-Device + Performance)
 - 🟢 Optional: Tests 6, 7 (Edge Cases + Browser)
+
+---
+
+### **Testing: i18n PIN-Login Dialog** 🌐
+**Priorität:** 🟡 **MITTEL** (Nach SQL Migration)
+**Status:** ❌ **OFFEN** (SQL Migration muss zuerst ausgeführt werden)
+
+**Voraussetzung:**
+- [ ] SQL Migration ausführen: `database/migrations/add_login_pin_translations.sql`
+
+**Test-Matrix:**
+
+**1. Language Selector Functionality (15min)**
+- [ ] **EN Button:** Klick wechselt zu Englisch
+  - [ ] Title: "PIN Login"
+  - [ ] Subtitle: "Enter your 4-digit PIN"
+  - [ ] Admin Button: "Admin"
+  - [ ] User Button: "User"
+- [ ] **RU Button:** Klick wechselt zu Russisch
+  - [ ] Title: "PIN-Вход"
+  - [ ] Subtitle: "Введите 4-значный PIN"
+  - [ ] Admin Button: "Администратор"
+  - [ ] User Button: "Пользователь"
+- [ ] **EL Button:** Klick wechselt zu Griechisch
+  - [ ] Title: "Σύνδεση PIN"
+  - [ ] Subtitle: "Εισάγετε τον 4ψήφιο PIN σας"
+  - [ ] Admin Button: "Διαχειριστής"
+  - [ ] User Button: "Χρήστης"
+- [ ] **DE Button:** Klick wechselt zu Deutsch
+  - [ ] Title: "PIN-Anmeldung"
+  - [ ] Subtitle: "Geben Sie Ihre 4-stellige PIN ein"
+  - [ ] Admin Button: "Administrator"
+  - [ ] User Button: "Benutzer"
+
+**2. Language Persistence (10min)**
+- [ ] **Sprache wechseln → Seite neu laden:** Sprache bleibt erhalten
+- [ ] **Sprache wechseln → Login → Dashboard:** Sprache bleibt erhalten
+- [ ] **Admin-Login:** Language Selector übernimmt gewählte Sprache
+
+**3. Fallback Behavior (10min)**
+- [ ] **Offline-Modus:** Fallback-Translations aus use-translation.ts werden geladen
+- [ ] **Fehlende DB-Keys:** Fallback zu EN wird verwendet
+- [ ] **Netzwerk-Fehler:** UI bleibt funktional mit Fallback
+
+**4. Mobile Testing (10min)**
+- [ ] **iPhone SE (375px):** Texte passen, kein Overflow
+- [ ] **iPhone 14 (390px):** Layout korrekt
+- [ ] **Android (412px):** Alle Buttons funktionieren
+
+**Aufwand:** 45 Minuten
+**Dependencies:**
+- ✅ Code implementiert
+- ❌ SQL Migration ausgeführt
+**Status:** ❌ **OFFEN**
 
 ---
 

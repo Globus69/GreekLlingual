@@ -545,7 +545,7 @@ export default function PinLoginPage() {
                         margin: '0 0 4px 0',
                         letterSpacing: '-0.5px',
                     }}>
-                        PIN-Login
+                        {t('login_pin.title')}
                     </h1>
 
                     <p style={{
@@ -555,7 +555,7 @@ export default function PinLoginPage() {
                         textAlign: 'center',
                         lineHeight: '1.5',
                     }}>
-                        Geben Sie Ihren 4-stelligen PIN ein
+                        {t('login_pin.subtitle')}
                     </p>
 
                     {/* Login Type Selection */}
@@ -594,7 +594,7 @@ export default function PinLoginPage() {
                             }}
                         >
                             <span style={{ fontSize: '16px' }}>👨‍💼</span>
-                            Admin
+                            {t('login_pin.admin_button')}
                         </button>
 
                         <button
@@ -633,7 +633,7 @@ export default function PinLoginPage() {
                             }}
                         >
                             <span style={{ fontSize: '16px' }}>👤</span>
-                            User
+                            {t('login_pin.user_button')}
                         </button>
                     </div>
 
