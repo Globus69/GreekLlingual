@@ -256,7 +256,18 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
             });
 
             if (rpcError) {
-                console.error('❌ FSRS RPC error:', rpcError);
+                console.error('❌ FSRS RPC error (get_weak_cards):', {
+                    message: rpcError.message,
+                    details: rpcError.details,
+                    hint: rpcError.hint,
+                    code: rpcError.code,
+                    fullError: rpcError
+                });
+
+                if (rpcError.code === '42883' || rpcError.message?.includes('does not exist')) {
+                    console.warn('⚠️ RPC function get_weak_cards does not exist.');
+                }
+
                 setLoadError(rpcError.message || 'Failed to load cards');
                 error('Failed to load cards. Please try again.');
                 setVocabulary([]);
@@ -373,7 +384,18 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
                 });
 
                 if (rpcError) {
-                    console.error('❌ Update RPC error:', rpcError);
+                    console.error('❌ Update RPC error (update_card_fsrs):', {
+                        message: rpcError.message,
+                        details: rpcError.details,
+                        hint: rpcError.hint,
+                        code: rpcError.code,
+                        fullError: rpcError
+                    });
+
+                    if (rpcError.code === '42883' || rpcError.message?.includes('does not exist')) {
+                        console.warn('⚠️ RPC function update_card_fsrs does not exist.');
+                    }
+
                     warning('Failed to save progress. Continuing anyway...');
                     // Continue anyway (optimistic update)
                 } else {

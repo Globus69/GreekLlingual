@@ -362,9 +362,28 @@ export default function GrammarDialogFSRS({ isOpen, onClose }: GrammarDialogFSRS
             });
 
             if (rpcError) {
-                console.error('❌ RPC error:', rpcError);
-                console.warn('⚠️ Falling back to mock data');
-                warning('Using offline grammar data');
+                // Enhanced error logging to handle empty error objects
+                console.error('❌ RPC error (get_due_grammar_cards):', {
+                    message: rpcError.message,
+                    details: rpcError.details,
+                    hint: rpcError.hint,
+                    code: rpcError.code,
+                    fullError: rpcError,
+                    stringified: JSON.stringify(rpcError, null, 2)
+                });
+
+                // Check if RPC function doesn't exist
+                if (rpcError.code === '42883' || rpcError.message?.includes('does not exist')) {
+                    console.warn('⚠️ RPC function get_due_grammar_cards does not exist. Please run migration 064 or 065.');
+                    warning('Grammar database function not found - using offline data');
+                } else if (rpcError.code === '42703' || rpcError.message?.includes('column')) {
+                    console.warn('⚠️ Database schema issue detected. Please run migration 065 to fix.');
+                    warning('Database schema needs update - using offline data');
+                } else {
+                    console.warn('⚠️ Unknown RPC error - falling back to mock data');
+                    warning('Using offline grammar data');
+                }
+
                 setVocabulary(mockGrammarRules);
                 setLoadError(null);
             } else if (!rpcData || rpcData.length === 0) {
@@ -480,7 +499,18 @@ export default function GrammarDialogFSRS({ isOpen, onClose }: GrammarDialogFSRS
                 });
 
                 if (rpcError) {
-                    console.error('❌ Update RPC error:', rpcError);
+                    console.error('❌ Update RPC error (update_grammar_card_progress):', {
+                        message: rpcError.message,
+                        details: rpcError.details,
+                        hint: rpcError.hint,
+                        code: rpcError.code,
+                        fullError: rpcError
+                    });
+
+                    if (rpcError.code === '42883' || rpcError.message?.includes('does not exist')) {
+                        console.warn('⚠️ RPC function update_grammar_card_progress does not exist. Please run migration 064.');
+                    }
+
                     warning('Failed to save progress. Continuing anyway...');
                     // Continue anyway (optimistic update)
                 } else {
@@ -510,7 +540,11 @@ export default function GrammarDialogFSRS({ isOpen, onClose }: GrammarDialogFSRS
                     });
 
                     if (sessionEndError) {
-                        console.warn('Session end failed:', sessionEndError);
+                        console.warn('Session end failed:', {
+                            message: sessionEndError.message,
+                            code: sessionEndError.code,
+                            fullError: sessionEndError
+                        });
                     } else if (sessionEndData && sessionEndData.length > 0) {
                         const result = sessionEndData[0];
                         console.log(`📊 Session completed: ${result.duration_minutes} minutes`);
@@ -528,7 +562,11 @@ export default function GrammarDialogFSRS({ isOpen, onClose }: GrammarDialogFSRS
                     });
 
                     if (streakError) {
-                        console.warn('Streak update failed:', streakError);
+                        console.warn('Streak update failed:', {
+                            message: streakError.message,
+                            code: streakError.code,
+                            fullError: streakError
+                        });
                     } else if (streakData && streakData.length > 0) {
                         const result = streakData[0];
                         console.log(`🔥 Streak updated: ${result.new_streak} days - ${result.message}`);

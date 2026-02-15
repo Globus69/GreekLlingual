@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/context/auth-context';
-import FlashcardFSRS from '@/components/learning/FlashcardFSRS';
+import FlashcardFSRS from '@/components/learning/flashcard-fsrs';
 import { useTranslation } from '@/lib/use-translation';
 import { usePerformanceEvaluation } from '@/lib/use-performance-evaluation';
 import { FSRSScheduler } from '@/lib/fsrs/fsrs-scheduler';
@@ -460,7 +460,18 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
                 });
 
                 if (rpcError) {
-                    console.error('❌ Update RPC error:', rpcError);
+                    console.error('❌ Update RPC error (update_card_fsrs):', {
+                        message: rpcError.message,
+                        details: rpcError.details,
+                        hint: rpcError.hint,
+                        code: rpcError.code,
+                        fullError: rpcError
+                    });
+
+                    if (rpcError.code === '42883' || rpcError.message?.includes('does not exist')) {
+                        console.warn('⚠️ RPC function update_card_fsrs does not exist.');
+                    }
+
                     warning('Failed to save progress. Continuing anyway...');
                     // Continue anyway (optimistic update)
                 } else {
