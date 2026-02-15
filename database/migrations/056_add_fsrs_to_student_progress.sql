@@ -175,30 +175,59 @@ CREATE INDEX IF NOT EXISTS idx_student_progress_fsrs_due_state_student
 CREATE INDEX IF NOT EXISTS idx_student_progress_student_item
     ON public.student_progress (student_id, item_id);
 
--- Migrate existing data from old SRS fields to FSRS fields
+-- Migrate existing data from old SRS fields to FSRS fields (if columns exist)
 DO $$
+DECLARE
+    has_last_attempt BOOLEAN;
+    has_next_review BOOLEAN;
+    has_attempts BOOLEAN;
+    has_correct_count BOOLEAN;
 BEGIN
-    -- Copy last_attempt to fsrs_last_review if exists
-    UPDATE public.student_progress
-    SET fsrs_last_review = last_attempt
-    WHERE last_attempt IS NOT NULL AND fsrs_last_review IS NULL;
+    -- Check which old columns exist
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'student_progress' AND column_name = 'last_attempt'
+    ) INTO has_last_attempt;
 
-    -- Copy next_review to fsrs_due if exists
-    UPDATE public.student_progress
-    SET fsrs_due = next_review
-    WHERE next_review IS NOT NULL;
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'student_progress' AND column_name = 'next_review'
+    ) INTO has_next_review;
 
-    -- Set fsrs_reps based on attempts if available
-    UPDATE public.student_progress
-    SET fsrs_reps = GREATEST(attempts, 0)
-    WHERE attempts > 0;
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'student_progress' AND column_name = 'attempts'
+    ) INTO has_attempts;
 
-    -- Set fsrs_state to 'review' for items with history
-    UPDATE public.student_progress
-    SET fsrs_state = 'review'
-    WHERE attempts > 0 OR correct_count > 0;
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'student_progress' AND column_name = 'correct_count'
+    ) INTO has_correct_count;
 
-    RAISE NOTICE 'Migrated existing SRS data to FSRS fields';
+    -- Conditionally migrate data
+    IF has_last_attempt THEN
+        EXECUTE 'UPDATE public.student_progress SET fsrs_last_review = last_attempt WHERE last_attempt IS NOT NULL AND fsrs_last_review IS NULL';
+        RAISE NOTICE 'Migrated last_attempt → fsrs_last_review';
+    END IF;
+
+    IF has_next_review THEN
+        EXECUTE 'UPDATE public.student_progress SET fsrs_due = next_review WHERE next_review IS NOT NULL';
+        RAISE NOTICE 'Migrated next_review → fsrs_due';
+    END IF;
+
+    IF has_attempts THEN
+        EXECUTE 'UPDATE public.student_progress SET fsrs_reps = GREATEST(attempts, 0) WHERE attempts > 0';
+        RAISE NOTICE 'Migrated attempts → fsrs_reps';
+    END IF;
+
+    IF has_attempts OR has_correct_count THEN
+        EXECUTE 'UPDATE public.student_progress SET fsrs_state = ''review'' WHERE attempts > 0 OR correct_count > 0';
+        RAISE NOTICE 'Set fsrs_state to review for items with history';
+    END IF;
+
+    IF NOT (has_last_attempt OR has_next_review OR has_attempts) THEN
+        RAISE NOTICE 'No legacy SRS columns found - starting fresh with FSRS-6';
+    END IF;
 END $$;
 
 -- Success message
