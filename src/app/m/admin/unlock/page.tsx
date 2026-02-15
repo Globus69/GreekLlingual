@@ -32,7 +32,7 @@ export default function MobileAdminUnlockPage() {
     }
 
     // Check if user is admin
-    if (user?.role !== 'teacher' && user?.role !== 'admin') {
+    if (user?.role !== 'admin') {
       router.push('/m');
       return;
     }
