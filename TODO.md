@@ -15,7 +15,7 @@
 | **Desktop-App** | ✅ Production-Ready | - |
 | **Mobile-App** | 🟡 In Development | HOCH |
 | **SQL-Migrationen** | 🔴 6 Pending | **KRITISCH** |
-| **Content Population** | ⚠️ A1/A2 leer | MITTEL |
+| **Content Population** | 🟡 Files ready, Import pending | MITTEL |
 | **Security Features** | 🟡 Ready, Not Integrated | MITTEL |
 
 ---
@@ -1650,18 +1650,31 @@ Alle 4 Module im Mobile Dashboard testen und Funktionalität verifizieren
 
 ---
 
-#### B) **Content Population**
-- [ ] **A1-Vokabular** in `learning_items` einfügen
-  - [ ] `a1-contend.md` mit Vokabular füllen
-  - [ ] SQL-INSERT-Statements erstellen
-  - [ ] 50-100 A1-Wörter (easy/middle/hard)
-- [ ] **A2-Vokabular** in `learning_items` einfügen
-  - [ ] `a2-contend.md` mit Vokabular füllen
-  - [ ] SQL-INSERT-Statements erstellen
-  - [ ] 50-100 A2-Wörter (easy/middle/hard)
+#### B) **Content Population** 🟡 CONTENT READY - IMPORT PENDING
+- [x] **A1-Vokabular** Content erstellen ✅
+  - [x] `a1-vocabulary.csv` mit 75 Wörtern (public/content/)
+  - [x] Kategorien: Greetings, Food, Numbers, Colors, Family, Body, Time
+  - [ ] **Import via /admin/import** (noch zu tun)
+- [x] **A2-Vokabular** Content erstellen ✅
+  - [x] `a2-vocabulary.csv` mit 75 Wörtern (public/content/)
+  - [x] Kategorien: Work, Education, Home, Transport, Places, Adjectives, Weather
+  - [ ] **Import via /admin/import** (noch zu tun)
+- [x] **README** mit Import-Anleitung ✅
 
-**Aufwand:** 4-6 Stunden
-**Status:** ⚠️ **OFFEN**
+**Content erstellt:** 2026-02-15
+**Total:** 150 Vocabulary Items (A1: 75, A2: 75)
+**Format:** CSV (kompatibel mit Admin Import Interface)
+**Location:** `public/content/`
+
+**Import Instructions:**
+1. Login as admin
+2. Navigate to `/admin/import`
+3. Upload `a1-vocabulary.csv`
+4. Preview and import
+5. Repeat for `a2-vocabulary.csv`
+
+**Aufwand:** Content: 4h (✅ erledigt) | Import: 15 min (⏳ ausstehend)
+**Status:** 🟡 **CONTENT READY - IMPORT PENDING**
 **Priorität:** 🟡 **MITTEL**
 
 ---
