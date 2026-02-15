@@ -941,7 +941,7 @@ const langGradient: Record<Locale, string> = {
 
 ### **4. Review Vocabulary (FSRS-6) - Mobile Integration** 🔁
 **Priorität:** 🟢 **MITTEL** (Komponente existiert, nur Integration fehlt)
-**Status:** ⚠️ Desktop funktioniert, Mobile zeigt nur Alert
+**Status:** ✅ **IMPLEMENTIERT** (Testing ausstehend)
 
 **Problem:**
 - VocabularyDialog mit FSRS-6 ist bereits implementiert (Desktop)
@@ -967,15 +967,20 @@ const langGradient: Record<Locale, string> = {
 
 ---
 
-### **5. Train Weak Words** 💪
+### **5. Train Weak Words - Mobile Integration** 💪
 **Priorität:** 🟡 **HOCH** (Kernmodul für Mobile)
-**Status:** ✅ Bereits implementiert (VocabularyDialog mit `mode: 'weak'`)
+**Status:** ✅ **IMPLEMENTIERT** (Testing ausstehend)
+
+**Implementiert:**
+- [x] Mobile Integration (VocabularyDialog mit `mode: 'weak'`)
+- [x] Button "💪 Weak Words" öffnet Dialog
+- [x] Filtert Wörter mit ease_factor < 2.0
 
 **Offene Aufgaben:**
-- [ ] Mobile-spezifische Anpassungen prüfen
-- [ ] Threshold `ease_factor < 2.0` dokumentieren
+- [ ] Testing auf verschiedenen Geräten
+- [ ] Performance-Tests
 
-**Aufwand:** 1 Stunde
+**Aufwand:** 30min (bereits erledigt)
 
 ---
 
@@ -1113,6 +1118,98 @@ const handleCardClick = () => {
 **Aufwand:** 2-3 Stunden (alle Module)
 **Dependencies:** Audio-URLs in DB (bereits vorhanden)
 **Status:** ❌ **OFFEN**
+
+---
+
+## 🧪 TESTING & QA
+
+### **Testing: Mobile Learning Modules** 📱
+**Priorität:** 🔴 **HOCH** (Vor Production Release)
+**Status:** ❌ **OFFEN**
+
+**Implementierte Module zum Testen:**
+1. ✅ Review Vocabulary (FSRS-6) - Mobile
+2. ✅ Train Weak Words - Mobile
+3. ✅ 2×6 Grid Layout - Mobile Dashboard
+
+**Test-Matrix:**
+
+**1. Review Vocabulary (📖) - Funktionstests (30min)**
+- [ ] **Button-Klick:** Öffnet VocabularyDialogFSRS
+- [ ] **Mode 'all':** Zeigt alle gelernten Wörter
+- [ ] **Flashcards:** Flip funktioniert (Vorderseite ↔ Rückseite)
+- [ ] **Rating-Buttons:** 1-4 (Again/Hard/Good/Easy) funktionieren
+- [ ] **FSRS-6:** Next-Review-Date wird berechnet
+- [ ] **Audio:** Lautsprecher-Icon spielt Audio ab
+- [ ] **Close:** Dialog schließt korrekt
+- [ ] **Progress:** Fortschritt wird in DB gespeichert
+
+**2. Train Weak Words (💪) - Funktionstests (30min)**
+- [ ] **Button-Klick:** Öffnet VocabularyDialog
+- [ ] **Mode 'weak':** Zeigt nur Wörter mit ease_factor < 2.0
+- [ ] **Filter:** Nur schwache Wörter werden geladen
+- [ ] **Training:** Rating verbessert ease_factor
+- [ ] **Empty State:** "No weak words" wenn alle stark sind
+- [ ] **Audio:** Funktioniert wie bei Review
+- [ ] **Close:** Dialog schließt korrekt
+
+**3. Grid Layout (2×6) - UI/UX Tests (30min)**
+- [ ] **Viewport Fit:** Alle 12 Module sichtbar OHNE Scrollen
+- [ ] **Touch Targets:** Buttons min 44x44px
+- [ ] **Grid Gaps:** 8px spacing korrekt
+- [ ] **Text Lesbarkeit:** Titles (13px) und Subtitles (10px) lesbar
+- [ ] **Icons:** 24px Icons klar erkennbar
+- [ ] **Hover/Active:** Visual Feedback bei Touch
+- [ ] **Admin Panel:** Wird nur für Admin/Teacher angezeigt
+
+**4. Cross-Device Testing (1h)**
+
+**Test-Geräte:**
+- [ ] **iPhone SE (375×667px)** - Kleinster Bildschirm
+  - [ ] Grid passt ohne Scrollen
+  - [ ] Dialogs sind vollständig sichtbar
+  - [ ] Buttons sind tappable (44px)
+- [ ] **iPhone 14/15 (390×844px)** - Standard
+  - [ ] Grid zentriert, kein Scrollen
+  - [ ] Dialogs funktionieren smooth
+- [ ] **iPhone 14 Pro Max (430×932px)** - Größter iPhone
+  - [ ] Layout nutzt verfügbaren Platz
+  - [ ] Keine zu großen Abstände
+- [ ] **Pixel 8 (412×873px)** - Android Standard
+  - [ ] Chrome Browser: alles funktioniert
+  - [ ] Grid Layout korrekt
+- [ ] **iPad Mini (768×1024px)** - Tablet
+  - [ ] Grid skaliert korrekt
+  - [ ] Oder: Desktop-Version wird angezeigt?
+
+**5. Performance Tests (30min)**
+- [ ] **Ladezeit Dialog:** < 1s
+- [ ] **Animation FPS:** 60fps (smooth)
+- [ ] **Memory Leaks:** Dialogs schließen ohne Memory-Leak
+- [ ] **Audio Loading:** Blockiert nicht die UI
+- [ ] **DB-Queries:** < 500ms Response-Zeit
+
+**6. Edge Cases & Error Handling (30min)**
+- [ ] **Kein Internet:** Fallback-Daten werden geladen
+- [ ] **Kein Audio:** Lautsprecher-Icon disabled oder versteckt
+- [ ] **Leere Daten:** Empty State wird angezeigt
+- [ ] **User logged out:** Redirect zu /login-pin
+- [ ] **Slow Network:** Loading-Spinner wird angezeigt
+
+**7. Browser-Kompatibilität (30min)**
+- [ ] **Chrome Mobile:** Alle Features funktionieren
+- [ ] **Safari iOS:** Webkit-spezifische Styles OK
+- [ ] **Firefox Mobile:** Kein Layout-Bruch
+- [ ] **Samsung Internet:** Android Default-Browser
+
+**Aufwand:** 4-5 Stunden (komplettes Testing)
+**Dependencies:** Alle Module implementiert (✅)
+**Status:** ❌ **OFFEN**
+
+**Blocker für Production:**
+- 🔴 Minimum: Tests 1, 2, 3 (Funktionalität + UI)
+- 🟡 Empfohlen: Tests 4, 5 (Cross-Device + Performance)
+- 🟢 Optional: Tests 6, 7 (Edge Cases + Browser)
 
 ---
 
