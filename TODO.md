@@ -1244,7 +1244,7 @@ Alle Learning-Dialoge haben **identisches Layout und identische Funktionsweise**
 ### **9. Grammar Module → VocabularyDialogFSRS Clone** 📐
 **Priorität:** 🟡 **HOCH** (UX-Konsistenz)
 **Aufwand:** 2-3 Stunden
-**Status:** ❌ **OFFEN**
+**Status:** ✅ **ERLEDIGT** (2026-02-15)
 
 **Problem:**
 - Das Grammar-Modul existiert noch nicht im Mobile Dashboard
@@ -1267,34 +1267,36 @@ Grammar-Modul als **kompletter Clone von VocabularyDialogFSRS** erstellen
 
 **Aufgaben:**
 
-**1. Neue Komponente erstellen: GrammarDialogFSRS.tsx**
-- [ ] **Basierend auf:** VocabularyDialogFSRS (kompletter Clone)
-- [ ] **Layout:** Identisch zu VocabularyDialogFSRS
-- [ ] **Features:** Alle Features von VocabularyDialogFSRS
-- [ ] **Content-Type:** Grammar Rules statt Vocabulary
-- [ ] **Flashcard Format:**
+**1. Neue Komponente erstellen: GrammarDialogFSRS.tsx** ✅
+- [x] **Basierend auf:** VocabularyDialogFSRS (kompletter Clone)
+- [x] **Layout:** Identisch zu VocabularyDialogFSRS
+- [x] **Features:** Alle Features von VocabularyDialogFSRS
+- [x] **Content-Type:** Grammar Rules statt Vocabulary
+- [x] **Flashcard Format:**
   - Front: Grammar Rule (EN/RU je nach Locale)
   - Back: Greek Examples + Explanation
-- [ ] **Mock Data:** 3-5 Grammar Rules für Testing
-  - Beispiel 1: "Present Tense -ω verbs"
-  - Beispiel 2: "Accusative Case"
-  - Beispiel 3: "Past Tense"
+- [x] **Mock Data:** 5 Grammar Rules implementiert
+  - ✅ Present Tense: -ω verbs
+  - ✅ Accusative Case
+  - ✅ Past Simple: -σα ending
+  - ✅ Genitive Case
+  - ✅ Future Tense: θα + verb
 
-**2. Mobile Dashboard Integration**
-- [ ] Import: `import GrammarDialogFSRS from '@/components/learning/grammar-dialog-fsrs'`
-- [ ] State: `const [showGrammarDialog, setShowGrammarDialog] = useState(false)`
-- [ ] Button Handler: `onClick={() => setShowGrammarDialog(true)}`
-- [ ] Dialog Render: Conditional rendering mit isOpen/onClose
+**2. Mobile Dashboard Integration** ✅
+- [x] Import: `import GrammarDialogFSRS from '@/components/learning/grammar-dialog-fsrs'`
+- [x] State: `const [showGrammarDialog, setShowGrammarDialog] = useState(false)`
+- [x] Button Handler: `onClick={() => setShowGrammarDialog(true)}`
+- [x] Dialog Render: Conditional rendering mit isOpen/onClose
 
-**3. Einheitliche Features (wie alle Module)**
-- [ ] Identischer Progress-Bar-Style
-- [ ] Gleiche Button-Anordnung (4 Buttons horizontal)
-- [ ] Gleiche Farben (Again: #FF6B6B, Hard: #FFA94D, Good: #51CF66, Easy: #339AF0)
-- [ ] Gleiche Button-Größen und Abstände
-- [ ] Gleiche Animations (Flip, Swipe, Transitions)
-- [ ] Gleiche Swipe-Gesten (←Again, ↓Hard, ↑Good, →Easy)
-- [ ] Glasmorphismus-Design (backdrop-blur, rgba backgrounds)
-- [ ] Summary Screen nach Session
+**3. Einheitliche Features (wie alle Module)** ✅
+- [x] Identischer Progress-Bar-Style
+- [x] Gleiche Button-Anordnung (4 Buttons horizontal)
+- [x] Gleiche Farben (Again: #FF6B6B, Hard: #FFA94D, Good: #51CF66, Easy: #339AF0)
+- [x] Gleiche Button-Größen und Abstände
+- [x] Gleiche Animations (Flip, Swipe, Transitions)
+- [x] Gleiche Swipe-Gesten (←Again, ↓Hard, ↑Good, →Easy)
+- [x] Glasmorphismus-Design (backdrop-blur, rgba backgrounds)
+- [x] Summary Screen nach Session
 
 **Backend (Future - Phase 5):**
 - [ ] Supabase Tabelle: `grammar_rules`
@@ -1319,14 +1321,20 @@ Grammar-Modul als **kompletter Clone von VocabularyDialogFSRS** erstellen
 - Mobile Dashboard existiert (✅)
 
 **Aufwand:** 2-3 Stunden
-**Status:** ❌ **OFFEN**
+**Status:** ✅ **ERLEDIGT** (2026-02-15)
 
-**Nächste Schritte:**
-1. GrammarDialogFSRS.tsx erstellen (Clone VocabularyDialogFSRS)
-2. Mock Grammar Data hinzufügen (3-5 Rules)
-3. In Mobile Dashboard integrieren
-4. Testen (Flip, Rating, Audio, Summary)
-5. Backend später in Phase 5
+**Ergebnis:**
+- GrammarDialogFSRS.tsx erfolgreich erstellt (1166 Zeilen)
+- 5 Mock Grammar Rules implementiert (A1-A2 Level)
+- Vollständig ins Mobile Dashboard integriert
+- Identisches Layout wie VocabularyDialogFSRS
+- FSRS-6 Integration für Spaced Repetition von Grammar
+- Backend-Integration pending (Phase 5)
+
+**Testing:**
+- Build erfolgreich ✅
+- TypeScript Compilation ohne Fehler ✅
+- Bereit für User Testing
 
 ---
 
