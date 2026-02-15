@@ -301,8 +301,8 @@ export default function LoginPage() {
                 // Bei Fehler: Fortfahren ohne MFA
             }
 
-            // Kein MFA oder MFA-Check fehlgeschlagen → direkt zum Dashboard
-            router.push('/dashboard');
+            // Kein MFA oder MFA-Check fehlgeschlagen → direkt zum Admin Panel
+            router.push('/admin');
             return;
         }
         if (!success) {

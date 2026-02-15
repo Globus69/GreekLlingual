@@ -5,6 +5,8 @@ import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/db/supabase';
 import Link from 'next/link';
+import EditItemModal from '@/components/admin/edit-item-modal';
+import { ToastNotification, useToast } from '@/components/ui/toast-notification';
 
 type Tab = 'import' | 'manage' | 'view';
 
@@ -40,6 +42,10 @@ export default function AdminContentPage() {
         phrases: 0,
         grammar: 0
     });
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<LearningItem | null>(null);
+    const [isCreating, setIsCreating] = useState(false);
+    const toast = useToast();
 
     // Add CSS animations for macOS 26 style
     useEffect(() => {
@@ -167,11 +173,55 @@ export default function AdminContentPage() {
 
             if (error) throw error;
 
+            toast.success('Item deleted successfully!');
             loadItems();
             loadStats();
         } catch (err) {
             console.error('Error deleting item:', err);
-            alert('Fehler beim Löschen');
+            toast.error('Failed to delete item');
+        }
+    };
+
+    const handleEdit = (item: LearningItem) => {
+        setEditingItem(item);
+        setIsCreating(false);
+        setIsEditModalOpen(true);
+    };
+
+    const handleCreate = () => {
+        setEditingItem(null);
+        setIsCreating(true);
+        setIsEditModalOpen(true);
+    };
+
+    const handleSave = async (item: any) => {
+        try {
+            if (isCreating) {
+                // Create new item
+                const { error } = await supabase
+                    .from('learning_items')
+                    .insert([item]);
+
+                if (error) throw error;
+                toast.success('Item created successfully!');
+            } else {
+                // Update existing item
+                const { error } = await supabase
+                    .from('learning_items')
+                    .update(item)
+                    .eq('id', editingItem?.id);
+
+                if (error) throw error;
+                toast.success('Item updated successfully!');
+            }
+
+            loadItems();
+            loadStats();
+            setIsEditModalOpen(false);
+        } catch (err) {
+            console.error('Error saving item:', err);
+            toast.error('Failed to save item');
+            throw err;
         }
     };
 
@@ -235,7 +285,16 @@ export default function AdminContentPage() {
                         </div>
 
                         {/* Stats */}
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 items-center">
+                            {/* + New Item Button */}
+                            <button
+                                onClick={handleCreate}
+                                className="group bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-4 rounded-2xl font-semibold shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                            >
+                                <span className="text-2xl group-hover:rotate-90 transition-transform duration-300">✚</span>
+                                <span className="tracking-wide">New Item</span>
+                            </button>
+
                             {[
                                 { value: stats.total, label: 'Gesamt', gradient: 'from-blue-500 to-blue-600' },
                                 { value: stats.vocabulary, label: 'Vokabeln', gradient: 'from-purple-500 to-purple-600' },
@@ -267,16 +326,14 @@ export default function AdminContentPage() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as Tab)}
-                                className={`relative px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 ${
-                                    activeTab === tab.id
-                                        ? 'bg-white text-purple-600 shadow-lg shadow-white/20 scale-105'
-                                        : 'text-white/80 hover:text-white hover:bg-white/10 hover:scale-102'
-                                }`}
+                                className={`relative px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 ${activeTab === tab.id
+                                    ? 'bg-white text-purple-600 shadow-lg shadow-white/20 scale-105'
+                                    : 'text-white/80 hover:text-white hover:bg-white/10 hover:scale-102'
+                                    }`}
                             >
                                 <span className="flex items-center gap-2">
-                                    <span className={`text-lg transition-transform duration-300 ${
-                                        activeTab === tab.id ? 'scale-110' : ''
-                                    }`}>{tab.icon}</span>
+                                    <span className={`text-lg transition-transform duration-300 ${activeTab === tab.id ? 'scale-110' : ''
+                                        }`}>{tab.icon}</span>
                                     <span className="tracking-wide">{tab.label}</span>
                                 </span>
                                 {activeTab === tab.id && (
@@ -382,12 +439,12 @@ export default function AdminContentPage() {
                                     type="text"
                                     placeholder="🔍 Suche..."
                                     value={filter.search}
-                                    onChange={(e) => setFilter({...filter, search: e.target.value})}
+                                    onChange={(e) => setFilter({ ...filter, search: e.target.value })}
                                     className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 placeholder-white/60 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium"
                                 />
                                 <select
                                     value={filter.type}
-                                    onChange={(e) => setFilter({...filter, type: e.target.value})}
+                                    onChange={(e) => setFilter({ ...filter, type: e.target.value })}
                                     className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
                                 >
                                     <option value="all" className="bg-gray-800">Alle Types</option>
@@ -397,7 +454,7 @@ export default function AdminContentPage() {
                                 </select>
                                 <select
                                     value={filter.level}
-                                    onChange={(e) => setFilter({...filter, level: e.target.value})}
+                                    onChange={(e) => setFilter({ ...filter, level: e.target.value })}
                                     className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
                                 >
                                     <option value="all" className="bg-gray-800">Alle Levels</option>
@@ -410,7 +467,7 @@ export default function AdminContentPage() {
                                 </select>
                                 <select
                                     value={filter.difficulty}
-                                    onChange={(e) => setFilter({...filter, difficulty: e.target.value})}
+                                    onChange={(e) => setFilter({ ...filter, difficulty: e.target.value })}
                                     className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
                                 >
                                     <option value="all" className="bg-gray-800">Alle Schwierigkeiten</option>
@@ -461,6 +518,14 @@ export default function AdminContentPage() {
                                                     <div className="text-sm text-white/60 italic mt-2 font-medium">{item.phonetic}</div>
                                                 )}
                                             </div>
+                                            {/* Edit Button */}
+                                            <button
+                                                onClick={() => handleEdit(item)}
+                                                className="group/btn bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 text-blue-200 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg border border-blue-400/20 hover:border-blue-400/40 flex items-center gap-2"
+                                            >
+                                                <span className="text-lg group-hover/btn:scale-110 transition-transform">✏️</span>
+                                                <span>Edit</span>
+                                            </button>
                                         </div>
                                     </div>
                                 ))
@@ -511,12 +576,12 @@ export default function AdminContentPage() {
                                     type="text"
                                     placeholder="🔍 Suche..."
                                     value={filter.search}
-                                    onChange={(e) => setFilter({...filter, search: e.target.value})}
+                                    onChange={(e) => setFilter({ ...filter, search: e.target.value })}
                                     className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 placeholder-white/60 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium"
                                 />
                                 <select
                                     value={filter.type}
-                                    onChange={(e) => setFilter({...filter, type: e.target.value})}
+                                    onChange={(e) => setFilter({ ...filter, type: e.target.value })}
                                     className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
                                 >
                                     <option value="all" className="bg-gray-800">Alle Types</option>
@@ -526,7 +591,7 @@ export default function AdminContentPage() {
                                 </select>
                                 <select
                                     value={filter.level}
-                                    onChange={(e) => setFilter({...filter, level: e.target.value})}
+                                    onChange={(e) => setFilter({ ...filter, level: e.target.value })}
                                     className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
                                 >
                                     <option value="all" className="bg-gray-800">Alle Levels</option>
@@ -539,7 +604,7 @@ export default function AdminContentPage() {
                                 </select>
                                 <select
                                     value={filter.difficulty}
-                                    onChange={(e) => setFilter({...filter, difficulty: e.target.value})}
+                                    onChange={(e) => setFilter({ ...filter, difficulty: e.target.value })}
                                     className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
                                 >
                                     <option value="all" className="bg-gray-800">Alle Schwierigkeiten</option>
@@ -610,6 +675,18 @@ export default function AdminContentPage() {
                     </div>
                 )}
             </div>
+
+            {/* Edit/Create Modal */}
+            <EditItemModal
+                isOpen={isEditModalOpen}
+                item={editingItem}
+                isCreating={isCreating}
+                onClose={() => setIsEditModalOpen(false)}
+                onSave={handleSave}
+            />
+
+            {/* Toast Notifications */}
+            <ToastNotification toasts={toast.toasts} onRemove={toast.removeToast} />
         </div>
     );
 }

@@ -200,37 +200,24 @@ export default function DashboardPage() {
 
                     {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
                     <div className="quick-actions-grid">
-                        {/* Row 1 - Reordered: 7, 2, 3, 6 */}
-                        <ActionTile 
-                            icon="📅" 
-                            label={`7. ${t('action.due_cards')}`}
-                            onClick={() => {
-                                setVocabDialogMode('due');
-                                setIsVocabDialogOpen(true);
-                            }}
+                        {/* Row 1 */}
+                        <ActionTile
+                            icon="👩‍🏫"
+                            label={`1. ${t('action.magic_round')}`}
+                            onClick={() => setIsLessonDialogOpen(true)}
                         />
-                        <ActionTile 
-                            icon="⚡" 
+                        <ActionTile
+                            icon="⚡"
                             label={`2. ${t('action.quick_lesson')}`}
                             onClick={() => console.log('🔥 Button 2: Quick Lesson clicked')}
                         />
-                        <ActionTile 
-                            icon="💬" 
+                        <ActionTile
+                            icon="💬"
                             label={`3. ${t('action.daily_phrases')}`}
                             onClick={() => {
                                 window.location.href = '/daily-phrases/daily-phrases.html';
                             }}
                         />
-                        <ActionTile
-                            icon="🔄"
-                            label={`6. ${t('action.review_vocab')}`}
-                            onClick={() => {
-                                setVocabDialogMode('all');
-                                setIsVocabDialogOpen(true);
-                            }}
-                        />
-
-                        {/* Row 2 - Reordered: 4, 5, 1 */}
                         <ActionTile
                             icon="📚"
                             label={`4. ${t('action.short_stories')}`}
@@ -239,6 +226,7 @@ export default function DashboardPage() {
                             }}
                         />
 
+                        {/* Row 2 */}
                         <ActionTile
                             icon="⚠️"
                             label={`5. ${t('action.train_weak')}`}
@@ -248,12 +236,23 @@ export default function DashboardPage() {
                             }}
                         />
 
-                        <ActionTile 
-                            icon="👩‍🏫" 
-                            label={`1. ${t('action.magic_round')}`}
-                            onClick={() => setIsLessonDialogOpen(true)}
+                        <ActionTile
+                            icon="🔄"
+                            label={`6. ${t('action.review_vocab')}`}
+                            onClick={() => {
+                                setVocabDialogMode('all');
+                                setIsVocabDialogOpen(true);
+                            }}
                         />
 
+                        <ActionTile
+                            icon="📅"
+                            label={`7. ${t('action.due_cards')}`}
+                            onClick={() => {
+                                setVocabDialogMode('due');
+                                setIsVocabDialogOpen(true);
+                            }}
+                        />
 
                         <ActionTile
                             icon="📐"
