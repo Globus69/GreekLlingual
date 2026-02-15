@@ -1,692 +1,328 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/db/supabase';
+import { useAuth } from '@/context/auth-context';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { ContentTable } from '@/components/admin/ContentTable';
+import { ContentModal } from '@/components/admin/ContentModal';
+import { ImportExportSection } from '@/components/admin/ImportExportSection';
+import { Content, ContentInsert, ContentUpdate } from '@/types/content';
+import {
+    fetchContent,
+    createContent,
+    updateContent,
+    deleteContent,
+    generateCSV,
+} from '@/lib/supabase/content';
+import { toast } from 'sonner';
+import { Plus, ArrowLeft, X } from 'lucide-react';
 import Link from 'next/link';
-import EditItemModal from '@/components/admin/edit-item-modal';
-import { ToastNotification, useToast } from '@/components/ui/toast-notification';
 
-type Tab = 'import' | 'manage' | 'view';
-
-interface LearningItem {
-    id: string;
-    type: 'vocabulary' | 'phrase' | 'grammar';
-    english: string;
-    greek: string;
-    phonetic?: string;
-    example_en?: string;
-    example_gr?: string;
-    level: string;
-    difficulty: string;
-    audio_url?: string;
-    created_at: string;
-}
-
-export default function AdminContentPage() {
-    const { user } = useAuth();
+export default function ContentPage() {
+    const { user, isAdmin } = useAuth();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<Tab>('import');
-    const [items, setItems] = useState<LearningItem[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [filter, setFilter] = useState({
-        type: 'all',
-        level: 'all',
-        difficulty: 'all',
-        search: ''
-    });
-    const [stats, setStats] = useState({
-        total: 0,
-        vocabulary: 0,
-        phrases: 0,
-        grammar: 0
-    });
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<LearningItem | null>(null);
-    const [isCreating, setIsCreating] = useState(false);
-    const toast = useToast();
 
-    // Add CSS animations for macOS 26 style
-    useEffect(() => {
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            .animate-fadeIn {
-                animation: fadeIn 0.4s ease-out;
-            }
-            .hover\\:scale-102:hover {
-                transform: scale(1.02);
-            }
-            /* Smooth scrolling */
-            html {
-                scroll-behavior: smooth;
-            }
-            /* Custom scrollbar */
-            ::-webkit-scrollbar {
-                width: 10px;
-                height: 10px;
-            }
-            ::-webkit-scrollbar-track {
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 10px;
-            }
-            ::-webkit-scrollbar-thumb {
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 10px;
-            }
-            ::-webkit-scrollbar-thumb:hover {
-                background: rgba(255, 255, 255, 0.3);
-            }
-        `;
-        document.head.appendChild(style);
-        return () => {
-            document.head.removeChild(style);
-        };
-    }, []);
+    const [data, setData] = useState<Content[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [totalCount, setTotalCount] = useState(0);
+    const [page, setPage] = useState(0);
+    const pageSize = 50;
 
-    // Check admin access
-    if (!user || user.role !== 'admin') {
-        router.push('/login');
-        return null;
-    }
+    // Filters
+    const [search, setSearch] = useState('');
+    const [typeFilter, setTypeFilter] = useState<string>('');
+    const [levelFilter, setLevelFilter] = useState<string[]>([]);
+    const [difficultyFilter, setDifficultyFilter] = useState<string[]>([]);
+
+    // Modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<Content | null>(null);
+
+    // Selection
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
     useEffect(() => {
-        if (activeTab === 'view' || activeTab === 'manage') {
-            loadItems();
-            loadStats();
+        if (!isAdmin) {
+            router.push('/login');
         }
-    }, [activeTab, filter]);
+    }, [isAdmin, router]);
 
-    const loadItems = async () => {
+    useEffect(() => {
+        loadData();
+    }, [search, typeFilter, levelFilter, difficultyFilter, page]);
+
+    const loadData = async () => {
         setLoading(true);
         try {
-            let query = supabase
-                .from('learning_items')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (filter.type !== 'all') {
-                query = query.eq('type', filter.type);
-            }
-            if (filter.level !== 'all') {
-                query = query.eq('level', filter.level);
-            }
-            if (filter.difficulty !== 'all') {
-                query = query.eq('difficulty', filter.difficulty);
-            }
-            if (filter.search) {
-                query = query.or(`english.ilike.%${filter.search}%,greek.ilike.%${filter.search}%`);
-            }
-
-            const { data, error } = await query.limit(100);
-
-            if (error) throw error;
-            setItems(data || []);
-        } catch (err) {
-            console.error('Error loading items:', err);
+            const result = await fetchContent({
+                search,
+                type: typeFilter || undefined,
+                level: levelFilter.length > 0 ? levelFilter : undefined,
+                difficulty: difficultyFilter.length > 0 ? difficultyFilter : undefined,
+                page,
+                pageSize,
+            });
+            setData(result.data);
+            setTotalCount(result.count);
+        } catch (error) {
+            console.error('Error loading data:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const loadStats = async () => {
+    const handleCreate = () => {
+        setEditingItem(null);
+        setIsModalOpen(true);
+    };
+
+    const handleEdit = (item: Content) => {
+        setEditingItem(item);
+        setIsModalOpen(true);
+    };
+
+    const handleSave = async (formData: ContentInsert) => {
         try {
-            const { data: allItems, error } = await supabase
-                .from('learning_items')
-                .select('type');
-
-            if (error) throw error;
-
-            const vocabulary = allItems?.filter(i => i.type === 'vocabulary').length || 0;
-            const phrases = allItems?.filter(i => i.type === 'phrase').length || 0;
-            const grammar = allItems?.filter(i => i.type === 'grammar').length || 0;
-
-            setStats({
-                total: allItems?.length || 0,
-                vocabulary,
-                phrases,
-                grammar
-            });
-        } catch (err) {
-            console.error('Error loading stats:', err);
+            if (editingItem) {
+                await updateContent(editingItem.id, formData as ContentUpdate);
+                toast.success('Eintrag aktualisiert');
+            } else {
+                await createContent(formData);
+                toast.success('Eintrag erstellt');
+            }
+            await loadData();
+        } catch (error) {
+            console.error('Error saving:', error);
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Möchten Sie dieses Element wirklich löschen?')) return;
-
         try {
-            const { error } = await supabase
-                .from('learning_items')
-                .delete()
-                .eq('id', id);
-
-            if (error) throw error;
-
-            toast.success('Item deleted successfully!');
-            loadItems();
-            loadStats();
-        } catch (err) {
-            console.error('Error deleting item:', err);
-            toast.error('Failed to delete item');
-        }
-    };
-
-    const handleEdit = (item: LearningItem) => {
-        setEditingItem(item);
-        setIsCreating(false);
-        setIsEditModalOpen(true);
-    };
-
-    const handleCreate = () => {
-        setEditingItem(null);
-        setIsCreating(true);
-        setIsEditModalOpen(true);
-    };
-
-    const handleSave = async (item: any) => {
-        try {
-            if (isCreating) {
-                // Create new item
-                const { error } = await supabase
-                    .from('learning_items')
-                    .insert([item]);
-
-                if (error) throw error;
-                toast.success('Item created successfully!');
-            } else {
-                // Update existing item
-                const { error } = await supabase
-                    .from('learning_items')
-                    .update(item)
-                    .eq('id', editingItem?.id);
-
-                if (error) throw error;
-                toast.success('Item updated successfully!');
-            }
-
-            loadItems();
-            loadStats();
-            setIsEditModalOpen(false);
-        } catch (err) {
-            console.error('Error saving item:', err);
-            toast.error('Failed to save item');
-            throw err;
+            await deleteContent(id);
+            toast.success('Eintrag gelöscht');
+            await loadData();
+        } catch (error) {
+            console.error('Error deleting:', error);
         }
     };
 
     const handleExport = async () => {
         try {
-            const { data, error } = await supabase
-                .from('learning_items')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-
-            const csv = [
-                'type,english,greek,phonetic,example_en,example_gr,level,difficulty,audio_url',
-                ...data.map(item =>
-                    `${item.type},${item.english},${item.greek},${item.phonetic || ''},${item.example_en || ''},${item.example_gr || ''},${item.level},${item.difficulty},${item.audio_url || ''}`
-                )
-            ].join('\n');
-
-            const blob = new Blob([csv], { type: 'text/csv' });
+            const result = await fetchContent({
+                search,
+                type: typeFilter || undefined,
+                level: levelFilter.length > 0 ? levelFilter : undefined,
+                difficulty: difficultyFilter.length > 0 ? difficultyFilter : undefined,
+            });
+            const csv = generateCSV(result.data);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `learning-items-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `content-export-${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
-        } catch (err) {
-            console.error('Error exporting:', err);
-            alert('Fehler beim Exportieren');
+            URL.revokeObjectURL(url);
+            toast.success('Export erfolgreich');
+        } catch (error) {
+            console.error('Error exporting:', error);
+            toast.error('Export fehlgeschlagen');
         }
     };
 
-    return (
-        <div className="min-h-screen" style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #5f4b8b 100%)',
-            position: 'relative'
-        }}>
-            {/* Ambient Background */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl"></div>
-            </div>
+    const handleResetFilters = () => {
+        setSearch('');
+        setTypeFilter('');
+        setLevelFilter([]);
+        setDifficultyFilter([]);
+        setPage(0);
+    };
 
-            {/* Header */}
-            <div className="relative bg-white/5 backdrop-blur-2xl border-b border-white/10 shadow-lg">
-                <div className="max-w-7xl mx-auto px-8 py-6">
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    if (!isAdmin) {
+        return null;
+    }
+
+    return (
+        <div className="min-h-screen bg-[#f5f5f7]">
+            {/* Clean Header */}
+            <div className="bg-white border-b border-gray-200">
+                <div className="max-w-6xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-6">
-                            <Link
-                                href="/admin"
-                                className="group flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                            >
-                                <span className="text-white text-xl group-hover:translate-x-[-2px] transition-transform duration-300">←</span>
+                        <div className="flex items-center gap-4">
+                            <Link href="/admin">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-md hover:bg-gray-100"
+                                >
+                                    <ArrowLeft className="h-4 w-4 text-gray-600" />
+                                </Button>
                             </Link>
                             <div>
-                                <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-                                    <span className="text-4xl filter drop-shadow-lg">📦</span>
-                                    Content Management
+                                <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                                    📦 Content Management
                                 </h1>
-                                <p className="text-sm text-white/70 mt-1 font-medium">Vokabeln, Phrasen und Grammatik verwalten</p>
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                    Vokabeln, Phrasen und Grammatik verwalten
+                                </p>
                             </div>
                         </div>
 
-                        {/* Stats */}
-                        <div className="flex gap-3 items-center">
-                            {/* + New Item Button */}
-                            <button
-                                onClick={handleCreate}
-                                className="group bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-4 rounded-2xl font-semibold shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                            >
-                                <span className="text-2xl group-hover:rotate-90 transition-transform duration-300">✚</span>
-                                <span className="tracking-wide">New Item</span>
-                            </button>
-
-                            {[
-                                { value: stats.total, label: 'Gesamt', gradient: 'from-blue-500 to-blue-600' },
-                                { value: stats.vocabulary, label: 'Vokabeln', gradient: 'from-purple-500 to-purple-600' },
-                                { value: stats.phrases, label: 'Phrasen', gradient: 'from-pink-500 to-pink-600' },
-                                { value: stats.grammar, label: 'Grammatik', gradient: 'from-indigo-500 to-indigo-600' }
-                            ].map((stat, idx) => (
-                                <div
-                                    key={idx}
-                                    className="group bg-white/10 backdrop-blur-xl rounded-2xl px-6 py-4 border border-white/10 hover:bg-white/15 hover:scale-105 transition-all duration-300 hover:shadow-xl cursor-default min-w-[100px]"
-                                >
-                                    <div className={`text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-br ${stat.gradient} group-hover:scale-110 transition-transform duration-300`}>
-                                        {stat.value}
-                                    </div>
-                                    <div className="text-xs text-white/70 font-medium mt-1 tracking-wide uppercase">
-                                        {stat.label}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Tabs */}
-                    <div className="flex gap-2 mt-6 p-1.5 bg-white/5 rounded-2xl backdrop-blur-xl border border-white/10 w-fit">
-                        {[
-                            { id: 'import', icon: '📤', label: 'Import' },
-                            { id: 'view', icon: '👁️', label: 'Anzeigen' },
-                            { id: 'manage', icon: '⚙️', label: 'Verwalten' }
-                        ].map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id as Tab)}
-                                className={`relative px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 ${activeTab === tab.id
-                                    ? 'bg-white text-purple-600 shadow-lg shadow-white/20 scale-105'
-                                    : 'text-white/80 hover:text-white hover:bg-white/10 hover:scale-102'
-                                    }`}
-                            >
-                                <span className="flex items-center gap-2">
-                                    <span className={`text-lg transition-transform duration-300 ${activeTab === tab.id ? 'scale-110' : ''
-                                        }`}>{tab.icon}</span>
-                                    <span className="tracking-wide">{tab.label}</span>
-                                </span>
-                                {activeTab === tab.id && (
-                                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-white rounded-full"></div>
-                                )}
-                            </button>
-                        ))}
+                        <Button
+                            onClick={handleCreate}
+                            size="sm"
+                            className="bg-blue-500 hover:bg-blue-600 text-white text-sm h-8 px-3 rounded-md shadow-sm"
+                        >
+                            <Plus className="h-4 w-4 mr-1" />
+                            New Item
+                        </Button>
                     </div>
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="relative max-w-7xl mx-auto px-8 py-10">
-                {/* Import Tab */}
-                {activeTab === 'import' && (
-                    <div className="space-y-8 animate-fadeIn">
-                        {/* Quick Actions */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Link
-                                href="/admin/import"
-                                className="group bg-white/10 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 cursor-pointer"
-                            >
-                                <div className="text-5xl mb-4 filter drop-shadow-lg group-hover:scale-110 transition-transform duration-300">📤</div>
-                                <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">Bulk Import</h3>
-                                <p className="text-sm text-white/70 font-medium">CSV oder JSON Dateien hochladen</p>
-                                <div className="mt-4 inline-flex items-center text-xs text-white/60 group-hover:text-white/80 transition-colors">
-                                    <span>Jetzt starten</span>
-                                    <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
-                                </div>
-                            </Link>
+            {/* Main Content */}
+            <div className="max-w-6xl mx-auto px-6 py-6">
+                {/* Stats - Compact */}
+                <div className="grid grid-cols-4 gap-3 mb-4">
+                    <div className="text-sm">
+                        <span className="text-gray-500">Total Items</span>
+                        <div className="text-lg font-semibold text-gray-900">{totalCount}</div>
+                    </div>
+                    <div className="text-sm">
+                        <span className="text-gray-500">Current Page</span>
+                        <div className="text-lg font-semibold text-gray-900">{page + 1}</div>
+                    </div>
+                    <div className="text-sm">
+                        <span className="text-gray-500">Total Pages</span>
+                        <div className="text-lg font-semibold text-gray-900">{totalPages}</div>
+                    </div>
+                    <div className="text-sm">
+                        <span className="text-gray-500">Selected</span>
+                        <div className="text-lg font-semibold text-gray-900">{selectedIds.length}</div>
+                    </div>
+                </div>
 
-                            <button
-                                onClick={handleExport}
-                                className="group bg-white/10 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/20 cursor-pointer text-left"
-                            >
-                                <div className="text-5xl mb-4 filter drop-shadow-lg group-hover:scale-110 transition-transform duration-300">📥</div>
-                                <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">Export</h3>
-                                <p className="text-sm text-white/70 font-medium">Alle Items als CSV exportieren</p>
-                                <div className="mt-4 inline-flex items-center text-xs text-white/60 group-hover:text-white/80 transition-colors">
-                                    <span>Download starten</span>
-                                    <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
-                                </div>
-                            </button>
+                {/* Filters - Clean Combobox Style */}
+                <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+                    <div className="space-y-3">
+                        <Input
+                            placeholder="🔍 Search English or Greek..."
+                            value={search}
+                            onChange={(e) => {
+                                setSearch(e.target.value);
+                                setPage(0);
+                            }}
+                            className="h-9 text-sm border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        />
 
-                            <a
-                                href="/templates/vocabulary-template.csv"
-                                download
-                                className="group bg-white/10 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20 cursor-pointer"
+                        <div className="flex gap-2">
+                            <Select
+                                value={typeFilter}
+                                onValueChange={(value) => {
+                                    setTypeFilter(value === 'all' ? '' : value);
+                                    setPage(0);
+                                }}
                             >
-                                <div className="text-5xl mb-4 filter drop-shadow-lg group-hover:scale-110 transition-transform duration-300">📋</div>
-                                <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">Template</h3>
-                                <p className="text-sm text-white/70 font-medium">CSV Vorlage herunterladen</p>
-                                <div className="mt-4 inline-flex items-center text-xs text-white/60 group-hover:text-white/80 transition-colors">
-                                    <span>Vorlage öffnen</span>
-                                    <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
-                                </div>
-                            </a>
-                        </div>
+                                <SelectTrigger className="h-9 text-sm border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                    <SelectValue placeholder="All Types" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Types</SelectItem>
+                                    <SelectItem value="vocabulary">Vocabulary</SelectItem>
+                                    <SelectItem value="phrase">Phrase</SelectItem>
+                                    <SelectItem value="grammar">Grammar</SelectItem>
+                                </SelectContent>
+                            </Select>
 
-                        {/* Documentation */}
-                        <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 shadow-xl">
-                            <h3 className="text-2xl font-bold text-white mb-6 tracking-tight flex items-center gap-3">
-                                <span className="text-3xl filter drop-shadow-lg">📚</span>
-                                Dokumentation
-                            </h3>
-                            <div className="space-y-4 text-white/90">
-                                {[
-                                    { label: 'Unterstützte Formate', value: 'CSV (mit Headers), JSON' },
-                                    { label: 'Erforderliche Felder', value: 'type, english, greek, level, difficulty' },
-                                    { label: 'Optionale Felder', value: 'phonetic, example_en, example_gr, audio_url' },
-                                    { label: 'Types', value: 'vocabulary, phrase, grammar' },
-                                    { label: 'Levels', value: 'A1, A2, B1, B2, C1, C2' },
-                                    { label: 'Difficulties', value: 'easy, medium, hard' }
-                                ].map((item, idx) => (
-                                    <div key={idx} className="flex items-start gap-3 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors duration-200">
-                                        <span className="text-green-400 text-lg">✅</span>
-                                        <div>
-                                            <strong className="font-semibold text-white">{item.label}:</strong>
-                                            <span className="ml-2 text-white/70">{item.value}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <a
-                                href="/docs/IMPORT-GUIDE.md"
-                                target="_blank"
-                                className="mt-6 inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                            <Select
+                                value={levelFilter[0] || 'all'}
+                                onValueChange={(value) => {
+                                    setLevelFilter(value === 'all' ? [] : [value]);
+                                    setPage(0);
+                                }}
                             >
-                                <span>Vollständige Anleitung</span>
-                                <span className="text-lg">→</span>
-                            </a>
+                                <SelectTrigger className="h-9 text-sm border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                    <SelectValue placeholder="All Levels" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Levels</SelectItem>
+                                    <SelectItem value="A1">A1</SelectItem>
+                                    <SelectItem value="A2">A2</SelectItem>
+                                    <SelectItem value="B1">B1</SelectItem>
+                                    <SelectItem value="B2">B2</SelectItem>
+                                    <SelectItem value="C1">C1</SelectItem>
+                                    <SelectItem value="C2">C2</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <Select
+                                value={difficultyFilter[0] || 'all'}
+                                onValueChange={(value) => {
+                                    setDifficultyFilter(value === 'all' ? [] : [value]);
+                                    setPage(0);
+                                }}
+                            >
+                                <SelectTrigger className="h-9 text-sm border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                    <SelectValue placeholder="All Difficulties" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Difficulties</SelectItem>
+                                    <SelectItem value="easy">Easy</SelectItem>
+                                    <SelectItem value="medium">Medium</SelectItem>
+                                    <SelectItem value="hard">Hard</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleResetFilters}
+                                className="h-9 px-3 text-sm text-gray-600 hover:bg-gray-100"
+                            >
+                                <X className="h-4 w-4 mr-1" />
+                                Reset Filters
+                            </Button>
                         </div>
                     </div>
-                )}
+                </div>
 
-                {/* View Tab */}
-                {activeTab === 'view' && (
-                    <div className="space-y-6 animate-fadeIn">
-                        {/* Filters */}
-                        <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-6 border border-white/20 shadow-xl">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <input
-                                    type="text"
-                                    placeholder="🔍 Suche..."
-                                    value={filter.search}
-                                    onChange={(e) => setFilter({ ...filter, search: e.target.value })}
-                                    className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 placeholder-white/60 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium"
-                                />
-                                <select
-                                    value={filter.type}
-                                    onChange={(e) => setFilter({ ...filter, type: e.target.value })}
-                                    className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
-                                >
-                                    <option value="all" className="bg-gray-800">Alle Types</option>
-                                    <option value="vocabulary" className="bg-gray-800">Vocabulary</option>
-                                    <option value="phrase" className="bg-gray-800">Phrase</option>
-                                    <option value="grammar" className="bg-gray-800">Grammar</option>
-                                </select>
-                                <select
-                                    value={filter.level}
-                                    onChange={(e) => setFilter({ ...filter, level: e.target.value })}
-                                    className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
-                                >
-                                    <option value="all" className="bg-gray-800">Alle Levels</option>
-                                    <option value="A1" className="bg-gray-800">A1</option>
-                                    <option value="A2" className="bg-gray-800">A2</option>
-                                    <option value="B1" className="bg-gray-800">B1</option>
-                                    <option value="B2" className="bg-gray-800">B2</option>
-                                    <option value="C1" className="bg-gray-800">C1</option>
-                                    <option value="C2" className="bg-gray-800">C2</option>
-                                </select>
-                                <select
-                                    value={filter.difficulty}
-                                    onChange={(e) => setFilter({ ...filter, difficulty: e.target.value })}
-                                    className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
-                                >
-                                    <option value="all" className="bg-gray-800">Alle Schwierigkeiten</option>
-                                    <option value="easy" className="bg-gray-800">Easy</option>
-                                    <option value="medium" className="bg-gray-800">Medium</option>
-                                    <option value="hard" className="bg-gray-800">Hard</option>
-                                </select>
-                            </div>
-                        </div>
+                {/* Import/Export - Simple */}
+                <ImportExportSection
+                    onImportSuccess={loadData}
+                    onExport={handleExport}
+                />
 
-                        {/* Items List */}
-                        <div className="space-y-3">
-                            {loading ? (
-                                <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-12 border border-white/20 text-center">
-                                    <div className="inline-flex items-center gap-3 text-white">
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        <span className="text-lg font-medium">Laden...</span>
-                                    </div>
-                                </div>
-                            ) : items.length === 0 ? (
-                                <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-12 border border-white/20 text-center">
-                                    <div className="text-6xl mb-4 opacity-50">🔍</div>
-                                    <p className="text-white text-lg font-medium">Keine Items gefunden</p>
-                                    <p className="text-white/60 text-sm mt-2">Versuchen Sie andere Filter</p>
-                                </div>
-                            ) : (
-                                items.map(item => (
-                                    <div
-                                        key={item.id}
-                                        className="group bg-white/10 backdrop-blur-2xl rounded-2xl p-6 border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2.5 mb-3">
-                                                    <span className="text-xs px-3 py-1.5 bg-blue-500/20 backdrop-blur-xl text-blue-200 rounded-lg border border-blue-400/20 font-semibold uppercase tracking-wide">
-                                                        {item.type}
-                                                    </span>
-                                                    <span className="text-xs px-3 py-1.5 bg-green-500/20 backdrop-blur-xl text-green-200 rounded-lg border border-green-400/20 font-semibold uppercase tracking-wide">
-                                                        {item.level}
-                                                    </span>
-                                                    <span className="text-xs px-3 py-1.5 bg-orange-500/20 backdrop-blur-xl text-orange-200 rounded-lg border border-orange-400/20 font-semibold uppercase tracking-wide">
-                                                        {item.difficulty}
-                                                    </span>
-                                                </div>
-                                                <div className="text-white font-bold text-lg mb-1">{item.english}</div>
-                                                <div className="text-blue-200 text-base font-medium">{item.greek}</div>
-                                                {item.phonetic && (
-                                                    <div className="text-sm text-white/60 italic mt-2 font-medium">{item.phonetic}</div>
-                                                )}
-                                            </div>
-                                            {/* Edit Button */}
-                                            <button
-                                                onClick={() => handleEdit(item)}
-                                                className="group/btn bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 text-blue-200 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg border border-blue-400/20 hover:border-blue-400/40 flex items-center gap-2"
-                                            >
-                                                <span className="text-lg group-hover/btn:scale-110 transition-transform">✏️</span>
-                                                <span>Edit</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-
-                        {items.length >= 100 && (
-                            <div className="bg-white/10 backdrop-blur-2xl rounded-2xl p-4 border border-white/20 text-center">
-                                <p className="text-white/80 text-sm font-medium">
-                                    💡 Zeige ersten 100 Items. Verwenden Sie Filter für mehr.
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Manage Tab */}
-                {activeTab === 'manage' && (
-                    <div className="space-y-6 animate-fadeIn">
-                        {/* Actions */}
-                        <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 shadow-xl">
-                            <h3 className="text-2xl font-bold text-white mb-6 tracking-tight flex items-center gap-3">
-                                <span className="text-3xl filter drop-shadow-lg">⚙️</span>
-                                Verwaltungs-Aktionen
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <button
-                                    onClick={handleExport}
-                                    className="group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
-                                >
-                                    <span className="text-2xl group-hover:scale-110 transition-transform">📥</span>
-                                    <span className="tracking-wide">Alle exportieren (CSV)</span>
-                                </button>
-                                <button
-                                    onClick={loadStats}
-                                    className="group bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
-                                >
-                                    <span className="text-2xl group-hover:rotate-180 transition-transform duration-500">🔄</span>
-                                    <span className="tracking-wide">Statistiken aktualisieren</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Filters */}
-                        <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-6 border border-white/20 shadow-xl">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <input
-                                    type="text"
-                                    placeholder="🔍 Suche..."
-                                    value={filter.search}
-                                    onChange={(e) => setFilter({ ...filter, search: e.target.value })}
-                                    className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 placeholder-white/60 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium"
-                                />
-                                <select
-                                    value={filter.type}
-                                    onChange={(e) => setFilter({ ...filter, type: e.target.value })}
-                                    className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
-                                >
-                                    <option value="all" className="bg-gray-800">Alle Types</option>
-                                    <option value="vocabulary" className="bg-gray-800">Vocabulary</option>
-                                    <option value="phrase" className="bg-gray-800">Phrase</option>
-                                    <option value="grammar" className="bg-gray-800">Grammar</option>
-                                </select>
-                                <select
-                                    value={filter.level}
-                                    onChange={(e) => setFilter({ ...filter, level: e.target.value })}
-                                    className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
-                                >
-                                    <option value="all" className="bg-gray-800">Alle Levels</option>
-                                    <option value="A1" className="bg-gray-800">A1</option>
-                                    <option value="A2" className="bg-gray-800">A2</option>
-                                    <option value="B1" className="bg-gray-800">B1</option>
-                                    <option value="B2" className="bg-gray-800">B2</option>
-                                    <option value="C1" className="bg-gray-800">C1</option>
-                                    <option value="C2" className="bg-gray-800">C2</option>
-                                </select>
-                                <select
-                                    value={filter.difficulty}
-                                    onChange={(e) => setFilter({ ...filter, difficulty: e.target.value })}
-                                    className="bg-white/20 backdrop-blur-xl text-white px-5 py-3.5 rounded-xl border border-white/30 focus:bg-white/25 focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300 font-medium cursor-pointer hover:bg-white/25"
-                                >
-                                    <option value="all" className="bg-gray-800">Alle Schwierigkeiten</option>
-                                    <option value="easy" className="bg-gray-800">Easy</option>
-                                    <option value="medium" className="bg-gray-800">Medium</option>
-                                    <option value="hard" className="bg-gray-800">Hard</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Items List with Delete */}
-                        <div className="space-y-3">
-                            {loading ? (
-                                <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-12 border border-white/20 text-center">
-                                    <div className="inline-flex items-center gap-3 text-white">
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        <span className="text-lg font-medium">Laden...</span>
-                                    </div>
-                                </div>
-                            ) : items.length === 0 ? (
-                                <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-12 border border-white/20 text-center">
-                                    <div className="text-6xl mb-4 opacity-50">🔍</div>
-                                    <p className="text-white text-lg font-medium">Keine Items gefunden</p>
-                                    <p className="text-white/60 text-sm mt-2">Versuchen Sie andere Filter</p>
-                                </div>
-                            ) : (
-                                items.map(item => (
-                                    <div
-                                        key={item.id}
-                                        className="group bg-white/10 backdrop-blur-2xl rounded-2xl p-6 border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all duration-300"
-                                    >
-                                        <div className="flex items-center justify-between gap-6">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2.5 mb-3">
-                                                    <span className="text-xs px-3 py-1.5 bg-blue-500/20 backdrop-blur-xl text-blue-200 rounded-lg border border-blue-400/20 font-semibold uppercase tracking-wide">
-                                                        {item.type}
-                                                    </span>
-                                                    <span className="text-xs px-3 py-1.5 bg-green-500/20 backdrop-blur-xl text-green-200 rounded-lg border border-green-400/20 font-semibold uppercase tracking-wide">
-                                                        {item.level}
-                                                    </span>
-                                                    <span className="text-xs px-3 py-1.5 bg-orange-500/20 backdrop-blur-xl text-orange-200 rounded-lg border border-orange-400/20 font-semibold uppercase tracking-wide">
-                                                        {item.difficulty}
-                                                    </span>
-                                                </div>
-                                                <div className="text-white font-bold text-lg mb-1">{item.english}</div>
-                                                <div className="text-blue-200 text-base font-medium">{item.greek}</div>
-                                                {item.phonetic && (
-                                                    <div className="text-sm text-white/60 italic mt-2 font-medium">{item.phonetic}</div>
-                                                )}
-                                                {item.example_en && (
-                                                    <div className="text-sm text-white/70 mt-3 p-3 bg-white/5 rounded-lg border border-white/10">
-                                                        <span className="font-semibold">Example:</span> {item.example_en}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <button
-                                                onClick={() => handleDelete(item.id)}
-                                                className="group/btn bg-red-500/20 backdrop-blur-xl hover:bg-red-500/30 text-red-200 hover:text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg border border-red-400/20 hover:border-red-400/40 flex items-center gap-2"
-                                            >
-                                                <span className="text-lg group-hover/btn:scale-110 transition-transform">🗑️</span>
-                                                <span>Löschen</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-                )}
+                {/* Table */}
+                <ContentTable
+                    data={data}
+                    loading={loading}
+                    selectedIds={selectedIds}
+                    onSelectionChange={setSelectedIds}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    page={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                />
             </div>
 
-            {/* Edit/Create Modal */}
-            <EditItemModal
-                isOpen={isEditModalOpen}
-                item={editingItem}
-                isCreating={isCreating}
-                onClose={() => setIsEditModalOpen(false)}
+            {/* Modal */}
+            <ContentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
+                item={editingItem}
             />
-
-            {/* Toast Notifications */}
-            <ToastNotification toasts={toast.toasts} onRemove={toast.removeToast} />
         </div>
     );
 }
