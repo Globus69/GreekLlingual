@@ -67,6 +67,7 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
     const [isPlaying, setIsPlaying] = useState(false); // TTS playing state
     const [speechRate, setSpeechRate] = useState<number>(0.9); // 0.6 = slow, 0.9 = normal, 1.2 = fast
     const [announceMessage, setAnnounceMessage] = useState<string>(''); // Screen reader announcements
+    const [sessionId, setSessionId] = useState<string | null>(null); // Track current session
 
     const STUDENT_ID = user?.id || '';
 
@@ -267,6 +268,25 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
                 console.log(`✅ Loaded ${data.length} due cards`);
                 setVocabulary(data as FSRSLearningItem[]);
                 setLoadError(null);
+
+                // Start session tracking
+                if (user?.id) {
+                    try {
+                        const { data: sessionData, error: sessionError } = await supabase.rpc('start_learning_session', {
+                            p_student_id: user.id,
+                            p_session_type: 'vocabulary'
+                        });
+
+                        if (sessionError) {
+                            console.warn('Session tracking failed:', sessionError);
+                        } else if (sessionData) {
+                            setSessionId(sessionData);
+                            console.log(`📊 Session started: ${sessionData}`);
+                        }
+                    } catch (err) {
+                        console.warn('Session start error:', err);
+                    }
+                }
             } else {
                 console.log('⚠️ No due cards found');
                 setVocabulary([]);
@@ -371,6 +391,26 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
             // Session complete
             setShowSummary(true);
 
+            // End session tracking
+            if (sessionId) {
+                try {
+                    const { data: sessionEndData, error: sessionEndError } = await supabase.rpc('end_learning_session', {
+                        p_session_id: sessionId,
+                        p_cards_reviewed: total,
+                        p_cards_correct: correct
+                    });
+
+                    if (sessionEndError) {
+                        console.warn('Session end failed:', sessionEndError);
+                    } else if (sessionEndData && sessionEndData.length > 0) {
+                        const result = sessionEndData[0];
+                        console.log(`📊 Session completed: ${result.duration_minutes} minutes`);
+                    }
+                } catch (err) {
+                    console.warn('Session end error:', err);
+                }
+            }
+
             // Update user streak
             if (user && user.id) {
                 try {
@@ -413,13 +453,28 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
         loadDueCards(); // Reload fresh cards
     };
 
-    const handleCancel = () => {
+    const handleCancel = async () => {
+        // End session if one is active
+        if (sessionId) {
+            try {
+                await supabase.rpc('end_learning_session', {
+                    p_session_id: sessionId,
+                    p_cards_reviewed: total,
+                    p_cards_correct: correct
+                });
+                console.log('📊 Session ended (cancelled)');
+            } catch (err) {
+                console.warn('Session end error:', err);
+            }
+        }
+
         setCurrentIndex(0);
         setRatings({ again: 0, hard: 0, good: 0, easy: 0 });
         setCorrect(0);
         setTotal(0);
         setShowSummary(false);
         setFlipped(false);
+        setSessionId(null);
         onClose();
     };
 
