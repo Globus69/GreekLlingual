@@ -14,6 +14,7 @@ interface FlashcardFSRSProps {
     onFlip: () => void;
     onRating: (rating: Rating) => void;
     showRatingButtons?: boolean; // Show buttons only when flipped
+    onBackClick?: () => void; // Click on card back to play audio
 }
 
 const RATING_BUTTONS = [
@@ -31,7 +32,8 @@ export default function FlashcardFSRS({
     flipped,
     onFlip,
     onRating,
-    showRatingButtons = true
+    showRatingButtons = true,
+    onBackClick
 }: FlashcardFSRSProps) {
     const { t } = useTranslation();
     const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | 'up' | 'down' | null>(null);
@@ -107,8 +109,8 @@ export default function FlashcardFSRS({
         <div className="flashcard-container">
             <div
                 {...(flipped ? handlers : {})}
-                className={`flashcard ${flipped ? 'flipped' : ''} ${swipeDirection ? 'swiping' : ''}`}
-                onClick={!flipped ? onFlip : undefined}
+                className={`flashcard ${flipped ? 'flipped' : ''} ${swipeDirection ? 'swiping' : ''} ${flipped && onBackClick ? 'clickable-back' : ''}`}
+                onClick={!flipped ? onFlip : onBackClick}
             >
                 {/* Front Face */}
                 <div className="flashcard-face flashcard-front">
@@ -190,6 +192,15 @@ export default function FlashcardFSRS({
 
                 .flashcard.flipped {
                     transform: rotateY(180deg);
+                }
+
+                .flashcard.clickable-back {
+                    cursor: pointer;
+                }
+
+                .flashcard.clickable-back:hover .flashcard-back {
+                    background: rgba(28, 28, 32, 1);
+                    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(0, 122, 255, 0.3);
                 }
 
                 .flashcard-face {

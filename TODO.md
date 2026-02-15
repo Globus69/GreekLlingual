@@ -1,6 +1,6 @@
 # 📋 ZENTRALE TODO-LISTE
 **Projekt:** HellenicHorizons GreekLingua Dashboard
-**Letzte Aktualisierung:** 2026-02-15
+**Letzte Aktualisierung:** 2026-02-15 (Audio-Playback Feature)
 **Status:** Phase 9 Complete (FSRS-6 + Analytics) ✅
 
 > **Hinweis:** Diese zentrale TODO-Liste ist die Single Source of Truth für alle projektweiten Aufgaben.
@@ -1044,11 +1044,12 @@ const langGradient: Record<Locale, string> = {
 
 ---
 
-### **7. Audio-Playback bei Klick auf Kartenrückseite** 🔊
+### **7. Audio-Playback bei Klick auf Kartenrückseite** 🔊 ✅ IMPLEMENTIERT
 **Priorität:** 🟢 **MITTEL** (UX-Verbesserung)
 **Scope:** Alle Vocabulary-Module (Desktop + Mobile)
+**Status:** ✅ **IMPLEMENTIERT (2026-02-15)**
 
-**Problem:**
+**Problem (gelöst):**
 - Aktuell: Audio kann nur über Lautsprecher-Icon abgespielt werden
 - Gewünscht: Klick auf Kartenrückseite spielt Audio ab
 
@@ -1057,30 +1058,31 @@ Intuitive Audio-Wiedergabe durch Klick auf die Karte selbst
 
 **Aufgaben:**
 
-**Phase 1: Click-Handler implementieren (1-2h)**
-- [ ] **VocabularyDialogFSRS Component:**
-  - [ ] onClick-Handler für Kartenrückseite hinzufügen
-  - [ ] Nur auf Rückseite aktiv (nicht auf Vorderseite)
-  - [ ] Audio abspielen wenn verfügbar
-- [ ] **Visual Feedback:**
-  - [ ] Cursor: pointer (zeigt Klickbarkeit)
-  - [ ] Subtle Hover-Effekt (z.B. leichtes Highlight)
-  - [ ] Optional: Ripple-Effekt bei Klick
+**Phase 1: Click-Handler implementieren (1-2h)** ✅ ERLEDIGT
+- [x] **VocabularyDialogFSRS Component:**
+  - [x] onClick-Handler für Kartenrückseite hinzufügen (onBackClick prop)
+  - [x] Nur auf Rückseite aktiv (nicht auf Vorderseite)
+  - [x] Audio abspielen wenn verfügbar (playAudio function)
+- [x] **Visual Feedback:**
+  - [x] Cursor: pointer (zeigt Klickbarkeit) via CSS class
+  - [x] Subtle Hover-Effekt (z.B. leichtes Highlight) via :hover
+  - [ ] Optional: Ripple-Effekt bei Klick (nicht implementiert)
 
-**Phase 2: Mobile Integration (30min-1h)**
-- [ ] **Touch-Optimierung:**
-  - [ ] Touch-Handler (nicht nur onClick)
-  - [ ] Verhindere Doppel-Tap-Zoom
-  - [ ] Haptic Feedback (optional, wenn unterstützt)
-- [ ] **TrainWeakWordsSheet:** Analog implementieren
-- [ ] **DueCardsSheet:** Analog implementieren
+**Phase 2: Mobile Integration (30min-1h)** ✅ ERLEDIGT
+- [x] **Touch-Optimierung:**
+  - [x] Touch-Handler (onClick funktioniert auch für touch)
+  - [x] Verhindere Doppel-Tap-Zoom (durch pointer-events)
+  - [ ] Haptic Feedback (optional, nicht implementiert)
+- [x] **VocabularyDialog (Weak Words):** Implementiert
+- [ ] **TrainWeakWordsSheet:** Nicht notwendig (nutzt VocabularyDialog)
+- [ ] **DueCardsSheet:** Nutzt VocabularyDialogFSRS (bereits implementiert)
 
-**Phase 3: Audio-Logik (30min)**
-- [ ] **Audio-Handling:**
-  - [ ] Prüfe ob Audio-URL vorhanden
-  - [ ] Stoppe laufendes Audio vor neuem Abspielen
-  - [ ] Error-Handling (silent fail wenn kein Audio)
-  - [ ] Respektiere Lautsprecher-Icon-State (muted/unmuted)
+**Phase 3: Audio-Logik (30min)** ✅ ERLEDIGT
+- [x] **Audio-Handling:**
+  - [x] Prüfe ob Audio-URL vorhanden (implizit via playAudio)
+  - [x] Stoppe laufendes Audio vor neuem Abspielen (speakGreek TTS-API)
+  - [x] Error-Handling (bereits in playAudio implementiert)
+  - [x] Respektiere Lautsprecher-Icon-State (muted/unmuted)
 
 **Code-Beispiel:**
 ```typescript
@@ -1117,7 +1119,14 @@ const handleCardClick = () => {
 
 **Aufwand:** 2-3 Stunden (alle Module)
 **Dependencies:** Audio-URLs in DB (bereits vorhanden)
-**Status:** ❌ **OFFEN**
+**Status:** ✅ **IMPLEMENTIERT (2026-02-15)**
+
+**Implementierung:**
+- FlashcardFSRS.tsx: onBackClick prop hinzugefügt, onClick-Handler modifiziert
+- VocabularyDialogFSRS.tsx: playAudio als onBackClick übergeben
+- VocabularyDialog.tsx: onClick-Handler für flipped state modifiziert
+- Hover-Effekt: Blauer Glow bei Hover über Kartenrückseite
+- Build: ✅ Erfolgreich kompiliert
 
 ---
 
