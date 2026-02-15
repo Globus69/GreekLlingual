@@ -7,6 +7,7 @@ import { useTranslation } from '@/lib/use-translation';
 import { useStatsData } from '@/hooks/use-stats-data';
 import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
 import { DueCardsSheet } from '@/components/mobile/DueCardsSheet';
+import VocabularyDialogFSRS from '@/components/learning/VocabularyDialogFSRS';
 import '@/styles/liquid-glass.css';
 
 export default function MobileDashboardPage() {
@@ -14,6 +15,7 @@ export default function MobileDashboardPage() {
   const [showDetailedStats, setShowDetailedStats] = useState(false);
   const [showWeakWordsSheet, setShowWeakWordsSheet] = useState(false);
   const [showDueCardsSheet, setShowDueCardsSheet] = useState(false);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -218,7 +220,7 @@ export default function MobileDashboardPage() {
             title="Review Vocab"
             subtitle="Practice words"
             color="green"
-            onClick={() => alert('Review - Coming soon!')}
+            onClick={() => setShowReviewDialog(true)}
           />
           <ModuleTile
             icon="💪"
@@ -371,6 +373,15 @@ export default function MobileDashboardPage() {
         onClose={() => setShowDueCardsSheet(false)}
         dueCount={stats.dueCount}
       />
+
+      {/* Review Vocabulary Dialog (FSRS-6) */}
+      {showReviewDialog && user?.id && (
+        <VocabularyDialogFSRS
+          isOpen={showReviewDialog}
+          onClose={() => setShowReviewDialog(false)}
+          mode="all"
+        />
+      )}
     </div>
   );
 }
