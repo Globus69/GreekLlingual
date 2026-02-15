@@ -233,7 +233,40 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
     }, [isOpen, flipped, currentIndex, vocabulary.length]);
 
     /**
+     * Get current time slot (Morning, Noon, Evening)
+     */
+    const getCurrentTimeSlot = (): 'morning' | 'noon' | 'evening' => {
+        const hour = new Date().getHours();
+        if (hour >= 6 && hour < 12) return 'morning';
+        if (hour >= 12 && hour < 18) return 'noon';
+        return 'evening'; // 18-6
+    };
+
+    /**
+     * Get stable daily phrase index for current date and time slot
+     * Uses date + time slot as seed for consistent phrase selection per slot
+     */
+    const getDailyPhraseIndex = (totalPhrases: number, timeSlot: 'morning' | 'noon' | 'evening'): number => {
+        const today = new Date();
+        const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD
+
+        // Create seed from date + time slot
+        const slotOffset = { morning: 0, noon: 1, evening: 2 }[timeSlot];
+        const seed = dateString + slotOffset;
+
+        // Simple hash function for stable "random" selection
+        let hash = 0;
+        for (let i = 0; i < seed.length; i++) {
+            hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+            hash = hash & hash; // Convert to 32bit integer
+        }
+
+        return Math.abs(hash) % totalPhrases;
+    };
+
+    /**
      * Load phrases from daily_phrases table
+     * Implements "3 per day" rule: Morning (1), Noon (1), Evening (1)
      */
     const loadDueCards = async () => {
         setLoading(true);
@@ -242,6 +275,8 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
 
         try {
             const DECK_ID = 'c8852ed2-ebb9-414c-ac90-4867c562561e';
+            const currentTimeSlot = getCurrentTimeSlot();
+            console.log(`⏰ Current time slot: ${currentTimeSlot}`);
 
             // Load phrases from daily_phrases table
             const { data: phrasesData, error: phrasesError } = await supabase
@@ -249,7 +284,7 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
                 .select('*')
                 .eq('deck_id', DECK_ID)
                 .order('created_at', { ascending: true })
-                .limit(50);
+                .limit(100); // Load more to have variety
 
             if (phrasesError) {
                 console.error('❌ Phrases error:', phrasesError);
@@ -265,7 +300,7 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
                     .from('daily_phrases')
                     .select('*')
                     .order('created_at', { ascending: true })
-                    .limit(50);
+                    .limit(100);
 
                 if (allError || !allPhrases || allPhrases.length === 0) {
                     console.warn('⚠️ No phrases found in database');
@@ -299,11 +334,13 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
                     created_at: p.created_at,
                 }));
 
-                // Shuffle for daily variety
-                const shuffled = phrases.sort(() => Math.random() - 0.5);
+                // "3 per day" rule: Select 1 phrase for current time slot
+                const phraseIndex = getDailyPhraseIndex(phrases.length, currentTimeSlot);
+                const selectedPhrase = [phrases[phraseIndex]];
 
-                console.log(`✅ Loaded ${shuffled.length} daily phrases (all decks)`);
-                setVocabulary(shuffled);
+                console.log(`✅ Selected 1 phrase for ${currentTimeSlot} (index ${phraseIndex}/${phrases.length})`);
+                console.log('   Phrase:', selectedPhrase[0]?.greek);
+                setVocabulary(selectedPhrase);
                 setLoadError(null);
                 setLoading(false);
                 return;
@@ -333,12 +370,16 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
                 created_at: p.created_at,
             }));
 
-            // Shuffle for daily variety (Fisher-Yates)
-            const shuffled = phrases.sort(() => Math.random() - 0.5);
+            // "3 per day" rule: Select 1 phrase for current time slot
+            // Uses deterministic selection based on date + time slot
+            const phraseIndex = getDailyPhraseIndex(phrases.length, currentTimeSlot);
+            const selectedPhrase = [phrases[phraseIndex]];
 
-            console.log(`✅ Loaded ${shuffled.length} daily phrases from database`);
-            console.log('   Sample:', shuffled[0]?.greek);
-            setVocabulary(shuffled);
+            console.log(`✅ Loaded 1 daily phrase for ${currentTimeSlot} from database`);
+            console.log(`   Selected index ${phraseIndex}/${phrases.length}`);
+            console.log('   Phrase:', selectedPhrase[0]?.greek);
+            console.log('   💡 3-per-day rule active: Morning (6-12), Noon (12-18), Evening (18-6)');
+            setVocabulary(selectedPhrase);
             setLoadError(null);
         } catch (err) {
             console.error('❌ Load error:', err);
