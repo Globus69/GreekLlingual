@@ -1,0 +1,57 @@
+[
+  {
+    "type": "vocabulary",
+    "english": "Hello",
+    "greek": "Γεια σου",
+    "phonetic": "YAH-soo",
+    "example_en": "Hello friend",
+    "example_gr": "Γεια σου φίλε",
+    "level": "A1",
+    "difficulty": "easy",
+    "audio_url": ""
+  },
+  {
+    "type": "vocabulary",
+    "english": "Thank you",
+    "greek": "Ευχαριστώ",
+    "phonetic": "ef-kha-ree-STOH",
+    "example_en": "Thank you very much",
+    "example_gr": "Ευχαριστώ πολύ",
+    "level": "A1",
+    "difficulty": "easy",
+    "audio_url": ""
+  },
+  {
+    "type": "vocabulary",
+    "english": "Water",
+    "greek": "Νερό",
+    "phonetic": "neh-ROH",
+    "example_en": "I want water",
+    "example_gr": "Θέλω νερό",
+    "level": "A1",
+    "difficulty": "easy",
+    "audio_url": ""
+  },
+  {
+    "type": "phrase",
+    "english": "How are you?",
+    "greek": "Πώς είσαι;",
+    "phonetic": "pos EE-seh",
+    "example_en": "How are you today?",
+    "example_gr": "Πώς είσαι σήμερα;",
+    "level": "A1",
+    "difficulty": "medium",
+    "audio_url": ""
+  },
+  {
+    "type": "phrase",
+    "english": "Good morning",
+    "greek": "Καλημέρα",
+    "phonetic": "ka-lee-MEH-ra",
+    "example_en": "Good morning everyone",
+    "example_gr": "Καλημέρα σε όλους",
+    "level": "A1",
+    "difficulty": "easy",
+    "audio_url": ""
+  }
+]
