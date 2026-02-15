@@ -1,10 +1,517 @@
 # 📋 ZENTRALE TODO-LISTE
 **Projekt:** HellenicHorizons GreekLingua Dashboard
-**Letzte Aktualisierung:** 2026-02-15 (Audio-Playback Feature)
+**Letzte Aktualisierung:** 2026-02-15 (Session Tracking + Desktop Module Integration)
 **Status:** Phase 9 Complete (FSRS-6 + Analytics) ✅
 
 > **Hinweis:** Diese zentrale TODO-Liste ist die Single Source of Truth für alle projektweiten Aufgaben.
 > Modul-spezifische TODOs befinden sich in den jeweiligen Modul-Ordnern.
+
+---
+
+## 🧪 TESTREIHENFOLGE - Neue Features (2026-02-15)
+
+**Zu testende Features:**
+- ✅ Session Time Tracking (Backend + Frontend)
+- ✅ Desktop: Due Cards & Weak Words Module Integration
+- 🟡 Responsive Design (Mobile Device Detection)
+
+**Teststrategie:** Systematisches Testen von Backend → Frontend → Integration
+
+---
+
+### Phase 1: Backend-Vorbereitung (Migration 059) ⚙️
+
+#### Test 1.1: Migration 059 Ausführung prüfen
+- [ ] **Supabase SQL Editor öffnen**
+- [ ] **Query ausführen:**
+  ```sql
+  -- Prüfen ob learning_sessions Tabelle existiert
+  SELECT * FROM pg_tables WHERE tablename = 'learning_sessions';
+  ```
+- [ ] **Erwartetes Ergebnis:** Eine Zeile mit `tablename = 'learning_sessions'`
+- [ ] ❌ **Falls Tabelle fehlt:** Migration 059 ausführen (`database/migrations/059_add_session_tracking.sql`)
+
+#### Test 1.2: RPC Functions prüfen
+- [ ] **Query ausführen:**
+  ```sql
+  -- Alle Session-Tracking Functions auflisten
+  SELECT proname FROM pg_proc WHERE proname LIKE '%learning_session%';
+  ```
+- [ ] **Erwartete Functions:**
+  - `start_learning_session`
+  - `end_learning_session`
+  - `get_session_stats`
+  - `get_recent_sessions`
+- [ ] ❌ **Falls Functions fehlen:** Migration 059 ausführen
+
+#### Test 1.3: Permissions prüfen
+- [ ] **Query ausführen:**
+  ```sql
+  -- Permissions für anon Role
+  SELECT has_function_privilege('anon', 'start_learning_session(uuid, text)', 'EXECUTE');
+  SELECT has_function_privilege('anon', 'end_learning_session(uuid, integer, integer)', 'EXECUTE');
+  ```
+- [ ] **Erwartetes Ergebnis:** Beide sollten `true` zurückgeben
+- [ ] ❌ **Falls false:**
+  ```sql
+  GRANT EXECUTE ON FUNCTION start_learning_session TO anon;
+  GRANT EXECUTE ON FUNCTION end_learning_session TO anon;
+  GRANT EXECUTE ON FUNCTION get_session_stats TO anon;
+  GRANT EXECUTE ON FUNCTION get_recent_sessions TO anon;
+  ```
+
+#### Test 1.4: Test-Session erstellen
+- [ ] **USER_ID ermitteln:**
+  ```sql
+  SELECT id, name, role FROM users LIMIT 5;
+  ```
+- [ ] **Notiere deine User UUID:** `________________________________`
+- [ ] **Test-Script ausführen:** `database/migrations/059_TEST_SESSION_TRACKING.sql`
+  - Ersetze `YOUR-USER-ID-HERE` mit deiner UUID
+- [ ] **Erwartetes Ergebnis:** Alle Checks zeigen ✅
+- [ ] **Session-Daten prüfen:**
+  ```sql
+  SELECT * FROM learning_sessions WHERE student_id = 'DEINE-UUID' ORDER BY started_at DESC LIMIT 5;
+  ```
+
+**Status Phase 1:** ⬜ NICHT GESTARTET | 🟡 IN BEARBEITUNG | ✅ ABGESCHLOSSEN | ❌ FEHLER
+
+---
+
+### Phase 2: Frontend Session Tracking 🖥️
+
+#### Test 2.1: Desktop - Vocabulary Dialog (Session Tracking)
+- [ ] **App starten:** `npm run dev` (falls nicht läuft)
+- [ ] **Browser öffnen:** `http://localhost:3000/dashboard`
+- [ ] **Login** mit deinem Account
+- [ ] **Button klicken:** "6. Review Vocab"
+- [ ] **Browser Console öffnen** (F12 → Console Tab)
+- [ ] **Erwartete Console-Logs:**
+  ```
+  🔄 Loading FSRS cards (mode: all, user: [UUID], level: [LEVEL])
+  ✅ Loaded X due cards
+  📊 Session started: [SESSION-UUID]
+  ```
+- [ ] **Flashcard-Test:** Mindestens 3 Karten bewerten (Any rating)
+- [ ] **Dialog schließen** (Cancel Button oder X)
+- [ ] **Erwartete Console-Logs:**
+  ```
+  📊 Session ended (cancelled)
+  ```
+- [ ] **Datenbank prüfen:**
+  ```sql
+  SELECT
+    session_type,
+    started_at,
+    duration_seconds,
+    cards_reviewed,
+    cards_correct,
+    completed
+  FROM learning_sessions
+  WHERE student_id = 'DEINE-UUID'
+  ORDER BY started_at DESC
+  LIMIT 1;
+  ```
+- [ ] **Erwartetes Ergebnis:**
+  - `session_type = 'vocabulary'`
+  - `duration_seconds > 0`
+  - `cards_reviewed >= 3`
+  - `completed = true`
+
+**Status Test 2.1:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 2.2: Desktop - Due Cards Dialog (Dedizierter Dialog)
+- [ ] **Dashboard öffnen:** `http://localhost:3000/dashboard`
+- [ ] **Button klicken:** "7. Due Cards"
+- [ ] **Browser Console prüfen:**
+  ```
+  📊 Session started: [UUID]
+  ```
+- [ ] **Dialog-Inhalt prüfen:**
+  - [ ] Lädt nur fällige Karten (nicht alle Vokabeln)
+  - [ ] Zeigt "X cards due today" oder "All caught up!"
+  - [ ] Hat 4 Rating-Buttons (Again/Hard/Good/Easy)
+- [ ] **Mindestens 5 Karten bewerten**
+- [ ] **Session Complete Screen:**
+  - [ ] Zeigt Statistiken (Cards reviewed, Accuracy, etc.)
+  - [ ] "Done" Button vorhanden
+- [ ] **Console prüfen:**
+  ```
+  📊 Session completed: X minutes
+  ```
+- [ ] **Datenbank prüfen:**
+  ```sql
+  SELECT * FROM learning_sessions WHERE student_id = 'DEINE-UUID' AND session_type = 'vocabulary' ORDER BY started_at DESC LIMIT 1;
+  ```
+
+**Status Test 2.2:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 2.3: Desktop - Weak Words Dialog
+- [ ] **Dashboard öffnen:** `http://localhost:3000/dashboard`
+- [ ] **Button klicken:** "5. Train Weak"
+- [ ] **Console prüfen:** Session started
+- [ ] **Dialog-Inhalt prüfen:**
+  - [ ] Lädt nur schwierige Wörter (Difficulty > 6.5)
+  - [ ] Zeigt "X weak words" oder "No weak words found"
+  - [ ] Identisches UI wie Due Cards Dialog
+- [ ] **Mindestens 3 Karten bewerten**
+- [ ] **Dialog schließen**
+- [ ] **Console prüfen:** Session ended
+- [ ] **Datenbank prüfen:** Session mit `session_type = 'vocabulary'` vorhanden
+
+**Status Test 2.3:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 2.4: Desktop - Daily Phrases Dialog
+- [ ] **Dashboard öffnen**
+- [ ] **Button klicken:** "3. Daily Phrases"
+- [ ] **Console prüfen:** Session started
+- [ ] **Dialog-Inhalt prüfen:**
+  - [ ] Lädt Daily Phrases aus DB (`daily_phrases` Tabelle)
+  - [ ] Zeigt griechische Phrasen mit Übersetzungen
+  - [ ] TTS Audio funktioniert
+- [ ] **Mindestens 3 Phrasen bewerten**
+- [ ] **Dialog komplett durcharbeiten**
+- [ ] **Console prüfen:** Session completed
+- [ ] **Datenbank prüfen:** Session vorhanden
+
+**Status Test 2.4:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 2.5: Desktop - Grammar Dialog
+- [ ] **Dashboard öffnen**
+- [ ] **Button klicken:** "8. Grammar Hits"
+- [ ] **Console prüfen:** Session started
+- [ ] **Dialog testen:** Mindestens 3 Grammar Rules bewerten
+- [ ] **Dialog schließen**
+- [ ] **Console prüfen:** Session ended
+- [ ] **Datenbank prüfen:** Session vorhanden
+
+**Status Test 2.5:** ⬜ | 🟡 | ✅ | ❌
+
+**Status Phase 2:** ⬜ | 🟡 | ✅ | ❌
+
+---
+
+### Phase 3: Mobile Version Testing 📱
+
+#### Test 3.1: Mobile Dashboard (Emulation)
+- [ ] **Browser DevTools öffnen** (F12)
+- [ ] **Toggle Device Toolbar** (Ctrl+Shift+M / Cmd+Shift+M)
+- [ ] **Device auswählen:** iPhone 12 Pro oder ähnlich
+- [ ] **URL öffnen:** `http://localhost:3000/m`
+- [ ] **Login**
+- [ ] **UI prüfen:**
+  - [ ] 2x6 Grid Layout (12 Module)
+  - [ ] Compact Stats Header (Streak, Due Count, Level)
+  - [ ] Bottom Navigation sichtbar
+  - [ ] Module-Tiles touchable (min 48px height)
+
+**Status Test 3.1:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 3.2: Mobile - Due Cards Module
+- [ ] **Mobile Dashboard:** `/m`
+- [ ] **Tile klicken:** "Due Cards"
+- [ ] **Console prüfen:** Session started
+- [ ] **Dialog testen:**
+  - [ ] Lädt fällige Karten
+  - [ ] Touch-optimierte Buttons
+  - [ ] Swipe gestures funktionieren (optional)
+- [ ] **Mindestens 5 Karten bewerten**
+- [ ] **Session Complete**
+- [ ] **Console prüfen:** Session completed
+
+**Status Test 3.2:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 3.3: Mobile - Weak Words Module
+- [ ] **Mobile Dashboard**
+- [ ] **Tile klicken:** "Weak Words"
+- [ ] **Dialog testen** (analog zu Desktop)
+- [ ] **Session prüfen**
+
+**Status Test 3.3:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 3.4: Mobile - Daily Phrases
+- [ ] **Mobile Dashboard**
+- [ ] **Tile klicken:** "Daily Phrases"
+- [ ] **Dialog testen**
+- [ ] **TTS Audio funktioniert**
+- [ ] **Session prüfen**
+
+**Status Test 3.4:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 3.5: Mobile - Grammar
+- [ ] **Mobile Dashboard**
+- [ ] **Tile klicken:** "Grammar"
+- [ ] **Dialog testen**
+- [ ] **Session prüfen**
+
+**Status Test 3.5:** ⬜ | 🟡 | ✅ | ❌
+
+**Status Phase 3:** ⬜ | 🟡 | ✅ | ❌
+
+---
+
+### Phase 4: Session Statistics & Analytics 📊
+
+#### Test 4.1: Session Stats RPC Function
+- [ ] **Supabase SQL Editor**
+- [ ] **Query ausführen:**
+  ```sql
+  SELECT * FROM get_session_stats('DEINE-UUID', 7);
+  ```
+- [ ] **Erwartetes Ergebnis:**
+  - `total_sessions >= 5` (aus vorherigen Tests)
+  - `total_time_minutes > 0`
+  - `avg_session_minutes > 0`
+  - `total_cards_reviewed > 10`
+  - `accuracy_percentage` zwischen 0-100
+
+**Status Test 4.1:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 4.2: Recent Sessions abfragen
+- [ ] **Query ausführen:**
+  ```sql
+  SELECT * FROM get_recent_sessions('DEINE-UUID', 10);
+  ```
+- [ ] **Erwartetes Ergebnis:** Liste der letzten 10 Sessions mit:
+  - `session_type`
+  - `duration_minutes`
+  - `cards_reviewed`
+  - `accuracy_percentage`
+
+**Status Test 4.2:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 4.3: Stats Dashboard Integration
+- [ ] **URL öffnen:** `http://localhost:3000/m/stats` (Mobile Stats)
+- [ ] **Stats prüfen:**
+  - [ ] Total Sessions angezeigt
+  - [ ] Study Time angezeigt
+  - [ ] Average Session Time angezeigt
+  - [ ] Weekly Activity Chart zeigt Daten
+- [ ] **DevTools Console:** Keine Fehler
+
+**Status Test 4.3:** ⬜ | 🟡 | ✅ | ❌
+
+**Status Phase 4:** ⬜ | 🟡 | ✅ | ❌
+
+---
+
+### Phase 5: Responsive Design Testing 📱💻
+
+#### Test 5.1: Device Detection Hook
+- [ ] **Browser Console:** `localStorage.clear()` (Cache leeren)
+- [ ] **Desktop-Modus:** Browser auf normale Größe (> 1024px)
+- [ ] **DevTools Console:**
+  ```javascript
+  // In Browser Console ausführen:
+  console.log(window.innerWidth);
+  ```
+- [ ] **Dashboard öffnen:** `/dashboard`
+- [ ] **Console prüfen:** Device detection logs (falls vorhanden)
+
+**Status Test 5.1:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 5.2: Tablet-Ansicht (768-1024px)
+- [ ] **DevTools Device Toolbar:** iPad Air auswählen
+- [ ] **Dashboard öffnen**
+- [ ] **Layout prüfen:**
+  - [ ] Header kompakt
+  - [ ] Quick Actions Grid: 3 Spalten
+  - [ ] Mastery Box responsive
+  - [ ] Keine horizontalen Scrollbars
+
+**Status Test 5.2:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 5.3: Mobile-Ansicht (< 768px)
+- [ ] **DevTools Device Toolbar:** iPhone 12 Pro
+- [ ] **Dashboard öffnen:** `/dashboard`
+- [ ] **Layout prüfen:**
+  - [ ] Header: DateTime ausgeblendet
+  - [ ] Stats: Kompakte Darstellung
+  - [ ] Quick Actions: 2-Spalten Grid
+  - [ ] Touch-Targets >= 44x44px
+  - [ ] Keine Overflow-Issues
+
+**Status Test 5.3:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 5.4: Mobile Dashboard Optimierung
+- [ ] **URL:** `/m` (Mobile-optimiert)
+- [ ] **DevTools:** iPhone SE (375px) - kleinster Screen
+- [ ] **UI prüfen:**
+  - [ ] 2x6 Grid lesbar
+  - [ ] Text nicht abgeschnitten
+  - [ ] Buttons klickbar
+  - [ ] Keine horizontale Scrollbar
+
+**Status Test 5.4:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 5.5: Orientation Change (Landscape)
+- [ ] **Device Toolbar:** iPhone im Landscape Mode
+- [ ] **Dashboard öffnen**
+- [ ] **Layout prüft sich automatisch an:** Ja/Nein
+- [ ] **Dialoge funktionieren:** Ja/Nein
+
+**Status Test 5.5:** ⬜ | 🟡 | ✅ | ❌
+
+**Status Phase 5:** ⬜ | 🟡 | ✅ | ❌
+
+---
+
+### Phase 6: Edge Cases & Error Handling 🔧
+
+#### Test 6.1: Offline Session Tracking
+- [ ] **Dashboard öffnen**
+- [ ] **DevTools → Network Tab → Offline aktivieren**
+- [ ] **Dialog öffnen:** Due Cards
+- [ ] **Console prüfen:** Warning "You are offline"
+- [ ] **Karten bewerten:** Sollte trotzdem funktionieren (Client-side)
+- [ ] **Dialog schließen**
+- [ ] **Network wieder Online**
+- [ ] **Erwartung:** Session wird NICHT in DB gespeichert (OK, weil offline)
+
+**Status Test 6.1:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 6.2: Empty State - No Due Cards
+- [ ] **Supabase SQL Editor:**
+  ```sql
+  -- Temporär alle Due Dates in die Zukunft setzen
+  UPDATE student_progress
+  SET next_review = NOW() + INTERVAL '1 day'
+  WHERE student_id = 'DEINE-UUID';
+  ```
+- [ ] **Dashboard → "7. Due Cards"**
+- [ ] **Erwartete Anzeige:**
+  - "🎉 All caught up!"
+  - "No cards are due for review right now"
+- [ ] **Zurücksetzen:**
+  ```sql
+  UPDATE student_progress
+  SET next_review = NOW() - INTERVAL '1 hour'
+  WHERE student_id = 'DEINE-UUID'
+  LIMIT 10;
+  ```
+
+**Status Test 6.2:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 6.3: Session Timeout (Long Session)
+- [ ] **Dialog öffnen:** Due Cards
+- [ ] **Console:** Session started (UUID notieren)
+- [ ] **10 Minuten warten** (oder nur 2 Min für Quick Test)
+- [ ] **Karten bewerten**
+- [ ] **Dialog schließen**
+- [ ] **Datenbank prüfen:**
+  ```sql
+  SELECT duration_seconds / 60 AS duration_minutes
+  FROM learning_sessions
+  WHERE id = 'SESSION-UUID';
+  ```
+- [ ] **Erwartung:** Duration ~10 Minuten (oder 2 Min)
+
+**Status Test 6.3:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 6.4: Multiple Dialogs (Session Isolation)
+- [ ] **Dialog 1 öffnen:** Due Cards
+- [ ] **Console:** Session 1 started
+- [ ] **Dialog 1 schließen** (ohne zu beenden)
+- [ ] **Dialog 2 öffnen:** Weak Words
+- [ ] **Console:** Session 2 started
+- [ ] **Erwartung:** Zwei separate Sessions in DB
+- [ ] **Datenbank prüfen:**
+  ```sql
+  SELECT id, session_type, started_at
+  FROM learning_sessions
+  WHERE student_id = 'DEINE-UUID'
+  ORDER BY started_at DESC
+  LIMIT 2;
+  ```
+
+**Status Test 6.4:** ⬜ | 🟡 | ✅ | ❌
+
+**Status Phase 6:** ⬜ | 🟡 | ✅ | ❌
+
+---
+
+### Phase 7: Performance & Cleanup 🚀
+
+#### Test 7.1: Session Query Performance
+- [ ] **Supabase SQL Editor:**
+  ```sql
+  EXPLAIN ANALYZE
+  SELECT * FROM get_recent_sessions('DEINE-UUID', 10);
+  ```
+- [ ] **Execution Time:** < 100ms erwartet
+- [ ] **Index Usage:** `idx_learning_sessions_student_started` verwendet
+
+**Status Test 7.1:** ⬜ | 🟡 | ✅ | ❌
+
+#### Test 7.2: Test-Sessions löschen
+- [ ] **Alle Test-Sessions löschen:**
+  ```sql
+  DELETE FROM learning_sessions
+  WHERE student_id = 'DEINE-UUID'
+  AND started_at > NOW() - INTERVAL '1 hour';
+  ```
+- [ ] **Verifizieren:**
+  ```sql
+  SELECT COUNT(*) FROM learning_sessions WHERE student_id = 'DEINE-UUID';
+  ```
+
+**Status Test 7.2:** ⬜ | 🟡 | ✅ | ❌
+
+**Status Phase 7:** ⬜ | 🟡 | ✅ | ❌
+
+---
+
+## 📊 TEST SUMMARY
+
+**Gesamt-Fortschritt:** ⬜⬜⬜⬜⬜⬜⬜ 0/7 Phasen
+
+| Phase | Status | Tests | Fehler | Notizen |
+|-------|--------|-------|--------|---------|
+| Phase 1: Backend | ⬜ | 0/4 | - | |
+| Phase 2: Frontend Desktop | ⬜ | 0/5 | - | |
+| Phase 3: Frontend Mobile | ⬜ | 0/5 | - | |
+| Phase 4: Analytics | ⬜ | 0/3 | - | |
+| Phase 5: Responsive | ⬜ | 0/5 | - | |
+| Phase 6: Edge Cases | ⬜ | 0/4 | - | |
+| Phase 7: Performance | ⬜ | 0/2 | - | |
+
+**Gefundene Bugs:** (Hier eintragen während Testing)
+- [ ] Bug 1: _______________________________________
+- [ ] Bug 2: _______________________________________
+- [ ] Bug 3: _______________________________________
+
+**Offene Fragen:** (Während Testing notieren)
+- [ ] Frage 1: _____________________________________
+- [ ] Frage 2: _____________________________________
+
+---
+
+## 🎯 Nächste Schritte nach Testing
+
+Nach erfolgreichem Abschluss aller Tests:
+
+1. **Commit erstellen:**
+   ```bash
+   git add .
+   git commit -m "feat: session tracking + desktop module integration
+
+   - Implement session time tracking (Migration 059)
+   - Add DueCardsDialog and WeakWordsDialog to desktop
+   - Update responsive design with device detection
+   - Add comprehensive testing checklist
+
+   Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+   ```
+
+2. **Documentation aktualisieren:**
+   - [ ] README.md mit neuen Features updaten
+   - [ ] API-Dokumentation erweitern
+   - [ ] User Guide für Session Tracking
+
+3. **Deployment vorbereiten:**
+   - [ ] Production-Migration 059 planen
+   - [ ] Monitoring für Sessions einrichten
+   - [ ] Backup-Strategie für learning_sessions Tabelle
 
 ---
 

@@ -282,18 +282,26 @@ export default function LoginPage() {
                         syncLocaleFromUser(userData.preferred_locale);
                     }
 
-                    // Prüfe ob MFA aktiviert ist
-                    const { data: mfaData, error: mfaError } = await supabase.rpc('get_admin_mfa_secret', {
-                        p_user_id: userData.user_id
-                    });
+                    // Prüfe ob MFA aktiviert ist (optional - requires Migration 008)
+                    try {
+                        const { data: mfaData, error: mfaError } = await supabase.rpc('get_admin_mfa_secret', {
+                            p_user_id: userData.user_id
+                        });
 
-                    if (!mfaError && mfaData && mfaData.mfa_enabled) {
-                        // MFA ist aktiviert → zeige Verify-Dialog
-                        setMfaUserId(userData.user_id);
-                        setMfaSecret(mfaData.mfa_secret);
-                        setShowMFAVerify(true);
-                        setIsSubmitting(false);
-                        return; // Nicht zum Dashboard weiterleiten
+                        if (mfaError) {
+                            // MFA-Funktion nicht verfügbar (Migration 008 nicht ausgeführt)
+                            console.warn('MFA feature not available (Migration 008 not executed):', mfaError.message);
+                        } else if (mfaData && mfaData.mfa_enabled) {
+                            // MFA ist aktiviert → zeige Verify-Dialog
+                            setMfaUserId(userData.user_id);
+                            setMfaSecret(mfaData.mfa_secret);
+                            setShowMFAVerify(true);
+                            setIsSubmitting(false);
+                            return; // Nicht zum Dashboard weiterleiten
+                        }
+                    } catch (mfaErr) {
+                        // MFA-Check fehlgeschlagen → Silent fail, continue without MFA
+                        console.warn('MFA check failed, continuing without 2FA:', mfaErr);
                     }
                 }
             } catch (err) {
