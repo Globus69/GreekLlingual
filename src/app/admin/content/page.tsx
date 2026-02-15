@@ -300,7 +300,7 @@ export default function ContentPage() {
                         style={inputStyle}
                     />
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '10px' }}>
+                    <div style={filterGridStyle}>
                         <select
                             value={typeFilter}
                             onChange={(e) => { setTypeFilter(e.target.value); setPage(0); }}
@@ -614,6 +614,13 @@ const filterCard: CSSProperties = {
     marginBottom: '16px',
 };
 
+const filterGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gap: '8px',
+    marginTop: '10px',
+};
+
 const contentCard: CSSProperties = {
     background: 'rgba(255,255,255,0.06)',
     borderRadius: '16px',
@@ -630,6 +637,7 @@ const inputStyle: CSSProperties = {
     color: '#fff',
     fontSize: '13px',
     outline: 'none',
+    boxSizing: 'border-box',
 };
 
 const selectStyle: CSSProperties = {
@@ -642,6 +650,7 @@ const selectStyle: CSSProperties = {
     fontSize: '12px',
     outline: 'none',
     cursor: 'pointer',
+    boxSizing: 'border-box',
 };
 
 const listContainer: CSSProperties = {

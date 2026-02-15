@@ -47,8 +47,8 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div className="user-profile">
-                    <div className="avatar">{studentName ? studentName.substring(0, 2).toUpperCase() : 'SW'}</div>
-                    <span className="username">{studentName || 'SWS'}</span>
+                    <div className="avatar">{studentName ? studentName.substring(0, 2).toUpperCase() : 'GU'}</div>
+                    <span className="username">{studentName || 'Guest'}</span>
                 </div>
 
                 {/* Flaggen-Anzeige: Klick rotiert durch 3 Sprachen (EN → RU → EL → EN) */}

@@ -126,7 +126,7 @@ export default function DashboardPage() {
 
     return (
         <div id="app" className="dashboard-layout">
-            <DashboardHeader />
+            <DashboardHeader studentName={user?.name} />
             <main className="dashboard-content">
                 <div className="hero-section" style={{ height: 'auto', flex: '0 0 auto' }}>
                     <StatsCard />
