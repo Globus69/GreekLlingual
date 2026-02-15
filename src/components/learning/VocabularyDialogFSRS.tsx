@@ -304,7 +304,7 @@ export default function VocabularyDialogFSRS({ isOpen, onClose, mode = 'due' }: 
             reps: item.fsrs_reps,
             lapses: item.fsrs_lapses,
             state: item.fsrs_state,
-            lastReview: item.fsrs_last_review ? new Date(item.fsrs_last_review) : undefined,
+            lastReview: item.fsrs_last_review ? new Date(item.fsrs_last_review) : null,
         };
 
         // Calculate new FSRS parameters
