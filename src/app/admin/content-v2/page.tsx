@@ -15,7 +15,7 @@ import {
     updateContent,
     deleteContent,
     bulkDeleteContent,
-    bulkImportContent,
+    bulkImport,
 } from '@/lib/supabase/content';
 import { toast } from 'sonner';
 import { Plus, ArrowLeft } from 'lucide-react';
@@ -141,13 +141,13 @@ export default function ContentV2Page() {
     };
 
     const handleImport = async (importItems: any[]) => {
-        const result = await bulkImportContent(importItems);
+        const result = await bulkImport(importItems);
         if (result.success > 0) {
             toast.success(`Successfully imported ${result.success} items!`);
             await loadContent();
         }
-        if (result.failed > 0) {
-            toast.error(`Failed to import ${result.failed} items`);
+        if (result.errors.length > 0) {
+            toast.error(`Failed to import ${result.errors.length} items: ${result.errors.join(', ')}`);
         }
         return result;
     };

@@ -1,343 +1,162 @@
-/**
- * Supabase API Functions for Content Management
- * CRUD operations + Import/Export helpers
- */
+import { supabase } from './client';
+import { Content, ContentInsert, ContentUpdate } from '../../types/content';
+import { toast } from 'sonner';
+import Papa from 'papaparse';
 
-import { supabase } from '@/db/supabase';
-import type {
-    Content,
-    ContentFormData,
-    ContentFilters,
-    BulkImportResult,
-    ImportPreviewRow,
-} from '@/types/content';
-
-const TABLE_NAME = 'learning_items';
-
-/**
- * Fetch all content with optional filters
- */
-export async function fetchContent(
-    filters?: ContentFilters,
-    page = 1,
-    pageSize = 50
-): Promise<{ data: Content[]; count: number; error: Error | null }> {
-    try {
-        let query = supabase.from(TABLE_NAME).select('*', { count: 'exact' });
-
-        // Apply filters
-        if (filters?.search) {
-            query = query.or(
-                `english.ilike.%${filters.search}%,greek.ilike.%${filters.search}%`
-            );
-        }
-        if (filters?.type && filters.type !== 'all') {
-            query = query.eq('type', filters.type);
-        }
-        if (filters?.level && filters.level !== 'all') {
-            query = query.eq('level', filters.level);
-        }
-        if (filters?.difficulty && filters.difficulty !== 'all') {
-            query = query.eq('difficulty', filters.difficulty);
-        }
-
-        // Pagination
-        const from = (page - 1) * pageSize;
-        const to = from + pageSize - 1;
-        query = query.range(from, to).order('created_at', { ascending: false });
-
-        const { data, error, count } = await query;
-
-        if (error) throw error;
-
-        return { data: data || [], count: count || 0, error: null };
-    } catch (error) {
-        console.error('Error fetching content:', error);
-        return { data: [], count: 0, error: error as Error };
-    }
+interface FilterParams {
+    search?: string;
+    type?: string;
+    level?: string[];
+    difficulty?: string[];
+    page?: number;
+    pageSize?: number;
 }
 
-/**
- * Fetch single content item by ID
- */
-export async function fetchContentById(
-    id: string
-): Promise<{ data: Content | null; error: Error | null }> {
-    try {
-        const { data, error } = await supabase
-            .from(TABLE_NAME)
-            .select('*')
-            .eq('id', id)
-            .single();
+export async function fetchContent(params: FilterParams): Promise<{ data: Content[]; count: number }> {
+    let query = supabase.from('content').select('*', { count: 'exact' });
 
-        if (error) throw error;
-
-        return { data, error: null };
-    } catch (error) {
-        console.error('Error fetching content by ID:', error);
-        return { data: null, error: error as Error };
+    if (params.search) {
+        query = query.or(`english.ilike.%${params.search}%,greek.ilike.%${params.search}%`);
     }
+    if (params.type) {
+        query = query.eq('type', params.type);
+    }
+    if (params.level && params.level.length > 0) {
+        query = query.in('level', params.level);
+    }
+    if (params.difficulty && params.difficulty.length > 0) {
+        query = query.in('difficulty', params.difficulty);
+    }
+
+    if (params.page !== undefined && params.pageSize) {
+        const from = params.page * params.pageSize;
+        const to = from + params.pageSize - 1;
+        query = query.range(from, to);
+    }
+
+    query = query.order('created_at', { ascending: false });
+
+    const { data, error, count } = await query;
+
+    if (error) {
+        toast.error('Fehler beim Laden der Inhalte: ' + error.message);
+        return { data: [], count: 0 };
+    }
+
+    return { data: data as Content[], count: count || 0 };
 }
 
-/**
- * Create new content item
- */
-export async function createContent(
-    formData: ContentFormData
-): Promise<{ data: Content | null; error: Error | null }> {
-    try {
-        const { data, error } = await supabase
-            .from(TABLE_NAME)
-            .insert([formData])
-            .select()
-            .single();
+export async function createContent(item: ContentInsert): Promise<Content | null> {
+    const { data, error } = await supabase.from('content').insert(item).select().single();
 
-        if (error) throw error;
-
-        return { data, error: null };
-    } catch (error) {
-        console.error('Error creating content:', error);
-        return { data: null, error: error as Error };
+    if (error) {
+        toast.error('Fehler beim Erstellen: ' + error.message);
+        return null;
     }
+
+    return data as Content;
 }
 
-/**
- * Update existing content item
- */
-export async function updateContent(
-    id: string,
-    formData: ContentFormData
-): Promise<{ data: Content | null; error: Error | null }> {
-    try {
-        const { data, error } = await supabase
-            .from(TABLE_NAME)
-            .update(formData)
-            .eq('id', id)
-            .select()
-            .single();
+export async function updateContent(id: string, updates: ContentUpdate): Promise<Content | null> {
+    const { data, error } = await supabase.from('content').update(updates).eq('id', id).select().single();
 
-        if (error) throw error;
-
-        return { data, error: null };
-    } catch (error) {
-        console.error('Error updating content:', error);
-        return { data: null, error: error as Error };
+    if (error) {
+        toast.error('Fehler beim Aktualisieren: ' + error.message);
+        return null;
     }
+
+    return data as Content;
 }
 
-/**
- * Delete single content item
- */
-export async function deleteContent(
-    id: string
-): Promise<{ error: Error | null }> {
-    try {
-        const { error } = await supabase.from(TABLE_NAME).delete().eq('id', id);
+export async function deleteContent(id: string): Promise<boolean> {
+    const { error } = await supabase.from('content').delete().eq('id', id);
 
-        if (error) throw error;
-
-        return { error: null };
-    } catch (error) {
-        console.error('Error deleting content:', error);
-        return { error: error as Error };
+    if (error) {
+        toast.error('Fehler beim Löschen: ' + error.message);
+        return false;
     }
+
+    return true;
 }
 
-/**
- * Bulk delete content items
- */
-export async function bulkDeleteContent(
-    ids: string[]
-): Promise<{ error: Error | null }> {
-    try {
-        const { error } = await supabase.from(TABLE_NAME).delete().in('id', ids);
+export async function bulkDeleteContent(ids: string[]): Promise<boolean> {
+    const { error } = await supabase.from('content').delete().in('id', ids);
 
-        if (error) throw error;
-
-        return { error: null };
-    } catch (error) {
-        console.error('Error bulk deleting content:', error);
-        return { error: error as Error };
+    if (error) {
+        toast.error('Fehler beim Bulk-Löschen: ' + error.message);
+        return false;
     }
+
+    return true;
 }
 
-/**
- * Bulk import content items
- */
-export async function bulkImportContent(
-    items: ContentFormData[]
-): Promise<BulkImportResult> {
-    const result: BulkImportResult = {
-        success: 0,
-        failed: 0,
-        errors: [],
-    };
+export function generateCSV(data: Content[]): string {
+    return Papa.unparse(data, {
+        header: true,
+        columns: ['id', 'type', 'english', 'greek', 'level', 'difficulty', 'phonetic', 'example_en', 'example_gr', 'audio_url', 'created_at', 'updated_at'],
+    });
+}
 
-    try {
-        const { data, error } = await supabase
-            .from(TABLE_NAME)
-            .insert(items)
-            .select();
+export async function importFromCSV(file: File): Promise<{ validItems: ContentInsert[]; invalidItems: { row: number; errors: string[] }[] }> {
+    return new Promise((resolve) => {
+        Papa.parse(file, {
+            header: true,
+            complete: (results) => {
+                const validItems: ContentInsert[] = [];
+                const invalidItems: { row: number; errors: string[] }[] = [];
+                const requiredFields = ['type', 'english', 'greek', 'level', 'difficulty'];
 
-        if (error) throw error;
+                results.data.forEach((row: any, index: number) => {
+                    const errors: string[] = [];
+                    requiredFields.forEach((field) => {
+                        if (!row[field]) errors.push(`${field} fehlt`);
+                    });
 
-        result.success = data?.length || 0;
-    } catch (error) {
-        console.error('Error bulk importing content:', error);
-        result.failed = items.length;
-        result.errors.push({
-            row: 0,
-            message: (error as Error).message,
+                    if (row.type && !['vocabulary', 'phrase', 'grammar'].includes(row.type)) {
+                        errors.push('Ungültiger type');
+                    }
+                    if (row.level && !['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].includes(row.level)) {
+                        errors.push('Ungültiger level');
+                    }
+                    if (row.difficulty && !['easy', 'medium', 'hard'].includes(row.difficulty)) {
+                        errors.push('Ungültige difficulty');
+                    }
+
+                    if (errors.length === 0) {
+                        validItems.push({
+                            type: row.type,
+                            english: row.english,
+                            greek: row.greek,
+                            level: row.level,
+                            difficulty: row.difficulty,
+                            phonetic: row.phonetic || undefined,
+                            example_en: row.example_en || undefined,
+                            example_gr: row.example_gr || undefined,
+                            audio_url: row.audio_url || undefined,
+                        });
+                    } else {
+                        invalidItems.push({ row: index + 1, errors });
+                    }
+                });
+
+                resolve({ validItems, invalidItems });
+            },
         });
-    }
-
-    return result;
+    });
 }
 
-/**
- * Export all content as CSV
- */
-export async function exportContentAsCSV(
-    filters?: ContentFilters
-): Promise<{ csv: string; error: Error | null }> {
-    try {
-        const { data, error } = await fetchContent(filters, 1, 10000);
+export async function bulkImport(items: ContentInsert[]): Promise<{ success: number; errors: string[] }> {
+    const { data, error } = await supabase.from('content').insert(items).select();
 
-        if (error) throw error;
-
-        // CSV Headers
-        const headers = [
-            'type',
-            'english',
-            'greek',
-            'level',
-            'difficulty',
-            'phonetic',
-            'example_en',
-            'example_gr',
-            'audio_url',
-        ];
-
-        // CSV Rows
-        const rows = data.map((item) =>
-            [
-                item.type,
-                `"${item.english.replace(/"/g, '""')}"`,
-                `"${item.greek.replace(/"/g, '""')}"`,
-                item.level,
-                item.difficulty,
-                item.phonetic || '',
-                item.example_en ? `"${item.example_en.replace(/"/g, '""')}"` : '',
-                item.example_gr ? `"${item.example_gr.replace(/"/g, '""')}"` : '',
-                item.audio_url || '',
-            ].join(',')
-        );
-
-        const csv = [headers.join(','), ...rows].join('\n');
-
-        return { csv, error: null };
-    } catch (error) {
-        console.error('Error exporting content as CSV:', error);
-        return { csv: '', error: error as Error };
+    if (error) {
+        return { success: 0, errors: [error.message] };
     }
+
+    return { success: data?.length || 0, errors: [] };
 }
 
-/**
- * Generate CSV template
- */
-export function generateCSVTemplate(): string {
-    const headers = [
-        'type',
-        'english',
-        'greek',
-        'level',
-        'difficulty',
-        'phonetic',
-        'example_en',
-        'example_gr',
-        'audio_url',
-    ];
-
-    const exampleRow = [
-        'vocabulary',
-        '"Hello"',
-        '"Γεια σου"',
-        'A1',
-        'easy',
-        '"YAH soo"',
-        '"Hello, how are you?"',
-        '"Γεια σου, τι κάνεις;"',
-        '',
-    ];
-
-    return [headers.join(','), exampleRow.join(',')].join('\n');
-}
-
-/**
- * Validate import row
- */
-export function validateImportRow(
-    row: any,
-    rowIndex: number
-): ImportPreviewRow {
-    const errors: string[] = [];
-
-    // Required fields
-    if (!row.type || !['vocabulary', 'phrase', 'grammar'].includes(row.type)) {
-        errors.push('Invalid or missing type');
-    }
-    if (!row.english || row.english.trim() === '') {
-        errors.push('English text is required');
-    }
-    if (!row.greek || row.greek.trim() === '') {
-        errors.push('Greek text is required');
-    }
-    if (!row.level || !['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].includes(row.level)) {
-        errors.push('Invalid or missing level');
-    }
-    if (
-        !row.difficulty ||
-        !['easy', 'medium', 'hard'].includes(row.difficulty)
-    ) {
-        errors.push('Invalid or missing difficulty');
-    }
-
-    return {
-        _rowIndex: rowIndex,
-        _errors: errors,
-        _isValid: errors.length === 0,
-        type: row.type,
-        english: row.english,
-        greek: row.greek,
-        level: row.level,
-        difficulty: row.difficulty,
-        phonetic: row.phonetic,
-        example_en: row.example_en,
-        example_gr: row.example_gr,
-        audio_url: row.audio_url,
-    };
-}
-
-/**
- * Parse CSV file
- */
-export function parseCSV(csvText: string): ImportPreviewRow[] {
-    const lines = csvText.split('\n').filter((line) => line.trim() !== '');
-    if (lines.length < 2) return [];
-
-    const headers = lines[0].split(',').map((h) => h.trim().replace(/"/g, ''));
-    const rows: ImportPreviewRow[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map((v) => v.trim().replace(/"/g, ''));
-        const row: any = {};
-
-        headers.forEach((header, index) => {
-            row[header] = values[index] || '';
-        });
-
-        rows.push(validateImportRow(row, i));
-    }
-
-    return rows;
+export function generateTemplateCSV(): string {
+    const headers = ['type', 'english', 'greek', 'level', 'difficulty', 'phonetic', 'example_en', 'example_gr', 'audio_url'];
+    const exampleRow = ['vocabulary', 'Hello', 'Γεια', 'A1', 'easy', 'he-lo', 'Hello, how are you?', 'Γεια, πώς είσαι;', 'https://audio.example.com/hello.mp3'];
+    return Papa.unparse([exampleRow], { header: true, columns: headers });
 }

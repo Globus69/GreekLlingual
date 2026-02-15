@@ -12,7 +12,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import type { ImportPreviewRow, BulkImportResult } from '@/types/content';
-import { parseCSV, generateCSVTemplate, exportContentAsCSV } from '@/lib/supabase/content';
+import { importFromCSV, generateTemplateCSV, generateCSV, fetchContent } from '@/lib/supabase/content';
 import { Download, Upload, FileText, Loader2, AlertCircle } from 'lucide-react';
 import type { ContentFilters } from '@/types/content';
 

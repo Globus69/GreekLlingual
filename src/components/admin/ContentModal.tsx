@@ -1,4 +1,4 @@
-// components/admin/content-modal.tsx – zentrierter Glass-Modal für New/Edit
+// components/admin/ContentModal.tsx – zentrierter Glass-Modal für New/Edit
 
 'use client';
 
