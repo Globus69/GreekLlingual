@@ -249,9 +249,21 @@ UPSTASH_REDIS_REST_TOKEN=...
 
 ## 📱 MOBILE DASHBOARD OPTIMIERUNG
 
-**Priorität:** 🟡 **HOCH** (User Experience Critical)
+**Priorität:** 🔴 **PRIO 1** (User Experience Critical)
 **Ziel:** Alle 12 Module ohne Scrollen sichtbar + kompakteres Design
-**Status:** ⚠️ **IN PLANUNG**
+**Status:** ⚠️ **IN PROGRESS**
+**Progress:** 2/8 Tasks completed (25%)
+
+**Quick Status:**
+- ✅ Task 0: RPC-Fehler behoben
+- ❓ Task 1: "SW, SWS" Feld (wartet auf User-Entscheidung)
+- ⏳ Task 2: Stats-Header kompakt (bereit zur Umsetzung)
+- ✅ Task 3: 12 Module definiert
+- ⏳ Task 4: Grid-Layout implementieren (bereit zur Umsetzung)
+- ⏳ Task 5: Module kompakter machen (bereit zur Umsetzung)
+- ⏳ Task 6: Welcome-Text kleiner (bereit zur Umsetzung)
+- ❓ Task 7: FAB implementieren (optional, wartet auf User-Entscheidung)
+- ⏳ Task 8: Responsiveness testen (nach Tasks 4-6)
 
 ---
 
@@ -565,7 +577,38 @@ Task 6 (Welcome-Text)
 Task 7 (FAB - optional)
 ```
 
-**Status:** ⏳ **WARTET AUF USER-FEEDBACK** (Task 1, 3, 7)
+**Status:** 🔴 **PRIO 1 - READY TO START**
+
+---
+
+### **🎯 MOBILE DASHBOARD - IMPLEMENTIERUNGS-PLAN**
+
+**Bereit zur sofortigen Umsetzung (ohne User-Input):**
+
+**Quick Wins (1h):** ⚡
+- [ ] Task 2: Stats-Header kompakt (20 Min.)
+- [ ] Task 6: Welcome-Text kleiner (15 Min.)
+- [ ] Task 5: Module kompakter (Vorbereitung, 25 Min.)
+
+**Grid-Layout (2-3h):** 🎨
+- [ ] Task 4: 2×6 Grid implementieren (2-3h)
+  - 12 Module portieren von Desktop
+  - Grid CSS schreiben
+  - Touch-Targets sicherstellen (min 44px)
+  - Responsive Breakpoints
+
+**Testing (1h):** ✅
+- [ ] Task 8: Responsiveness testen
+  - iPhone SE, 14, 14 Pro Max
+  - Pixel 8, Galaxy S24
+  - Landscape Mode
+
+**Wartet auf User-Entscheidung:** ❓
+- [ ] Task 1: "SW, SWS" Feld - Entfernen oder Icon?
+- [ ] Task 7: FAB (Floating Action Button) - Ja oder Nein?
+
+**Total Aufwand (ohne User-Tasks):** 4-5 Stunden
+**Erwartetes Ergebnis:** Komplettes Mobile Dashboard ohne Scrollen
 
 ---
 
