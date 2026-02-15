@@ -1241,6 +1241,95 @@ Alle Learning-Dialoge haben **identisches Layout und identische Funktionsweise**
 
 ---
 
+### **9. Grammar Module → VocabularyDialogFSRS Clone** 📐
+**Priorität:** 🟡 **HOCH** (UX-Konsistenz)
+**Aufwand:** 2-3 Stunden
+**Status:** ❌ **OFFEN**
+
+**Problem:**
+- Das Grammar-Modul existiert noch nicht im Mobile Dashboard
+- Sollte konsistent mit anderen Learning-Modulen sein
+- Muss gleiche Layout- und Funktionsstruktur wie VocabularyDialogFSRS haben
+
+**Ziel:**
+Grammar-Modul als **kompletter Clone von VocabularyDialogFSRS** erstellen
+
+**Template (Referenz):** VocabularyDialogFSRS (Review Vocabulary)
+- ✅ FSRS-6 Algorithm (4 Ratings: Again/Hard/Good/Easy)
+- ✅ Progress Bar oben (current/total, %)
+- ✅ Flashcard in der Mitte (Flip-Animation)
+- ✅ Rating Buttons unten (4-Button-Layout)
+- ✅ Audio Button (🔊 TTS)
+- ✅ Swipe-Gesten (Mobile: ←/→/↑/↓)
+- ✅ Glasmorphismus-Design (backdrop-blur, rgba)
+- ✅ Summary Screen nach Session
+- ✅ Stats-Tracking (Again/Hard/Good/Easy counts)
+
+**Aufgaben:**
+
+**1. Neue Komponente erstellen: GrammarDialogFSRS.tsx**
+- [ ] **Basierend auf:** VocabularyDialogFSRS (kompletter Clone)
+- [ ] **Layout:** Identisch zu VocabularyDialogFSRS
+- [ ] **Features:** Alle Features von VocabularyDialogFSRS
+- [ ] **Content-Type:** Grammar Rules statt Vocabulary
+- [ ] **Flashcard Format:**
+  - Front: Grammar Rule (EN/RU je nach Locale)
+  - Back: Greek Examples + Explanation
+- [ ] **Mock Data:** 3-5 Grammar Rules für Testing
+  - Beispiel 1: "Present Tense -ω verbs"
+  - Beispiel 2: "Accusative Case"
+  - Beispiel 3: "Past Tense"
+
+**2. Mobile Dashboard Integration**
+- [ ] Import: `import GrammarDialogFSRS from '@/components/learning/grammar-dialog-fsrs'`
+- [ ] State: `const [showGrammarDialog, setShowGrammarDialog] = useState(false)`
+- [ ] Button Handler: `onClick={() => setShowGrammarDialog(true)}`
+- [ ] Dialog Render: Conditional rendering mit isOpen/onClose
+
+**3. Einheitliche Features (wie alle Module)**
+- [ ] Identischer Progress-Bar-Style
+- [ ] Gleiche Button-Anordnung (4 Buttons horizontal)
+- [ ] Gleiche Farben (Again: #FF6B6B, Hard: #FFA94D, Good: #51CF66, Easy: #339AF0)
+- [ ] Gleiche Button-Größen und Abstände
+- [ ] Gleiche Animations (Flip, Swipe, Transitions)
+- [ ] Gleiche Swipe-Gesten (←Again, ↓Hard, ↑Good, →Easy)
+- [ ] Glasmorphismus-Design (backdrop-blur, rgba backgrounds)
+- [ ] Summary Screen nach Session
+
+**Backend (Future - Phase 5):**
+- [ ] Supabase Tabelle: `grammar_rules`
+  - Columns: id, rule_name_en, rule_name_ru, explanation_en, explanation_ru, example_gr, level, difficulty
+- [ ] RPC Function: `get_grammar_rules(p_student_id, p_level)`
+- [ ] FSRS-6 Integration: `grammar_progress` Tabelle für User-spezifische Progress
+
+**Unterschiede zu anderen Modulen:**
+- **Content:** Grammar Rules statt Vocabulary/Phrases
+- **Flashcard Back:** Kann länger sein (Explanation + Multiple Examples)
+- **Level Filter:** Optional filter by CEFR Level (A1, A2, B1, B2)
+
+**Vorteile:**
+- Konsistente UX mit anderen Learning-Modulen
+- Wiederverwendung bewährter FSRS-6 Integration
+- Spaced Repetition auch für Grammar-Regeln
+- Einheitliches Design und Verhalten
+
+**Dependencies:**
+- VocabularyDialogFSRS existiert (✅) - als Template verwenden
+- FlashcardFSRS Component existiert (✅)
+- Mobile Dashboard existiert (✅)
+
+**Aufwand:** 2-3 Stunden
+**Status:** ❌ **OFFEN**
+
+**Nächste Schritte:**
+1. GrammarDialogFSRS.tsx erstellen (Clone VocabularyDialogFSRS)
+2. Mock Grammar Data hinzufügen (3-5 Rules)
+3. In Mobile Dashboard integrieren
+4. Testen (Flip, Rating, Audio, Summary)
+5. Backend später in Phase 5
+
+---
+
 ## 🧪 TESTING & QA
 
 ### **Testing: Mobile Learning Modules** 📱
