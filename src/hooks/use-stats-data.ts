@@ -129,9 +129,9 @@ export function useStatsData(userId?: string): UseStatsDataResult {
           .eq('student_id', userId)
           .gte('correct_count', 1),
 
-        // Level (aus students Tabelle)
+        // Level (aus users Tabelle)
         supabase
-          .from('students')
+          .from('users')
           .select('level')
           .eq('id', userId)
           .single(),

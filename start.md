@@ -1,22 +1,25 @@
-# Hellenic Horizons – GreekLingua Dashboard  
-**Zentrale Einstiegsseite**  
-(letztes Update: 14. Februar 2026)
+# Hellenic Horizons – GreekLingua Dashboard
+**Zentrale Einstiegsseite**
+(letztes Update: 15. Februar 2026)
 
 Dies ist der schnellste Weg, um das Projekt zu verstehen – egal ob du nach einem Jahr wiederkommst oder Claude/Grok einen neuen Prompt gibst.
 
 ## Überblick – Wichtige Module & Bereiche
 
-- **[Daily Phrases](./modules/daily-phrases/README.md)**  
-  Tägliche Phrasen, DueCardsToday-Logik, Content-Generierung und Anzeige im Dashboard
+- **[Daily Phrases](./modules/daily-phrases/README.md)**
+  Tägliche Phrasen (3 pro Tag), eigene Due-Logik, Content-Generierung und Anzeige im Dashboard
 
-- **[Vocabulary / Vokabel-Training](./modules/vocabulary/)**  
-  (falls schon vorhanden oder geplant – später ausfüllen)
+- **[Grammar](./modules/grammar/README.md)**
+  Grammatikregeln mit FSRS-6 Spaced Repetition, TTS-Audio, Session-Tracking, Flashcard-basiertes Lernen
 
-- **[Fortschritt & Tracking](./modules/progress-tracking/)**  
-  (User-Statistiken, Streaks, Review-Intervalle …)
+- **[Vocabulary / Vokabel-Training](./modules/vocabulary/)**
+  Klassische Vokabelkarten (Einzelwörter), Anki-ähnliches SRS-System (falls schon vorhanden oder geplant)
 
-- **[Authentifizierung & User-Management](./modules/auth/)**  
-  (Login, Sessions, ggf. Supabase / Firebase-Integration)
+- **[Fortschritt & Tracking](./modules/progress-tracking/)**
+  User-Statistiken, Streaks, Review-Intervalle, Session-Tracking
+
+- **[Authentifizierung & User-Management](./modules/auth/)**
+  Login (4-Digit-PIN), Sessions, Supabase Custom Auth, Device Detection
 
 ## Wichtige zentrale Dateien
 
