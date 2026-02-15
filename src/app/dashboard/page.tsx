@@ -8,6 +8,7 @@ import StatsCard from '@/components/dashboard/StatsCard';
 import ModuleGrid from '@/components/dashboard/ModuleGrid';
 import '@/styles/liquid-glass.css';
 import VocabularyDialog from '@/components/learning/VocabularyDialog';
+import VocabularyDialogFSRS from '@/components/learning/VocabularyDialogFSRS';
 import GrammarDialog from '@/components/learning/GrammarDialog';
 import ComprehensionDialog from '@/components/learning/ComprehensionDialog';
 import ListeningDialog from '@/components/learning/ListeningDialog';
@@ -260,8 +261,8 @@ export default function DashboardPage() {
                 </div>
             </main>
 
-            {/* Vocabulary Dialog */}
-            <VocabularyDialog
+            {/* Vocabulary Dialog - NEW FSRS Version */}
+            <VocabularyDialogFSRS
                 isOpen={isVocabDialogOpen}
                 onClose={() => setIsVocabDialogOpen(false)}
                 mode={vocabDialogMode}
