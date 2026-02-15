@@ -256,7 +256,18 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
             });
 
             if (rpcError) {
-                console.error('❌ FSRS RPC error:', rpcError);
+                console.error('❌ FSRS RPC error (get_due_cards_fsrs):', {
+                    message: rpcError.message,
+                    details: rpcError.details,
+                    hint: rpcError.hint,
+                    code: rpcError.code,
+                    fullError: rpcError
+                });
+
+                if (rpcError.code === '42883' || rpcError.message?.includes('does not exist')) {
+                    console.warn('⚠️ RPC function get_due_cards_fsrs does not exist.');
+                }
+
                 setLoadError(rpcError.message || 'Failed to load cards');
                 error('Failed to load cards. Please try again.');
                 setVocabulary([]);
@@ -371,7 +382,18 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                 });
 
                 if (rpcError) {
-                    console.error('❌ Update RPC error:', rpcError);
+                    console.error('❌ Update RPC error (update_card_fsrs):', {
+                        message: rpcError.message,
+                        details: rpcError.details,
+                        hint: rpcError.hint,
+                        code: rpcError.code,
+                        fullError: rpcError
+                    });
+
+                    if (rpcError.code === '42883' || rpcError.message?.includes('does not exist')) {
+                        console.warn('⚠️ RPC function update_card_fsrs does not exist.');
+                    }
+
                     warning('Failed to save progress. Continuing anyway...');
                     // Continue anyway (optimistic update)
                 } else {
