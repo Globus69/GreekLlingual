@@ -217,6 +217,8 @@ export default function FlashcardFSRS({
                     background: rgba(28, 28, 32, 0.95);
                     border: 1px solid rgba(255, 255, 255, 0.1);
                     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+                    box-sizing: border-box;
+                    overflow: hidden;
                 }
 
                 .flashcard-back {
@@ -266,10 +268,15 @@ export default function FlashcardFSRS({
 
                 .flip-hint {
                     position: absolute;
-                    bottom: 20px;
+                    bottom: 24px;
+                    left: 50%;
+                    transform: translateX(-50%);
                     font-size: 12px;
                     color: rgba(255, 255, 255, 0.3);
                     font-weight: 500;
+                    white-space: nowrap;
+                    max-width: 90%;
+                    text-align: center;
                 }
 
                 .swipe-hint {
@@ -414,7 +421,7 @@ export default function FlashcardFSRS({
                 /* Mobile Responsive */
                 @media (max-width: 600px) {
                     .flashcard {
-                        height: 350px;
+                        height: 380px;
                     }
 
                     .main-word, .greek-word {
@@ -425,9 +432,19 @@ export default function FlashcardFSRS({
                         font-size: 16px;
                     }
 
+                    .flashcard-face {
+                        padding: 24px;
+                    }
+
+                    .flip-hint {
+                        bottom: 10px;
+                        font-size: 11px;
+                        padding: 0 10px;
+                    }
+
                     .swipe-hint {
                         font-size: 10px;
-                        bottom: 12px;
+                        bottom: 10px;
                     }
 
                     .swipe-emoji {
