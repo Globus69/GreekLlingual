@@ -22,6 +22,142 @@
 
 ## 🔴 KRITISCH (Blocker für Production)
 
+### 0. **RPC-Fehler beheben: start_learning_session 404** (30 Min.)
+**Priorität:** 🔴 **KRITISCH**
+**Aufwand:** 30 Minuten
+**Fehler:** `POST .../rpc/start_learning_session 404 (Not Found)`
+**Location:** VocabularyDialogFSRS oder ähnliche Komponenten
+
+**Problem:**
+- Supabase RPC-Funktion `start_learning_session` gibt 404
+- Typische Ursachen: Funktion existiert nicht, falsches Schema, fehlende Permissions
+
+**Systematische Fehlersuche:**
+
+**A) Funktion existiert?**
+```sql
+-- SQL im Supabase SQL Editor ausführen:
+SELECT
+  routine_name,
+  routine_schema,
+  routine_type
+FROM information_schema.routines
+WHERE routine_name LIKE '%learning_session%';
+```
+
+**B) Schema korrekt?**
+```sql
+-- Ist die Funktion im public-Schema?
+SELECT proname, pronamespace::regnamespace AS schema
+FROM pg_proc
+WHERE proname = 'start_learning_session';
+```
+
+**C) Permissions gesetzt?**
+```sql
+-- Prüfen ob anon/authenticated Role Zugriff hat
+SELECT has_function_privilege('anon', 'start_learning_session(uuid, text)', 'EXECUTE');
+SELECT has_function_privilege('authenticated', 'start_learning_session(uuid, text)', 'EXECUTE');
+```
+
+**D) Schema-Cache aktualisieren**
+```sql
+-- Supabase PostgREST Cache neu laden
+NOTIFY pgrst, 'reload schema';
+```
+
+**E) Client-Aufruf prüfen**
+```typescript
+// AKTUELL (vermutlich):
+const { data, error } = await supabase.rpc('start_learning_session', {
+  p_student_id: userId,
+  p_session_type: 'vocabulary'
+});
+
+// KORREKT (mit Fehlerbehandlung):
+const { data, error } = await supabase
+  .rpc('start_learning_session', {
+    p_student_id: userId,
+    p_session_type: 'vocabulary'
+  });
+
+if (error) {
+  console.error('RPC Error:', error);
+  // Fallback: Session-Tracking überspringen
+}
+```
+
+**F) Migration-File prüfen**
+- [ ] Datei: `database/migrations/059_add_session_tracking.sql`
+- [ ] Wurde die Migration ausgeführt?
+- [ ] Ist die Funktion korrekt definiert?
+
+**Aufgaben:**
+- [ ] **Step 1:** SQL-Checks (A, B, C) im Supabase SQL Editor ausführen
+- [ ] **Step 2:** Funktion existiert nicht? → Migration 059 ausführen
+- [ ] **Step 3:** Funktion existiert, aber falsche Permissions? → GRANT EXECUTE
+- [ ] **Step 4:** Schema-Cache aktualisieren (D)
+- [ ] **Step 5:** Client-Code prüfen und Fehlerbehandlung hinzufügen (E)
+- [ ] **Step 6:** Testen: Funktion aufrufen und 404 sollte weg sein
+
+**Fallback (wenn Migration fehlt):**
+```sql
+-- Minimale start_learning_session Funktion (Fallback)
+CREATE OR REPLACE FUNCTION public.start_learning_session(
+  p_student_id UUID,
+  p_session_type TEXT
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_session_id UUID;
+BEGIN
+  -- Session-ID generieren
+  v_session_id := gen_random_uuid();
+
+  -- Session in learning_sessions Tabelle einfügen
+  INSERT INTO public.learning_sessions (
+    id,
+    student_id,
+    session_type,
+    started_at
+  )
+  VALUES (
+    v_session_id,
+    p_student_id,
+    p_session_type,
+    NOW()
+  );
+
+  RETURN v_session_id;
+END;
+$$;
+
+-- Permissions setzen
+GRANT EXECUTE ON FUNCTION public.start_learning_session(UUID, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.start_learning_session(UUID, TEXT) TO anon;
+
+-- Schema-Cache aktualisieren
+NOTIFY pgrst, 'reload schema';
+```
+
+**Verifizierung:**
+```typescript
+// Test im Browser-Console:
+const { data, error } = await supabase.rpc('start_learning_session', {
+  p_student_id: 'YOUR_USER_ID',
+  p_session_type: 'test'
+});
+console.log('Result:', data, 'Error:', error);
+// Erwartung: data = UUID, error = null
+```
+
+**Status:** ❌ **PENDING**
+
+---
+
 ### 1. **SQL-Migrationen ausführen** (15 Min.)
 **Priorität:** 🔴 **KRITISCH**
 **Aufwand:** 15 Minuten
@@ -77,6 +213,318 @@ UPSTASH_REDIS_REST_TOKEN=...
 **Anleitung:** Siehe `active-deploy/next-steps.md` Phase 2
 
 **Status:** ❌ **PENDING**
+
+---
+
+## 📱 MOBILE DASHBOARD OPTIMIERUNG
+
+**Priorität:** 🟡 **HOCH** (User Experience Critical)
+**Ziel:** Alle 12 Module ohne Scrollen sichtbar + kompakteres Design
+**Status:** ⚠️ **IN PLANUNG**
+
+---
+
+### **Task 1: "SW, SWS" Feld analysieren & optimieren** (15 Min.)
+**Priorität:** 🟡 **MITTEL**
+**Location:** `/m/page.tsx` - Header/Welcome Section
+
+**Problem:**
+- User versteht Sinn und Nutzen nicht
+- Möglicherweise redundant (Username steht bereits in Welcome-Text)
+- Platzverschwendung auf Mobile
+
+**Aufgaben:**
+- [ ] **Option A: Komplett entfernen** (EMPFOHLEN)
+  - [ ] Username nur im "Welcome, {name}!" Text zeigen
+  - [ ] Platz für bessere Balance nutzen
+- [ ] **Option B: Durch Icon ersetzen**
+  - [ ] Nur Profilbild-Icon (👤) ohne Text
+  - [ ] Klick öffnet Profil/Settings
+- [ ] **User-Entscheidung einholen:** Welche Option bevorzugt?
+
+**Aufwand:** 15 Minuten
+**Status:** ⏳ **WARTET AUF USER-FEEDBACK**
+
+---
+
+### **Task 2: Statistik-Header ultra-kompakt machen** (20 Min.)
+**Priorität:** 🟡 **HOCH**
+**Location:** `/m/page.tsx` - Lines 80-126 (Stats Header)
+
+**Aktuell (zugeklappt):**
+```
+🔥 5    📚 42    ⭐ A2    [▼]
+```
+
+**Neu (vorgeschlagen):**
+```
+🔥 5 · 📚 42 · ⭐ A2 · 87% Retention [▼]
+```
+
+**Änderungen:**
+- [ ] Alles in **einer Zeile** mit Mittelpunkten (·)
+- [ ] **Retention %** aus Stats hinzufügen
+- [ ] **Kleinere Schrift** (12px statt 14px)
+- [ ] **Höhe reduzieren:** 44px statt 60px (-26% Platzersparnis)
+- [ ] Aufgeklappte Version behalten (für Details)
+
+**Aufwand:** 20 Minuten
+**Status:** ❌ **OFFEN**
+
+---
+
+### **Task 3: 12 Module definieren** (WARTET AUF USER)
+**Priorität:** 🟡 **HOCH**
+**Status:** ⏳ **WARTET AUF USER-FEEDBACK**
+
+**Aktuell vorhanden (7 Module):**
+1. ✅ Admin Panel (nur für teacher/admin)
+2. ✅ Due Cards Today
+3. ✅ Review Vocabulary
+4. ✅ Train Weak Words
+5. ✅ Daily Phrases
+6. ✅ 20 min Quick Lesson
+7. ✅ Test
+8. ✅ Quiz go ahead
+
+**Fehlende Module (5 Module):**
+- [ ] ❓ **Modul 9:** (User muss spezifizieren)
+- [ ] ❓ **Modul 10:** (User muss spezifizieren)
+- [ ] ❓ **Modul 11:** (User muss spezifizieren)
+- [ ] ❓ **Modul 12:** (User muss spezifizieren)
+- [ ] ❓ **Modul 13:** (User muss spezifizieren)
+
+**Aufgabe für User:**
+> Bitte liste die fehlenden 5 Module auf, dann kann ich das optimale Layout berechnen.
+
+**Mögliche Kandidaten:**
+- Grammar Lessons
+- Vocabulary Builder
+- Audio Practice
+- Conversation Practice
+- Cultural Notes
+- Level Test
+- Progress Report
+- Achievements
+- Leaderboard
+- Settings
+
+**Status:** ⏳ **WARTET AUF USER-INPUT**
+
+---
+
+### **Task 4: Grid-Layout implementieren (2×6 oder 3×4)** (2-3h)
+**Priorität:** 🟡 **HOCH**
+**Location:** `/m/page.tsx` - Lines 169-231 (Module Section)
+**Dependencies:** Task 3 (12 Module definiert)
+
+**Aktuell:**
+- Full-width Buttons (100% Breite)
+- 64px Höhe + 12px margin = 76px pro Button
+- 7 Buttons = ~532px nur für Buttons
+- **Erfordert Scrollen auf den meisten Smartphones**
+
+**Option A: 2×6 Grid (EMPFOHLEN)** ✅
+```
+[📅 Due Cards   ] [📖 Review Vocab ]
+[💪 Weak Words  ] [💬 Daily Phrases]
+[⚡ Quick Lesson] [📝 Test         ]
+[🎯 Quiz        ] [📚 Grammar      ]
+[🗣️ Conversation] [🎧 Audio        ]
+[🏆 Achievements] [⚙️ Settings     ]
+```
+- **Pro:** Balance zwischen Kompaktheit und Lesbarkeit
+- **Höhe:** 56px pro Button (statt 64px)
+- **Padding:** 8px 12px (statt 12px 16px)
+- **Icon:** 28px (statt 32px)
+- **Font:** 14px Title, 11px Subtitle (statt 16px/12px)
+- **Total:** ~670px für 12 Buttons (inkl. gaps)
+
+**Option B: 3×4 Grid (Maximale Kompaktheit)**
+```
+[📅] [📖] [💪]
+Due  Rev  Weak
+[💬] [⚡] [📝]
+Phr  Qui  Test
+... (4 Reihen)
+```
+- **Pro:** Sehr kompakt, alles sichtbar
+- **Contra:** Icons klein, Text schwer lesbar
+
+**Aufgaben:**
+- [ ] User-Entscheidung: 2×6 oder 3×4 Grid?
+- [ ] CSS Grid implementieren
+- [ ] Responsive Breakpoints definieren
+- [ ] Touch-Targets (min 44x44px) sicherstellen
+- [ ] Hover/Active States anpassen
+
+**Berechnungen (für 2×6 Grid):**
+```
+Header:           80px (kompakt nach Task 2: 64px)
+Welcome:          60px (einzeilig)
+Modules (12x56):  672px (inkl. gaps)
+Bottom Nav:       60px
+Padding:          32px
+─────────────────────
+TOTAL:           ~904px
+
+iPhone 14/15:     844px hoch → passt MIT leichtem Scrollen
+iPhone 14 Pro:    852px hoch → passt OHNE Scrollen
+Pixel 8:          873px hoch → passt OHNE Scrollen
+```
+
+**Optimierung um OHNE Scrollen zu passen:**
+- [ ] Modul-Höhe auf 48px reduzieren → Total: ~808px ✅
+- [ ] Oder: Welcome-Text kleiner (50px statt 60px)
+- [ ] Oder: Stats-Header noch kompakter (44px nach Task 2)
+
+**Aufwand:** 2-3 Stunden
+**Status:** ❌ **OFFEN** (wartet auf Task 3)
+
+---
+
+### **Task 5: Module kompakter machen** (1h)
+**Priorität:** 🟡 **HOCH**
+**Location:** `/m/page.tsx` - Lines 323-363 (ModuleTile Component)
+**Dependencies:** Task 4 (Grid-Layout)
+
+**Änderungen:**
+- [ ] **Height:** 64px → 56px (oder 48px für no-scroll)
+- [ ] **Padding:** 12px 16px → 8px 12px
+- [ ] **Icon Size:** 32px → 28px (oder 24px für 3×4)
+- [ ] **Font Size Title:** 16px → 14px
+- [ ] **Font Size Subtitle:** 12px → 11px
+- [ ] **Margin Bottom:** 12px → 8px
+- [ ] **Border Radius:** 16px → 12px (optional, für kompakteres Gefühl)
+
+**Responsive Breakpoints:**
+```typescript
+// Mobile (< 768px): Kompakt (48px Höhe)
+// Tablet (768-1024px): Medium (56px Höhe)
+// Desktop (> 1024px): Full Size (64px Höhe)
+```
+
+**Aufwand:** 1 Stunde
+**Status:** ❌ **OFFEN**
+
+---
+
+### **Task 6: Welcome-Text einzeilig optimieren** (15 Min.)
+**Priorität:** 🟢 **MITTEL**
+**Location:** `/m/page.tsx` - Lines 131-139
+
+**Aktuell:**
+```tsx
+<h1 style={{ fontSize: '28px', ... }}>
+  Welcome, {name}! 👋
+</h1>
+```
+
+**Neu (kompakter):**
+```tsx
+<h1 style={{ fontSize: '24px', ... }}>
+  Welcome, {name}! 👋
+</h1>
+```
+
+**Änderungen:**
+- [ ] **Font Size:** 28px → 24px (-14% Höhe)
+- [ ] **Margin Bottom:** 32px → 24px
+- [ ] **Höhe reduzieren:** ~80px → ~60px (-20px)
+
+**Aufwand:** 15 Minuten
+**Status:** ❌ **OFFEN**
+
+---
+
+### **Task 7: FAB (Floating Action Button) implementieren** (OPTIONAL, 1-2h)
+**Priorität:** 🟢 **NIEDRIG** (Nice-to-Have)
+**Location:** Neues Component `/components/mobile/FloatingActionButton.tsx`
+
+**Konzept:**
+- Großer runder Button rechts unten
+- Zeigt primäre Aktion: "Lernen starten" oder "Due Cards"
+- Immer sichtbar (fixed position)
+- Schneller Zugriff auf wichtigste Funktion
+
+**Design:**
+```tsx
+<button style={{
+  position: 'fixed',
+  bottom: '80px', // über Bottom Nav
+  right: '16px',
+  width: '64px',
+  height: '64px',
+  borderRadius: '50%',
+  background: 'linear-gradient(135deg, #007AFF, #0051D5)',
+  boxShadow: '0 8px 24px rgba(0, 122, 255, 0.4)',
+  ...
+}}>
+  📚
+</button>
+```
+
+**Aufgaben:**
+- [ ] User-Entscheidung: FAB gewünscht? Welche Hauptaktion?
+- [ ] Component erstellen
+- [ ] Animation hinzufügen (scale on tap)
+- [ ] Haptic Feedback (optional)
+
+**Aufwand:** 1-2 Stunden
+**Status:** ⏳ **WARTET AUF USER-FEEDBACK**
+
+---
+
+### **Task 8: Responsiveness testen** (1h)
+**Priorität:** 🟡 **HOCH**
+**Dependencies:** Task 4, 5, 6
+
+**Test-Geräte:**
+- [ ] **iPhone SE (375×667px)** - Kleinster Bildschirm
+- [ ] **iPhone 14/15 (390×844px)** - Standard
+- [ ] **iPhone 14 Pro Max (430×932px)** - Größter iPhone
+- [ ] **Pixel 8 (412×873px)** - Android Standard
+- [ ] **Galaxy S24 (360×780px)** - Kompakt Android
+
+**Test-Scenarios:**
+- [ ] Alle 12 Module sichtbar ohne Scrollen?
+- [ ] Touch-Targets groß genug (min 44x44px)?
+- [ ] Text lesbar in allen Größen?
+- [ ] Bottom Navigation nicht überlappt?
+- [ ] Landscape-Mode funktioniert?
+
+**Tools:**
+- Chrome DevTools (Device Emulation)
+- BrowserStack (Real Device Testing)
+- `useMediaQuery` Hook für Breakpoints
+
+**Aufwand:** 1 Stunde
+**Status:** ❌ **OFFEN**
+
+---
+
+### **📊 MOBILE DASHBOARD OPTIMIERUNG - ZUSAMMENFASSUNG**
+
+**Total Aufwand:** 6-8 Stunden (ohne optionale Tasks)
+**Total Tasks:** 8 (3 warten auf User-Feedback)
+
+**Kritischer Pfad:**
+```
+Task 3 (Module definieren)
+  → Task 4 (Grid-Layout)
+  → Task 5 (Module kompakter)
+  → Task 8 (Testing)
+```
+
+**Parallele Tasks:**
+```
+Task 1 (SW, SWS Feld)
+Task 2 (Stats-Header)
+Task 6 (Welcome-Text)
+Task 7 (FAB - optional)
+```
+
+**Status:** ⏳ **WARTET AUF USER-FEEDBACK** (Task 1, 3, 7)
 
 ---
 
