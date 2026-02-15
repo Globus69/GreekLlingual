@@ -73,11 +73,19 @@ export default function DashboardPage() {
     const fetchStats = async () => {
         try {
             if (!user?.id) return;
-            
-            const { data: progressData } = await supabase
+
+            const { data: progressData, error } = await supabase
                 .from('student_progress')
                 .select('correct_count, attempts')
                 .eq('student_id', user.id);
+
+            // Log error but don't block dashboard
+            if (error) {
+                console.warn('student_progress query failed (non-blocking):', error.message);
+                // Set default values
+                setMasteryProgress(38);
+                return;
+            }
 
             if (progressData && progressData.length > 0) {
                 const totalCorrect = progressData.reduce((sum: number, p: any) => sum + (p.correct_count || 0), 0);
@@ -85,9 +93,14 @@ export default function DashboardPage() {
                 const calculatedProgress = Math.min(100, Math.round((totalCorrect / totalItems) * 100));
                 setMasteryProgress(calculatedProgress || 38);
                 setStats(prev => ({ ...prev, words: totalCorrect }));
+            } else {
+                // No data found, use defaults
+                setMasteryProgress(38);
             }
         } catch (err) {
             console.error("Stats fetching error:", err);
+            // Set defaults on error
+            setMasteryProgress(38);
         }
     };
 
