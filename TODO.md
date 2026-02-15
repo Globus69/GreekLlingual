@@ -1150,7 +1150,7 @@ const handleCardClick = () => {
 ### **8. Konsistenz: Alle Learning-Module vereinheitlichen** 🎨
 **Priorität:** 🟡 **HOCH** (UX-Konsistenz)
 **Aufwand:** 6-8 Stunden (alle 3 Module)
-**Status:** ❌ **OFFEN**
+**Status:** ✅ **ERLEDIGT** (2026-02-15)
 
 **Problem:**
 - Aktuell haben Learning-Module unterschiedliche Layouts und UX
@@ -1174,39 +1174,39 @@ Alle Learning-Dialoge haben **identisches Layout und identische Funktionsweise**
 
 **Clone-Aufgaben:**
 
-**1. Weak Words (VocabularyDialog.tsx) → VocabularyDialogFSRS Clone (2-3h)**
-- [ ] **Layout Migration:**
-  - [ ] Progress Bar wie VocabularyDialogFSRS
-  - [ ] Flashcard-Struktur wie VocabularyDialogFSRS
-  - [ ] 4-Button-Layout (Currently: 3 Buttons Hard/Good/Easy)
-  - [ ] Button-Farben angleichen
-- [ ] **Feature-Parity:**
-  - [ ] FSRS-6 Integration (statt SM-2)
-  - [ ] Swipe-Gesten hinzufügen
-  - [ ] Summary Screen nach Session
-  - [ ] Stats-Tracking erweitern
-- [ ] **Filter beibehalten:** ease_factor < 2.0 für "Weak Words"
+**1. Weak Words (VocabularyDialog.tsx) → VocabularyDialogFSRS Clone (2-3h)** ✅
+- [x] **Layout Migration:**
+  - [x] Progress Bar wie VocabularyDialogFSRS
+  - [x] Flashcard-Struktur wie VocabularyDialogFSRS
+  - [x] 4-Button-Layout (Currently: 3 Buttons Hard/Good/Easy)
+  - [x] Button-Farben angleichen
+- [x] **Feature-Parity:**
+  - [x] FSRS-6 Integration (statt SM-2)
+  - [x] Swipe-Gesten hinzufügen
+  - [x] Summary Screen nach Session
+  - [x] Stats-Tracking erweitern
+- [x] **Filter beibehalten:** fsrs_difficulty > 6.5 für "Weak Words"
 
-**2. Due Cards (noch nicht implementiert) → VocabularyDialogFSRS Clone (2-3h)**
-- [ ] **Neue Komponente erstellen:** DueCardsDialog.tsx
-- [ ] **Basierend auf:** VocabularyDialogFSRS (kompletter Clone)
-- [ ] **Layout:** Identisch zu VocabularyDialogFSRS
-- [ ] **Features:** Alle Features von VocabularyDialogFSRS
-- [ ] **Filter:** next_review < NOW() für "Due Cards"
-- [ ] **Backend:** RPC get_due_cards_today(student_id)
+**2. Due Cards (noch nicht implementiert) → VocabularyDialogFSRS Clone (2-3h)** ✅
+- [x] **Neue Komponente erstellen:** DueCardsDialog.tsx
+- [x] **Basierend auf:** VocabularyDialogFSRS (kompletter Clone)
+- [x] **Layout:** Identisch zu VocabularyDialogFSRS
+- [x] **Features:** Alle Features von VocabularyDialogFSRS
+- [x] **Filter:** mode='due' für "Due Cards"
+- [x] **Backend:** RPC get_due_cards (mode parameter)
 
-**3. Daily Phrases → VocabularyDialogFSRS Clone (2-3h)**
-- [ ] **Layout Migration:**
-  - [ ] Progress Bar wie VocabularyDialogFSRS
-  - [ ] Flashcard-Struktur verwenden (statt 2-Panel-Layout)
-  - [ ] 4-Button-Layout (Currently: 3 Buttons Hard/Good/Easy)
-  - [ ] Swipe-Gesten hinzufügen
-- [ ] **Feature-Parity:**
-  - [ ] Summary Screen nach Session
-  - [ ] Stats-Tracking (Hard/Good/Easy counts)
-- [ ] **Unterschiede erlaubt:**
-  - [ ] Content: Phrases statt Vocabulary
-  - [ ] Kein FSRS-6 nötig (Phrases sind nicht SRS-basiert)
+**3. Daily Phrases → VocabularyDialogFSRS Clone (2-3h)** ✅
+- [x] **Layout Migration:**
+  - [x] Progress Bar wie VocabularyDialogFSRS
+  - [x] Flashcard-Struktur verwenden (statt 2-Panel-Layout)
+  - [x] 4-Button-Layout (Currently: 3 Buttons Hard/Good/Easy)
+  - [x] Swipe-Gesten hinzufügen
+- [x] **Feature-Parity:**
+  - [x] Summary Screen nach Session
+  - [x] Stats-Tracking (Hard/Good/Easy counts)
+- [x] **Unterschiede erlaubt:**
+  - [x] Content: Phrases statt Vocabulary (Mock Data aktuell)
+  - [x] FSRS-6 integriert (Backend-Integration pending Phase 4)
 
 **Einheitliche Features (alle Module):**
 - ✅ Identischer Progress-Bar-Style (1/10, 2/10, ... + %)
@@ -1226,12 +1226,18 @@ Alle Learning-Dialoge haben **identisches Layout und identische Funktionsweise**
 
 **Dependencies:**
 - VocabularyDialogFSRS existiert bereits (✅)
-- Weak Words (VocabularyDialog) existiert (⚠️ Refactoring nötig)
-- Daily Phrases existiert (⚠️ Refactoring nötig)
-- Due Cards existiert noch nicht (❌ Neu erstellen)
+- Weak Words (WeakWordsDialog) ✅ Refactored als FSRS Clone
+- Daily Phrases (DailyPhrasesDialogFSRS) ✅ Refactored als FSRS Clone (Mock Data)
+- Due Cards (DueCardsDialog) ✅ Neu erstellt als FSRS Clone
 
 **Aufwand:** 6-8 Stunden (alle 3 Module)
-**Status:** ❌ **OFFEN**
+**Status:** ✅ **ERLEDIGT** (2026-02-15)
+
+**Ergebnis:**
+- Alle 3 Learning-Module haben jetzt identisches Layout (Progress Bar, Flashcard, 4-Button Rating)
+- FSRS-6 Integration in allen Modulen
+- Konsistente Swipe-Gesten und Glasmorphismus-Design
+- Daily Phrases verwendet aktuell Mock Data (Backend-Integration = Phase 4)
 
 ---
 
