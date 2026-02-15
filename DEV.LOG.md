@@ -10,6 +10,97 @@
 
 ---
 
+## 2026-02-15 - Daily Phrases Integration: Mobile → Desktop 💬
+
+### ✅ Desktop Integration der Daily Phrases Funktionalität - COMPLETED
+**Commit:** `[pending]`
+
+**Ziel:** Integration der "Daily Phrases" Funktionalität von der mobilen HTML-Version in die React/Next.js Desktop-Version
+
+**Implementiert:**
+
+#### 1. **Analyse der mobilen Version**
+- **Mobile Version:**  - Standalone HTML (`modules/daily-phrases/daily-phrases.html`)
+  - Vanilla JavaScript (`modules/daily-phrases/daily-phrases-script.js`)
+  - Lädt aus `daily_phrases` Tabelle (Supabase)
+  - Fallback-Phrasen wenn DB nicht erreichbar
+  - SM-2 Spaced Repetition Algorithmus
+  - Speichert Progress in `student_progress` Tabelle
+
+#### 2. **Desktop-Version aktualisiert** (`src/components/learning/daily-phrases-dialog-fsrs.tsx`)
+- **Vorher:** Mock-Daten (3 statische Phrases)
+- **Jetzt:** Echte DB-Anbindung
+  - Lädt aus `daily_phrases` Tabelle
+  - DECK_ID: `c8852ed2-ebb9-414c-ac90-4867c562561e`
+  - Fallback: Lädt alle Phrasen wenn Deck leer
+  - Fisher-Yates Shuffle für tägliche Variation
+  - Konvertiert zu FSRSLearningItem Format
+
+#### 3. **Datenbank-Schema**
+```sql
+CREATE TABLE public.daily_phrases (
+    id UUID PRIMARY KEY,
+    deck_id UUID NOT NULL,
+    greek_phrase TEXT NOT NULL,
+    english_translation TEXT NOT NULL,
+    category VARCHAR(100),
+    difficulty VARCHAR(50),
+    created_at TIMESTAMP
+);
+```
+
+#### 4. **Features portiert**
+- ✅ DB-Laden aus `daily_phrases` Tabelle
+- ✅ Shuffle-Algorithmus für Variety
+- ✅ Phrase Cards mit Greek/English
+- ✅ TTS Audio (bereits vorhanden in FSRS Version)
+- ✅ Rating System (FSRS-6 statt SM-2)
+- ✅ Progress Tracking
+- ✅ Completion Screen mit Stats
+- ✅ Keyboard Shortcuts (1/2/3/4=Rate, A=Audio)
+- ✅ Auto-Play TTS
+- ✅ Speed Control (🐢/▶️/🐇)
+
+#### 5. **Dashboard Integration** (`src/app/dashboard/page.tsx`)
+- Import: `DailyPhrasesDialogFSRS`
+- State: `isDailyPhrasesDialogOpen`
+- Button Handler: Öffnet React Dialog statt HTML-Seite
+- Dialog Component am Ende eingebunden
+
+#### 6. **Vorteile der Desktop-Version**
+- 🎯 **FSRS-6 Algorithmus** statt SM-2 (moderneres SRS)
+- 🔊 **TTS mit Speed Control** (Slow/Normal/Fast)
+- 🎨 **Consistent UI** mit rest of Dashboard (Glassmorphism)
+- 📱 **Responsive Design** (bereits vorhanden)
+- 🌐 **Offline Detection** mit Toast-Benachrichtigungen
+- 🔥 **Streak Integration** (automatisches Update)
+- 📊 **Session Tracking** (Dauer, Karten reviewed)
+- ♿ **Accessibility** (Screen Reader Announcements, ARIA)
+
+**Unterschiede:**
+| Feature | Mobile (HTML) | Desktop (React) |
+|---------|---------------|-----------------|
+| Algorithmus | SM-2 | FSRS-6 |
+| UI Framework | Vanilla JS | React/Next.js |
+| TTS | Basic Speech Synthesis | Advanced with Speed Control |
+| Progress Save | `student_progress` | RPC: `update_card_fsrs` |
+| Offline | No | Yes (mit Detection) |
+| Responsive | Basic | Full Mobile/Tablet/Desktop |
+
+**Testing:**
+- ✅ Desktop: Dialog öffnet, lädt Phrasen
+- ✅ Database: Phrasen werden geladen
+- ✅ Fallback: Funktioniert wenn Deck leer
+- ⏳ Full E2E Testing: Pending
+
+**Nächste Schritte:**
+- Testing auf verschiedenen Browsern
+- Performance Optimierung (Caching)
+- Russian Translation Support (Tabelle erweitern?)
+- Phonetic/IPA Support hinzufügen
+
+---
+
 ## 2026-02-15 - Mobile Device Detection & Responsive Design 📱
 
 ### ✅ Complete Responsive Design Implementation - COMPLETED
