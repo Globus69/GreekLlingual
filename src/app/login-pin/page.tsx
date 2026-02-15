@@ -523,7 +523,7 @@ export default function PinLoginPage() {
                         Geben Sie Ihren 4-stelligen PIN ein
                     </p>
 
-                    {/* Device Type Selection */}
+                    {/* Login Type Selection */}
                     <div style={{
                         display: 'flex',
                         gap: '12px',
@@ -534,16 +534,14 @@ export default function PinLoginPage() {
                     }}>
                         <button
                             type="button"
-                            onClick={() => setDeviceType('desktop')}
+                            onClick={() => router.push('/login')}
                             style={{
                                 flex: 1,
                                 padding: '10px 20px',
                                 borderRadius: '12px',
                                 border: 'none',
-                                background: deviceType === 'desktop'
-                                    ? 'linear-gradient(135deg, #007AFF 0%, #5856D6 100%)'
-                                    : 'transparent',
-                                color: deviceType === 'desktop' ? '#fff' : '#8E8E93',
+                                background: 'transparent',
+                                color: '#8E8E93',
                                 fontSize: '13px',
                                 fontWeight: 600,
                                 cursor: 'pointer',
@@ -552,23 +550,16 @@ export default function PinLoginPage() {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 gap: '6px',
-                                boxShadow: deviceType === 'desktop'
-                                    ? '0 2px 8px rgba(0, 122, 255, 0.3)'
-                                    : 'none',
                             }}
                             onMouseEnter={(e) => {
-                                if (deviceType !== 'desktop') {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                }
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
                             }}
                             onMouseLeave={(e) => {
-                                if (deviceType !== 'desktop') {
-                                    e.currentTarget.style.background = 'transparent';
-                                }
+                                e.currentTarget.style.background = 'transparent';
                             }}
                         >
-                            <span style={{ fontSize: '16px' }}>🖥️</span>
-                            Desktop
+                            <span style={{ fontSize: '16px' }}>👨‍💼</span>
+                            Admin
                         </button>
 
                         <button
@@ -606,8 +597,8 @@ export default function PinLoginPage() {
                                 }
                             }}
                         >
-                            <span style={{ fontSize: '16px' }}>📱</span>
-                            Mobile
+                            <span style={{ fontSize: '16px' }}>👤</span>
+                            User
                         </button>
                     </div>
 
