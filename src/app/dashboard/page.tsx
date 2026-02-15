@@ -13,6 +13,7 @@ import GrammarDialog from '@/components/learning/GrammarDialog';
 import ComprehensionDialog from '@/components/learning/ComprehensionDialog';
 import ListeningDialog from '@/components/learning/ListeningDialog';
 import LessonDialog from '@/components/learning/LessonDialog';
+import DailyPhrasesDialogFSRS from '@/components/learning/daily-phrases-dialog-fsrs';
 import { supabase } from '@/db/supabase';
 import { useTranslation } from '@/lib/use-translation';
 import Link from 'next/link';
@@ -56,6 +57,7 @@ export default function DashboardPage() {
     const [isListeningDialogOpen, setIsListeningDialogOpen] = useState(false);
     const [listeningDialogMode, setListeningDialogMode] = useState<'weak' | 'review' | 'due'>('review');
     const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
+    const [isDailyPhrasesDialogOpen, setIsDailyPhrasesDialogOpen] = useState(false);
     const [masteryProgress, setMasteryProgress] = useState(38);
     const [stats, setStats] = useState({ streak: 0, words: 47, weak: 'Verbs' });
     const { t } = useTranslation();
@@ -261,12 +263,10 @@ export default function DashboardPage() {
                             label={`2. ${t('action.quick_lesson')}`}
                             onClick={() => console.log('🔥 Button 2: Quick Lesson clicked')}
                         />
-                        <ActionTile 
-                            icon="💬" 
+                        <ActionTile
+                            icon="💬"
                             label={`3. ${t('action.daily_phrases')}`}
-                            onClick={() => {
-                                window.location.href = '/daily-phrases/daily-phrases.html';
-                            }}
+                            onClick={() => setIsDailyPhrasesDialogOpen(true)}
                         />
                         <ActionTile
                             icon="🔄"
@@ -396,6 +396,12 @@ export default function DashboardPage() {
             <LessonDialog
                 isOpen={isLessonDialogOpen}
                 onClose={() => setIsLessonDialogOpen(false)}
+            />
+
+            {/* Daily Phrases Dialog - FSRS Version */}
+            <DailyPhrasesDialogFSRS
+                isOpen={isDailyPhrasesDialogOpen}
+                onClose={() => setIsDailyPhrasesDialogOpen(false)}
             />
         </div>
     );

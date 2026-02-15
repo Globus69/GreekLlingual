@@ -233,90 +233,118 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
     }, [isOpen, flipped, currentIndex, vocabulary.length]);
 
     /**
-     * Load due cards using FSRS RPC function
+     * Load phrases from daily_phrases table
      */
     const loadDueCards = async () => {
         setLoading(true);
         setLoadError(null);
-        console.log(`🔄 Loading daily phrases...`);
+        console.log(`🔄 Loading daily phrases from database...`);
 
-        // TODO: Replace with actual RPC call when backend is ready
-        // For now, use mock data
         try {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 500));
+            const DECK_ID = 'c8852ed2-ebb9-414c-ac90-4867c562561e';
 
-            const mockPhrases: FSRSLearningItem[] = [
-                {
-                    id: 'phrase-1',
+            // Load phrases from daily_phrases table
+            const { data: phrasesData, error: phrasesError } = await supabase
+                .from('daily_phrases')
+                .select('*')
+                .eq('deck_id', DECK_ID)
+                .order('created_at', { ascending: true })
+                .limit(50);
+
+            if (phrasesError) {
+                console.error('❌ Phrases error:', phrasesError);
+                throw new Error(phrasesError.message);
+            }
+
+            if (!phrasesData || phrasesData.length === 0) {
+                console.warn('⚠️ No phrases found for deck_id:', DECK_ID);
+                console.log('💡 Trying to load all phrases without deck filter...');
+
+                // Fallback: Load all phrases
+                const { data: allPhrases, error: allError } = await supabase
+                    .from('daily_phrases')
+                    .select('*')
+                    .order('created_at', { ascending: true })
+                    .limit(50);
+
+                if (allError || !allPhrases || allPhrases.length === 0) {
+                    console.warn('⚠️ No phrases found in database');
+                    setLoadError('No phrases available. Please contact support.');
+                    setVocabulary([]);
+                    setLoading(false);
+                    return;
+                }
+
+                // Convert to FSRSLearningItem format
+                const phrases: FSRSLearningItem[] = allPhrases.map((p: any) => ({
+                    id: p.id,
                     type: 'phrase',
-                    english: 'Good morning',
-                    russian: 'Доброе утро',
-                    greek: 'Καλημέρα',
-                    phonetic: 'kaliˈmera',
+                    english: p.english_translation,
+                    russian: '', // Not available in daily_phrases table
+                    greek: p.greek_phrase,
+                    greek_word: p.greek_phrase,
+                    phonetic: undefined,
                     example_en: null,
                     example_gr: null,
                     audio_url: null,
                     level: 'A1',
-                    difficulty: 'easy',
+                    difficulty: p.difficulty || 'easy',
+                    // FSRS-6 defaults for new phrases
                     fsrs_difficulty: 5.0,
                     fsrs_stability: 10.0,
                     fsrs_due: new Date().toISOString(),
                     fsrs_reps: 0,
                     fsrs_lapses: 0,
                     fsrs_state: 'new',
-                    created_at: new Date().toISOString(),
-                },
-                {
-                    id: 'phrase-2',
-                    type: 'phrase',
-                    english: 'Thank you very much',
-                    russian: 'Большое спасибо',
-                    greek: 'Ευχαριστώ πολύ',
-                    phonetic: 'efxariˈsto poˈli',
-                    example_en: null,
-                    example_gr: null,
-                    audio_url: null,
-                    level: 'A1',
-                    difficulty: 'easy',
-                    fsrs_difficulty: 5.0,
-                    fsrs_stability: 10.0,
-                    fsrs_due: new Date().toISOString(),
-                    fsrs_reps: 0,
-                    fsrs_lapses: 0,
-                    fsrs_state: 'new',
-                    created_at: new Date().toISOString(),
-                },
-                {
-                    id: 'phrase-3',
-                    type: 'phrase',
-                    english: 'How much does this cost?',
-                    russian: 'Сколько это стоит?',
-                    greek: 'Πόσο κοστίζει αυτό;',
-                    phonetic: 'ˈposo kosˈtizi afˈto',
-                    example_en: null,
-                    example_gr: null,
-                    audio_url: null,
-                    level: 'A1',
-                    difficulty: 'medium',
-                    fsrs_difficulty: 6.0,
-                    fsrs_stability: 8.0,
-                    fsrs_due: new Date().toISOString(),
-                    fsrs_reps: 0,
-                    fsrs_lapses: 0,
-                    fsrs_state: 'new',
-                    created_at: new Date().toISOString(),
-                },
-            ];
+                    created_at: p.created_at,
+                }));
 
-            console.log(`✅ Loaded ${mockPhrases.length} daily phrases (mock data)`);
-            setVocabulary(mockPhrases);
+                // Shuffle for daily variety
+                const shuffled = phrases.sort(() => Math.random() - 0.5);
+
+                console.log(`✅ Loaded ${shuffled.length} daily phrases (all decks)`);
+                setVocabulary(shuffled);
+                setLoadError(null);
+                setLoading(false);
+                return;
+            }
+
+            // Convert to FSRSLearningItem format
+            const phrases: FSRSLearningItem[] = phrasesData.map((p: any) => ({
+                id: p.id,
+                type: 'phrase',
+                english: p.english_translation,
+                russian: '', // Not available in daily_phrases table
+                greek: p.greek_phrase,
+                greek_word: p.greek_phrase,
+                phonetic: undefined,
+                example_en: null,
+                example_gr: null,
+                audio_url: null,
+                level: 'A1',
+                difficulty: p.difficulty || 'easy',
+                // FSRS-6 defaults for new phrases
+                fsrs_difficulty: 5.0,
+                fsrs_stability: 10.0,
+                fsrs_due: new Date().toISOString(),
+                fsrs_reps: 0,
+                fsrs_lapses: 0,
+                fsrs_state: 'new',
+                created_at: p.created_at,
+            }));
+
+            // Shuffle for daily variety (Fisher-Yates)
+            const shuffled = phrases.sort(() => Math.random() - 0.5);
+
+            console.log(`✅ Loaded ${shuffled.length} daily phrases from database`);
+            console.log('   Sample:', shuffled[0]?.greek);
+            setVocabulary(shuffled);
             setLoadError(null);
         } catch (err) {
             console.error('❌ Load error:', err);
             const errMessage = err instanceof Error ? err.message : 'Unknown error';
             setLoadError(errMessage);
-            error('An error occurred while loading phrases. Please try again.');
+            error('Failed to load phrases. Please try again.');
             setVocabulary([]);
         } finally {
             setLoading(false);
@@ -914,8 +942,11 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
 
                 .dialog-footer {
                     display: flex;
+                    flex-wrap: wrap;
                     gap: 12px;
                     justify-content: center;
+                    margin-top: 20px;
+                    padding: 0 8px;
                 }
 
                 .btn-secondary, .btn-audio, .btn-autoplay, .btn-speed, .btn-cancel {
@@ -928,22 +959,25 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
                 }
 
                 .btn-secondary {
-                    background: rgba(0, 122, 255, 0.2);
+                    background: rgba(0, 122, 255, 0.4);
                     color: #007AFF;
+                    border: 1px solid rgba(0, 122, 255, 0.3);
                 }
 
                 .btn-secondary:hover {
-                    background: rgba(0, 122, 255, 0.3);
+                    background: rgba(0, 122, 255, 0.5);
                 }
 
                 .btn-audio {
-                    background: rgba(52, 199, 89, 0.2);
-                    color: #34C759;
+                    background: rgba(52, 199, 89, 0.8);
+                    color: #fff;
                     position: relative;
+                    border: 1px solid rgba(52, 199, 89, 0.4);
+                    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
                 }
 
                 .btn-audio:hover {
-                    background: rgba(52, 199, 89, 0.3);
+                    background: rgba(52, 199, 89, 0.9);
                 }
 
                 .btn-audio.playing {
@@ -967,33 +1001,37 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
                 }
 
                 .btn-autoplay {
-                    background: rgba(255, 159, 10, 0.15);
-                    color: rgba(255, 159, 10, 0.7);
+                    background: rgba(255, 159, 10, 0.4);
+                    color: #FF9F0A;
                     font-size: 13px;
                     padding: 12px 16px;
+                    border: 1px solid rgba(255, 159, 10, 0.3);
                 }
 
                 .btn-autoplay:hover {
-                    background: rgba(255, 159, 10, 0.25);
-                    color: rgba(255, 159, 10, 0.9);
+                    background: rgba(255, 159, 10, 0.5);
+                    color: #FF9F0A;
                 }
 
                 .btn-autoplay.active {
-                    background: rgba(255, 159, 10, 0.3);
-                    color: #FF9F0A;
-                    border: 1px solid rgba(255, 159, 10, 0.4);
+                    background: rgba(255, 159, 10, 0.9);
+                    color: #fff;
+                    border: 1px solid rgba(255, 159, 10, 0.6);
+                    box-shadow: 0 4px 12px rgba(255, 159, 10, 0.3);
                 }
 
                 .btn-speed {
-                    background: rgba(94, 92, 230, 0.15);
-                    color: rgba(94, 92, 230, 0.9);
+                    background: rgba(94, 92, 230, 0.8);
+                    color: #fff;
                     font-size: 20px;
                     padding: 12px 16px;
                     min-width: 56px;
+                    border: 1px solid rgba(94, 92, 230, 0.4);
+                    box-shadow: 0 4px 12px rgba(94, 92, 230, 0.3);
                 }
 
                 .btn-speed:hover {
-                    background: rgba(94, 92, 230, 0.25);
+                    background: rgba(94, 92, 230, 0.5);
                     transform: scale(1.1);
                 }
 
@@ -1002,12 +1040,14 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
                 }
 
                 .btn-cancel {
-                    background: rgba(255, 69, 58, 0.2);
-                    color: #FF453A;
+                    background: rgba(255, 69, 58, 0.8);
+                    color: #fff;
+                    border: 1px solid rgba(255, 69, 58, 0.4);
+                    box-shadow: 0 4px 12px rgba(255, 69, 58, 0.3);
                 }
 
                 .btn-cancel:hover {
-                    background: rgba(255, 69, 58, 0.3);
+                    background: rgba(255, 69, 58, 0.5);
                 }
 
                 .summary-content {
@@ -1038,6 +1078,10 @@ export default function DailyPhrasesDialogFSRS({ isOpen, onClose }: DailyPhrases
                 @media (max-width: 600px) {
                     .dialog-content {
                         padding: 24px 16px;
+                    }
+
+                    .card-container {
+                        margin: 12px 0 32px 0;
                     }
 
                     .progress-info {
