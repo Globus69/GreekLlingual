@@ -6,11 +6,11 @@ import { useAuth } from '@/context/auth-context';
 import { useTranslation } from '@/lib/use-translation';
 import { useStatsData } from '@/hooks/use-stats-data';
 import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
-import VocabularyDialogFSRS from '@/components/learning/vocabulary-dialog-fsrs';
-import DailyPhrasesDialogFSRS from '@/components/learning/daily-phrases-dialog-fsrs';
+import VocabularyDialog from '@/components/learning/vocabulary-dialog';
+import DailyPhrasesDialog from '@/components/learning/daily-phrases-dialog';
 import DueCardsDialog from '@/components/learning/due-cards-dialog';
 import WeakWordsDialog from '@/components/learning/weak-words-dialog';
-import GrammarDialogFSRS from '@/components/learning/grammar-dialog-fsrs';
+import GrammarDialog from '@/components/learning/grammar-dialog';
 import '@/styles/liquid-glass.css';
 
 export default function MobileDashboardPage() {
@@ -394,7 +394,7 @@ export default function MobileDashboardPage() {
 
       {/* Daily Phrases Dialog */}
       {showDailyPhrasesDialog && (
-        <DailyPhrasesDialogFSRS
+        <DailyPhrasesDialog
           isOpen={showDailyPhrasesDialog}
           onClose={() => setShowDailyPhrasesDialog(false)}
         />
@@ -410,7 +410,7 @@ export default function MobileDashboardPage() {
 
       {/* Grammar Dialog */}
       {showGrammarDialog && (
-        <GrammarDialogFSRS
+        <GrammarDialog
           isOpen={showGrammarDialog}
           onClose={() => setShowGrammarDialog(false)}
         />

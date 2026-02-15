@@ -15,13 +15,19 @@ interface FlashcardFSRSProps {
     onRating: (rating: Rating) => void;
     showRatingButtons?: boolean; // Show buttons only when flipped
     onBackClick?: () => void; // Click on card back to play audio
+    useFSRS?: boolean; // If false, show simple "Wrong/Correct" buttons instead of 4-button FSRS
 }
 
-const RATING_BUTTONS = [
+const RATING_BUTTONS_FSRS = [
     { rating: 1 as Rating, label: 'Again', color: '#FF6B6B', emoji: '❌', key: '1' },
     { rating: 2 as Rating, label: 'Hard', color: '#FFA94D', emoji: '🟠', key: '2' },
     { rating: 3 as Rating, label: 'Good', color: '#51CF66', emoji: '✅', key: '3' },
     { rating: 4 as Rating, label: 'Easy', color: '#339AF0', emoji: '🎯', key: '4' },
+];
+
+const RATING_BUTTONS_SIMPLE = [
+    { rating: 1 as Rating, label: 'Wrong', color: '#FF6B6B', emoji: '❌', key: '1' },
+    { rating: 3 as Rating, label: 'Correct', color: '#51CF66', emoji: '✅', key: '3' },
 ];
 
 export default function FlashcardFSRS({
@@ -33,10 +39,14 @@ export default function FlashcardFSRS({
     onFlip,
     onRating,
     showRatingButtons = true,
-    onBackClick
+    onBackClick,
+    useFSRS = false
 }: FlashcardFSRSProps) {
     const { t } = useTranslation();
     const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | 'up' | 'down' | null>(null);
+
+    // Choose button set based on mode
+    const ratingButtons = useFSRS ? RATING_BUTTONS_FSRS : RATING_BUTTONS_SIMPLE;
 
     const handleRatingClick = (e: React.MouseEvent, rating: Rating) => {
         e.stopPropagation();
@@ -49,7 +59,7 @@ export default function FlashcardFSRS({
             if (flipped) {
                 setSwipeDirection('left');
                 setTimeout(() => {
-                    onRating(1); // Again
+                    onRating(1); // Wrong/Again
                     setSwipeDirection(null);
                 }, 150);
             }
@@ -58,25 +68,25 @@ export default function FlashcardFSRS({
             if (flipped) {
                 setSwipeDirection('right');
                 setTimeout(() => {
-                    onRating(4); // Easy
+                    onRating(useFSRS ? 4 : 3); // Easy (FSRS) or Correct (Simple)
                     setSwipeDirection(null);
                 }, 150);
             }
         },
         onSwipedUp: () => {
-            if (flipped) {
+            if (flipped && useFSRS) {
                 setSwipeDirection('up');
                 setTimeout(() => {
-                    onRating(3); // Good
+                    onRating(3); // Good (FSRS only)
                     setSwipeDirection(null);
                 }, 150);
             }
         },
         onSwipedDown: () => {
-            if (flipped) {
+            if (flipped && useFSRS) {
                 setSwipeDirection('down');
                 setTimeout(() => {
-                    onRating(2); // Hard
+                    onRating(2); // Hard (FSRS only)
                     setSwipeDirection(null);
                 }, 150);
             }
@@ -130,7 +140,7 @@ export default function FlashcardFSRS({
                     )}
                     {flipped && (
                         <div className="swipe-hint">
-                            ← Again | ↓ Hard | ↑ Good | Easy →
+                            {useFSRS ? '← Again | ↓ Hard | ↑ Good | Easy →' : '← Wrong | Correct →'}
                         </div>
                     )}
                 </div>
@@ -151,10 +161,10 @@ export default function FlashcardFSRS({
                 )}
             </div>
 
-            {/* Rating Buttons (4-Button FSRS System) */}
+            {/* Rating Buttons (FSRS or Simple Mode) */}
             {flipped && showRatingButtons && (
-                <div className="rating-buttons">
-                    {RATING_BUTTONS.map((btn) => (
+                <div className={`rating-buttons ${useFSRS ? 'fsrs-mode' : 'simple-mode'}`}>
+                    {ratingButtons.map((btn) => (
                         <button
                             key={btn.rating}
                             onClick={(e) => handleRatingClick(e, btn.rating)}
@@ -358,11 +368,18 @@ export default function FlashcardFSRS({
                 /* Rating Buttons */
                 .rating-buttons {
                     display: grid;
-                    grid-template-columns: repeat(4, 1fr);
                     gap: 12px;
                     margin-top: 24px;
                     width: 100%;
                     max-width: 500px;
+                }
+
+                .rating-buttons.fsrs-mode {
+                    grid-template-columns: repeat(4, 1fr);
+                }
+
+                .rating-buttons.simple-mode {
+                    grid-template-columns: repeat(2, 1fr);
                 }
 
                 .rating-btn {

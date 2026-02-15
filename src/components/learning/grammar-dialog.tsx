@@ -9,7 +9,7 @@ import { useToast, ToastContainer } from '@/components/ui/toast';
 import { speakGreek } from '@/lib/tts/greek-tts';
 import '@/styles/liquid-glass.css';
 
-interface WeakWord {
+interface GrammarRule {
     id: string;
     type: string;
     english: string;
@@ -24,17 +24,17 @@ interface WeakWord {
     difficulty?: string;
 }
 
-interface WeakWordsDialogProps {
+interface GrammarDialogProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProps) {
+export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
     const { user } = useAuth();
     const { t, locale } = useTranslation();
     const { toasts, showToast, removeToast, error, warning, success, info } = useToast();
 
-    const [queue, setQueue] = useState<WeakWord[]>([]);
+    const [queue, setQueue] = useState<GrammarRule[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [correct, setCorrect] = useState(0);
@@ -60,10 +60,10 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
         }
     }, []);
 
-    // Load weak words (prioritize difficult items)
+    // Load grammar rules
     useEffect(() => {
         if (isOpen && STUDENT_ID) {
-            loadWeakWords();
+            loadGrammar();
             setShowSummary(false);
             setFlipped(false);
             setCurrentIndex(0);
@@ -72,21 +72,19 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
         }
     }, [isOpen, STUDENT_ID]);
 
-    const loadWeakWords = async () => {
+    const loadGrammar = async () => {
         setLoading(true);
         try {
-            // Load vocabulary items with higher difficulty first
             const { data, error: dbError } = await supabase
                 .from('learning_items')
                 .select('*')
-                .eq('type', 'vocabulary')
+                .eq('type', 'grammar')
                 .eq('level', user?.level || 'A1')
-                .order('difficulty', { ascending: false }) // Most difficult first
                 .limit(15);
 
             if (dbError) {
                 console.error('❌ DB error:', dbError);
-                error('Failed to load weak words');
+                error('Failed to load grammar rules');
                 setQueue([]);
                 return;
             }
@@ -95,15 +93,14 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
                 // Shuffle items
                 const shuffled = [...data].sort(() => Math.random() - 0.5);
                 setQueue(shuffled);
-                console.log(`✅ Loaded ${shuffled.length} weak words`);
-                info(`📊 Reviewing ${shuffled.length} challenging words`);
+                console.log(`✅ Loaded ${shuffled.length} grammar rules`);
             } else {
                 setQueue([]);
-                info('No weak words found - great job!');
+                info('No grammar rules found');
             }
         } catch (err) {
             console.error('❌ Load error:', err);
-            error('Failed to load weak words');
+            error('Failed to load grammar rules');
             setQueue([]);
         } finally {
             setLoading(false);
@@ -152,14 +149,14 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
 
             if (newQueue.length === 0) {
                 setShowSummary(true);
-                success(`All weak words reviewed! ${correct + 1} mastered, ${wrong} to practice`);
+                success(`Session complete! ${correct + 1} correct, ${wrong} to review`);
             } else {
                 if (currentIndex >= newQueue.length) {
                     setCurrentIndex(newQueue.length - 1);
                 }
             }
         } else {
-            // Wrong: Move to end of queue (practice again)
+            // Wrong: Move to end of queue
             setWrong(prev => prev + 1);
             const newQueue = [...queue];
             const [item] = newQueue.splice(currentIndex, 1);
@@ -254,7 +251,7 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
                 <div className="liquid-glass-panel w-full max-w-2xl p-8 rounded-3xl relative" onClick={(e) => e.stopPropagation()}>
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-white">📊 Weak Words Practice</h2>
+                        <h2 className="text-2xl font-bold text-white">📖 Grammar Practice</h2>
                         <div className="flex gap-2">
                             <button
                                 onClick={cycleSpeed}
@@ -277,20 +274,20 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
                     {loading ? (
                         <div className="text-center py-20">
                             <div className="inline-block animate-spin text-5xl">⏳</div>
-                            <p className="mt-4 text-white">Loading weak words...</p>
+                            <p className="mt-4 text-white">Loading grammar rules...</p>
                         </div>
                     ) : showSummary || queue.length === 0 ? (
                         <div className="text-center py-12">
                             <div className="text-6xl mb-4">🎉</div>
-                            <h3 className="text-2xl font-bold text-white mb-6">Practice Complete!</h3>
+                            <h3 className="text-2xl font-bold text-white mb-6">Session Complete!</h3>
                             <div className="flex justify-center gap-6 mb-8">
                                 <div className="text-center">
                                     <div className="text-4xl font-bold text-green-400">{correct}</div>
-                                    <div className="text-sm text-gray-400">Mastered</div>
+                                    <div className="text-sm text-gray-400">Correct</div>
                                 </div>
                                 <div className="text-center">
                                     <div className="text-4xl font-bold text-red-400">{wrong}</div>
-                                    <div className="text-sm text-gray-400">To Practice</div>
+                                    <div className="text-sm text-gray-400">To Review</div>
                                 </div>
                             </div>
                             <button onClick={onClose} className="btn-primary px-8 py-3 rounded-xl">
@@ -302,7 +299,7 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
                             {/* Progress */}
                             <div className="flex justify-between items-center mb-6 text-sm">
                                 <div className="text-gray-400">
-                                    Word {currentIndex + 1} of {queue.length}
+                                    Rule {currentIndex + 1} of {queue.length}
                                 </div>
                                 <div className="flex gap-3">
                                     {correct > 0 && <span className="text-green-400">✅ {correct}</span>}

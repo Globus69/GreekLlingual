@@ -9,43 +9,39 @@ import { useToast, ToastContainer } from '@/components/ui/toast';
 import { speakGreek } from '@/lib/tts/greek-tts';
 import '@/styles/liquid-glass.css';
 
-interface WeakWord {
+interface DailyPhrase {
     id: string;
-    type: string;
     english: string;
     russian?: string;
     greek: string;
-    greek_word?: string;
     phonetic?: string;
     example_en: string | null;
     example_gr: string | null;
     audio_url: string | null;
     level?: string;
-    difficulty?: string;
+    deck_id?: string;
+    created_at?: string;
 }
 
-interface WeakWordsDialogProps {
+interface DailyPhrasesDialogProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProps) {
+export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDialogProps) {
     const { user } = useAuth();
     const { t, locale } = useTranslation();
     const { toasts, showToast, removeToast, error, warning, success, info } = useToast();
 
-    const [queue, setQueue] = useState<WeakWord[]>([]);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const [phrase, setPhrase] = useState<DailyPhrase | null>(null);
     const [loading, setLoading] = useState(true);
-    const [correct, setCorrect] = useState(0);
-    const [wrong, setWrong] = useState(0);
-    const [showSummary, setShowSummary] = useState(false);
+    const [answered, setAnswered] = useState(false);
+    const [wasCorrect, setWasCorrect] = useState(false);
     const [flipped, setFlipped] = useState(false);
     const [autoPlay, setAutoPlay] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const [speechRate, setSpeechRate] = useState<number>(0.9);
-
-    const STUDENT_ID = user?.id || '';
+    const [currentTimeSlot, setCurrentTimeSlot] = useState<'morning' | 'noon' | 'evening'>('morning');
 
     // Load preferences
     useEffect(() => {
@@ -60,51 +56,85 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
         }
     }, []);
 
-    // Load weak words (prioritize difficult items)
-    useEffect(() => {
-        if (isOpen && STUDENT_ID) {
-            loadWeakWords();
-            setShowSummary(false);
-            setFlipped(false);
-            setCurrentIndex(0);
-            setCorrect(0);
-            setWrong(0);
-        }
-    }, [isOpen, STUDENT_ID]);
+    /**
+     * Get current time slot (Morning, Noon, Evening)
+     */
+    const getCurrentTimeSlot = (): 'morning' | 'noon' | 'evening' => {
+        const hour = new Date().getHours();
+        if (hour >= 6 && hour < 12) return 'morning';
+        if (hour >= 12 && hour < 18) return 'noon';
+        return 'evening'; // 18-6
+    };
 
-    const loadWeakWords = async () => {
+    /**
+     * Get stable daily phrase index for current date and time slot
+     * Uses date + time slot as seed for consistent phrase selection per slot
+     */
+    const getDailyPhraseIndex = (totalPhrases: number, timeSlot: 'morning' | 'noon' | 'evening'): number => {
+        const today = new Date();
+        const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD
+
+        // Create seed from date + time slot
+        const slotOffset = { morning: 0, noon: 1, evening: 2 }[timeSlot];
+        const seed = dateString + slotOffset;
+
+        // Simple hash function for stable "random" selection
+        let hash = 0;
+        for (let i = 0; i < seed.length; i++) {
+            hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+            hash = hash & hash; // Convert to 32bit integer
+        }
+
+        return Math.abs(hash) % totalPhrases;
+    };
+
+    // Load daily phrase (1 per time slot)
+    useEffect(() => {
+        if (isOpen) {
+            loadDailyPhrase();
+            setAnswered(false);
+            setWasCorrect(false);
+            setFlipped(false);
+        }
+    }, [isOpen]);
+
+    const loadDailyPhrase = async () => {
         setLoading(true);
         try {
-            // Load vocabulary items with higher difficulty first
+            const timeSlot = getCurrentTimeSlot();
+            setCurrentTimeSlot(timeSlot);
+            console.log(`⏰ Current time slot: ${timeSlot}`);
+
+            // Load phrases from daily_phrases table
             const { data, error: dbError } = await supabase
-                .from('learning_items')
+                .from('daily_phrases')
                 .select('*')
-                .eq('type', 'vocabulary')
-                .eq('level', user?.level || 'A1')
-                .order('difficulty', { ascending: false }) // Most difficult first
-                .limit(15);
+                .eq('level', user?.level || 'A1');
 
             if (dbError) {
                 console.error('❌ DB error:', dbError);
-                error('Failed to load weak words');
-                setQueue([]);
+                error('Failed to load daily phrase');
+                setPhrase(null);
                 return;
             }
 
             if (data && data.length > 0) {
-                // Shuffle items
-                const shuffled = [...data].sort(() => Math.random() - 0.5);
-                setQueue(shuffled);
-                console.log(`✅ Loaded ${shuffled.length} weak words`);
-                info(`📊 Reviewing ${shuffled.length} challenging words`);
+                // "3 per day" rule: Select 1 phrase for current time slot
+                const phraseIndex = getDailyPhraseIndex(data.length, timeSlot);
+                const selectedPhrase = data[phraseIndex];
+
+                console.log(`✅ Selected 1 phrase for ${timeSlot} (index ${phraseIndex}/${data.length})`);
+                console.log('   Phrase:', selectedPhrase?.greek);
+                setPhrase(selectedPhrase);
+                info(`📅 Daily phrase for ${timeSlot}`);
             } else {
-                setQueue([]);
-                info('No weak words found - great job!');
+                setPhrase(null);
+                info('No daily phrases found');
             }
         } catch (err) {
             console.error('❌ Load error:', err);
-            error('Failed to load weak words');
-            setQueue([]);
+            error('Failed to load daily phrase');
+            setPhrase(null);
         } finally {
             setLoading(false);
         }
@@ -112,12 +142,9 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
 
     // TTS Audio
     const playAudio = async () => {
-        if (queue.length === 0 || currentIndex >= queue.length) return;
+        if (!phrase) return;
 
-        const currentItem = queue[currentIndex];
-        if (!currentItem) return;
-
-        const text = currentItem.greek_word || currentItem.greek;
+        const text = phrase.greek;
         if (!text) return;
 
         setIsPlaying(true);
@@ -132,51 +159,31 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
 
     // Auto-play TTS when card flips
     useEffect(() => {
-        if (flipped && autoPlay && queue.length > 0) {
+        if (flipped && autoPlay && phrase) {
             const timer = setTimeout(() => {
                 playAudio();
             }, 300);
             return () => clearTimeout(timer);
         }
-    }, [flipped, currentIndex, autoPlay, queue.length]);
+    }, [flipped, autoPlay, phrase]);
 
-    // Handle answer: 1 = Wrong (push to end), 3 = Correct (remove from queue)
+    // Handle answer: Just mark as answered (no queue needed for 1 phrase)
     const handleRating = (rating: 1 | 3) => {
-        if (queue.length === 0 || currentIndex >= queue.length) return;
+        if (!phrase || answered) return;
+
+        setAnswered(true);
+        setWasCorrect(rating === 3);
 
         if (rating === 3) {
-            // Correct: Remove from queue
-            setCorrect(prev => prev + 1);
-            const newQueue = queue.filter((_, index) => index !== currentIndex);
-            setQueue(newQueue);
-
-            if (newQueue.length === 0) {
-                setShowSummary(true);
-                success(`All weak words reviewed! ${correct + 1} mastered, ${wrong} to practice`);
-            } else {
-                if (currentIndex >= newQueue.length) {
-                    setCurrentIndex(newQueue.length - 1);
-                }
-            }
+            success('Correct! 🎉');
         } else {
-            // Wrong: Move to end of queue (practice again)
-            setWrong(prev => prev + 1);
-            const newQueue = [...queue];
-            const [item] = newQueue.splice(currentIndex, 1);
-            newQueue.push(item);
-            setQueue(newQueue);
-
-            if (currentIndex >= newQueue.length) {
-                setCurrentIndex(0);
-            }
+            info('Study this phrase again later');
         }
-
-        setFlipped(false);
     };
 
     // Keyboard shortcuts
     useEffect(() => {
-        if (!isOpen || showSummary) return;
+        if (!isOpen || answered) return;
 
         const handleKeyPress = (e: KeyboardEvent) => {
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
@@ -212,7 +219,7 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
 
         window.addEventListener('keydown', handleKeyPress);
         return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [isOpen, flipped, currentIndex, queue.length, showSummary]);
+    }, [isOpen, flipped, answered]);
 
     // Speed control
     const getSpeedLabel = (rate: number): { label: string; emoji: string } => {
@@ -243,9 +250,17 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
         info(newAutoPlay ? '🔊 Auto-play enabled' : '🔇 Auto-play disabled');
     };
 
+    const getTimeSlotEmoji = (slot: string): string => {
+        switch (slot) {
+            case 'morning': return '🌅';
+            case 'noon': return '☀️';
+            case 'evening': return '🌙';
+            default: return '📅';
+        }
+    };
+
     if (!isOpen) return null;
 
-    const currentItem = queue[currentIndex];
     const speedInfo = getSpeedLabel(speechRate);
 
     return (
@@ -254,7 +269,12 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
                 <div className="liquid-glass-panel w-full max-w-2xl p-8 rounded-3xl relative" onClick={(e) => e.stopPropagation()}>
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-white">📊 Weak Words Practice</h2>
+                        <div>
+                            <h2 className="text-2xl font-bold text-white">💬 Daily Phrase</h2>
+                            <p className="text-sm text-gray-400 mt-1">
+                                {getTimeSlotEmoji(currentTimeSlot)} {currentTimeSlot} • 1 phrase per time slot
+                            </p>
+                        </div>
                         <div className="flex gap-2">
                             <button
                                 onClick={cycleSpeed}
@@ -277,46 +297,30 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
                     {loading ? (
                         <div className="text-center py-20">
                             <div className="inline-block animate-spin text-5xl">⏳</div>
-                            <p className="mt-4 text-white">Loading weak words...</p>
+                            <p className="mt-4 text-white">Loading daily phrase...</p>
                         </div>
-                    ) : showSummary || queue.length === 0 ? (
+                    ) : answered ? (
                         <div className="text-center py-12">
-                            <div className="text-6xl mb-4">🎉</div>
-                            <h3 className="text-2xl font-bold text-white mb-6">Practice Complete!</h3>
-                            <div className="flex justify-center gap-6 mb-8">
-                                <div className="text-center">
-                                    <div className="text-4xl font-bold text-green-400">{correct}</div>
-                                    <div className="text-sm text-gray-400">Mastered</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-4xl font-bold text-red-400">{wrong}</div>
-                                    <div className="text-sm text-gray-400">To Practice</div>
-                                </div>
-                            </div>
+                            <div className="text-6xl mb-4">{wasCorrect ? '🎉' : '📖'}</div>
+                            <h3 className="text-2xl font-bold text-white mb-4">
+                                {wasCorrect ? 'Well done!' : 'Keep practicing!'}
+                            </h3>
+                            <p className="text-gray-400 mb-8">
+                                Come back in the next time slot for a new phrase
+                            </p>
                             <button onClick={onClose} className="btn-primary px-8 py-3 rounded-xl">
                                 Close
                             </button>
                         </div>
-                    ) : currentItem ? (
+                    ) : phrase ? (
                         <>
-                            {/* Progress */}
-                            <div className="flex justify-between items-center mb-6 text-sm">
-                                <div className="text-gray-400">
-                                    Word {currentIndex + 1} of {queue.length}
-                                </div>
-                                <div className="flex gap-3">
-                                    {correct > 0 && <span className="text-green-400">✅ {correct}</span>}
-                                    {wrong > 0 && <span className="text-red-400">❌ {wrong}</span>}
-                                </div>
-                            </div>
-
                             {/* Flashcard */}
                             <div className="card-container">
                                 <FlashcardFSRS
-                                    front={locale === 'ru' && currentItem.russian ? currentItem.russian : currentItem.english}
-                                    back={currentItem.greek_word || currentItem.greek}
-                                    phonetic={currentItem.phonetic}
-                                    example={currentItem.example_gr || undefined}
+                                    front={locale === 'ru' && phrase.russian ? phrase.russian : phrase.english}
+                                    back={phrase.greek}
+                                    phonetic={phrase.phonetic}
+                                    example={phrase.example_gr || undefined}
                                     onFlip={() => setFlipped(!flipped)}
                                     flipped={flipped}
                                     showRatingButtons={true}
@@ -339,7 +343,12 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
                                 </div>
                             )}
                         </>
-                    ) : null}
+                    ) : (
+                        <div className="text-center py-12">
+                            <div className="text-6xl mb-4">📭</div>
+                            <h3 className="text-xl text-white">No phrases available</h3>
+                        </div>
+                    )}
                 </div>
             </div>
 
