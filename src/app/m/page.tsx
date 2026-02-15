@@ -7,9 +7,9 @@ import { useTranslation } from '@/lib/use-translation';
 import { useStatsData } from '@/hooks/use-stats-data';
 import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
 import VocabularyDialogFSRS from '@/components/learning/VocabularyDialogFSRS';
-import VocabularyDialog from '@/components/learning/VocabularyDialog';
 import DailyPhrasesDialog from '@/components/learning/daily-phrases-dialog';
 import DueCardsDialog from '@/components/learning/due-cards-dialog';
+import WeakWordsDialog from '@/components/learning/weak-words-dialog';
 import '@/styles/liquid-glass.css';
 
 export default function MobileDashboardPage() {
@@ -384,10 +384,9 @@ export default function MobileDashboardPage() {
 
       {/* Train Weak Words Dialog */}
       {showWeakWordsDialog && (
-        <VocabularyDialog
+        <WeakWordsDialog
           isOpen={showWeakWordsDialog}
           onClose={() => setShowWeakWordsDialog(false)}
-          mode="weak"
         />
       )}
 
