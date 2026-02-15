@@ -7,6 +7,7 @@ import FlashcardFSRS from '@/components/learning/flashcard-fsrs';
 import { useTranslation } from '@/lib/use-translation';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { speakGreek } from '@/lib/tts/greek-tts';
+import { DialogPortalWrapper } from '@/components/ui/dialog-portal';
 import '@/styles/liquid-glass.css';
 
 interface DailyPhrase {
@@ -106,10 +107,10 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
             console.log(`⏰ Current time slot: ${timeSlot}`);
 
             // Load phrases from daily_phrases table
+            // Note: daily_phrases table uses 'difficulty' not 'level'
             const { data, error: dbError } = await supabase
                 .from('daily_phrases')
-                .select('*')
-                .eq('level', user?.level || 'A1');
+                .select('*');
 
             if (dbError) {
                 console.error('❌ DB error:', dbError);
@@ -263,10 +264,11 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
 
     const speedInfo = getSpeedLabel(speechRate);
 
+    if (!isOpen) return null;
+
     return (
-        <>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm" onClick={onClose}>
-                <div className="liquid-glass-panel w-full max-w-2xl p-8 rounded-3xl relative" onClick={(e) => e.stopPropagation()}>
+        <div className="vocabulary-dialog-overlay" onClick={onClose}>
+            <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()}>
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
                         <div>
@@ -349,10 +351,9 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
                             <h3 className="text-xl text-white">No phrases available</h3>
                         </div>
                     )}
-                </div>
             </div>
 
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <ToastContainer toasts={toasts} onRemove={removeToast} />
 
             <style jsx>{`
                 .liquid-glass-panel {
@@ -411,6 +412,6 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
                     cursor: not-allowed;
                 }
             `}</style>
-        </>
+        </div>
     );
 }
