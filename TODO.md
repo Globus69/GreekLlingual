@@ -1338,6 +1338,97 @@ Grammar-Modul als **kompletter Clone von VocabularyDialogFSRS** erstellen
 
 ---
 
+### **10. User Testing: 4 neue FSRS Learning Modules** 🧪
+**Priorität:** 🔴 **HOCH** (Quality Assurance)
+**Aufwand:** 1-2 Stunden
+**Status:** ❌ **OFFEN**
+
+**Problem:**
+- 4 neue Learning-Module wurden implementiert (Due Cards, Weak Words, Daily Phrases, Grammar)
+- Alle haben identisches Layout als VocabularyDialogFSRS Clones
+- Müssen vor Production getestet werden
+- User Testing erforderlich um UX-Konsistenz zu verifizieren
+
+**Ziel:**
+Alle 4 Module im Mobile Dashboard testen und Funktionalität verifizieren
+
+**Module zum Testen:**
+
+**1. Due Cards Dialog (📅)** - 15 min
+- [ ] Button "Due Cards" öffnet Dialog
+- [ ] Zeigt nur fällige Karten (mode='due')
+- [ ] Flashcard flip funktioniert
+- [ ] 4-Button-Rating (Again/Hard/Good/Easy)
+- [ ] Progress Bar zeigt X/Y
+- [ ] Audio Button (🔊) spielt Greek TTS
+- [ ] Swipe-Gesten (optional)
+- [ ] Summary Screen am Ende
+- [ ] Dialog schließen funktioniert
+
+**2. Weak Words Dialog (💪)** - 15 min
+- [ ] Button "Weak Words" öffnet Dialog
+- [ ] Zeigt nur schwache Wörter (fsrs_difficulty > 6.5)
+- [ ] Flashcard flip funktioniert
+- [ ] 4-Button-Rating (Again/Hard/Good/Easy)
+- [ ] Progress Bar zeigt X/Y
+- [ ] Audio Button (🔊) spielt Greek TTS
+- [ ] Swipe-Gesten (optional)
+- [ ] Summary Screen am Ende
+- [ ] Empty State wenn keine weak words
+
+**3. Daily Phrases Dialog (💬)** - 15 min
+- [ ] Button "Daily Phrases" öffnet Dialog
+- [ ] Zeigt Mock Phrases (3 Stück)
+  - Good morning / Καλημέρα
+  - Thank you / Ευχαριστώ πολύ
+  - How much? / Πόσο κοστίζει αυτό;
+- [ ] Flashcard flip funktioniert
+- [ ] 4-Button-Rating (Again/Hard/Good/Easy)
+- [ ] Progress Bar zeigt 1/3, 2/3, 3/3
+- [ ] Audio Button (🔊) spielt Greek TTS
+- [ ] Summary Screen am Ende
+- [ ] Ratings werden gezählt (Again/Hard/Good/Easy)
+
+**4. Grammar Dialog (📐)** - 15 min
+- [ ] Button "Grammar" öffnet Dialog
+- [ ] Zeigt Mock Grammar Rules (5 Stück)
+  - Present Tense -ω verbs
+  - Accusative Case
+  - Past Simple -σα
+  - Genitive Case
+  - Future Tense θα
+- [ ] Flashcard flip funktioniert
+- [ ] Front: Grammar Rule Name (EN/RU)
+- [ ] Back: Greek Examples + Explanation
+- [ ] 4-Button-Rating (Again/Hard/Good/Easy)
+- [ ] Progress Bar zeigt 1/5 bis 5/5
+- [ ] Audio Button (🔊) spielt Greek TTS
+- [ ] Summary Screen am Ende
+
+**UX-Konsistenz Check:**
+- [ ] Alle 4 Module haben identisches Layout
+- [ ] Gleiche Button-Farben (Again: Red, Hard: Orange, Good: Green, Easy: Blue)
+- [ ] Gleiche Animations (Flip, Transitions)
+- [ ] Glasmorphismus Design konsistent
+- [ ] Progress Bar Style identisch
+- [ ] Summary Screen identisch
+
+**Known Issues:**
+- Daily Phrases: Mock Data (Backend pending Phase 4)
+- Grammar: Mock Data (Backend pending Phase 5)
+- Weak Words: Funktioniert nur wenn User schwache Wörter hat
+- Due Cards: Funktioniert nur wenn User fällige Karten hat
+
+**Test Environment:**
+- URL: `/m` (Mobile Dashboard)
+- Device: iPhone/Android Browser oder Desktop mit Mobile View
+- User: Test-Account mit Vocabulary Data
+
+**Aufwand:** 1-2 Stunden (15 min pro Modul + 30 min UX-Check)
+**Status:** ❌ **OFFEN**
+
+---
+
 ## 🧪 TESTING & QA
 
 ### **Testing: Mobile Learning Modules** 📱
