@@ -43,7 +43,7 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isVocabDialogOpen, setIsVocabDialogOpen] = useState(false);
-    const [vocabDialogMode, setVocabDialogMode] = useState<'weak' | 'review' | 'due'>('review');
+    const [vocabDialogMode, setVocabDialogMode] = useState<'due' | 'new' | 'all'>('due');
     const [isGrammarDialogOpen, setIsGrammarDialogOpen] = useState(false);
     const [grammarDialogMode, setGrammarDialogMode] = useState<'weak' | 'review' | 'due'>('review');
     const [isComprehensionDialogOpen, setIsComprehensionDialogOpen] = useState(false);
@@ -221,20 +221,20 @@ export default function DashboardPage() {
                             }}
                         />
 
-                        <ActionTile 
-                            icon="⚠️" 
-                            label={t('action.train_weak')} 
+                        <ActionTile
+                            icon="⚠️"
+                            label={t('action.train_weak')}
                             onClick={() => {
-                                setVocabDialogMode('weak');
+                                setVocabDialogMode('all');
                                 setIsVocabDialogOpen(true);
                             }}
                         />
 
-                        <ActionTile 
-                            icon="🔄" 
-                            label={t('action.review_vocab')} 
+                        <ActionTile
+                            icon="🔄"
+                            label={t('action.review_vocab')}
                             onClick={() => {
-                                setVocabDialogMode('review');
+                                setVocabDialogMode('all');
                                 setIsVocabDialogOpen(true);
                             }}
                         />
