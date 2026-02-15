@@ -16,6 +16,9 @@ import LessonDialog from '@/components/learning/LessonDialog';
 import { supabase } from '@/db/supabase';
 import { useTranslation } from '@/lib/use-translation';
 import Link from 'next/link';
+import { StreakDisplay } from '@/components/dashboard/streak-display';
+import { StreakMilestoneToast } from '@/components/dashboard/streak-milestone-toast';
+import { useStreak } from '@/hooks/use-streak';
 
 interface ActionTileProps {
     icon: string;
@@ -55,6 +58,14 @@ export default function DashboardPage() {
     const [stats, setStats] = useState({ streak: 0, words: 47, weak: 'Verbs' });
     const { t } = useTranslation();
 
+    // Streak tracking
+    const { updateStreak, getMilestoneMessage } = useStreak();
+    const [milestoneToast, setMilestoneToast] = useState<{
+        streak: number;
+        isNewRecord: boolean;
+        message: string;
+    } | null>(null);
+
     useEffect(() => {
         if (!authLoading) {
             if (!user) {
@@ -63,12 +74,30 @@ export default function DashboardPage() {
                 return;
             }
             fetchStats();
+
+            // Auto-update streak on dashboard load
+            const checkStreak = async () => {
+                const result = await updateStreak();
+                if (result) {
+                    // Check for milestones
+                    const milestone = getMilestoneMessage(result.new_streak);
+                    if (milestone || result.is_new_record) {
+                        setMilestoneToast({
+                            streak: result.new_streak,
+                            isNewRecord: result.is_new_record,
+                            message: milestone || result.message,
+                        });
+                    }
+                }
+            };
+            checkStreak();
+
             const timer = setTimeout(() => {
                 setLoading(false);
             }, 800);
             return () => clearTimeout(timer);
         }
-    }, [user, authLoading, router]);
+    }, [user, authLoading, router, updateStreak, getMilestoneMessage]);
 
     const fetchStats = async () => {
         try {
@@ -127,15 +156,31 @@ export default function DashboardPage() {
     return (
         <div id="app" className="dashboard-layout">
             <DashboardHeader studentName={user?.name} />
+
+            {/* Milestone Toast */}
+            {milestoneToast && (
+                <StreakMilestoneToast
+                    streak={milestoneToast.streak}
+                    isNewRecord={milestoneToast.isNewRecord}
+                    message={milestoneToast.message}
+                    onClose={() => setMilestoneToast(null)}
+                />
+            )}
+
             <main className="dashboard-content">
                 <div className="hero-section" style={{ height: 'auto', flex: '0 0 auto' }}>
                     <StatsCard />
-                    {/* Hero Right Side (Welcome / quick info) can go here if needed, 
+                    {/* Hero Right Side (Welcome / quick info) can go here if needed,
                         or we can keep it cleaner as per new design focus on footer */}
                     <div className="action-area" style={{ alignItems: 'flex-start', paddingLeft: '20px' }}>
                         <h2 style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#fff' }}>{t('dashboard.welcome', { name: user?.name || 'SWS' })} 🏛️</h2>
                         <p style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}
                             dangerouslySetInnerHTML={{ __html: t('dashboard.welcome_subtitle', { count: '12' }) }} />
+
+                        {/* Streak Display */}
+                        <div style={{ marginTop: '20px', maxWidth: '350px' }}>
+                            <StreakDisplay />
+                        </div>
                     </div>
                 </div>
 
