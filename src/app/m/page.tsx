@@ -8,6 +8,7 @@ import { useStatsData } from '@/hooks/use-stats-data';
 import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
 import { DueCardsSheet } from '@/components/mobile/DueCardsSheet';
 import VocabularyDialogFSRS from '@/components/learning/VocabularyDialogFSRS';
+import VocabularyDialog from '@/components/learning/VocabularyDialog';
 import '@/styles/liquid-glass.css';
 
 export default function MobileDashboardPage() {
@@ -16,6 +17,7 @@ export default function MobileDashboardPage() {
   const [showWeakWordsSheet, setShowWeakWordsSheet] = useState(false);
   const [showDueCardsSheet, setShowDueCardsSheet] = useState(false);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [showWeakWordsDialog, setShowWeakWordsDialog] = useState(false);
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -227,7 +229,7 @@ export default function MobileDashboardPage() {
             title="Weak Words"
             subtitle="Train difficult"
             color="orange"
-            onClick={() => setShowWeakWordsSheet(true)}
+            onClick={() => setShowWeakWordsDialog(true)}
           />
 
           {/* Row 3 */}
@@ -380,6 +382,15 @@ export default function MobileDashboardPage() {
           isOpen={showReviewDialog}
           onClose={() => setShowReviewDialog(false)}
           mode="all"
+        />
+      )}
+
+      {/* Train Weak Words Dialog */}
+      {showWeakWordsDialog && (
+        <VocabularyDialog
+          isOpen={showWeakWordsDialog}
+          onClose={() => setShowWeakWordsDialog(false)}
+          mode="weak"
         />
       )}
     </div>
