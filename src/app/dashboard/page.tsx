@@ -135,7 +135,7 @@ export default function DashboardPage() {
                     <div className="action-area" style={{ alignItems: 'flex-start', paddingLeft: '20px' }}>
                         <h2 style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#fff' }}>{t('dashboard.welcome', { name: user?.name || 'SWS' })} 🏛️</h2>
                         <p style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}
-                           dangerouslySetInnerHTML={{ __html: t('dashboard.welcome_subtitle', { count: '12' }) }} />
+                            dangerouslySetInnerHTML={{ __html: t('dashboard.welcome_subtitle', { count: '12' }) }} />
                     </div>
                 </div>
 
@@ -186,7 +186,7 @@ export default function DashboardPage() {
 
                         <div className="vocab-progress-section">
                             <div className="vocab-status-text"
-                                 dangerouslySetInnerHTML={{ __html: t('mastery.vocab_progress', { learned: '187', total: '600', remaining: '413' }) }} />
+                                dangerouslySetInnerHTML={{ __html: t('mastery.vocab_progress', { learned: '187', total: '600', remaining: '413' }) }} />
                             <div className="vocab-bar-dual">
                                 <div className="vocab-bar-learned" style={{ width: '31%' }}></div>
                                 <div className="vocab-bar-repeat" style={{ width: '69%' }}></div>
@@ -200,30 +200,36 @@ export default function DashboardPage() {
 
                     {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
                     <div className="quick-actions-grid">
+                        {/* Row 1 */}
                         <ActionTile
                             icon="👩‍🏫"
-                            label={t('action.magic_round')}
+                            label={`1. ${t('action.magic_round')}`}
                             onClick={() => setIsLessonDialogOpen(true)}
                         />
-                        <ActionTile icon="⚡" label={t('action.quick_lesson')} disabled />
-                        <ActionTile 
-                            icon="💬" 
-                            label={t('action.daily_phrases')} 
+                        <ActionTile
+                            icon="⚡"
+                            label={`2. ${t('action.quick_lesson')}`}
+                            onClick={() => console.log('🔥 Button 2: Quick Lesson clicked')}
+                        />
+                        <ActionTile
+                            icon="💬"
+                            label={`3. ${t('action.daily_phrases')}`}
                             onClick={() => {
                                 window.location.href = '/daily-phrases/daily-phrases.html';
                             }}
                         />
                         <ActionTile
                             icon="📚"
-                            label={t('action.short_stories')}
+                            label={`4. ${t('action.short_stories')}`}
                             onClick={() => {
                                 window.location.href = '/short-stories/short-stories.html';
                             }}
                         />
 
+                        {/* Row 2 */}
                         <ActionTile
                             icon="⚠️"
-                            label={t('action.train_weak')}
+                            label={`5. ${t('action.train_weak')}`}
                             onClick={() => {
                                 setVocabDialogMode('all');
                                 setIsVocabDialogOpen(true);
@@ -232,56 +238,80 @@ export default function DashboardPage() {
 
                         <ActionTile
                             icon="🔄"
-                            label={t('action.review_vocab')}
+                            label={`6. ${t('action.review_vocab')}`}
                             onClick={() => {
                                 setVocabDialogMode('all');
                                 setIsVocabDialogOpen(true);
                             }}
                         />
 
-                        <ActionTile 
-                            icon="📅" 
-                            label={t('action.due_cards')} 
+                        <ActionTile
+                            icon="📅"
+                            label={`7. ${t('action.due_cards')}`}
                             onClick={() => {
                                 setVocabDialogMode('due');
                                 setIsVocabDialogOpen(true);
                             }}
                         />
 
-                        <ActionTile 
-                            icon="📐" 
-                            label={t('action.grammar_hits')} 
+                        <ActionTile
+                            icon="📐"
+                            label={`8. ${t('action.grammar_hits')}`}
                             onClick={() => {
                                 setGrammarDialogMode('review');
                                 setIsGrammarDialogOpen(true);
                             }}
                         />
 
-                        <ActionTile 
-                            icon="👂" 
-                            label={t('action.listening')} 
-                            disabled
+                        {/* Row 3 */}
+                        <ActionTile
+                            icon="👂"
+                            label={`9. ${t('action.listening')}`}
                             onClick={() => {
                                 setListeningDialogMode('review');
                                 setIsListeningDialogOpen(true);
                             }}
                         />
-                        <ActionTile icon="🗣️" label={t('action.pronunciation')} disabled />
-                        <ActionTile 
-                            icon="🧠" 
-                            label={t('action.comprehension')} 
-                            disabled
+                        <ActionTile
+                            icon="🗣️"
+                            label={`10. ${t('action.pronunciation')}`}
+                            onClick={() => console.log('🔥 Button 10: Pronunciation clicked')}
+                        />
+                        <ActionTile
+                            icon="🧠"
+                            label={`11. ${t('action.comprehension')}`}
                             onClick={() => {
                                 setComprehensionDialogMode('review');
                                 setIsComprehensionDialogOpen(true);
                             }}
                         />
-                        <ActionTile icon="🎧" label={t('action.audio_immersion')} disabled />
+                        <ActionTile
+                            icon="🎧"
+                            label={`12. ${t('action.audio_immersion')}`}
+                            onClick={() => console.log('🔥 Button 12: Audio Immersion clicked')}
+                        />
 
-                        <ActionTile icon="📝" label={t('action.test')} disabled />
-                        <ActionTile icon="🏛️" label={t('action.cyprus_exam')} disabled />
-                        <ActionTile icon="📕" label={t('action.book_recs')} disabled />
-                        <ActionTile icon="📊" label={t('action.progress_history')} disabled />
+                        {/* Row 4 */}
+                        <ActionTile
+                            icon="📝"
+                            label={`13. ${t('action.test')}`}
+                            onClick={() => console.log('🔥 Button 13: Test clicked')}
+                        />
+                        <ActionTile
+                            icon="🏛️"
+                            label={`14. ${t('action.cyprus_exam')}`}
+                            onClick={() => console.log('🔥 Button 14: Cyprus Exam clicked')}
+                        />
+                        <ActionTile
+                            icon="📕"
+                            label={`15. ${t('action.book_recs')}`}
+                            onClick={() => console.log('🔥 Button 15: Book Recommendations clicked')}
+                        />
+                        <ActionTile
+                            icon="📊"
+                            label={`16. ${t('action.progress_history')}`}
+                            onClick={() => console.log('🔥 Button 16: Progress History clicked')}
+                        />
                     </div>
                 </div>
             </main>
