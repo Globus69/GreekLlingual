@@ -1,96 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/use-translation';
-import { supabase } from '@/db/supabase';
-
-interface Stats {
-  totalWords: number;
-  learnedWords: number;
-  weakWords: number;
-  dueToday: number;
-  streakDays: number;
-  totalSessions: number;
-  correctRate: number;
-  avgSessionTime: number;
-}
+import { useStatsData, formatStudyTime } from '@/hooks/use-stats-data';
+import WeeklyActivityChart from '@/components/weekly-activity-chart';
 
 export default function MobileStatsPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { stats, loading } = useStatsData(user?.id);
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login-pin');
-      return;
     }
-
-    loadStats();
-  }, [isAuthenticated, user]);
-
-  const loadStats = async () => {
-    try {
-      if (!user) return;
-
-      // Fetch student progress stats
-      const { data: progressData, error: progressError } = await supabase
-        .from('student_progress')
-        .select('*')
-        .eq('student_id', user.id);
-
-      if (progressError) throw progressError;
-
-      // Calculate stats
-      const totalWords = progressData?.length || 0;
-      const learnedWords = progressData?.filter((p: any) => p.correct_count > 0).length || 0;
-      const weakWords = progressData?.filter((p: any) => p.ease_factor < 2.0).length || 0;
-      const dueToday = progressData?.filter((p: any) => {
-        const nextReview = new Date(p.next_review);
-        const today = new Date();
-        return nextReview <= today;
-      }).length || 0;
-
-      // Calculate correct rate
-      const totalAttempts = progressData?.reduce((sum: number, p: any) => sum + (p.attempts || 0), 0) || 0;
-      const totalCorrect = progressData?.reduce((sum: number, p: any) => sum + (p.correct_count || 0), 0) || 0;
-      const correctRate = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
-
-      // Fetch session stats
-      let avgSessionTime = 0;
-      try {
-        const { data: sessionData, error: sessionError } = await supabase.rpc('get_session_stats', {
-          p_student_id: user.id,
-          p_days: 30
-        });
-
-        if (!sessionError && sessionData && sessionData.length > 0) {
-          avgSessionTime = sessionData[0].avg_session_minutes || 0;
-        }
-      } catch (err) {
-        console.warn('Session stats query failed:', err);
-      }
-
-      setStats({
-        totalWords,
-        learnedWords,
-        weakWords,
-        dueToday,
-        streakDays: user?.streak_days || 0,
-        totalSessions: totalAttempts,
-        correctRate,
-        avgSessionTime,
-      });
-    } catch (error) {
-      console.error('Error loading stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isAuthenticated, router]);
 
   if (loading) {
     return (
@@ -118,7 +45,7 @@ export default function MobileStatsPage() {
         <StatCard
           icon="🔥"
           label="Streak"
-          value={stats?.streakDays || 0}
+          value={stats.streak}
           suffix="days"
           color="from-orange-500 to-red-500"
         />
@@ -127,7 +54,7 @@ export default function MobileStatsPage() {
         <StatCard
           icon="📚"
           label="Total Words"
-          value={stats?.totalWords || 0}
+          value={stats.totalWords}
           suffix="words"
           color="from-blue-500 to-purple-500"
         />
@@ -136,17 +63,17 @@ export default function MobileStatsPage() {
         <StatCard
           icon="✅"
           label="Learned"
-          value={stats?.learnedWords || 0}
+          value={stats.progressOverview?.cards_learned || 0}
           suffix="words"
           color="from-green-500 to-emerald-500"
         />
 
-        {/* Weak Words */}
+        {/* Mastered */}
         <StatCard
-          icon="💪"
-          label="Weak"
-          value={stats?.weakWords || 0}
-          suffix="words"
+          icon="⭐"
+          label="Mastered"
+          value={stats.progressOverview?.cards_mastered || 0}
+          suffix="cards"
           color="from-yellow-500 to-orange-500"
         />
 
@@ -154,7 +81,7 @@ export default function MobileStatsPage() {
         <StatCard
           icon="📅"
           label="Due Today"
-          value={stats?.dueToday || 0}
+          value={stats.dueCount}
           suffix="cards"
           color="from-pink-500 to-rose-500"
         />
@@ -163,7 +90,7 @@ export default function MobileStatsPage() {
         <StatCard
           icon="🎯"
           label="Accuracy"
-          value={stats?.correctRate || 0}
+          value={Math.round(stats.correctRate || 0)}
           suffix="%"
           color="from-cyan-500 to-blue-500"
         />
@@ -171,23 +98,39 @@ export default function MobileStatsPage() {
 
       {/* Detailed Stats */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 space-y-4">
-        <h2 className="text-xl font-bold text-white mb-4">Detailed Statistics</h2>
+        <h2 className="text-xl font-bold text-white mb-4">📈 Detailed Statistics</h2>
 
-        <StatRow label="Total Sessions" value={stats?.totalSessions || 0} />
-        <StatRow label="Level" value={user?.level || 'A1'} />
-        <StatRow label="Difficulty" value={user?.difficulty || 'easy'} />
         <StatRow
-          label="Progress Index"
-          value={user?.performance_index || 'A1-easy'}
+          label="Total Reviews"
+          value={stats.progressOverview?.total_reviews || 0}
         />
+        <StatRow
+          label="Total Sessions"
+          value={stats.progressOverview?.total_sessions || 0}
+        />
+        <StatRow
+          label="Study Time"
+          value={formatStudyTime(stats.totalStudyTime || 0)}
+        />
+        <StatRow
+          label="Avg Session"
+          value={formatStudyTime(stats.avgSessionTime || 0)}
+        />
+        <StatRow
+          label="Consistency"
+          value={`${Math.round(stats.consistencyScore || 0)}%`}
+        />
+        <StatRow
+          label="Improvement Rate"
+          value={`${(stats.progressOverview?.improvement_rate || 0) > 0 ? '+' : ''}${Math.round(stats.progressOverview?.improvement_rate || 0)}%`}
+        />
+        <StatRow label="Level" value={stats.level} />
       </div>
 
-      {/* Weekly Activity Chart (Placeholder) */}
+      {/* Weekly Activity Chart */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
-        <h2 className="text-xl font-bold text-white mb-4">Weekly Activity</h2>
-        <div className="text-center text-blue-200 py-8">
-          📊 Chart coming soon...
-        </div>
+        <h2 className="text-xl font-bold text-white mb-4">📊 Weekly Activity</h2>
+        <WeeklyActivityChart data={stats.weeklyActivity || []} />
       </div>
     </div>
   );
