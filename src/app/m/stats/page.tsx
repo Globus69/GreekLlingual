@@ -21,34 +21,52 @@ export default function MobileStatsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-white text-lg">Loading statistics...</div>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#0F0F11',
+      }}>
+        <div style={{ color: 'white', fontSize: '18px' }}>Loading statistics...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-4 space-y-4 pb-20">
+    <div style={{ minHeight: '100vh', backgroundColor: '#0F0F11', padding: '16px', paddingBottom: '80px' }}>
       {/* Header */}
-      <div className="flex items-center gap-3 py-6">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingTop: '24px', paddingBottom: '24px' }}>
         <button
           onClick={() => router.push('/m')}
-          className="text-2xl text-white"
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '24px',
+            color: 'white',
+            cursor: 'pointer',
+            padding: 0,
+          }}
         >
           ←
         </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-white">
+        <div style={{ flex: 1 }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>
             📊 {t('perf.title') || 'Performance Statistics'}
           </h1>
-          <p className="text-sm text-blue-200">
+          <p style={{ fontSize: '14px', color: '#93C5FD', margin: 0 }}>
             {user?.name || 'Student'}
           </p>
         </div>
       </div>
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '12px',
+        marginBottom: '16px',
+      }}>
         {/* Streak */}
         <StatCard
           icon="🔥"
@@ -105,8 +123,14 @@ export default function MobileStatsPage() {
       </div>
 
       {/* Detailed Stats */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 space-y-4">
-        <h2 className="text-xl font-bold text-white mb-4">📈 Detailed Statistics</h2>
+      <div style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '16px',
+        padding: '24px',
+        marginBottom: '16px',
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'white', marginBottom: '16px', marginTop: 0 }}>📈 Detailed Statistics</h2>
 
         <StatRow
           label="Total Reviews"
@@ -136,8 +160,14 @@ export default function MobileStatsPage() {
       </div>
 
       {/* Weekly Activity Chart */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
-        <h2 className="text-xl font-bold text-white mb-4">📊 Weekly Activity</h2>
+      <div style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '16px',
+        padding: '24px',
+        marginBottom: '16px',
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'white', marginBottom: '16px', marginTop: 0 }}>📊 Weekly Activity</h2>
         <WeeklyActivityChart data={stats.weeklyActivity || []} />
       </div>
 
@@ -223,30 +253,51 @@ function StatCard({
   suffix?: string;
   color: string;
 }) {
+  const colorMap: { [key: string]: string } = {
+    'from-orange-500 to-red-500': 'linear-gradient(135deg, #F97316 0%, #EF4444 100%)',
+    'from-blue-500 to-purple-500': 'linear-gradient(135deg, #3B82F6 0%, #A855F7 100%)',
+    'from-green-500 to-emerald-500': 'linear-gradient(135deg, #22C55E 0%, #10B981 100%)',
+    'from-yellow-500 to-orange-500': 'linear-gradient(135deg, #EAB308 0%, #F97316 100%)',
+    'from-pink-500 to-rose-500': 'linear-gradient(135deg, #EC4899 0%, #F43F5E 100%)',
+    'from-cyan-500 to-blue-500': 'linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)',
+  };
+
   return (
     <div
-      className={`
-        bg-gradient-to-br ${color}
-        rounded-2xl p-4
-        flex flex-col items-center justify-center
-        min-h-[120px]
-        shadow-lg
-        transform transition-transform hover:scale-105
-      `}
+      style={{
+        background: colorMap[color] || '#3B82F6',
+        borderRadius: '16px',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '120px',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+        transition: 'transform 0.2s ease',
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
     >
-      <div className="text-4xl mb-2">{icon}</div>
-      <div className="text-3xl font-bold text-white mb-1">{value}</div>
-      {suffix && <div className="text-sm text-white/80">{suffix}</div>}
-      <div className="text-xs text-white/90 mt-1 font-medium">{label}</div>
+      <div style={{ fontSize: '36px', marginBottom: '8px' }}>{icon}</div>
+      <div style={{ fontSize: '30px', fontWeight: 'bold', color: 'white', marginBottom: '4px' }}>{value}</div>
+      {suffix && <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>{suffix}</div>}
+      <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.9)', marginTop: '4px', fontWeight: '500' }}>{label}</div>
     </div>
   );
 }
 
 function StatRow({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="flex justify-between items-center py-2 border-b border-white/10">
-      <span className="text-blue-200">{label}</span>
-      <span className="text-white font-semibold">{value}</span>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '8px 0',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+    }}>
+      <span style={{ color: '#93C5FD' }}>{label}</span>
+      <span style={{ color: 'white', fontWeight: '600' }}>{value}</span>
     </div>
   );
 }
