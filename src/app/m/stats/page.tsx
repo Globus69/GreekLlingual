@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/use-translation';
@@ -11,13 +11,18 @@ export default function MobileStatsPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
-  const { stats, loading } = useStatsData(user?.id);
+  const [mounted, setMounted] = useState(false);
+  const { stats, loading } = useStatsData(mounted ? user?.id : undefined);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
       router.push('/login-pin');
     }
-  }, [isAuthenticated, router]);
+  }, [mounted, isAuthenticated, router]);
 
   if (loading) {
     return (

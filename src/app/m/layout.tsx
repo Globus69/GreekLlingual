@@ -1,3 +1,5 @@
+'use client';
+
 import MobileBottomNav from '@/components/mobile/MobileBottomNav';
 
 export default function MobileLayout({

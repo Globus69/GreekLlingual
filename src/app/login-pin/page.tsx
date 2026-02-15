@@ -279,11 +279,15 @@ export default function PinLoginPage() {
                 }
 
                 // Device-Typ in Datenbank speichern (fire-and-forget)
+                // Note: Requires migration 010_add_device_type_tracking.sql to be executed
                 supabase.rpc('update_user_device', {
                     p_user_id: userData.user_id,
                     p_device_type: deviceType
                 }).then(({ error }) => {
-                    if (error) console.warn('Device update failed:', error);
+                    // Silently ignore if function doesn't exist (migration not yet applied)
+                    if (error && error.code !== 'PGRST202') {
+                        console.warn('Device update failed:', error);
+                    }
                 });
 
                 // Fingerprint speichern (falls neu oder geändert)

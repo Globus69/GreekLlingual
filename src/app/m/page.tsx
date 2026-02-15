@@ -377,7 +377,7 @@ export default function MobileDashboardPage() {
 
       {/* Review Vocabulary Dialog (FSRS-6) */}
       {showReviewDialog && user?.id && (
-        <VocabularyDialogFSRS
+        <VocabularyDialog
           isOpen={showReviewDialog}
           onClose={() => setShowReviewDialog(false)}
           mode="all"
