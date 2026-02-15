@@ -6,10 +6,10 @@ import { useAuth } from '@/context/auth-context';
 import { useTranslation } from '@/lib/use-translation';
 import { useStatsData } from '@/hooks/use-stats-data';
 import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
-import { DueCardsSheet } from '@/components/mobile/DueCardsSheet';
 import VocabularyDialogFSRS from '@/components/learning/VocabularyDialogFSRS';
 import VocabularyDialog from '@/components/learning/VocabularyDialog';
 import DailyPhrasesDialog from '@/components/learning/daily-phrases-dialog';
+import DueCardsDialog from '@/components/learning/due-cards-dialog';
 import '@/styles/liquid-glass.css';
 
 export default function MobileDashboardPage() {
@@ -372,11 +372,6 @@ export default function MobileDashboardPage() {
         isOpen={showWeakWordsSheet}
         onClose={() => setShowWeakWordsSheet(false)}
       />
-      <DueCardsSheet
-        isOpen={showDueCardsSheet}
-        onClose={() => setShowDueCardsSheet(false)}
-        dueCount={stats.dueCount}
-      />
 
       {/* Review Vocabulary Dialog (FSRS-6) */}
       {showReviewDialog && user?.id && (
@@ -401,6 +396,14 @@ export default function MobileDashboardPage() {
         <DailyPhrasesDialog
           isOpen={showDailyPhrasesDialog}
           onClose={() => setShowDailyPhrasesDialog(false)}
+        />
+      )}
+
+      {/* Due Cards Dialog */}
+      {showDueCardsSheet && (
+        <DueCardsDialog
+          isOpen={showDueCardsSheet}
+          onClose={() => setShowDueCardsSheet(false)}
         />
       )}
     </div>
