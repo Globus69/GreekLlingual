@@ -282,6 +282,7 @@ export default function AdminPage() {
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                     }}
+                        onClick={() => router.push('/admin/content')}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.background = 'rgba(52, 199, 89, 0.15)';
                             e.currentTarget.style.transform = 'translateY(-2px)';
@@ -291,10 +292,10 @@ export default function AdminPage() {
                             e.currentTarget.style.transform = 'translateY(0)';
                         }}
                     >
-                        <div style={{ fontSize: '40px', marginBottom: '12px' }}>📚</div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>{t('admin.content')}</h3>
+                        <div style={{ fontSize: '40px', marginBottom: '12px' }}>📦</div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Content Management</h3>
                         <p style={{ fontSize: '13px', color: '#8E8E93' }}>
-                            {t('admin.content_desc')}
+                            Import, verwalten und pflegen Sie Vokabeln, Phrasen und Grammatik
                         </p>
                     </div>
 
