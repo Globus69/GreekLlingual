@@ -666,6 +666,103 @@ Task 7 (FAB - optional)
 
 ---
 
+#### C) **Sprachauswahl im PIN-Login-Dialog umsetzen** (1-2h)
+**Priorität:** 🟡 **MITTEL**
+**Location:** `/app/login-pin/page.tsx`
+
+**Problem:**
+- Sprachauswahl (🌐 EN/RU/EL/DE) wurde oben rechts integriert
+- Dialog-Texte (Titel, Untertitel, Buttons) wechseln noch nicht mit Sprache
+- Aktuell hardcoded auf Deutsch: "PIN-Login", "Geben Sie Ihren 4-stelligen PIN ein"
+
+**Aufgaben:**
+- [ ] **i18n-Keys definieren** für Login-PIN Dialog:
+  - [ ] `login_pin.title` (z.B. "PIN Login", "PIN-Вход", "Σύνδεση PIN", "PIN-Anmeldung")
+  - [ ] `login_pin.subtitle` (z.B. "Enter your 4-digit PIN", "Введите 4-значный PIN", ...)
+  - [ ] `login_pin.admin_button` (z.B. "Admin", "Администратор", ...)
+  - [ ] `login_pin.user_button` (z.B. "User", "Пользователь", "Χρήστης", "Benutzer")
+- [ ] **Translation-Strings in DB einfügen** (`ui_translations` Tabelle)
+- [ ] **useTranslation Hook anwenden** im login-pin Dialog
+- [ ] **Hardcoded Strings ersetzen** mit `t('login_pin.title')` etc.
+- [ ] **Testen:** Alle 4 Sprachen durchklicken und Dialog-Text prüfen
+
+**Beispiel-Code:**
+```typescript
+// Aktuell:
+<h1>PIN-Login</h1>
+<p>Geben Sie Ihren 4-stelligen PIN ein</p>
+
+// Neu:
+<h1>{t('login_pin.title')}</h1>
+<p>{t('login_pin.subtitle')}</p>
+```
+
+**Aufwand:** 1-2 Stunden
+**Status:** ❌ **OFFEN**
+
+---
+
+#### D) **Spanisch als 5. Sprache integrieren** (4-6h)
+**Priorität:** 🟢 **NIEDRIG** (Feature-Erweiterung)
+**Scope:** Gesamte App (Frontend + Backend)
+
+**Problem:**
+- App unterstützt aktuell 4 Sprachen: EN, RU, EL, DE
+- Spanisch (ES) als wichtige europäische Sprache fehlt
+
+**Aufgaben:**
+
+**1. Backend (Supabase):**
+- [ ] **Locale-Type erweitern** in TypeScript:
+  ```typescript
+  // context/language-context.tsx
+  export type Locale = 'en' | 'ru' | 'el' | 'de' | 'es';
+  ```
+- [ ] **ui_translations Tabelle aktualisieren:**
+  - [ ] Neue Spalte `translation_es TEXT` hinzufügen
+  - [ ] Alle ~270 Keys mit spanischen Übersetzungen füllen
+- [ ] **learning_items Tabelle aktualisieren:**
+  - [ ] Neue Spalte `translation_es TEXT` hinzufügen
+  - [ ] Vokabular mit spanischen Übersetzungen füllen
+- [ ] **SQL-Migration erstellen:** `add_spanish_locale.sql`
+
+**2. Frontend (UI):**
+- [ ] **Language Selector erweitern:**
+  - [ ] `/login/page.tsx` - 5. Button "ES" hinzufügen
+  - [ ] `/login-pin/page.tsx` - 5. Button "ES" hinzufügen
+  - [ ] Gradient/Shadow für ES definieren (z.B. Spanien-Rot: #C60B1E)
+- [ ] **Background-Farben erweitern:**
+  - [ ] Partikel-Farbe für ES (z.B. Hue 0-20 für Rot)
+  - [ ] Gradient Orbs für ES (z.B. rgba(198, 11, 30, 0.18))
+- [ ] **Flag-Emoji hinzufügen** (optional):
+  - [ ] 🇪🇸 als visueller Indikator
+
+**3. Testing:**
+- [ ] **Sprachauswahl testen:** ES-Button funktioniert
+- [ ] **Alle UI-Texte prüfen:** 270+ Keys auf Spanisch
+- [ ] **Vokabeltraining testen:** Spanische Übersetzungen korrekt
+- [ ] **Mobile/Desktop konsistent:** Beide Plattformen unterstützen ES
+
+**Gradient-Vorschlag für Spanisch:**
+```typescript
+const langGradient: Record<Locale, string> = {
+  en: 'linear-gradient(135deg, #007AFF, #5856D6)',
+  ru: 'linear-gradient(135deg, #E05555, #C0392B)',
+  el: 'linear-gradient(135deg, #0D6EFD, #0A58CA)',
+  de: 'linear-gradient(135deg, #DAA520, #B8860B)',
+  es: 'linear-gradient(135deg, #C60B1E, #AA0000)', // Spanien Rot
+};
+```
+
+**Dependencies:**
+- Content-Übersetzungen (externe Übersetzungsarbeit notwendig)
+- SQL-Migration muss VOR Frontend-Deployment ausgeführt werden
+
+**Aufwand:** 4-6 Stunden (ohne Übersetzungsarbeit)
+**Status:** ❌ **OFFEN**
+
+---
+
 ## 📚 MODUL-SPEZIFISCHE TODOs
 
 ### **1. Due Cards Today** 🎯
