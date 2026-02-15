@@ -76,7 +76,7 @@ export default function MobileDashboardPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0F0F11', paddingBottom: '80px' }}>
-      {/* Stats Header */}
+      {/* Stats Header - COMPACT VERSION */}
       <div
         style={{
           position: 'sticky',
@@ -85,26 +85,50 @@ export default function MobileDashboardPage() {
           backgroundColor: 'rgba(28, 28, 30, 0.95)',
           backdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '12px 16px'
+          padding: '8px 16px'
         }}
         onClick={() => setShowDetailedStats(!showDetailedStats)}
       >
-        <div style={{ maxWidth: '448px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '24px' }}>🔥</span>
+        <div style={{
+          maxWidth: '448px',
+          margin: '0 auto',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '12px'
+        }}>
+          {/* Compact one-line stats */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: '#E5E5E7',
+            fontWeight: '500'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <span style={{ fontSize: '18px' }}>🔥</span>
               <span style={{ fontWeight: 'bold', color: 'white' }}>{stats.streak}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '24px' }}>📚</span>
+            </span>
+            <span style={{ color: '#8E8E93' }}>·</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <span style={{ fontSize: '18px' }}>📚</span>
               <span style={{ fontWeight: 'bold', color: '#007AFF' }}>{stats.dueCount}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '24px' }}>⭐</span>
+            </span>
+            <span style={{ color: '#8E8E93' }}>·</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <span style={{ fontSize: '18px' }}>⭐</span>
               <span style={{ fontWeight: 'bold', color: '#FFD60A' }}>{stats.level}</span>
-            </div>
+            </span>
+            {stats.totalWords > 0 && (
+              <>
+                <span style={{ color: '#8E8E93' }}>·</span>
+                <span style={{ color: '#34C759', fontWeight: '600' }}>
+                  {Math.round((stats.totalWords / (stats.totalWords + stats.dueCount)) * 100)}%
+                </span>
+              </>
+            )}
           </div>
-          <div style={{ color: '#8E8E93' }}>
+          <div style={{ color: '#8E8E93', fontSize: '14px' }}>
             {showDetailedStats ? '▲' : '▼'}
           </div>
         </div>
@@ -127,12 +151,11 @@ export default function MobileDashboardPage() {
 
       {/* Main Content */}
       <div style={{ maxWidth: '448px', margin: '0 auto', padding: '24px 16px' }}>
-        {/* Welcome */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', marginBottom: '4px' }}>
+        {/* Welcome - COMPACT VERSION */}
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', marginBottom: '0' }}>
             Welcome, {(() => {
               const name = user?.name;
-              console.log('🔍 User name:', name, 'Full user:', user);
               return name ? name.split(' ')[0] : 'Student';
             })()}! 👋
           </h1>
@@ -336,27 +359,39 @@ function ModuleTile({ icon, title, subtitle, color, disabled, onClick }: ModuleT
       disabled={disabled}
       style={{
         width: '100%',
-        minHeight: '64px',
-        padding: '12px 16px',
-        borderRadius: '16px',
+        minHeight: '56px',
+        padding: '10px 14px',
+        borderRadius: '14px',
         backgroundColor: c.bg,
         border: `1px solid ${c.border}`,
         backdropFilter: 'blur(10px)',
         display: 'flex',
         alignItems: 'center',
-        gap: '16px',
-        marginBottom: '12px',
+        gap: '12px',
+        marginBottom: '10px',
         opacity: disabled ? 0.4 : 1,
         cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'transform 0.2s ease, opacity 0.2s ease',
+      }}
+      onMouseDown={(e) => {
+        if (!disabled) {
+          e.currentTarget.style.transform = 'scale(0.98)';
+        }
+      }}
+      onMouseUp={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
       }}
     >
-      <span style={{ fontSize: '32px' }}>{icon}</span>
+      <span style={{ fontSize: '28px' }}>{icon}</span>
       <div style={{ flex: 1, textAlign: 'left' }}>
-        <div style={{ fontWeight: 'bold', fontSize: '16px', color: 'white' }}>{title}</div>
-        <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>{subtitle}</div>
+        <div style={{ fontWeight: 'bold', fontSize: '15px', color: 'white', lineHeight: '1.2' }}>{title}</div>
+        <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.65)', marginTop: '2px' }}>{subtitle}</div>
       </div>
       {!disabled && (
-        <span style={{ fontSize: '20px', color: c.text, opacity: 0.7 }}>→</span>
+        <span style={{ fontSize: '18px', color: c.text, opacity: 0.7 }}>→</span>
       )}
     </button>
   );
