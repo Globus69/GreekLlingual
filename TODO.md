@@ -1429,6 +1429,398 @@ Alle 4 Module im Mobile Dashboard testen und Funktionalität verifizieren
 
 ---
 
+### **11. FSRS-6 Algorithm Testing: Weak Words & Review Vocab Integration** 🧮
+**Priorität:** 🔴 **HOCH** (Quality Assurance + Algorithm Validation)
+**Aufwand:** 3-4 Stunden
+**Status:** ❌ **OFFEN**
+
+**Problem:**
+- FSRS-6 Algorithmus ist implementiert, aber nicht systematisch getestet
+- Zusammenspiel zwischen "Weak Words" und "Review Vocab" muss validiert werden
+- Rating-System (Again/Hard/Good/Easy) Auswertung muss korrekt funktionieren
+- Difficulty/Stability Tracking muss überprüft werden
+- State Transitions (new → learning → review → relearning) müssen getestet werden
+
+**Ziel:**
+Systematische Testroutine für FSRS-6 Algorithm und Modul-Integration erstellen und durchführen
+
+---
+
+## 🧪 Testroutine & Strategie
+
+### **Phase 1: Setup & Preparation (30 min)**
+
+**1. Test-Account vorbereiten**
+- [ ] Neuen Test-User erstellen (z.B. "test-fsrs@example.com")
+- [ ] User-ID notieren für spätere DB-Queries
+- [ ] Browser DevTools öffnen (Console für Logs)
+
+**2. Test-Data importieren**
+- [ ] A1 Vocabulary importieren (75 Wörter)
+- [ ] Erste 10 Wörter auswählen für intensive Tests
+- [ ] DB-State vor Tests dokumentieren
+
+**3. Monitoring Setup**
+- [ ] Supabase Dashboard öffnen (SQL Editor)
+- [ ] Console Logs aktivieren (FSRS Updates werden geloggt)
+- [ ] Spreadsheet für Test-Dokumentation vorbereiten
+
+---
+
+### **Phase 2: Rating System Tests (60 min)**
+
+**Ziel:** Verifizieren, dass Ratings korrekt in FSRS-Parameter umgewandelt werden
+
+**Test Case 1: "Again" Rating (❌)**
+```
+Erwartetes Verhalten:
+- fsrs_difficulty: increases (harder)
+- fsrs_stability: decreases slightly
+- fsrs_state: 'new' → 'learning' OR 'review' → 'relearning'
+- fsrs_lapses: +1
+- fsrs_reps: +1
+- next_review: today + short interval (minutes/hours)
+```
+
+**Schritte:**
+- [ ] 1. Wort lernen → Rating "Again" (1)
+- [ ] 2. Console Log prüfen: FSRS Update anzeigen
+- [ ] 3. DB Query ausführen:
+  ```sql
+  SELECT id, english, greek, fsrs_difficulty, fsrs_stability,
+         fsrs_state, fsrs_reps, fsrs_lapses, fsrs_due
+  FROM learning_items
+  WHERE id = '<test-card-id>';
+  ```
+- [ ] 4. Werte dokumentieren (Before/After)
+- [ ] 5. Verifizieren: difficulty ↑, stability ↓, lapses +1
+
+**Test Case 2: "Hard" Rating (🟠)**
+```
+Erwartetes Verhalten:
+- fsrs_difficulty: increases moderately
+- fsrs_stability: increases slightly
+- fsrs_state: remains or advances
+- fsrs_lapses: unchanged
+- fsrs_reps: +1
+- next_review: today + moderate interval (1-3 days)
+```
+
+**Schritte:**
+- [ ] 1. Neues Wort → Rating "Hard" (2)
+- [ ] 2. Console Log prüfen
+- [ ] 3. DB Query + Dokumentation
+- [ ] 4. Verifizieren: difficulty moderate ↑, stability slight ↑
+
+**Test Case 3: "Good" Rating (✅)**
+```
+Erwartetes Verhalten:
+- fsrs_difficulty: stable or decreases slightly
+- fsrs_stability: increases significantly
+- fsrs_state: 'new' → 'learning' → 'review'
+- fsrs_lapses: unchanged
+- fsrs_reps: +1
+- next_review: today + longer interval (5-10 days)
+```
+
+**Schritte:**
+- [ ] 1. Neues Wort → Rating "Good" (3)
+- [ ] 2. Console Log prüfen
+- [ ] 3. DB Query + Dokumentation
+- [ ] 4. Verifizieren: stability significant ↑
+
+**Test Case 4: "Easy" Rating (🎯)**
+```
+Erwartetes Verhalten:
+- fsrs_difficulty: decreases
+- fsrs_stability: increases maximally
+- fsrs_state: 'new' → 'review' (skip learning)
+- fsrs_lapses: unchanged
+- fsrs_reps: +1
+- next_review: today + longest interval (10-30 days)
+```
+
+**Schritte:**
+- [ ] 1. Neues Wort → Rating "Easy" (4)
+- [ ] 2. Console Log prüfen
+- [ ] 3. DB Query + Dokumentation
+- [ ] 4. Verifizieren: difficulty ↓, stability maximal ↑
+
+---
+
+### **Phase 3: Weak Words Filter Tests (45 min)**
+
+**Ziel:** Verifizieren, dass "Weak Words" Filter korrekt funktioniert
+
+**Test Case 5: Weak Word Creation**
+```
+Strategie: Mehrfach "Again" drücken → Wort wird "weak"
+```
+
+**Schritte:**
+- [ ] 1. Wort auswählen für Weak Word Test
+- [ ] 2. Review Vocab öffnen
+- [ ] 3. Dieses Wort 3x mit "Again" bewerten
+- [ ] 4. DB Query prüfen: `fsrs_difficulty > 6.5`
+- [ ] 5. Weak Words Modul öffnen
+- [ ] 6. Verifizieren: Wort erscheint in Weak Words Liste
+
+**Test Case 6: Weak Word Graduation**
+```
+Strategie: Weak Word mehrfach "Good/Easy" bewerten → wird strong
+```
+
+**Schritte:**
+- [ ] 1. Weak Words Modul öffnen
+- [ ] 2. Weak Word 3x mit "Good" bewerten
+- [ ] 3. DB Query: `fsrs_difficulty` sollte < 6.5 sein
+- [ ] 4. Weak Words Modul erneut öffnen
+- [ ] 5. Verifizieren: Wort erscheint NICHT mehr in Liste
+
+**Test Case 7: Filter Threshold Validation**
+```
+Boundary Testing: fsrs_difficulty = 6.49 vs 6.51
+```
+
+**Schritte:**
+- [ ] 1. DB Query: Wörter mit difficulty ~6.5 finden
+- [ ] 2. Weak Words öffnen
+- [ ] 3. Verifizieren: Nur difficulty > 6.5 erscheinen
+- [ ] 4. SQL Test:
+  ```sql
+  SELECT COUNT(*) FROM learning_items
+  WHERE fsrs_difficulty > 6.5 AND user_id = '<test-user-id>';
+  ```
+- [ ] 5. Count vergleichen mit Weak Words Dialog
+
+---
+
+### **Phase 4: State Transition Tests (45 min)**
+
+**Ziel:** FSRS State Machine validieren (new → learning → review → relearning)
+
+**Test Case 8: New → Learning**
+```
+Trigger: Erste Rating (beliebig außer Easy)
+```
+
+**Schritte:**
+- [ ] 1. Neues Wort (state: 'new')
+- [ ] 2. Rating "Good" geben
+- [ ] 3. DB Query: `fsrs_state` sollte 'learning' sein
+- [ ] 4. Dokumentieren: Transition successful
+
+**Test Case 9: Learning → Review**
+```
+Trigger: Mehrere erfolgreiche Ratings
+```
+
+**Schritte:**
+- [ ] 1. Wort in 'learning' state
+- [ ] 2. 2-3x "Good" Rating geben
+- [ ] 3. DB Query: `fsrs_state` sollte 'review' sein
+- [ ] 4. Verifizieren: Interval ist länger (Tage statt Stunden)
+
+**Test Case 10: Review → Relearning**
+```
+Trigger: "Again" Rating nach langer Zeit
+```
+
+**Schritte:**
+- [ ] 1. Wort in 'review' state
+- [ ] 2. Rating "Again" geben
+- [ ] 3. DB Query: `fsrs_state` sollte 'relearning' sein
+- [ ] 4. Verifizieren: Interval wird zurückgesetzt
+
+**Test Case 11: Easy Skip (New → Review direkt)**
+```
+Trigger: "Easy" Rating bei neuem Wort
+```
+
+**Schritte:**
+- [ ] 1. Neues Wort (state: 'new')
+- [ ] 2. Rating "Easy" geben
+- [ ] 3. DB Query: `fsrs_state` sollte direkt 'review' sein
+- [ ] 4. Verifizieren: Learning-Phase übersprungen
+
+---
+
+### **Phase 5: Integration Tests (45 min)**
+
+**Ziel:** Zusammenspiel zwischen Review Vocab und Weak Words testen
+
+**Test Case 12: Review → Weak → Review Cycle**
+```
+Scenario: Wort lernen, schwach werden lassen, wieder stärken
+```
+
+**Schritte:**
+- [ ] 1. Review Vocab: Neues Wort 2x "Good"
+- [ ] 2. Review Vocab: Gleiches Wort 3x "Again"
+- [ ] 3. DB Query: Jetzt `difficulty > 6.5`?
+- [ ] 4. Weak Words öffnen: Wort erscheint?
+- [ ] 5. Weak Words: Wort 4x "Good" trainieren
+- [ ] 6. DB Query: Jetzt `difficulty < 6.5`?
+- [ ] 7. Weak Words öffnen: Wort weg?
+- [ ] 8. Verifizieren: Cycle funktioniert
+
+**Test Case 13: Multi-User Isolation**
+```
+Ziel: User A's Ratings beeinflussen nicht User B's Daten
+```
+
+**Schritte:**
+- [ ] 1. Als User A einloggen
+- [ ] 2. Wort X mit "Easy" bewerten
+- [ ] 3. Als User B einloggen
+- [ ] 4. Wort X prüfen: Sollte 'new' sein
+- [ ] 5. DB Query: Separate learning_progress Einträge?
+
+**Test Case 14: Session Persistence**
+```
+Ziel: Ratings werden korrekt in DB gespeichert
+```
+
+**Schritte:**
+- [ ] 1. 5 Wörter in Review Vocab bewerten
+- [ ] 2. Browser schließen (Session beenden)
+- [ ] 3. Neu einloggen
+- [ ] 4. Review Vocab öffnen
+- [ ] 5. Verifizieren: Bewertete Wörter fehlen in Due Cards
+- [ ] 6. DB Query: fsrs_due Dates in Zukunft?
+
+---
+
+### **Phase 6: Performance & Edge Cases (30 min)**
+
+**Test Case 15: Large Dataset Performance**
+```
+Scenario: 100+ Wörter im System
+```
+
+**Schritte:**
+- [ ] 1. A1 + A2 Vocabulary komplett importieren (150 Wörter)
+- [ ] 2. Review Vocab öffnen: Ladezeit messen
+- [ ] 3. Weak Words Filter: Performance OK?
+- [ ] 4. Verifizieren: < 2 Sekunden Ladezeit
+
+**Test Case 16: Offline Handling**
+```
+Scenario: Keine Netzwerkverbindung
+```
+
+**Schritte:**
+- [ ] 1. Review Vocab öffnen
+- [ ] 2. Browser offline schalten (DevTools)
+- [ ] 3. Rating geben
+- [ ] 4. Verifizieren: Warning "Offline - changes not saved"
+- [ ] 5. Online schalten
+- [ ] 6. Rating nochmal geben
+- [ ] 7. DB Query: Wurde gespeichert?
+
+**Test Case 17: Boundary Values**
+```
+Scenario: Extreme FSRS Werte
+```
+
+**Schritte:**
+- [ ] 1. Wort 20x "Easy" bewerten
+- [ ] 2. DB Query: difficulty → 1.0 (minimum)?
+- [ ] 3. DB Query: stability → 100+ Tage?
+- [ ] 4. Wort 20x "Again" bewerten
+- [ ] 5. DB Query: difficulty → 10.0 (maximum)?
+- [ ] 6. Verifizieren: Keine Crashes, Werte im Rahmen
+
+---
+
+## 📊 Test Dokumentation Template
+
+**Excel/Google Sheets Struktur:**
+
+| Test # | Test Case | Expected | Actual | Pass/Fail | Notes |
+|--------|-----------|----------|--------|-----------|-------|
+| 1 | Again Rating | difficulty↑ | 5.0→6.2 | ✅ Pass | Logged correctly |
+| 2 | Hard Rating | stability↑ | 10.0→12.5 | ✅ Pass | Moderate increase |
+| ... | ... | ... | ... | ... | ... |
+
+**SQL Query Template:**
+```sql
+-- Before Rating
+SELECT id, english, greek, fsrs_difficulty, fsrs_stability,
+       fsrs_state, fsrs_reps, fsrs_lapses, fsrs_due
+FROM learning_items
+WHERE id = '<card-id>';
+
+-- After Rating (refresh)
+SELECT id, english, greek, fsrs_difficulty, fsrs_stability,
+       fsrs_state, fsrs_reps, fsrs_lapses, fsrs_due
+FROM learning_items
+WHERE id = '<card-id>';
+
+-- Compare values
+```
+
+---
+
+## ✅ Akzeptanzkriterien
+
+**Alle Tests bestanden, wenn:**
+- [ ] Rating System: Alle 4 Ratings (Again/Hard/Good/Easy) funktionieren korrekt
+- [ ] FSRS Updates: Difficulty & Stability werden korrekt berechnet
+- [ ] State Transitions: new → learning → review → relearning funktioniert
+- [ ] Weak Words Filter: Threshold 6.5 wird korrekt angewendet
+- [ ] Weak → Strong Cycle: Wörter können trainiert und verbessert werden
+- [ ] Data Persistence: Ratings werden in DB gespeichert
+- [ ] Multi-User: User-Daten sind isoliert
+- [ ] Performance: < 2 Sek Ladezeit bei 150 Wörtern
+- [ ] Offline Handling: Warning angezeigt, keine Crashes
+- [ ] Console Logs: FSRS Updates werden korrekt geloggt
+- [ ] No Crashes: Keine JavaScript-Fehler oder Bugs
+
+---
+
+## 🐛 Bug Tracking
+
+**Known Issues (zu dokumentieren):**
+- [ ] Issue #1: _______________
+- [ ] Issue #2: _______________
+
+**Kritische Bugs (Blocker):**
+- [ ] Ratings werden nicht gespeichert
+- [ ] Weak Words Filter funktioniert nicht
+- [ ] State Transitions fehlerhaft
+
+**Minor Bugs (Non-Blocker):**
+- [ ] Console Logs fehlen
+- [ ] Performance langsam (>3 Sek)
+
+---
+
+## 📋 Deliverables
+
+Nach Abschluss der Tests:
+1. ✅ Test Report (Excel/Google Sheets mit allen Test Cases)
+2. ✅ Bug Report (Liste aller gefundenen Issues)
+3. ✅ FSRS Validation Report (Algorithmus funktioniert korrekt?)
+4. ✅ Empfehlungen für Fixes/Improvements
+
+---
+
+**Aufwand:** 3-4 Stunden (systematisches Testing)
+**Priorität:** 🔴 **HOCH** (Algorithm Validation kritisch)
+**Status:** ❌ **OFFEN**
+**Dependencies:**
+- A1/A2 Vocabulary muss importiert sein (Task 6)
+- Test-User Account erstellen
+
+**Nächste Schritte:**
+1. Test-Environment vorbereiten (Test-User + Vocabulary Import)
+2. Phase 1-6 durchführen
+3. Bugs dokumentieren und fixen
+4. Re-test nach Fixes
+
+---
+
 ## 🧪 TESTING & QA
 
 ### **Testing: Mobile Learning Modules** 📱
