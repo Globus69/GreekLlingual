@@ -874,23 +874,54 @@ const langGradient: Record<Locale, string> = {
 
 ---
 
-### **2. Daily Phrases** 📅
-**Priorität:** 🟡 **HOCH** (Kernmodul für Mobile)
-**Status:** 🟢 Teilweise implementiert (HTML/CSS/JS vorhanden)
+### **2. Daily Phrases - Desktop + Mobile** 💬
+**Priorität:** 🟡 **HOCH** (Kernmodul für beide Plattformen)
+**Status:** ⚠️ Nur HTML-Prototyp vorhanden (`/daily-phrases/daily-phrases.html`)
 **Referenz:** `modules/daily-phrases/daily-phrases-todo.md`
 
-**Offene Aufgaben (aus Modul-TODO):**
-- [ ] `daily-phrases-due-logic.md` final überarbeiten
-- [ ] Struktur einer Phrase definieren (TypeScript Interface)
-- [ ] Regelwerk für 3 Phrasen pro Tag finalisieren
-- [ ] Verbindung zu progress-tracking herstellen
-- [ ] Erste Frontend-Komponente skizzieren (React)
-- [ ] **Nice-to-have:**
-  - [ ] Audio-Integration planen
-  - [ ] Kategorien-System einführen
+**Problem:**
+- HTML-Prototyp existiert unter `/daily-phrases/daily-phrases.html`
+- Keine React-Integration in Desktop Dashboard
+- Keine Integration in Mobile Dashboard
+- Kein Backend/DB-Anbindung
 
-**Aufwand:** 3-5 Stunden
-**Dependencies:** Keine
+**Aufgaben:**
+
+**Phase 1: React-Komponente erstellen (3-4h)**
+- [ ] **DailyPhrasesDialog Component:**
+  - [ ] `components/learning/DailyPhrasesDialog.tsx` erstellen
+  - [ ] HTML-Prototyp zu React migrieren
+  - [ ] TypeScript Interfaces definieren (Phrase, Category)
+  - [ ] Glasmorphismus-Design (konsistent mit anderen Dialogen)
+- [ ] **Phrase-Struktur:**
+  ```typescript
+  interface DailyPhrase {
+    id: string;
+    phrase_greek: string;
+    phrase_english: string;
+    category: 'greeting' | 'shopping' | 'restaurant' | 'travel';
+    difficulty: 'easy' | 'medium' | 'hard';
+    audio_url?: string;
+  }
+  ```
+
+**Phase 2: Desktop Integration (1h)**
+- [ ] Button in Desktop Dashboard hinzufügen
+- [ ] Dialog State Management
+- [ ] 3 Phrasen pro Tag laden
+
+**Phase 3: Mobile Integration (1h)**
+- [ ] Button "💬 Daily Phrases" funktional machen
+- [ ] Mobile-optimiertes Layout
+- [ ] Touch-Gesten
+
+**Phase 4: Backend (2-3h)**
+- [ ] Supabase `daily_phrases` Tabelle erstellen
+- [ ] RPC `get_daily_phrases(user_id, date)` erstellen
+- [ ] Progress-Tracking in `student_progress`
+
+**Aufwand:** 7-9 Stunden (komplett)
+**Dependencies:** HTML-Prototyp analysieren, DB-Schema definieren
 
 ---
 
@@ -908,16 +939,31 @@ const langGradient: Record<Locale, string> = {
 
 ---
 
-### **4. Review Vocabulary** 🔁
-**Priorität:** 🟡 **HOCH** (Kernmodul für Mobile)
-**Status:** ✅ Bereits implementiert (VocabularyDialog mit `mode: 'review'`)
+### **4. Review Vocabulary (FSRS-6) - Mobile Integration** 🔁
+**Priorität:** 🟢 **MITTEL** (Komponente existiert, nur Integration fehlt)
+**Status:** ⚠️ Desktop funktioniert, Mobile zeigt nur Alert
 
-**Offene Aufgaben:**
-- [ ] Mobile-spezifische Anpassungen prüfen
-- [ ] Swipe-Gesten hinzufügen (optional)
-- [ ] Performance-Tests
+**Problem:**
+- VocabularyDialog mit FSRS-6 ist bereits implementiert (Desktop)
+- Mobile Dashboard Button "📖 Review Vocab" zeigt nur `alert('Review - Coming soon!')`
+- Integration in Mobile Dashboard fehlt
 
-**Aufwand:** 1-2 Stunden
+**Aufgaben:**
+- [ ] **Mobile Integration:**
+  - [ ] VocabularyDialogFSRS in `/m/page.tsx` importieren
+  - [ ] State für Dialog (open/close) hinzufügen
+  - [ ] Button onClick: Dialog öffnen statt Alert
+  - [ ] Props übergeben: `mode: 'review'`, `userId`, etc.
+- [ ] **Mobile-spezifische Anpassungen:**
+  - [ ] Touch-optimierte Controls (min 44px)
+  - [ ] Swipe-Gesten für Flashcards (optional)
+  - [ ] Responsive Layout testen (iPhone SE bis Pro Max)
+- [ ] **Performance-Tests:**
+  - [ ] Ladezeit < 1s
+  - [ ] Smooth Animationen (60fps)
+
+**Aufwand:** 1-2 Stunden (nur Integration + Testing)
+**Dependencies:** Keine (VocabularyDialogFSRS existiert bereits)
 
 ---
 
@@ -930,6 +976,66 @@ const langGradient: Record<Locale, string> = {
 - [ ] Threshold `ease_factor < 2.0` dokumentieren
 
 **Aufwand:** 1 Stunde
+
+---
+
+### **6. Grammar Quick Hits - Desktop + Mobile** 📐
+**Priorität:** 🟡 **MITTEL** (Neues Modul)
+**Status:** ❌ Nicht implementiert
+
+**Problem:**
+- Button "📐 Grammar" existiert im Mobile Dashboard
+- Zeigt nur `alert('Grammar - Coming soon!')`
+- Kein Desktop-Equivalent
+- Keine Komponente vorhanden
+
+**Aufgaben:**
+
+**Phase 1: Komponente erstellen (4-5h)**
+- [ ] **GrammarDialog Component:**
+  - [ ] `components/learning/GrammarDialog.tsx` erstellen
+  - [ ] Quiz-Format: Multiple Choice oder Fill-in-the-blank
+  - [ ] Grammatik-Regeln anzeigen (z.B. Artikel, Fälle, Verben)
+  - [ ] Feedback bei richtigen/falschen Antworten
+  - [ ] Glasmorphismus-Design
+- [ ] **Grammar-Struktur:**
+  ```typescript
+  interface GrammarRule {
+    id: string;
+    title: string; // "Definite Articles (ο, η, το)"
+    explanation: string; // Rule explanation
+    difficulty: 'easy' | 'medium' | 'hard';
+    category: 'articles' | 'cases' | 'verbs' | 'adjectives';
+  }
+
+  interface GrammarExercise {
+    id: string;
+    rule_id: string;
+    question: string;
+    options: string[];
+    correct_answer: number;
+    explanation?: string;
+  }
+  ```
+
+**Phase 2: Desktop Integration (1h)**
+- [ ] Action Tile in Desktop Dashboard hinzufügen
+- [ ] "📐 Grammar Hits" Button
+- [ ] Dialog State Management
+
+**Phase 3: Mobile Integration (30min)**
+- [ ] Button "📐 Grammar" funktional machen
+- [ ] Mobile-optimiertes Layout
+- [ ] Touch-optimiert
+
+**Phase 4: Backend (2-3h)**
+- [ ] Supabase `grammar_rules` Tabelle
+- [ ] Supabase `grammar_exercises` Tabelle
+- [ ] RPC `get_grammar_exercises(level, limit)`
+- [ ] Progress-Tracking
+
+**Aufwand:** 8-10 Stunden (komplett)
+**Dependencies:** Keine
 
 ---
 
