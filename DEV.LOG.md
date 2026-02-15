@@ -10,6 +10,90 @@
 
 ---
 
+## 2026-02-15 - Content Management: RLS Fix, CSV Import & UI Improvements ✅
+
+### ✅ RLS Fix for Custom PIN-based Authentication - COMPLETED
+**Commits:** `6d802f5`, `54f3585`
+
+**Problem:** Content table RLS policies used `auth.uid()` but app uses custom PIN-based authentication with `public.users` table.
+
+**Lösung:**
+1. **Backend RPC Functions** (`database/migrations/062_fix_content_rls_for_custom_auth.sql`)
+   - Created security-definer RPC functions that check `public.users.role` instead of `auth.uid()`:
+     - `admin_create_content` - Create content items (admin only)
+     - `admin_update_content` - Update content items (admin only)
+     - `admin_delete_content` - Delete content items (admin only)
+     - `admin_bulk_import_content` - Bulk import from CSV (admin only)
+   - Helper function `is_admin_user(user_id)` for role checking
+   - Updated RLS policies: Read for all, Write/Update/Delete via RPC functions
+
+2. **Frontend Integration** (`src/lib/supabase/content.ts`)
+   - Updated all CRUD functions to use RPC instead of direct Supabase queries
+   - Extracts `user.id` from localStorage and passes to RPC functions
+   - Error handling with toast notifications
+
+**Ergebnis:** Content creation/editing now works with custom PIN authentication ✅
+
+---
+
+### ✅ CSV Import/Export for Content Management - COMPLETED
+**Commit:** `6d802f5`
+
+**Features:**
+1. **Import Modal** (`src/app/admin/content/page.tsx`)
+   - Template download button (generates example CSV)
+   - File upload with live validation
+   - Preview showing valid/invalid items count
+   - Error display (first 5 errors with line numbers)
+   - Bulk import confirmation with success statistics
+
+2. **Backend Support**
+   - `admin_bulk_import_content` RPC handles batch inserts
+   - Individual error handling per row
+   - Returns success/error counts with error messages
+
+3. **UI/UX**
+   - Glassmorphism styling matching admin theme
+   - Step-by-step workflow (Download → Upload → Review → Import)
+   - Success/error notifications
+   - Disabled states during processing
+
+**Ergebnis:** Admins can now bulk-import content via CSV ✅
+
+---
+
+### ✅ ContentModal Two-Column Layout - COMPLETED
+**Commit:** `decc8e1`
+
+**Änderungen:**
+- Split modal into two-column grid layout
+- **Left Column:** Required fields (Type, Level, Difficulty, English, Greek)
+- **Right Column:** "Optional Fields" header + optional fields (Phonetic, Audio URL, Examples)
+- Increased modal width: 560px → 900px
+- Improved visual organization and space utilization
+
+**Ergebnis:** Better UX, clearer field grouping ✅
+
+---
+
+### ✅ Responsive Layout Fixes - COMPLETED
+**Commit:** `54f3585`
+
+**Fixes:**
+1. **Filter Width Overflow** (`src/app/admin/content/page.tsx`)
+   - Added `boxSizing: 'border-box'` to input/select styles
+   - Changed grid from `repeat(3, 1fr)` to `repeat(auto-fit, minmax(180px, 1fr))`
+   - Filters now responsive: stack on narrow screens, side-by-side on wide screens
+
+2. **Dashboard Header Display** (`src/components/dashboard/DashboardHeader.tsx`, `src/app/dashboard/page.tsx`)
+   - Fixed "SW SWS" display issue
+   - Now passes `studentName={user?.name}` prop to DashboardHeader
+   - Consistent fallbacks: `'GU'` / `'Guest'` instead of `'SW'` / `'SWS'`
+
+**Ergebnis:** UI now properly responsive and displays correct user information ✅
+
+---
+
 ## 2026-02-15 - Progress Statistics: Backend + Frontend Integration ✅
 
 ### ✅ Phase 1: Backend RPC Functions - COMPLETED
