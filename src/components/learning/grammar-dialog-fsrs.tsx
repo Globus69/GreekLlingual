@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/context/auth-context';
-import FlashcardFSRS from '@/components/learning/FlashcardFSRS';
+import FlashcardFSRS from '@/components/learning/flashcard-fsrs';
 import { useTranslation } from '@/lib/use-translation';
 import { usePerformanceEvaluation } from '@/lib/use-performance-evaluation';
 import { FSRSScheduler } from '@/lib/fsrs/fsrs-scheduler';
