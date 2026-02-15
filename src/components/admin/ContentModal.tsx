@@ -138,131 +138,137 @@ export function ContentModal({
 
                 {/* Body */}
                 <div style={bodyStyle}>
-                    <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        {/* Type */}
-                        <label style={labelStyle}>
-                            <span>Type <span style={{ color: '#FF3B30' }}>*</span></span>
-                            <select
-                                value={selectedType}
-                                onChange={(e) => setValue('type', e.target.value as any)}
-                                style={selectStyle}
-                            >
-                                <option value="vocabulary">Vocabulary</option>
-                                <option value="phrase">Phrase</option>
-                                <option value="grammar">Grammar</option>
-                            </select>
-                            {errors.type && <span style={errorStyle}>{errors.type.message}</span>}
-                        </label>
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        {/* Two Column Grid */}
+                        <div style={gridStyle}>
+                            {/* Left Column - Required Fields */}
+                            <div style={columnStyle}>
+                                {/* Type */}
+                                <label style={labelStyle}>
+                                    <span>Type <span style={{ color: '#FF3B30' }}>*</span></span>
+                                    <select
+                                        value={selectedType}
+                                        onChange={(e) => setValue('type', e.target.value as any)}
+                                        style={selectStyle}
+                                    >
+                                        <option value="vocabulary">Vocabulary</option>
+                                        <option value="phrase">Phrase</option>
+                                        <option value="grammar">Grammar</option>
+                                    </select>
+                                    {errors.type && <span style={errorStyle}>{errors.type.message}</span>}
+                                </label>
 
-                        {/* Level */}
-                        <label style={labelStyle}>
-                            <span>Level <span style={{ color: '#FF3B30' }}>*</span></span>
-                            <select
-                                value={selectedLevel}
-                                onChange={(e) => setValue('level', e.target.value as any)}
-                                style={selectStyle}
-                            >
-                                <option value="A1">A1</option>
-                                <option value="A2">A2</option>
-                                <option value="B1">B1</option>
-                                <option value="B2">B2</option>
-                                <option value="C1">C1</option>
-                                <option value="C2">C2</option>
-                            </select>
-                            {errors.level && <span style={errorStyle}>{errors.level.message}</span>}
-                        </label>
+                                {/* Level */}
+                                <label style={labelStyle}>
+                                    <span>Level <span style={{ color: '#FF3B30' }}>*</span></span>
+                                    <select
+                                        value={selectedLevel}
+                                        onChange={(e) => setValue('level', e.target.value as any)}
+                                        style={selectStyle}
+                                    >
+                                        <option value="A1">A1</option>
+                                        <option value="A2">A2</option>
+                                        <option value="B1">B1</option>
+                                        <option value="B2">B2</option>
+                                        <option value="C1">C1</option>
+                                        <option value="C2">C2</option>
+                                    </select>
+                                    {errors.level && <span style={errorStyle}>{errors.level.message}</span>}
+                                </label>
 
-                        {/* Difficulty */}
-                        <label style={labelStyle}>
-                            <span>Difficulty <span style={{ color: '#FF3B30' }}>*</span></span>
-                            <select
-                                value={selectedDifficulty}
-                                onChange={(e) => setValue('difficulty', e.target.value as any)}
-                                style={selectStyle}
-                            >
-                                <option value="easy">Easy</option>
-                                <option value="medium">Medium</option>
-                                <option value="hard">Hard</option>
-                            </select>
-                            {errors.difficulty && <span style={errorStyle}>{errors.difficulty.message}</span>}
-                        </label>
+                                {/* Difficulty */}
+                                <label style={labelStyle}>
+                                    <span>Difficulty <span style={{ color: '#FF3B30' }}>*</span></span>
+                                    <select
+                                        value={selectedDifficulty}
+                                        onChange={(e) => setValue('difficulty', e.target.value as any)}
+                                        style={selectStyle}
+                                    >
+                                        <option value="easy">Easy</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="hard">Hard</option>
+                                    </select>
+                                    {errors.difficulty && <span style={errorStyle}>{errors.difficulty.message}</span>}
+                                </label>
 
-                        {/* English */}
-                        <label style={labelStyle}>
-                            <span>English <span style={{ color: '#FF3B30' }}>*</span></span>
-                            <textarea
-                                {...register('english')}
-                                placeholder="Enter English text"
-                                style={textareaStyle}
-                                rows={4}
-                            />
-                            {errors.english && <span style={errorStyle}>{errors.english.message}</span>}
-                        </label>
+                                {/* English */}
+                                <label style={labelStyle}>
+                                    <span>English <span style={{ color: '#FF3B30' }}>*</span></span>
+                                    <textarea
+                                        {...register('english')}
+                                        placeholder="Enter English text"
+                                        style={textareaStyle}
+                                        rows={4}
+                                    />
+                                    {errors.english && <span style={errorStyle}>{errors.english.message}</span>}
+                                </label>
 
-                        {/* Greek */}
-                        <label style={labelStyle}>
-                            <span>Greek <span style={{ color: '#FF3B30' }}>*</span></span>
-                            <textarea
-                                {...register('greek')}
-                                placeholder="Εισάγετε ελληνικό κείμενο"
-                                style={textareaStyle}
-                                rows={4}
-                            />
-                            {errors.greek && <span style={errorStyle}>{errors.greek.message}</span>}
-                        </label>
+                                {/* Greek */}
+                                <label style={labelStyle}>
+                                    <span>Greek <span style={{ color: '#FF3B30' }}>*</span></span>
+                                    <textarea
+                                        {...register('greek')}
+                                        placeholder="Εισάγετε ελληνικό κείμενο"
+                                        style={textareaStyle}
+                                        rows={4}
+                                    />
+                                    {errors.greek && <span style={errorStyle}>{errors.greek.message}</span>}
+                                </label>
+                            </div>
 
-                        {/* Divider */}
-                        <div style={dividerStyle} />
+                            {/* Right Column - Optional Fields */}
+                            <div style={columnStyle}>
+                                {/* Optional Fields Header */}
+                                <div style={{ fontSize: '11px', fontWeight: 600, color: '#636366', marginBottom: '12px' }}>
+                                    Optional Fields
+                                </div>
 
-                        {/* Optional Fields */}
-                        <div style={{ fontSize: '11px', fontWeight: 600, color: '#636366', marginTop: '4px' }}>
-                            Optional Fields
+                                {/* Phonetic */}
+                                <label style={labelStyle}>
+                                    <span>Phonetic</span>
+                                    <input
+                                        {...register('phonetic')}
+                                        type="text"
+                                        placeholder="e.g., YAH-soo"
+                                        style={inputStyle}
+                                    />
+                                </label>
+
+                                {/* Audio URL */}
+                                <label style={labelStyle}>
+                                    <span>Audio URL</span>
+                                    <input
+                                        {...register('audio_url')}
+                                        type="url"
+                                        placeholder="https://example.com/audio.mp3"
+                                        style={inputStyle}
+                                    />
+                                    {errors.audio_url && <span style={errorStyle}>{errors.audio_url.message}</span>}
+                                </label>
+
+                                {/* Example English */}
+                                <label style={labelStyle}>
+                                    <span>Example (English)</span>
+                                    <textarea
+                                        {...register('example_en')}
+                                        placeholder="Example sentence in English"
+                                        style={textareaSmallStyle}
+                                        rows={2}
+                                    />
+                                </label>
+
+                                {/* Example Greek */}
+                                <label style={labelStyle}>
+                                    <span>Example (Greek)</span>
+                                    <textarea
+                                        {...register('example_gr')}
+                                        placeholder="Παράδειγμα πρότασης στα ελληνικά"
+                                        style={textareaSmallStyle}
+                                        rows={2}
+                                    />
+                                </label>
+                            </div>
                         </div>
-
-                        {/* Phonetic */}
-                        <label style={labelStyle}>
-                            <span>Phonetic</span>
-                            <input
-                                {...register('phonetic')}
-                                type="text"
-                                placeholder="e.g., YAH-soo"
-                                style={inputStyle}
-                            />
-                        </label>
-
-                        {/* Audio URL */}
-                        <label style={labelStyle}>
-                            <span>Audio URL</span>
-                            <input
-                                {...register('audio_url')}
-                                type="url"
-                                placeholder="https://example.com/audio.mp3"
-                                style={inputStyle}
-                            />
-                            {errors.audio_url && <span style={errorStyle}>{errors.audio_url.message}</span>}
-                        </label>
-
-                        {/* Example English */}
-                        <label style={labelStyle}>
-                            <span>Example (English)</span>
-                            <textarea
-                                {...register('example_en')}
-                                placeholder="Example sentence in English"
-                                style={textareaSmallStyle}
-                                rows={2}
-                            />
-                        </label>
-
-                        {/* Example Greek */}
-                        <label style={labelStyle}>
-                            <span>Example (Greek)</span>
-                            <textarea
-                                {...register('example_gr')}
-                                placeholder="Παράδειγμα πρότασης στα ελληνικά"
-                                style={textareaSmallStyle}
-                                rows={2}
-                            />
-                        </label>
 
                         {/* Footer Buttons */}
                         <div style={footerStyle}>
@@ -308,7 +314,7 @@ const backdropStyle: CSSProperties = {
 
 const modalStyle: CSSProperties = {
     width: '100%',
-    maxWidth: '560px',
+    maxWidth: '900px',
     maxHeight: '90vh',
     background: 'rgba(22, 22, 26, 0.98)',
     backdropFilter: 'blur(60px)',
@@ -340,6 +346,19 @@ const bodyStyle: CSSProperties = {
     padding: '18px',
     overflowY: 'auto',
     flex: 1,
+};
+
+const gridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '20px',
+    marginBottom: '16px',
+};
+
+const columnStyle: CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
 };
 
 const labelStyle: CSSProperties = {
