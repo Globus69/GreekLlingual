@@ -1039,6 +1039,83 @@ const langGradient: Record<Locale, string> = {
 
 ---
 
+### **7. Audio-Playback bei Klick auf Kartenrückseite** 🔊
+**Priorität:** 🟢 **MITTEL** (UX-Verbesserung)
+**Scope:** Alle Vocabulary-Module (Desktop + Mobile)
+
+**Problem:**
+- Aktuell: Audio kann nur über Lautsprecher-Icon abgespielt werden
+- Gewünscht: Klick auf Kartenrückseite spielt Audio ab
+
+**Ziel:**
+Intuitive Audio-Wiedergabe durch Klick auf die Karte selbst
+
+**Aufgaben:**
+
+**Phase 1: Click-Handler implementieren (1-2h)**
+- [ ] **VocabularyDialogFSRS Component:**
+  - [ ] onClick-Handler für Kartenrückseite hinzufügen
+  - [ ] Nur auf Rückseite aktiv (nicht auf Vorderseite)
+  - [ ] Audio abspielen wenn verfügbar
+- [ ] **Visual Feedback:**
+  - [ ] Cursor: pointer (zeigt Klickbarkeit)
+  - [ ] Subtle Hover-Effekt (z.B. leichtes Highlight)
+  - [ ] Optional: Ripple-Effekt bei Klick
+
+**Phase 2: Mobile Integration (30min-1h)**
+- [ ] **Touch-Optimierung:**
+  - [ ] Touch-Handler (nicht nur onClick)
+  - [ ] Verhindere Doppel-Tap-Zoom
+  - [ ] Haptic Feedback (optional, wenn unterstützt)
+- [ ] **TrainWeakWordsSheet:** Analog implementieren
+- [ ] **DueCardsSheet:** Analog implementieren
+
+**Phase 3: Audio-Logik (30min)**
+- [ ] **Audio-Handling:**
+  - [ ] Prüfe ob Audio-URL vorhanden
+  - [ ] Stoppe laufendes Audio vor neuem Abspielen
+  - [ ] Error-Handling (silent fail wenn kein Audio)
+  - [ ] Respektiere Lautsprecher-Icon-State (muted/unmuted)
+
+**Code-Beispiel:**
+```typescript
+// In VocabularyDialogFSRS
+const handleCardClick = () => {
+  // Nur auf Rückseite (wenn Antwort sichtbar)
+  if (showAnswer && currentItem.audio_url) {
+    playAudio(currentItem.audio_url);
+  }
+};
+
+// JSX
+<div
+  className="flashcard-back"
+  onClick={handleCardClick}
+  style={{
+    cursor: showAnswer ? 'pointer' : 'default',
+    transition: 'background 0.2s ease'
+  }}
+  onMouseEnter={(e) => {
+    if (showAnswer) {
+      e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+    }
+  }}
+>
+  {/* Card content */}
+</div>
+```
+
+**Hinweis:**
+- Click-Area sollte groß sein (gesamte Kartenrückseite)
+- Buttons (1-4) dürfen nicht gestört werden
+- Event-Propagation beachten (stopPropagation auf Buttons)
+
+**Aufwand:** 2-3 Stunden (alle Module)
+**Dependencies:** Audio-URLs in DB (bereits vorhanden)
+**Status:** ❌ **OFFEN**
+
+---
+
 ## 🔧 ORDNERSTRUKTUR-ÄNDERUNGEN
 
 ### ✅ **Bereits durchgeführt** (2026-02-13)
