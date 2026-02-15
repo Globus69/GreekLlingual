@@ -414,46 +414,6 @@ export default function PinLoginPage() {
                     style={{ position: 'absolute', inset: 0, zIndex: 0 }}
                 />
 
-                {/* Admin-Login Button - Top Right */}
-                <button
-                    type="button"
-                    onClick={() => router.push('/login')}
-                    style={{
-                        position: 'absolute',
-                        top: '24px',
-                        right: '24px',
-                        background: 'rgba(255, 255, 255, 0.06)',
-                        backdropFilter: 'blur(30px)',
-                        WebkitBackdropFilter: 'blur(30px)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: '12px',
-                        padding: '10px 18px',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        color: '#FFD700',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        zIndex: 10,
-                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(255, 215, 0, 0.15)';
-                        e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.3)';
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                >
-                    <span style={{ fontSize: '16px' }}>👤</span>
-                    Admin
-                </button>
-
                 <div style={{
                     position: 'absolute',
                     width: '500px',
