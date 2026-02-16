@@ -41,6 +41,8 @@ interface UnlockStatus {
 }
 
 export function PracticeModesSection() {
+    console.log('🔍 PracticeModesSection: Component rendering');
+
     const { user } = useAuth();
     const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([]);
     const [unlockStatuses, setUnlockStatuses] = useState<Record<string, UnlockStatus>>({});
@@ -48,6 +50,12 @@ export function PracticeModesSection() {
     const [selectedItem, setSelectedItem] = useState<PracticeItem | null>(null);
     const [selectedMode, setSelectedMode] = useState<PracticeMode | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
+
+    console.log('🔍 PracticeModesSection: State -', {
+        loading,
+        itemCount: practiceItems.length,
+        hasUser: !!user?.id
+    });
 
     useEffect(() => {
         if (user?.id) {
@@ -59,8 +67,12 @@ export function PracticeModesSection() {
      * Load learning items with practice modes enabled
      */
     const loadPracticeItems = async () => {
-        if (!user?.id) return;
+        if (!user?.id) {
+            console.log('🔍 PracticeModesSection: No user ID, skipping load');
+            return;
+        }
 
+        console.log('🔍 PracticeModesSection: Loading practice items for user:', user.id);
         setLoading(true);
 
         try {
@@ -71,6 +83,9 @@ export function PracticeModesSection() {
                 .not('practice_modes_config', 'is', null)
                 .limit(10); // Limit for MVP
 
+            console.log('🔍 PracticeModesSection: Raw items from DB:', items);
+            console.log('🔍 PracticeModesSection: Query error:', error);
+
             if (error) {
                 console.error('Error loading practice items:', error);
                 return;
@@ -78,12 +93,23 @@ export function PracticeModesSection() {
 
             // Filter items where practice is actually enabled
             const enabledItems = (items || []).filter(
-                (item: any) =>
-                    item.practice_modes_config &&
-                    item.practice_modes_config.enabled &&
-                    item.practice_modes_config.available_modes?.length > 0
+                (item: any) => {
+                    const hasConfig = !!item.practice_modes_config;
+                    const isEnabled = item.practice_modes_config?.enabled === true;
+                    const hasModes = (item.practice_modes_config?.available_modes?.length || 0) > 0;
+
+                    console.log(`🔍 Item ${item.english}:`, {
+                        hasConfig,
+                        isEnabled,
+                        hasModes,
+                        config: item.practice_modes_config
+                    });
+
+                    return hasConfig && isEnabled && hasModes;
+                }
             );
 
+            console.log('🔍 PracticeModesSection: Enabled items after filter:', enabledItems.length, enabledItems);
             setPracticeItems(enabledItems);
 
             // Load unlock statuses for each item
@@ -184,6 +210,7 @@ export function PracticeModesSection() {
     };
 
     if (loading) {
+        console.log('🔍 PracticeModesSection: Rendering LOADING state');
         return (
             <div className="practice-modes-section">
                 <h3 className="text-lg font-semibold mb-4">Practice Modes</h3>
@@ -193,8 +220,11 @@ export function PracticeModesSection() {
     }
 
     if (practiceItems.length === 0) {
+        console.log('🔍 PracticeModesSection: Rendering NULL (no items found)');
         return null; // Don't show section if no practice items
     }
+
+    console.log('🔍 PracticeModesSection: Rendering PRACTICE CARDS:', practiceItems.length, 'items');
 
     return (
         <>
