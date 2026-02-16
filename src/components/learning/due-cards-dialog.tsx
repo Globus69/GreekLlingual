@@ -706,13 +706,26 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     margin-bottom: 24px;
                 }
 
-                /* Empty State & Error State */
+                .dialog-header h2 {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #fff;
+                    margin: 0;
+                }
+
+                .dialog-footer {
+                    display: flex;
+                    gap: 12px;
+                    justify-content: center;
+                    margin-top: 24px;
+                }
+
                 .empty-state {
                     text-align: center;
                     padding: 40px 20px;
                 }
 
-                .empty-state h2 {
+                .empty-state h3 {
                     font-size: 24px;
                     margin-bottom: 16px;
                     color: #fff;
@@ -722,24 +735,6 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     color: rgba(255, 255, 255, 0.7);
                     margin-bottom: 12px;
                     line-height: 1.5;
-                }
-
-                .empty-hint {
-                    font-size: 14px;
-                    color: rgba(255, 255, 255, 0.5);
-                    margin-top: 8px;
-                    font-style: italic;
-                }
-
-                .error-message {
-                    color: #FF453A !important;
-                    background: rgba(255, 69, 58, 0.1);
-                    padding: 12px 16px;
-                    border-radius: 8px;
-                    border: 1px solid rgba(255, 69, 58, 0.3);
-                    margin: 16px 0;
-                    font-family: monospace;
-                    font-size: 13px;
                 }
 
                 .empty-actions {
@@ -758,18 +753,12 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     transition: all 0.2s;
                     background: rgba(0, 122, 255, 0.3);
                     color: #007AFF;
+                    border: 1px solid rgba(0, 122, 255, 0.5);
                 }
 
                 .btn-primary:hover {
                     background: rgba(0, 122, 255, 0.4);
                     transform: translateY(-1px);
-                }
-
-                .dialog-footer {
-                    display: flex;
-                    gap: 12px;
-                    justify-content: center;
-                    margin-top: 24px;
                 }
 
                 .btn-audio, .btn-speed, .btn-autoplay, .btn-cancel {
@@ -800,6 +789,55 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     color: #007AFF;
                 }
 
+                .icon-btn {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 12px;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    background: rgba(255, 255, 255, 0.05);
+                    color: #fff;
+                    font-size: 18px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .icon-btn:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                    transform: scale(1.05);
+                }
+
+                .btn-primary {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+
+                .btn-primary:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+                }
+
+                .btn-secondary {
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .btn-secondary:hover {
+                    background: rgba(255, 255, 255, 0.15);
+                }
+
+                .btn-secondary:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+
                 /* Loading State */
                 .loading-state {
                     text-align: center;
@@ -826,6 +864,30 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     margin-top: 8px;
                 }
 
+                .empty-state h2 {
+                    font-size: 24px;
+                    margin-bottom: 16px;
+                    color: #fff;
+                }
+
+                .empty-hint {
+                    font-size: 14px;
+                    color: rgba(255, 255, 255, 0.5);
+                    margin-top: 8px;
+                    font-style: italic;
+                }
+
+                .error-message {
+                    color: #FF453A !important;
+                    background: rgba(255, 69, 58, 0.1);
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(255, 69, 58, 0.3);
+                    margin: 16px 0;
+                    font-family: monospace;
+                    font-size: 13px;
+                }
+
                 .summary-content {
                     text-align: center;
                 }
@@ -848,33 +910,6 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     gap: 12px;
                     justify-content: center;
                     margin-top: 24px;
-                }
-
-                /* Mobile Responsive */
-                @media (max-width: 600px) {
-                    .dialog-content {
-                        padding: 24px 16px;
-                    }
-
-                    .progress-info {
-                        font-size: 13px;
-                    }
-
-                    .dialog-footer {
-                        flex-wrap: wrap;
-                        gap: 8px;
-                    }
-
-                    .btn-audio, .btn-autoplay, .btn-speed, .btn-cancel {
-                        padding: 10px 16px;
-                        font-size: 13px;
-                    }
-
-                    .btn-speed {
-                        font-size: 18px;
-                        padding: 10px 12px;
-                        min-width: 48px;
-                    }
                 }
             `}</style>
 
