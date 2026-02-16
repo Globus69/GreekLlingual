@@ -60,8 +60,31 @@ export async function checkRateLimit(identifier: string) {
     return result;
   } catch (error) {
     console.error('Rate limit check failed:', error);
-    // Fallback: Bei Redis-Fehler erlauben wir den Request (fail-open)
-    return { success: true, limit: 10, remaining: 10, reset: 0, pending: Promise.resolve() };
+    // SECURITY: Fail-closed – Bei Redis-Fehler blocken wir Requests (verhindert Brute-Force)
+    return { success: false, limit: 10, remaining: 0, reset: 60000, pending: Promise.resolve() };
+  }
+}
+
+/**
+ * Prüft ob Admin-IP unter Rate Limit liegt (strengere Limits)
+ *
+ * @param identifier - IP-Adresse oder eindeutiger Identifier
+ * @returns {success, limit, remaining, reset}
+ *
+ * @example
+ * const { success } = await checkRateLimitAdmin('192.168.1.1');
+ * if (!success) {
+ *   throw new Error('Too many admin login attempts. Try again later.');
+ * }
+ */
+export async function checkRateLimitAdmin(identifier: string) {
+  try {
+    const result = await rateLimitAdmin.limit(identifier);
+    return result;
+  } catch (error) {
+    console.error('Admin rate limit check failed:', error);
+    // SECURITY: Fail-closed – Bei Redis-Fehler blocken wir Admin-Requests (extra streng)
+    return { success: false, limit: 3, remaining: 0, reset: 300000, pending: Promise.resolve() };
   }
 }
 
