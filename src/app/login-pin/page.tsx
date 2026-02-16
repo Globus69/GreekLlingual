@@ -146,44 +146,9 @@ export default function PinLoginPage() {
             return;
         }
 
-        // Honeypot-Check (Client-seitig)
-        const HONEYPOT_PINS = new Set([
-            '0000', '1111', '2222', '3333', '4444', '5555', '6666', '7777', '8888', '9999',
-            '1234', '4321', '1122', '2211', '5678'
-        ]);
-
-        if (HONEYPOT_PINS.has(pin)) {
-            // Honeypot-PIN erkannt! Telegram-Alert senden (via API-Route = server-seitig, kein CORS)
-            console.log('🍯 Honeypot-PIN detected:', pin);
-            try {
-                const alertResponse = await fetch('/api/honeypot-alert', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pin })
-                });
-                const alertData = await alertResponse.json();
-                console.log('📱 Telegram alert sent:', alertData);
-            } catch (error) {
-                console.error('❌ Telegram alert failed:', error);
-            }
-
-            // Zeige Fehler-Popup
-            setAttemptCount(prev => prev + 1);
-            setWelcomePopup({
-                show: true,
-                name: '⚠️ Sicherheitswarnung',
-                level: 'Ungültiger PIN',
-                difficulty: '',
-                success: false
-            });
-            setTimeout(() => {
-                setWelcomePopup({ show: false, name: '', level: '', difficulty: '', success: false });
-                setPinDigits(['', '', '', '']);
-                inputRefs.current[0]?.focus();
-            }, 2000);
-            setIsSubmitting(false);
-            return;
-        }
+        // NOTE: Honeypot checks are handled server-side in verify_user_4digit_pin RPC function
+        // Client-side checks removed for security (can be bypassed)
+        // Server validates PIN, checks honeypots, and bans IPs automatically
 
         // Progressive delays: 0ms, 1s, 2s, 5s, 10s
         const delays = [0, 1000, 2000, 5000, 10000];

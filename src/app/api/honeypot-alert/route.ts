@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { pinSchema, safeParse } from '@/lib/validation/schemas';
 
 // Rate Limiting: Max 10 Alerts pro Minute (verhindert Spam)
 const alertTimestamps: number[] = [];
@@ -23,15 +24,18 @@ export async function POST(request: NextRequest) {
       alertTimestamps.shift();
     }
 
-    const { pin } = await request.json();
+    const body = await request.json();
 
-    // Validierung
-    if (!pin || typeof pin !== 'string' || pin.length !== 4) {
+    // Validate PIN with Zod
+    const validationResult = safeParse(pinSchema, body.pin);
+    if (!validationResult.success) {
       return NextResponse.json(
         { success: false, error: 'Invalid PIN format' },
         { status: 400 }
       );
     }
+
+    const pin = validationResult.data;
 
     // Hole Client-IP für Logging
     const clientIP =
@@ -39,9 +43,19 @@ export async function POST(request: NextRequest) {
       request.headers.get('x-real-ip') ||
       'unknown';
 
+    // Validiere Umgebungsvariablen
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl) {
+      console.error('❌ NEXT_PUBLIC_SUPABASE_URL is not defined');
+      return NextResponse.json(
+        { success: false, error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     // Sende Telegram-Nachricht via Supabase Edge Function
     const telegramResponse = await fetch(
-      'https://bzdzqmnxycnudflcnmzj.supabase.co/functions/v1/send-telegram',
+      `${supabaseUrl}/functions/v1/send-telegram`,
       {
         method: 'POST',
         headers: {

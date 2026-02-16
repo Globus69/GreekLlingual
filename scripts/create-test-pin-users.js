@@ -2,12 +2,22 @@
 
 /**
  * Erstellt 5 Test-User mit 4-stelligem PIN direkt in Supabase
+ *
+ * Benötigt .env.local mit:
+ * - NEXT_PUBLIC_SUPABASE_URL
+ * - NEXT_PUBLIC_SUPABASE_ANON_KEY
  */
 
 const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config({ path: '.env.local' });
 
-const supabaseUrl = 'https://bzdzqmnxycnudflcnmzj.supabase.co';
-const supabaseKey = 'sb_publishable_uT0wv5-tv95ETP0u16h8zg_Ni3WqAIo';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ Error: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set in .env.local');
+    process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
