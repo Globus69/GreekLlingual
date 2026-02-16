@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/context/auth-context';
-import Flashcard from '@/components/learning/Flashcard';
+import Flashcard from '@/archive/learning-components-old/Flashcard';
 import '@/styles/liquid-glass.css';
 
 interface LearningItem {

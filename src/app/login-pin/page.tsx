@@ -57,7 +57,9 @@ export default function PinLoginPage() {
                 ? { base: 190, spread: 30 }
                 : locale === 'de'
                     ? { base: 35, spread: 20 }
-                    : { base: 200, spread: 40 };
+                    : locale === 'es'
+                        ? { base: 0, spread: 20 }
+                        : { base: 200, spread: 40 };
 
         for (let i = 0; i < 60; i++) {
             particles.push({
@@ -71,7 +73,7 @@ export default function PinLoginPage() {
             });
         }
 
-        const lineColor = locale === 'ru' ? '180, 60, 60' : locale === 'el' ? '13, 110, 253' : locale === 'de' ? '218, 165, 32' : '0, 122, 255';
+        const lineColor = locale === 'ru' ? '180, 60, 60' : locale === 'el' ? '13, 110, 253' : locale === 'de' ? '218, 165, 32' : locale === 'es' ? '220, 60, 40' : '0, 122, 255';
 
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -243,16 +245,16 @@ export default function PinLoginPage() {
                     setAttemptCount(prev => prev + 1); // Increment on failure
 
                     // Spezielle Fehlerbehandlung für verschiedene Fälle
-                    let errorLevel = 'PIN nicht gefunden';
+                    let errorLevel = t('error.pin_not_found');
                     if (userData.error === 'IP banned') {
-                        errorLevel = 'IP gesperrt - Verdächtige Aktivität';
+                        errorLevel = t('error.ip_banned');
                     } else if (userData.error === 'Account locked. Try again later.') {
-                        errorLevel = 'Account gesperrt - 15 Min. warten';
+                        errorLevel = t('error.account_locked');
                     }
 
                     setWelcomePopup({
                         show: true,
-                        name: 'Fehler',
+                        name: t('error.title'),
                         level: errorLevel,
                         difficulty: '',
                         success: false
@@ -341,8 +343,8 @@ export default function PinLoginPage() {
                 setAttemptCount(prev => prev + 1); // Increment on failure
                 setWelcomePopup({
                     show: true,
-                    name: 'Fehler',
-                    level: 'PIN nicht gefunden',
+                    name: t('error.title'),
+                    level: t('error.pin_not_found'),
                     difficulty: '',
                     success: false
                 });
@@ -358,8 +360,8 @@ export default function PinLoginPage() {
             setAttemptCount(prev => prev + 1); // Increment on failure
             setWelcomePopup({
                 show: true,
-                name: 'Fehler',
-                level: 'PIN nicht gefunden',
+                name: t('error.title'),
+                level: t('error.pin_not_found'),
                 difficulty: '',
                 success: false
             });
@@ -409,7 +411,9 @@ export default function PinLoginPage() {
                         ? 'radial-gradient(ellipse at 50% 50%, #0d2847 0%, #091a35 50%, #0A0A0C 100%)'
                         : locale === 'de'
                             ? 'radial-gradient(ellipse at 50% 50%, #3d3010 0%, #1a1508 50%, #0A0A0C 100%)'
-                            : 'radial-gradient(ellipse at 50% 50%, #0f2555 0%, #0a1230 50%, #0A0A0C 100%)',
+                            : locale === 'es'
+                                ? 'radial-gradient(ellipse at 50% 50%, #3d1015 0%, #1a0808 50%, #0A0A0C 100%)'
+                                : 'radial-gradient(ellipse at 50% 50%, #0f2555 0%, #0a1230 50%, #0A0A0C 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -447,24 +451,27 @@ export default function PinLoginPage() {
                         borderRadius: '10px',
                         padding: '3px',
                     }}>
-                        {(['en', 'ru', 'el', 'de'] as Locale[]).map((lang) => {
+                        {(['en', 'ru', 'de', 'es'] as Locale[]).map((lang) => {
                             const langGradient: Record<Locale, string> = {
                                 en: 'linear-gradient(135deg, #007AFF, #5856D6)',
                                 ru: 'linear-gradient(135deg, #E05555, #C0392B)',
                                 el: 'linear-gradient(135deg, #0D6EFD, #0A58CA)',
                                 de: 'linear-gradient(135deg, #DAA520, #B8860B)',
+                                es: 'linear-gradient(135deg, #DC3C28, #B22A1A)',
                             };
                             const langShadow: Record<Locale, string> = {
                                 en: '0 2px 8px rgba(0, 122, 255, 0.3)',
                                 ru: '0 2px 8px rgba(224, 85, 85, 0.3)',
                                 el: '0 2px 8px rgba(13, 110, 253, 0.3)',
                                 de: '0 2px 8px rgba(218, 165, 32, 0.3)',
+                                es: '0 2px 8px rgba(220, 60, 40, 0.3)',
                             };
                             const langLabel: Record<Locale, string> = {
                                 en: 'EN',
                                 ru: 'RU',
                                 el: 'EL',
                                 de: 'DE',
+                                es: 'ES',
                             };
                             return (
                                 <button
@@ -504,7 +511,9 @@ export default function PinLoginPage() {
                             ? 'radial-gradient(circle, rgba(13, 110, 253, 0.18) 0%, transparent 70%)'
                             : locale === 'de'
                                 ? 'radial-gradient(circle, rgba(218, 165, 32, 0.18) 0%, transparent 70%)'
-                                : 'radial-gradient(circle, rgba(0, 122, 255, 0.18) 0%, transparent 70%)',
+                                : locale === 'es'
+                                    ? 'radial-gradient(circle, rgba(220, 60, 40, 0.18) 0%, transparent 70%)'
+                                    : 'radial-gradient(circle, rgba(0, 122, 255, 0.18) 0%, transparent 70%)',
                     top: '-100px',
                     right: '-100px',
                     animation: 'orbFloat1 12s ease-in-out infinite',
@@ -954,7 +963,7 @@ export default function PinLoginPage() {
                             position: 'relative',
                             width: '380px',
                             maxWidth: '90vw',
-                            background: welcomePopup.name === 'Fehler'
+                            background: welcomePopup.success === false
                                 ? 'rgba(40, 20, 20, 0.85)'
                                 : 'rgba(22, 22, 26, 0.85)',
                             backdropFilter: 'blur(40px) saturate(1.8)',
@@ -1027,7 +1036,7 @@ export default function PinLoginPage() {
                             )}
 
                             {/* Error Message */}
-                            {welcomePopup.name === 'Fehler' && (
+                            {!welcomePopup.success && (
                                 <p style={{
                                     fontSize: '15px',
                                     color: '#FF6B6B',

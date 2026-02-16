@@ -29,6 +29,7 @@ interface LearningItem {
 interface VocabularyDialogProps {
     isOpen: boolean;
     onClose: () => void;
+    mode?: 'new' | 'all' | 'due' | string;
 }
 
 export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogProps) {

@@ -30,6 +30,13 @@ export default function LoginPage() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const pinRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+    const generateCaptcha = () => {
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        setCaptchaQuestion({ num1, num2, answer: num1 + num2 });
+        setCaptchaAnswer('');
+    };
+
     // Generate CAPTCHA on mount
     useEffect(() => {
         generateCaptcha();
@@ -167,13 +174,6 @@ export default function LoginPage() {
             const nextEmpty = newDigits.findIndex(d => !d);
             pinRefs.current[nextEmpty >= 0 ? nextEmpty : 5]?.focus();
         }
-    };
-
-    const generateCaptcha = () => {
-        const num1 = Math.floor(Math.random() * 10) + 1;
-        const num2 = Math.floor(Math.random() * 10) + 1;
-        setCaptchaQuestion({ num1, num2, answer: num1 + num2 });
-        setCaptchaAnswer('');
     };
 
     // Helper function for progressive delay
@@ -457,18 +457,21 @@ export default function LoginPage() {
                                 ru: 'linear-gradient(135deg, #E05555, #C0392B)',
                                 el: 'linear-gradient(135deg, #0D6EFD, #0A58CA)',
                                 de: 'linear-gradient(135deg, #DAA520, #B8860B)',
+                                es: 'linear-gradient(135deg, #DC3C28, #B22A1A)',
                             };
                             const langShadow: Record<Locale, string> = {
                                 en: '0 2px 8px rgba(0, 122, 255, 0.3)',
                                 ru: '0 2px 8px rgba(224, 85, 85, 0.3)',
                                 el: '0 2px 8px rgba(13, 110, 253, 0.3)',
                                 de: '0 2px 8px rgba(218, 165, 32, 0.3)',
+                                es: '0 2px 8px rgba(220, 60, 40, 0.3)',
                             };
                             const langLabel: Record<Locale, string> = {
                                 en: 'EN',
                                 ru: 'RU',
                                 el: 'EL',
                                 de: 'DE',
+                                es: 'ES',
                             };
                             return (
                                 <button

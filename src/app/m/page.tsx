@@ -50,7 +50,7 @@ export default function MobileDashboardPage() {
       const storedUser = localStorage.getItem('greeklingua_user');
 
       // Lade User aus localStorage, falls AuthContext keinen hat
-      if (!authUser && storedUser) {
+      if (!authUser && storedUser && !localUser) {
         try {
           const parsedUser = JSON.parse(storedUser);
           console.log('🔍 Loading user from localStorage:', parsedUser);
@@ -66,7 +66,7 @@ export default function MobileDashboardPage() {
         router.push('/login-pin');
       }
     }
-  }, [authUser, authLoading, router]);
+  }, [authUser, authLoading, router, localUser]);
 
   if (statsLoading || authLoading) {
     return (

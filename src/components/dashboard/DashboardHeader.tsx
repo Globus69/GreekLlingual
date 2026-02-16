@@ -84,7 +84,7 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
                         {/* Flaggen-Anzeige: Klick rotiert durch Sprachen */}
                         <button
                     onClick={() => {
-                        const nextLocale = locale === 'en' ? 'ru' : locale === 'ru' ? 'el' : locale === 'el' ? 'de' : 'en';
+                        const nextLocale = locale === 'en' ? 'ru' : locale === 'ru' ? 'el' : locale === 'el' ? 'de' : locale === 'de' ? 'es' : 'en';
                         setLocale(nextLocale);
                     }}
                     title={locale === 'en' ? t('header.switch_to_ru') : locale === 'ru' ? t('header.switch_to_el') : locale === 'el' ? t('header.switch_to_de') : t('header.switch_to_en')}
@@ -113,10 +113,10 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
                     }}
                 >
                     <span style={{ fontSize: '22px' }}>
-                        {locale === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : locale === 'ru' ? '\uD83C\uDDF7\uD83C\uDDFA' : locale === 'el' ? '\uD83C\uDDEC\uD83C\uDDF7' : '\uD83C\uDDE9\uD83C\uDDEA'}
+                        {locale === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : locale === 'ru' ? '\uD83C\uDDF7\uD83C\uDDFA' : locale === 'el' ? '\uD83C\uDDEC\uD83C\uDDF7' : locale === 'de' ? '\uD83C\uDDE9\uD83C\uDDEA' : '\uD83C\uDDEA\uD83C\uDDF8'}
                     </span>
                     <span style={{ fontSize: '11px', fontWeight: 600, color: '#8E8E93', textTransform: 'uppercase' }}>
-                        {locale === 'en' ? 'EN' : locale === 'ru' ? 'RU' : locale === 'el' ? 'EL' : 'DE'}
+                        {locale === 'en' ? 'EN' : locale === 'ru' ? 'RU' : locale === 'el' ? 'EL' : locale === 'de' ? 'DE' : 'ES'}
                     </span>
                 </button>
 

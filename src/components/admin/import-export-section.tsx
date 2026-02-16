@@ -21,6 +21,26 @@ interface ImportExportSectionProps {
     filters?: ContentFilters;
 }
 
+// Simple CSV parser helper
+function parseCSV(text: string): any[] {
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return [];
+
+    const headers = lines[0].split(',').map(h => h.trim());
+    const rows = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        const row: any = { _isValid: true };
+        headers.forEach((header, index) => {
+            row[header] = values[index] || '';
+        });
+        rows.push(row);
+    }
+
+    return rows;
+}
+
 export function ImportExportSection({ onImport, filters }: ImportExportSectionProps) {
     const [previewData, setPreviewData] = useState<ImportPreviewRow[]>([]);
     const [isImporting, setIsImporting] = useState(false);
@@ -29,7 +49,7 @@ export function ImportExportSection({ onImport, filters }: ImportExportSectionPr
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleDownloadTemplate = () => {
-        const csv = generateCSVTemplate();
+        const csv = generateTemplateCSV();
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -64,7 +84,7 @@ export function ImportExportSection({ onImport, filters }: ImportExportSectionPr
         try {
             const result = await onImport(validItems);
             setImportResult(result);
-            if (result.success > 0) {
+            if (result.imported > 0) {
                 setPreviewData([]);
                 if (fileInputRef.current) {
                     fileInputRef.current.value = '';
@@ -80,9 +100,14 @@ export function ImportExportSection({ onImport, filters }: ImportExportSectionPr
     const handleExport = async () => {
         setIsExporting(true);
         try {
-            const { csv, error } = await exportContentAsCSV(filters);
-            if (error) throw error;
+            const { data } = await fetchContent({
+                search: filters?.search,
+                type: filters?.type !== 'all' ? filters?.type : undefined,
+                level: filters?.level && filters.level !== 'all' ? [filters.level] : undefined,
+                difficulty: filters?.difficulty && filters.difficulty !== 'all' ? [filters.difficulty] : undefined,
+            });
 
+            const csv = generateCSV(data);
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -227,7 +252,7 @@ export function ImportExportSection({ onImport, filters }: ImportExportSectionPr
                                                 ) : (
                                                     <div className="flex items-center gap-1 text-red-400 text-xs">
                                                         <AlertCircle className="h-3 w-3" />
-                                                        {row._errors?.join(', ')}
+                                                        {row.errors?.join(', ')}
                                                     </div>
                                                 )}
                                             </TableCell>
@@ -242,10 +267,10 @@ export function ImportExportSection({ onImport, filters }: ImportExportSectionPr
 
             {/* Import Result */}
             {importResult && (
-                <Card className={`glass-card ${importResult.success > 0 ? 'border-green-500/50' : 'border-red-500/50'}`}>
+                <Card className={`glass-card ${importResult.imported > 0 ? 'border-green-500/50' : 'border-red-500/50'}`}>
                     <CardHeader>
-                        <CardTitle className={importResult.success > 0 ? 'text-green-400' : 'text-red-400'}>
-                            Import {importResult.success > 0 ? 'Successful' : 'Failed'}
+                        <CardTitle className={importResult.imported > 0 ? 'text-green-400' : 'text-red-400'}>
+                            Import {importResult.imported > 0 ? 'Successful' : 'Failed'}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -254,12 +279,12 @@ export function ImportExportSection({ onImport, filters }: ImportExportSectionPr
                             {importResult.failed > 0 && (
                                 <p className="text-red-400">✗ Failed: {importResult.failed} items</p>
                             )}
-                            {importResult.errors.length > 0 && (
+                            {importResult.errors && importResult.errors.length > 0 && (
                                 <div className="mt-4 space-y-1">
                                     <p className="font-semibold">Errors:</p>
                                     {importResult.errors.map((error, idx) => (
                                         <p key={idx} className="text-red-400 text-xs">
-                                            Row {error.row}: {error.message}
+                                            Row {error.row}: {error.error}
                                         </p>
                                     ))}
                                 </div>

@@ -73,39 +73,6 @@ export default function DashboardPage() {
         message: string;
     } | null>(null);
 
-    useEffect(() => {
-        if (!authLoading) {
-            if (!user) {
-                // Not logged in – redirect to login page
-                router.push('/login');
-                return;
-            }
-            fetchStats();
-
-            // Auto-update streak on dashboard load
-            const checkStreak = async () => {
-                const result = await updateStreak();
-                if (result) {
-                    // Check for milestones
-                    const milestone = getMilestoneMessage(result.new_streak);
-                    if (milestone || result.is_new_record) {
-                        setMilestoneToast({
-                            streak: result.new_streak,
-                            isNewRecord: result.is_new_record,
-                            message: milestone || result.message,
-                        });
-                    }
-                }
-            };
-            checkStreak();
-
-            const timer = setTimeout(() => {
-                setLoading(false);
-            }, 800);
-            return () => clearTimeout(timer);
-        }
-    }, [user, authLoading, router, updateStreak, getMilestoneMessage]);
-
     const fetchStats = async () => {
         try {
             if (!user?.id) return;
@@ -151,6 +118,39 @@ export default function DashboardPage() {
             }));
         }
     };
+
+    useEffect(() => {
+        if (!authLoading) {
+            if (!user) {
+                // Not logged in – redirect to login page
+                router.push('/login');
+                return;
+            }
+            fetchStats();
+
+            // Auto-update streak on dashboard load
+            const checkStreak = async () => {
+                const result = await updateStreak();
+                if (result) {
+                    // Check for milestones
+                    const milestone = getMilestoneMessage(result.new_streak);
+                    if (milestone || result.is_new_record) {
+                        setMilestoneToast({
+                            streak: result.new_streak,
+                            isNewRecord: result.is_new_record,
+                            message: milestone || result.message,
+                        });
+                    }
+                }
+            };
+            checkStreak();
+
+            const timer = setTimeout(() => {
+                setLoading(false);
+            }, 800);
+            return () => clearTimeout(timer);
+        }
+    }, [user, authLoading, router, updateStreak, getMilestoneMessage, fetchStats]);
 
     if (authLoading || loading) {
         return (
