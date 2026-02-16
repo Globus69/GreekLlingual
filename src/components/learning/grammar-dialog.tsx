@@ -436,7 +436,46 @@ export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
 
                 .btn-primary:hover {
                     background: rgba(0, 122, 255, 0.4);
-                    transform: translateY(-1px);
+                    transform: translateY(-2px);
+                }
+
+                .progress-section {
+                    margin-top: 16px;
+                    margin-bottom: 12px;
+                }
+
+                .progress-info {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 8px;
+                }
+
+                .progress-count {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: rgba(255, 255, 255, 0.9);
+                }
+
+                .progress-bar-container {
+                    width: 100%;
+                    height: 8px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    overflow: hidden;
+                    position: relative;
+                }
+
+                .progress-bar-fill {
+                    height: 100%;
+                    background: linear-gradient(90deg, #007AFF 0%, #00C7BE 100%);
+                    border-radius: 8px;
+                    transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+                    box-shadow: 0 0 12px rgba(0, 199, 190, 0.4);
+                }
+
+                .card-container {
+                    margin: 24px 0;
                 }
 
                 .btn-secondary, .btn-audio, .btn-autoplay, .btn-speed, .btn-cancel {
