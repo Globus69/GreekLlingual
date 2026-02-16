@@ -1,12 +1,8 @@
 -- ============================================================================
--- Migration 067: Add Practice Modes System
+-- Migration 067: Add Practice Modes System (FIXED)
 -- ============================================================================
 -- Purpose: Adds Quizlet-style practice modes with backend-configurable settings
--- Features:
---   - JSONB config column for flexible practice mode settings
---   - Tracking table for practice attempts and scoring
---   - RPC functions for unlock logic, recording attempts, and stats
---   - Admin RPC for updating practice configurations
+-- FIXED: Uses role = 'admin' instead of is_admin column
 -- ============================================================================
 
 -- ============================================================================
@@ -302,10 +298,11 @@ COMMENT ON FUNCTION get_practice_stats IS
 'Get aggregate practice statistics for user/item over specified days';
 
 -- ============================================================================
--- 7. RPC Function: admin_update_practice_config
+-- 7. RPC Function: admin_update_practice_config (FIXED)
 -- ============================================================================
 -- Purpose: Admin-only function to update practice mode configuration
 -- Returns: success boolean
+-- FIXED: Uses role = 'admin' instead of is_admin column
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION admin_update_practice_config(
@@ -318,15 +315,15 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  v_is_admin BOOLEAN;
+  v_user_role TEXT;
 BEGIN
-  -- Check if user is admin
-  SELECT is_admin INTO v_is_admin
+  -- Check if user is admin (FIXED: use role column)
+  SELECT role INTO v_user_role
   FROM users
   WHERE id = p_user_id;
 
-  IF NOT v_is_admin THEN
-    RAISE EXCEPTION 'Access denied: User is not an admin';
+  IF v_user_role != 'admin' THEN
+    RAISE EXCEPTION 'Access denied: User is not an admin (role: %)', v_user_role;
   END IF;
 
   -- Update practice_modes_config
@@ -351,7 +348,7 @@ COMMENT ON FUNCTION admin_update_practice_config IS
 'Admin-only: Update practice mode configuration for a learning item';
 
 -- ============================================================================
--- 8. Row Level Security (RLS) Policies
+-- 8. Row Level Security (RLS) Policies (FIXED)
 -- ============================================================================
 
 -- Enable RLS on practice_attempts
@@ -373,7 +370,7 @@ WITH CHECK (
   user_id = auth.uid()
 );
 
--- Policy: Admins can view all practice attempts
+-- Policy: Admins can view all practice attempts (FIXED: use role)
 CREATE POLICY practice_attempts_select_admin
 ON practice_attempts
 FOR SELECT
@@ -381,11 +378,11 @@ USING (
   EXISTS (
     SELECT 1 FROM users
     WHERE users.id = auth.uid()
-    AND users.is_admin = true
+    AND users.role = 'admin'
   )
 );
 
--- Policy: Admins can delete practice attempts (for data cleanup)
+-- Policy: Admins can delete practice attempts (FIXED: use role)
 CREATE POLICY practice_attempts_delete_admin
 ON practice_attempts
 FOR DELETE
@@ -393,7 +390,7 @@ USING (
   EXISTS (
     SELECT 1 FROM users
     WHERE users.id = auth.uid()
-    AND users.is_admin = true
+    AND users.role = 'admin'
   )
 );
 
