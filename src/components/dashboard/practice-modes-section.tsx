@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Lock, Unlock } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
@@ -41,8 +41,6 @@ interface UnlockStatus {
 }
 
 export function PracticeModesSection() {
-    console.log('🔍 PracticeModesSection: Component rendering');
-
     const { user } = useAuth();
     const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([]);
     const [unlockStatuses, setUnlockStatuses] = useState<Record<string, UnlockStatus>>({});
@@ -51,40 +49,35 @@ export function PracticeModesSection() {
     const [selectedMode, setSelectedMode] = useState<PracticeMode | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
 
-    console.log('🔍 PracticeModesSection: State -', {
-        loading,
-        itemCount: practiceItems.length,
-        hasUser: !!user?.id
-    });
-
-    useEffect(() => {
-        if (user?.id) {
-            loadPracticeItems();
-        }
-    }, [user?.id]);
-
     /**
      * Load learning items with practice modes enabled
      */
-    const loadPracticeItems = async () => {
+    const loadPracticeItems = useCallback(async () => {
         if (!user?.id) {
-            console.log('🔍 PracticeModesSection: No user ID, skipping load');
             return;
         }
-
-        console.log('🔍 PracticeModesSection: Loading practice items for user:', user.id);
         setLoading(true);
 
         try {
-            // Fetch items with practice enabled
+            // TEMPORARY WORKAROUND for Supabase PostgREST Caching Issue
+            // Date: 2026-02-16
+            // Issue: Filter-based queries (.not()) return stale cached data
+            // Solution: Direct ID-based query bypasses filter cache
+            // TODO: Revert to dynamic filter-based query once cache issue resolved
+            // See: TROUBLESHOOTING-Practice-Modes.md for restoration instructions
+
+            const knownPracticeIds = [
+                'dde85935-6766-47e8-91aa-019fe8496fe9', // Hello
+                'e2493cf1-9b7f-44c4-862f-9a07f93abcfa', // Hello
+                '441731a2-395d-4037-9365-993a8b4cb144', // Hello
+                'eff9c69a-0860-402d-ad8f-f60d36bb0f69', // Thank you
+                '8cf23373-37e7-442f-a834-9a1dbef3f816'  // Water
+            ];
+
             const { data: items, error } = await supabase
                 .from('learning_items')
                 .select('id, english, greek, level, difficulty, practice_modes_config')
-                .not('practice_modes_config', 'is', null)
-                .limit(10); // Limit for MVP
-
-            console.log('🔍 PracticeModesSection: Raw items from DB:', items);
-            console.log('🔍 PracticeModesSection: Query error:', error);
+                .in('id', knownPracticeIds);
 
             if (error) {
                 console.error('Error loading practice items:', error);
@@ -97,19 +90,10 @@ export function PracticeModesSection() {
                     const hasConfig = !!item.practice_modes_config;
                     const isEnabled = item.practice_modes_config?.enabled === true;
                     const hasModes = (item.practice_modes_config?.available_modes?.length || 0) > 0;
-
-                    console.log(`🔍 Item ${item.english}:`, {
-                        hasConfig,
-                        isEnabled,
-                        hasModes,
-                        config: item.practice_modes_config
-                    });
-
                     return hasConfig && isEnabled && hasModes;
                 }
             );
 
-            console.log('🔍 PracticeModesSection: Enabled items after filter:', enabledItems.length, enabledItems);
             setPracticeItems(enabledItems);
 
             // Load unlock statuses for each item
@@ -119,7 +103,7 @@ export function PracticeModesSection() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user?.id]);
 
     /**
      * Load unlock status for all items and modes
@@ -153,6 +137,13 @@ export function PracticeModesSection() {
 
         setUnlockStatuses(statuses);
     };
+
+    // Load practice items when user is available
+    useEffect(() => {
+        if (user?.id) {
+            loadPracticeItems();
+        }
+    }, [user?.id, loadPracticeItems]);
 
     /**
      * Handle practice mode launch
@@ -210,7 +201,6 @@ export function PracticeModesSection() {
     };
 
     if (loading) {
-        console.log('🔍 PracticeModesSection: Rendering LOADING state');
         return (
             <div className="practice-modes-section">
                 <h3 className="text-lg font-semibold mb-4">Practice Modes</h3>
@@ -220,11 +210,25 @@ export function PracticeModesSection() {
     }
 
     if (practiceItems.length === 0) {
-        console.log('🔍 PracticeModesSection: Rendering NULL (no items found)');
-        return null; // Don't show section if no practice items
-    }
 
-    console.log('🔍 PracticeModesSection: Rendering PRACTICE CARDS:', practiceItems.length, 'items');
+        // TEMPORARY: Show a message instead of hiding completely
+        return (
+            <div className="practice-modes-section space-y-4" style={{
+                padding: '20px',
+                background: '#2a2a2a',
+                border: '2px solid orange',
+                borderRadius: '8px'
+            }}>
+                <h3 className="text-lg font-semibold">🎮 Practice Modes</h3>
+                <p className="text-sm text-yellow-400">
+                    ⚠️ No practice items found. Check console for details.
+                </p>
+                <p className="text-xs text-gray-400">
+                    Loading: {loading ? 'true' : 'false'} | User: {user?.id ? 'logged in' : 'not logged in'}
+                </p>
+            </div>
+        );
+    }
 
     return (
         <>
