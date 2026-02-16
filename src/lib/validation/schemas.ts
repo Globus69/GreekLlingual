@@ -15,6 +15,10 @@ export const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 export const DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
 export const USER_ROLES = ['admin', 'student'] as const;
 
+// Practice Modes
+export const PRACTICE_MODES = ['matching', 'multiple_choice', 'write_input'] as const;
+export const PRACTICE_TOLERANCE = ['strict', 'lenient'] as const;
+
 // ========================================
 // BASIC SCHEMAS
 // ========================================
@@ -140,6 +144,70 @@ export type ContentUpdate = z.infer<typeof contentUpdateSchema>;
 export const bulkDeleteSchema = z.object({
     ids: z.array(uuidSchema).min(1, 'At least one ID required').max(100, 'Too many IDs'),
 });
+
+// ========================================
+// PRACTICE MODES SCHEMAS
+// ========================================
+
+/**
+ * Practice mode type validation
+ */
+export const practiceModeSchema = z.enum(PRACTICE_MODES, {
+    errorMap: () => ({ message: 'Invalid practice mode' })
+});
+
+/**
+ * Practice tolerance validation (for write_input mode)
+ */
+export const practiceToleranceSchema = z.enum(PRACTICE_TOLERANCE, {
+    errorMap: () => ({ message: 'Invalid tolerance setting' })
+});
+
+/**
+ * Practice modes configuration schema
+ * Validates JSONB config stored in learning_items.practice_modes_config
+ */
+export const practiceModesConfigSchema = z.object({
+    enabled: z.boolean().default(false),
+    available_modes: z.array(practiceModeSchema).default([]),
+    activation_threshold: z.number().int().min(0).max(50).default(3),
+    difficulty_settings: z.object({
+        matching: z.object({
+            num_pairs: z.number().int().min(3).max(10).default(6),
+            time_limit_sec: z.number().int().min(10).nullable().default(null)
+        }),
+        multiple_choice: z.object({
+            num_options: z.number().int().min(2).max(6).default(4),
+            time_limit_sec: z.number().int().min(10).max(300).default(30),
+            show_hint: z.boolean().default(true)
+        }),
+        write_input: z.object({
+            tolerance: practiceToleranceSchema.default('lenient'),
+            show_phonetic: z.boolean().default(true),
+            max_attempts: z.number().int().min(1).max(5).default(3)
+        })
+    })
+});
+
+export type PracticeModesConfig = z.infer<typeof practiceModesConfigSchema>;
+export type PracticeMode = z.infer<typeof practiceModeSchema>;
+export type PracticeTolerance = z.infer<typeof practiceToleranceSchema>;
+
+/**
+ * Practice attempt validation (for recording attempts)
+ */
+export const practiceAttemptSchema = z.object({
+    item_id: uuidSchema,
+    mode_type: practiceModeSchema,
+    success: z.boolean(),
+    score: z.number().int().min(0).max(100),
+    time_seconds: z.number().int().min(0),
+    mistakes: z.number().int().min(0).default(0),
+    fsrs_rating: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+    metadata: z.record(z.unknown()).optional()
+});
+
+export type PracticeAttempt = z.infer<typeof practiceAttemptSchema>;
 
 // ========================================
 // AUTH SCHEMAS

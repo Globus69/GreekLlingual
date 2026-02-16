@@ -22,6 +22,7 @@ import { StreakDisplay } from '@/components/dashboard/streak-display';
 import { StreakMilestoneToast } from '@/components/dashboard/streak-milestone-toast';
 import { useStreak } from '@/hooks/use-streak';
 import { useDeviceDetection } from '@/hooks/use-device-detection';
+import { PracticeModesSection } from '@/components/dashboard/practice-modes-section';
 
 interface ActionTileProps {
     icon: string;
@@ -358,6 +359,11 @@ export default function DashboardPage() {
                             onClick={() => console.log('🔥 Button 16: Progress History clicked')}
                         />
                     </div>
+                </div>
+
+                {/* Practice Modes Section */}
+                <div className="mt-8 px-4 md:px-6">
+                    <PracticeModesSection />
                 </div>
             </main>
 

@@ -8,7 +8,11 @@ import {
     contentInsertSchema,
     contentUpdateSchema,
     uuidSchema,
-    bulkDeleteSchema
+    bulkDeleteSchema,
+    practiceModesConfigSchema,
+    practiceAttemptSchema,
+    type PracticeModesConfig,
+    type PracticeAttempt
 } from '../validation/schemas';
 
 interface FilterParams {
@@ -314,4 +318,190 @@ export function generateTemplateCSV(): string {
     const headers = ['type', 'english', 'greek', 'level', 'difficulty', 'phonetic', 'example_en', 'example_gr', 'audio_url'];
     const exampleRow = ['vocabulary', 'Hello', 'Γεια', 'A1', 'easy', 'he-lo', 'Hello, how are you?', 'Γεια, πώς είσαι;', 'https://audio.example.com/hello.mp3'];
     return Papa.unparse([exampleRow], { header: true, columns: headers });
+}
+
+// ============================================================================
+// PRACTICE MODES FUNCTIONS
+// ============================================================================
+
+/**
+ * Update practice mode configuration for a learning item (Admin only)
+ *
+ * @param itemId - UUID of the learning item
+ * @param config - Practice modes configuration object
+ * @returns True if update successful, false otherwise
+ */
+export async function updatePracticeModeConfig(
+    itemId: string,
+    config: PracticeModesConfig
+): Promise<boolean> {
+    // Validate item ID
+    const idValidation = safeParse(uuidSchema, itemId);
+    if (!idValidation.success) {
+        toast.error('Invalid ID format');
+        return false;
+    }
+
+    // Validate configuration
+    const configValidation = safeParse(practiceModesConfigSchema, config);
+    if (!configValidation.success) {
+        toast.error('Invalid configuration: ' + configValidation.error);
+        return false;
+    }
+
+    // Get user from localStorage
+    const storedUser = localStorage.getItem('greeklingua_user');
+    if (!storedUser) {
+        toast.error('Fehler: Nicht angemeldet');
+        return false;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    // Call RPC function
+    const { error } = await supabase.rpc('admin_update_practice_config', {
+        p_user_id: user.id,
+        p_item_id: idValidation.data,
+        p_config: configValidation.data
+    });
+
+    if (error) {
+        toast.error('Failed to update practice configuration: ' + error.message);
+        return false;
+    }
+
+    toast.success('Practice configuration updated successfully!');
+    return true;
+}
+
+/**
+ * Get practice mode configuration and unlock status for a learning item
+ *
+ * @param itemId - UUID of the learning item
+ * @param userId - UUID of the user
+ * @param modeType - Type of practice mode (matching, multiple_choice, write_input)
+ * @returns Practice config object with unlock status
+ */
+export async function getPracticeConfig(
+    itemId: string,
+    userId: string,
+    modeType: string
+): Promise<{
+    unlocked: boolean;
+    config: any;
+    user_reps: number;
+    threshold: number;
+    enabled: boolean;
+    mode_available: boolean;
+} | null> {
+    // Validate IDs
+    const itemIdValidation = safeParse(uuidSchema, itemId);
+    const userIdValidation = safeParse(uuidSchema, userId);
+
+    if (!itemIdValidation.success || !userIdValidation.success) {
+        toast.error('Invalid ID format');
+        return null;
+    }
+
+    // Call RPC function
+    const { data, error } = await supabase.rpc('get_practice_config', {
+        p_item_id: itemIdValidation.data,
+        p_user_id: userIdValidation.data,
+        p_mode_type: modeType
+    });
+
+    if (error) {
+        console.error('[getPracticeConfig] Error:', error);
+        toast.error('Failed to load practice configuration');
+        return null;
+    }
+
+    return data as any;
+}
+
+/**
+ * Record a practice attempt with score and FSRS rating
+ *
+ * @param attempt - Practice attempt data
+ * @param userId - UUID of the user
+ * @returns True if recording successful, false otherwise
+ */
+export async function recordPracticeAttempt(
+    attempt: Omit<PracticeAttempt, 'metadata'> & { metadata?: Record<string, unknown> },
+    userId: string
+): Promise<boolean> {
+    // Validate user ID
+    const userIdValidation = safeParse(uuidSchema, userId);
+    if (!userIdValidation.success) {
+        toast.error('Invalid user ID');
+        return false;
+    }
+
+    // Validate attempt data
+    const attemptValidation = safeParse(practiceAttemptSchema, attempt);
+    if (!attemptValidation.success) {
+        toast.error('Invalid attempt data: ' + attemptValidation.error);
+        return false;
+    }
+
+    const validAttempt = attemptValidation.data;
+
+    // Call RPC function
+    const { data, error } = await supabase.rpc('record_practice_attempt', {
+        p_user_id: userIdValidation.data,
+        p_item_id: validAttempt.item_id,
+        p_mode_type: validAttempt.mode_type,
+        p_success: validAttempt.success,
+        p_score: validAttempt.score,
+        p_time_seconds: validAttempt.time_seconds,
+        p_mistakes: validAttempt.mistakes,
+        p_fsrs_rating: validAttempt.fsrs_rating,
+        p_metadata: validAttempt.metadata || {}
+    });
+
+    if (error) {
+        console.error('[recordPracticeAttempt] Error:', error);
+        toast.error('Failed to record practice attempt');
+        return false;
+    }
+
+    return data === true;
+}
+
+/**
+ * Get practice statistics for a user/item combination
+ *
+ * @param userId - UUID of the user
+ * @param itemId - UUID of the learning item
+ * @param days - Number of days to look back (default: 30)
+ * @returns Array of statistics by mode type
+ */
+export async function getPracticeStats(
+    userId: string,
+    itemId: string,
+    days: number = 30
+): Promise<any[] | null> {
+    // Validate IDs
+    const userIdValidation = safeParse(uuidSchema, userId);
+    const itemIdValidation = safeParse(uuidSchema, itemId);
+
+    if (!userIdValidation.success || !itemIdValidation.success) {
+        toast.error('Invalid ID format');
+        return null;
+    }
+
+    // Call RPC function
+    const { data, error } = await supabase.rpc('get_practice_stats', {
+        p_user_id: userIdValidation.data,
+        p_item_id: itemIdValidation.data,
+        p_days: days
+    });
+
+    if (error) {
+        console.error('[getPracticeStats] Error:', error);
+        toast.error('Failed to load practice statistics');
+        return null;
+    }
+
+    return data || [];
 }

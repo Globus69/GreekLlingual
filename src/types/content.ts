@@ -1,3 +1,5 @@
+import type { PracticeModesConfig } from '@/lib/validation/schemas';
+
 export interface Content {
   id: string;
   type: 'vocabulary' | 'phrase' | 'grammar';
@@ -9,6 +11,7 @@ export interface Content {
   example_en?: string;
   example_gr?: string;
   audio_url?: string;
+  practice_modes_config?: PracticeModesConfig;
   created_at: string;
   updated_at: string;
 }

@@ -277,6 +277,39 @@ const FALLBACK_EN: Record<string, string> = {
     'lesson.no_vocabulary': 'No vocabulary for this lesson.',
     'lesson.words': 'words',
     'lesson.words_total': 'words total',
+
+    // Practice Modes
+    'practice.title': 'Practice Modes',
+    'practice.locked': 'Locked - Complete {count} more reviews',
+    'practice.unlocked': 'Unlocked!',
+    'practice.matching': 'Matching Game',
+    'practice.multiple_choice': 'Multiple Choice',
+    'practice.write_input': 'Write It Out',
+    'practice.start': 'Start Practice',
+    'practice.timer': 'Time: {seconds}s',
+    'practice.score': 'Score: {score}%',
+    'practice.mistakes': 'Mistakes: {count}',
+    'practice.attempts': 'Attempts: {current} / {max}',
+    'practice.result.title': 'Practice Complete!',
+    'practice.result.score': 'Your Score',
+    'practice.result.time': 'Time Taken',
+    'practice.result.fsrs_rating': 'FSRS Rating',
+    'practice.result.retry': 'Try Again',
+    'practice.result.close': 'Close',
+    'practice.feedback.correct': 'Correct! Well done!',
+    'practice.feedback.incorrect': 'Incorrect. Try again!',
+    'practice.feedback.close': 'Very close! Check your spelling.',
+    'practice.feedback.timeout': 'Time\'s up!',
+    'practice.instructions.matching': 'Match the English words with their Greek translations',
+    'practice.instructions.mc': 'Select the correct Greek translation',
+    'practice.instructions.write': 'Type the Greek translation',
+
+    // Admin Practice Config
+    'admin.practice_config.title': 'Practice Mode Configuration',
+    'admin.practice_config.enabled': 'Enable Practice Modes',
+    'admin.practice_config.threshold': 'Activation Threshold (Reviews)',
+    'admin.practice_config.modes': 'Available Modes',
+    'admin.practice_config.saved': 'Practice configuration saved!',
 };
 
 // Fallback Greek translations (hardcoded subset for offline/error scenarios)
@@ -792,6 +825,39 @@ const FALLBACK_DE: Record<string, string> = {
     'lesson.no_vocabulary': 'Keine Vokabeln für diese Lektion.',
     'lesson.words': 'Wörter',
     'lesson.words_total': 'Wörter insgesamt',
+
+    // Practice Modes
+    'practice.title': 'Übungsmodi',
+    'practice.locked': 'Gesperrt - Schließe {count} weitere Wiederholungen ab',
+    'practice.unlocked': 'Freigeschaltet!',
+    'practice.matching': 'Zuordnungsspiel',
+    'practice.multiple_choice': 'Multiple Choice',
+    'practice.write_input': 'Schreib es auf',
+    'practice.start': 'Übung starten',
+    'practice.timer': 'Zeit: {seconds}s',
+    'practice.score': 'Punkte: {score}%',
+    'practice.mistakes': 'Fehler: {count}',
+    'practice.attempts': 'Versuche: {current} / {max}',
+    'practice.result.title': 'Übung abgeschlossen!',
+    'practice.result.score': 'Deine Punktzahl',
+    'practice.result.time': 'Benötigte Zeit',
+    'practice.result.fsrs_rating': 'FSRS-Bewertung',
+    'practice.result.retry': 'Erneut versuchen',
+    'practice.result.close': 'Schließen',
+    'practice.feedback.correct': 'Richtig! Gut gemacht!',
+    'practice.feedback.incorrect': 'Falsch. Versuch es nochmal!',
+    'practice.feedback.close': 'Sehr nah dran! Überprüfe die Rechtschreibung.',
+    'practice.feedback.timeout': 'Zeit abgelaufen!',
+    'practice.instructions.matching': 'Ordne die englischen Wörter ihren griechischen Übersetzungen zu',
+    'practice.instructions.mc': 'Wähle die richtige griechische Übersetzung',
+    'practice.instructions.write': 'Schreibe die griechische Übersetzung',
+
+    // Admin Practice Config
+    'admin.practice_config.title': 'Übungsmodus-Konfiguration',
+    'admin.practice_config.enabled': 'Übungsmodi aktivieren',
+    'admin.practice_config.threshold': 'Aktivierungsschwelle (Wiederholungen)',
+    'admin.practice_config.modes': 'Verfügbare Modi',
+    'admin.practice_config.saved': 'Übungskonfiguration gespeichert!',
 };
 
 // Get locale-specific fallback
@@ -1048,6 +1114,39 @@ const FALLBACK_ES: Record<string, string> = {
     'lesson.no_vocabulary': 'No hay vocabulario para esta lección.',
     'lesson.words': 'palabras',
     'lesson.words_total': 'palabras en total',
+
+    // Practice Modes
+    'practice.title': 'Modos de práctica',
+    'practice.locked': 'Bloqueado - Completa {count} repasos más',
+    'practice.unlocked': '¡Desbloqueado!',
+    'practice.matching': 'Juego de emparejar',
+    'practice.multiple_choice': 'Opción múltiple',
+    'practice.write_input': 'Escríbelo',
+    'practice.start': 'Iniciar práctica',
+    'practice.timer': 'Tiempo: {seconds}s',
+    'practice.score': 'Puntuación: {score}%',
+    'practice.mistakes': 'Errores: {count}',
+    'practice.attempts': 'Intentos: {current} / {max}',
+    'practice.result.title': '¡Práctica completa!',
+    'practice.result.score': 'Tu puntuación',
+    'practice.result.time': 'Tiempo empleado',
+    'practice.result.fsrs_rating': 'Calificación FSRS',
+    'practice.result.retry': 'Intentar de nuevo',
+    'practice.result.close': 'Cerrar',
+    'practice.feedback.correct': '¡Correcto! ¡Bien hecho!',
+    'practice.feedback.incorrect': 'Incorrecto. ¡Inténtalo de nuevo!',
+    'practice.feedback.close': '¡Muy cerca! Revisa la ortografía.',
+    'practice.feedback.timeout': '¡Se acabó el tiempo!',
+    'practice.instructions.matching': 'Empareja las palabras en inglés con sus traducciones en griego',
+    'practice.instructions.mc': 'Selecciona la traducción griega correcta',
+    'practice.instructions.write': 'Escribe la traducción en griego',
+
+    // Admin Practice Config
+    'admin.practice_config.title': 'Configuración de modo de práctica',
+    'admin.practice_config.enabled': 'Habilitar modos de práctica',
+    'admin.practice_config.threshold': 'Umbral de activación (repasos)',
+    'admin.practice_config.modes': 'Modos disponibles',
+    'admin.practice_config.saved': '¡Configuración de práctica guardada!',
 };
 
 const FALLBACKS: Record<Locale, Record<string, string>> = { en: FALLBACK_EN, ru: FALLBACK_EN, el: FALLBACK_EL, de: FALLBACK_DE, es: FALLBACK_ES };
