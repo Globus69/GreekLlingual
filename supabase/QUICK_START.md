@@ -12,7 +12,7 @@ open https://app.supabase.com/project/bzdzqmnxycnudflcnmzj/sql
 # 3. Paste in SQL Editor → Click Run ✅
 
 # 4. Verify (copy this to clipboard)
-cat supabase/migrations/verify_practice_modes.sql | pbcopy
+cat supabase/migrations/verify_practice_modes_web.sql | pbcopy
 # Then paste in SQL Editor → Click Run ✅
 ```
 
@@ -42,9 +42,11 @@ supabase db push
 
 ### 2️⃣ Verify Migration
 
-1. In Supabase SQL Editor, run: `supabase/migrations/verify_practice_modes.sql`
+1. In Supabase SQL Editor, run: `supabase/migrations/verify_practice_modes_web.sql`
 2. Check output for ✅ green checkmarks
 3. Should see: "MIGRATION SUCCESSFUL - All components installed"
+
+**Note**: Use `verify_practice_modes_web.sql` (works in web UI), not `verify_practice_modes.sql` (psql only)
 
 ### 3️⃣ Test in Application
 
