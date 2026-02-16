@@ -1,0 +1,88 @@
+{
+  "name": "GreekLingua - Master Greek with FSRS",
+  "short_name": "GreekLingua",
+  "description": "Learn Greek vocabulary with spaced repetition (FSRS-6). Track your progress, practice flashcards, and achieve fluency.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#1a1a1e",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-apple-touch.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard with vocabulary stats"
+    },
+    {
+      "src": "/screenshots/flashcard.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Vocabulary flashcard practice"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Practice Vocabulary",
+      "short_name": "Vocabulary",
+      "description": "Start vocabulary practice session",
+      "url": "/dashboard?action=vocabulary",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Due Cards",
+      "short_name": "Due Cards",
+      "description": "Review cards due today",
+      "url": "/dashboard?action=due",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "related_applications": [],
+  "prefer_related_applications": false
+}

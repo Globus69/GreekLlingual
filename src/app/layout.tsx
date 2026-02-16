@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/auth-context";
 import { LanguageProvider } from "@/context/language-context";
 import LanguageToast from "@/components/ui/LanguageToast";
 import { Toaster } from "sonner";
+import PWAInstallPrompt from "@/components/pwa/install-prompt";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,10 +24,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "GreekLingua Dashboard",
   description: "Master Greek with Spaced Repetition",
+  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'GreekLingua',
+  },
+  icons: {
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icon-apple-touch.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 };
 
@@ -56,6 +67,7 @@ export default function RootLayout({
           </AuthProvider>
         </LanguageProvider>
         <Toaster position="top-right" richColors />
+        <PWAInstallPrompt />
       </body>
     </html>
   );
