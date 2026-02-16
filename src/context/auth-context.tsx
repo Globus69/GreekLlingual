@@ -183,25 +183,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.warn('Supabase direct query failed, trying local fallback:', err);
         }
 
-        // 3. Fallback: Lokaler Admin-Account (funktioniert ohne Supabase)
-        if (username.toLowerCase() === 'admin' && pin === '123456') {
-            const adminUser: User = {
-                id: 'admin-local',
-                email: 'admin@greeklingua.local',
-                name: 'Admin',
-                role: 'admin',
-                level: 'A1',
-                difficulty: 'easy',
-                performance_index: 'A1-easy',
-            };
-            setUser(adminUser);
-            localStorage.setItem('greeklingua_user', JSON.stringify(adminUser));
-            localStorage.setItem('greeklingua_session_ts', String(Date.now()));
-            router.push('/dashboard');
-            return true;
-        }
-
         // Login fehlgeschlagen
+        console.warn('Login failed: Invalid credentials or database unavailable');
         return false;
     };
 
