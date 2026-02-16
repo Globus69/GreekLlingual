@@ -906,3 +906,13 @@ const btnPrimarySmall: CSSProperties = {
     fontWeight: 600,
     cursor: 'pointer',
 };
+
+const bodyStyle: CSSProperties = {
+    padding: '24px',
+};
+
+const dividerStyle: CSSProperties = {
+    height: '1px',
+    background: 'rgba(255,255,255,0.08)',
+    margin: '20px 0',
+};

@@ -8,7 +8,7 @@ import { ContentFilters } from '@/components/admin/content-filters';
 import { ContentTable } from '@/components/admin/content-table';
 import { ContentModal } from '@/components/admin/content-modal';
 import { ImportExportSection } from '@/components/admin/import-export-section';
-import type { Content, ContentFilters as Filters, ContentFormData } from '@/types/content';
+import type { Content, ContentFilters as Filters, ContentFormData, BulkImportResult } from '@/types/content';
 import {
     fetchContent,
     createContent,
@@ -55,8 +55,14 @@ export default function ContentV2Page() {
     const loadContent = async () => {
         setLoading(true);
         try {
-            const { data, count, error } = await fetchContent(filters, currentPage, 50);
-            if (error) throw error;
+            const { data, count } = await fetchContent({
+                search: filters.search,
+                type: filters.type !== 'all' ? filters.type : undefined,
+                level: filters.level !== 'all' ? [filters.level] : undefined,
+                difficulty: filters.difficulty !== 'all' ? [filters.difficulty] : undefined,
+                page: currentPage - 1,
+                pageSize: 50,
+            });
 
             setItems(data);
             setTotalCount(count);
@@ -98,12 +104,12 @@ export default function ContentV2Page() {
     const handleSave = async (formData: ContentFormData) => {
         try {
             if (isCreating) {
-                const { data, error } = await createContent(formData);
-                if (error) throw error;
+                const data = await createContent(formData);
+                if (!data) throw new Error('Failed to create content');
                 toast.success('Item created successfully!');
             } else if (editingItem) {
-                const { data, error } = await updateContent(editingItem.id, formData);
-                if (error) throw error;
+                const data = await updateContent(editingItem.id, formData);
+                if (!data) throw new Error('Failed to update content');
                 toast.success('Item updated successfully!');
             }
             await loadContent();
@@ -117,8 +123,8 @@ export default function ContentV2Page() {
 
     const handleDelete = async (id: string) => {
         try {
-            const { error } = await deleteContent(id);
-            if (error) throw error;
+            const success = await deleteContent(id);
+            if (!success) throw new Error('Failed to delete content');
             toast.success('Item deleted successfully!');
             await loadContent();
         } catch (error) {
@@ -129,8 +135,8 @@ export default function ContentV2Page() {
 
     const handleBulkDelete = async (ids: string[]) => {
         try {
-            const { error } = await bulkDeleteContent(ids);
-            if (error) throw error;
+            const success = await bulkDeleteContent(ids);
+            if (!success) throw new Error('Failed to bulk delete content');
             toast.success(`${ids.length} items deleted successfully!`);
             setSelectedIds([]);
             await loadContent();
@@ -140,16 +146,25 @@ export default function ContentV2Page() {
         }
     };
 
-    const handleImport = async (importItems: any[]) => {
+    const handleImport = async (importItems: any[]): Promise<BulkImportResult> => {
         const result = await bulkImport(importItems);
-        if (result.success > 0) {
-            toast.success(`Successfully imported ${result.success} items!`);
+        const imported = result.success;
+        const failed = result.errors.length;
+
+        if (imported > 0) {
+            toast.success(`Successfully imported ${imported} items!`);
             await loadContent();
         }
-        if (result.errors.length > 0) {
-            toast.error(`Failed to import ${result.errors.length} items: ${result.errors.join(', ')}`);
+        if (failed > 0) {
+            toast.error(`Failed to import ${failed} items`);
         }
-        return result;
+
+        return {
+            success: imported > 0,
+            imported,
+            failed,
+            errors: result.errors.map((msg, idx) => ({ row: idx, error: msg }))
+        };
     };
 
     const totalPages = Math.ceil(totalCount / 50);

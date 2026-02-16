@@ -9,15 +9,9 @@ import * as z from 'zod';
 import type { Content, ContentFormData } from '@/types/content';
 
 const contentSchema = z.object({
-    type: z.enum(['vocabulary', 'phrase', 'grammar'], {
-        required_error: 'Type is required',
-    }),
-    level: z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'], {
-        required_error: 'Level is required',
-    }),
-    difficulty: z.enum(['easy', 'medium', 'hard'], {
-        required_error: 'Difficulty is required',
-    }),
+    type: z.enum(['vocabulary', 'phrase', 'grammar']),
+    level: z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2']),
+    difficulty: z.enum(['easy', 'medium', 'hard']),
     english: z.string().min(1, 'English text is required'),
     greek: z.string().min(1, 'Greek text is required'),
     phonetic: z.string().trim().optional().or(z.literal('')),

@@ -88,13 +88,17 @@ export default function AdminPage() {
             ? 'linear-gradient(135deg, #0a0a1a 0%, #0d2847 50%, #0a0a1a 100%)'  // griechisches Blau
             : locale === 'de'
                 ? 'linear-gradient(135deg, #0a0a1a 0%, #2a2010 50%, #0a0a1a 100%)'  // warmer Goldton
-                : 'linear-gradient(135deg, #0a0a1a 0%, #0f1a3e 50%, #0a0a1a 100%)'; // kuehler Blauton
+                : locale === 'es'
+                    ? 'linear-gradient(135deg, #0a0a1a 0%, #2a1015 50%, #0a0a1a 100%)'  // warmer Rot-Orange
+                    : 'linear-gradient(135deg, #0a0a1a 0%, #0f1a3e 50%, #0a0a1a 100%)'; // kuehler Blauton
     const headerBg = locale === 'ru'
         ? 'rgba(60, 0, 20, 0.25)'   // dezenter Rot-Touch
         : locale === 'el'
             ? 'rgba(0, 30, 70, 0.25)'   // griechischer Blau-Touch
             : locale === 'de'
                 ? 'rgba(50, 40, 0, 0.25)'   // dezenter Gold-Touch
+                : locale === 'es'
+                    ? 'rgba(60, 20, 10, 0.25)'   // dezenter Rot-Orange-Touch
                 : 'rgba(0, 20, 60, 0.25)';  // dezenter Blau-Touch
     const headerBorder = locale === 'ru'
         ? '1px solid rgba(200, 50, 50, 0.08)'
@@ -102,7 +106,9 @@ export default function AdminPage() {
             ? '1px solid rgba(13, 110, 253, 0.08)'
             : locale === 'de'
                 ? '1px solid rgba(218, 165, 32, 0.08)'
-                : '1px solid rgba(50, 100, 200, 0.08)';
+                : locale === 'es'
+                    ? '1px solid rgba(220, 60, 40, 0.08)'
+                    : '1px solid rgba(50, 100, 200, 0.08)';
 
     return (
         <div style={{
@@ -135,10 +141,10 @@ export default function AdminPage() {
                     {/* Flaggen-Anzeige: Klick rotiert durch 3 Sprachen (EN → RU → EL → EN) */}
                     <button
                         onClick={() => {
-                            const nextLocale = locale === 'en' ? 'ru' : locale === 'ru' ? 'el' : locale === 'el' ? 'de' : 'en';
+                            const nextLocale = locale === 'en' ? 'ru' : locale === 'ru' ? 'el' : locale === 'el' ? 'de' : locale === 'de' ? 'es' : 'en';
                             setLocale(nextLocale);
                         }}
-                        title={locale === 'en' ? t('header.switch_to_ru') : locale === 'ru' ? t('header.switch_to_el') : locale === 'el' ? t('header.switch_to_de') : t('header.switch_to_en')}
+                        title={locale === 'en' ? t('header.switch_to_ru') : locale === 'ru' ? t('header.switch_to_el') : locale === 'el' ? t('header.switch_to_de') : locale === 'de' ? t('header.switch_to_es') : t('header.switch_to_en')}
                         style={{
                             background: 'rgba(255,255,255,0.06)',
                             border: locale === 'ru'
@@ -147,7 +153,9 @@ export default function AdminPage() {
                                     ? '1px solid rgba(13, 110, 253, 0.2)'
                                     : locale === 'de'
                                         ? '1px solid rgba(218, 165, 32, 0.2)'
-                                        : '1px solid rgba(60, 120, 220, 0.2)',
+                                        : locale === 'es'
+                                            ? '1px solid rgba(220, 60, 40, 0.2)'
+                                            : '1px solid rgba(60, 120, 220, 0.2)',
                             borderRadius: '10px',
                             padding: '6px 10px',
                             cursor: 'pointer',
@@ -160,16 +168,16 @@ export default function AdminPage() {
                         }}
                     >
                         <span style={{ fontSize: '22px' }}>
-                            {locale === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : locale === 'ru' ? '\uD83C\uDDF7\uD83C\uDDFA' : locale === 'el' ? '\uD83C\uDDEC\uD83C\uDDF7' : '\uD83C\uDDE9\uD83C\uDDEA'}
+                            {locale === 'en' ? '\uD83C\uDDEC\uD83C\uDDE7' : locale === 'ru' ? '\uD83C\uDDF7\uD83C\uDDFA' : locale === 'el' ? '\uD83C\uDDEC\uD83C\uDDF7' : locale === 'de' ? '\uD83C\uDDE9\uD83C\uDDEA' : '\uD83C\uDDEA\uD83C\uDDF8'}
                         </span>
                         <span style={{
                             fontSize: '11px',
                             fontWeight: 600,
-                            color: locale === 'ru' ? '#E05555' : locale === 'el' ? '#0D6EFD' : locale === 'de' ? '#DAA520' : '#5B9BFF',
+                            color: locale === 'ru' ? '#E05555' : locale === 'el' ? '#0D6EFD' : locale === 'de' ? '#DAA520' : locale === 'es' ? '#DC3C28' : '#5B9BFF',
                             textTransform: 'uppercase',
                             transition: 'color 0.3s ease',
                         }}>
-                            {locale === 'en' ? 'EN' : locale === 'ru' ? 'RU' : locale === 'el' ? 'EL' : 'DE'}
+                            {locale === 'en' ? 'EN' : locale === 'ru' ? 'RU' : locale === 'el' ? 'EL' : locale === 'de' ? 'DE' : 'ES'}
                         </span>
                     </button>
 

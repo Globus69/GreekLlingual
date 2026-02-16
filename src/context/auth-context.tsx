@@ -12,7 +12,7 @@ interface User {
     level?: string;
     difficulty?: string;
     performance_index?: string;
-    preferred_locale?: 'en' | 'ru' | 'el' | 'de';
+    preferred_locale?: 'en' | 'ru' | 'el' | 'de' | 'es';
     streak_days?: number;
     last_activity_date?: string;
     longest_streak?: number;
@@ -141,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     level: dbUser.user_level,
                     difficulty: dbUser.user_difficulty,
                     performance_index: dbUser.user_performance_index,
-                    preferred_locale: (dbUser.user_preferred_locale as 'en' | 'ru' | 'el' | 'de') || 'en',
+                    preferred_locale: (dbUser.user_preferred_locale as 'en' | 'ru' | 'el' | 'de' | 'es') || 'en',
                 };
                 setUser(userData);
                 localStorage.setItem('greeklingua_user', JSON.stringify(userData));
@@ -171,7 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     level: data.level,
                     difficulty: data.difficulty,
                     performance_index: data.performance_index,
-                    preferred_locale: (data.preferred_locale as 'en' | 'ru' | 'el' | 'de') || 'en',
+                    preferred_locale: (data.preferred_locale as 'en' | 'ru' | 'el' | 'de' | 'es') || 'en',
                 };
                 setUser(userData);
                 localStorage.setItem('greeklingua_user', JSON.stringify(userData));
