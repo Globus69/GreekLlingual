@@ -73,17 +73,16 @@ Anweisung für neue Sessions:
   - Honeypot-Checks in API-Route verlagern
 - **Aufwand:** Mittel (3–8 h)
 
-### 5. Rate-Limiter fail-closed statt fail-open
-- **Dateien:** `src/lib/rate-limit.ts:64`
-- **Problem:** Bei Redis-Fehler gibt Rate-Limiter `success: true` zurück → Brute-Force-Angriffe möglich
-- **Schwere:** HOCH (CVSS 7.3) – Account-Takeover durch Brute-Force
-- **Lösung:**
-  ```typescript
-  // Statt fail-open:
-  return { success: false, limit: 10, remaining: 0, reset: 60000, pending: Promise.resolve() };
-  // Oder: Fallback auf In-Memory Rate-Limiting
-  ```
-- **Aufwand:** Sehr gering (< 1 h)
+### 5. ✅ ~~Rate-Limiter fail-closed statt fail-open~~ **ERLEDIGT**
+- **Status:** ✅ Commit `TBD` – Rate-Limiter auf fail-closed umgestellt
+- **Dateien:** `src/lib/rate-limit.ts:64, 88`
+- **Schwere:** HOCH (CVSS 7.3) → Behoben
+- **Änderungen:**
+  - `checkRateLimit()`: Gibt jetzt `success: false` bei Redis-Fehler zurück
+  - `checkRateLimitAdmin()`: Neue Funktion für Admin-Login mit fail-closed
+  - Verhindert Brute-Force-Angriffe bei Redis-Ausfall
+- **Hinweis:** Integration in Login-Flow erfolgt mit Punkt 4 (API-Routes)
+- **Commit:** `2026-02-16` – fix(security): Rate-limiter fail-closed to prevent brute-force
 
 ### 6. IP-Whitelisting server-seitig implementieren
 - **Dateien:** `src/app/login/page.tsx`, `.env.example:21`
@@ -296,19 +295,21 @@ Anweisung für neue Sessions:
 ## 📊 Zusammenfassung
 
 **Gesamt:** 18 Punkte
-**Erledigt:** 2 ✅
-**Hoch-Priorität (Sicherheit):** 5 offen
+**Erledigt:** 3 ✅
+**Hoch-Priorität (Sicherheit):** 4 offen
 **Mittel-Priorität:** 3 offen
 **Performance:** 3 offen
 **Code-Qualität:** 3 offen
-**Neue Features:** 2 in Arbeit
+**Neue Features:** 2 abgeschlossen
 
 **Nächste Schritte:**
-1. ✅ Punkt 17 & 18 umsetzen (Spanisch + Griechisch-UI-Entfernung)
-2. Punkt 3 umsetzen (localStorage → Cookies)
-3. Punkt 4 umsetzen (Server-seitige Auth)
-4. Punkt 5 umsetzen (Rate-Limiter fail-closed)
+1. ✅ Punkt 17 & 18 umsetzen (Spanisch + Griechisch-UI-Entfernung) – ERLEDIGT
+2. ✅ Punkt 5 umsetzen (Rate-Limiter fail-closed) – ERLEDIGT
+3. Punkt 7 umsetzen (Hardcoded Supabase-URL entfernen) – < 1 h
+4. Punkt 3 umsetzen (localStorage → Cookies) – 3-8 h
+5. Punkt 4 umsetzen (Server-seitige Auth) – 3-8 h
+6. Punkt 6 umsetzen (IP-Whitelisting server-seitig) – 1-3 h
 
 ---
 
-**Letzte Aktualisierung:** 2026-02-16 13:10 UTC+2
+**Letzte Aktualisierung:** 2026-02-16 15:45 UTC+2
