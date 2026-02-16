@@ -24,6 +24,7 @@ import { useStreak } from '@/hooks/use-streak';
 import { useDeviceDetection } from '@/hooks/use-device-detection';
 import { PracticeModesSection } from '@/components/dashboard/practice-modes-section';
 import { PracticeModesTestDialog } from '@/components/dashboard/practice-modes-test-dialog';
+import VocabularyStatsWidget from '@/components/dashboard/vocabulary-stats-widget';
 
 interface ActionTileProps {
     icon: string;
@@ -153,22 +154,21 @@ export default function DashboardPage() {
             }
             fetchStats();
 
-            // Auto-update streak on dashboard load
-            const checkStreak = async () => {
-                const result = await updateStreak();
-                if (result) {
-                    // Check for milestones
-                    const milestone = getMilestoneMessage(result.new_streak);
-                    if (milestone || result.is_new_record) {
-                        setMilestoneToast({
-                            streak: result.new_streak,
-                            isNewRecord: result.is_new_record,
-                            message: milestone || result.message,
-                        });
-                    }
-                }
-            };
-            checkStreak();
+            // TEMPORARILY DISABLED: Auto-update streak (blocking dashboard load)
+            // const checkStreak = async () => {
+            //     const result = await updateStreak();
+            //     if (result) {
+            //         const milestone = getMilestoneMessage(result.new_streak);
+            //         if (milestone || result.is_new_record) {
+            //             setMilestoneToast({
+            //                 streak: result.new_streak,
+            //                 isNewRecord: result.is_new_record,
+            //                 message: milestone || result.message,
+            //             });
+            //         }
+            //     }
+            // };
+            // checkStreak();
 
             const timer = setTimeout(() => {
                 setLoading(false);
@@ -177,13 +177,14 @@ export default function DashboardPage() {
         }
     }, [user, authLoading, router, updateStreak, getMilestoneMessage, fetchStats]);
 
-    if (authLoading || loading) {
-        return (
-            <div className="login-overlay">
-                <h1 style={{ color: 'white', fontSize: '24px' }}>🏛️ {authLoading ? t('dashboard.authenticating') : t('dashboard.loading')}</h1>
-            </div>
-        );
-    }
+    // AGGRESSIVE FIX: Skip loading screen entirely for debugging
+    // if (authLoading || loading) {
+    //     return (
+    //         <div className="login-overlay">
+    //             <h1 style={{ color: 'white', fontSize: '24px' }}>🏛️ Loading...</h1>
+    //         </div>
+    //     );
+    // }
 
     return (
         <div id="app" className="dashboard-layout">
@@ -209,12 +210,23 @@ export default function DashboardPage() {
                         <p style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}
                             dangerouslySetInnerHTML={{ __html: t('dashboard.welcome_subtitle', { count: '12' }) }} />
 
-                        {/* Streak Display */}
-                        <div style={{ marginTop: '20px', maxWidth: '350px' }}>
+                        {/* TEMPORARILY DISABLED: Streak Display (focusing on Practice Modes only) */}
+                        {/* <div style={{ marginTop: '20px', maxWidth: '350px' }}>
                             <StreakDisplay />
-                        </div>
+                        </div> */}
                     </div>
                 </div>
+
+                {/* TEMPORARILY DISABLED: Vocabulary Stats Widget (focusing on Practice Modes only) */}
+                {/* <div className="stats-widgets-row" style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+                    gap: '20px',
+                    marginBottom: '32px',
+                    padding: '0 20px'
+                }}>
+                    <VocabularyStatsWidget onOpenDialog={() => setIsVocabDialogOpen(true)} />
+                </div> */}
 
                 <div className="dashboard-footer-area">
                     {/* LEFT: MASTERY BOX (PIMPED) */}
@@ -283,8 +295,8 @@ export default function DashboardPage() {
                             label={`7. ${t('action.due_cards')}`}
                             onClick={() => setIsDueCardsDialogOpen(true)}
                         />
-                        <ActionTile 
-                            icon="⚡" 
+                        <ActionTile
+                            icon="⚡"
                             label={`2. ${t('action.quick_lesson')}`}
                             onClick={() => console.log('🔥 Button 2: Quick Lesson clicked')}
                         />
@@ -317,8 +329,8 @@ export default function DashboardPage() {
                             onClick={() => setIsWeakWordsDialogOpen(true)}
                         />
 
-                        <ActionTile 
-                            icon="👩‍🏫" 
+                        <ActionTile
+                            icon="👩‍🏫"
                             label={`1. ${t('action.magic_round')}`}
                             onClick={() => setIsLessonDialogOpen(true)}
                         />

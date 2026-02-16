@@ -59,10 +59,17 @@ export function PracticeModesSection() {
         setLoading(true);
 
         try {
+            console.log('🎮 [loadPracticeItems] Calling RPC: get_practice_enabled_items');
+
             // Use RPC endpoint to bypass PostgREST cache issues
             // Migration: 069_get_practice_enabled_items.sql
             const { data: items, error } = await supabase
                 .rpc('get_practice_enabled_items');
+
+            console.log('🎮 [loadPracticeItems] RPC response:', {
+                itemCount: items?.length || 0,
+                hasError: !!error
+            });
 
             if (error) {
                 console.error('Error loading practice items:', error);
@@ -79,6 +86,7 @@ export function PracticeModesSection() {
                 }
             );
 
+            console.log('🎮 [loadPracticeItems] Filtered enabled items:', enabledItems);
             setPracticeItems(enabledItems);
 
             // Load unlock statuses for each item
@@ -123,12 +131,19 @@ export function PracticeModesSection() {
         setUnlockStatuses(statuses);
     };
 
+    // Mount log (only once)
+    useEffect(() => {
+        console.log('🎮 [PracticeModesSection] Component MOUNTED');
+    }, []);
+
     // Load practice items when user is available
     useEffect(() => {
         if (user?.id) {
+            console.log('🎮 [useEffect] Loading practice items for user:', user.id);
             loadPracticeItems();
         }
-    }, [user?.id, loadPracticeItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id]); // Only depend on user?.id, not loadPracticeItems
 
     /**
      * Handle practice mode launch
@@ -187,16 +202,19 @@ export function PracticeModesSection() {
 
     if (loading) {
         return (
-            <div className="practice-modes-section">
-                <h3 className="text-lg font-semibold mb-4">Practice Modes</h3>
-                <p className="text-sm text-muted-foreground">Loading...</p>
+            <div className="practice-modes-section" style={{
+                padding: '20px',
+                background: 'rgba(255, 255, 0, 0.1)',
+                border: '2px solid yellow',
+                borderRadius: '8px'
+            }}>
+                <h3 className="text-lg font-semibold mb-4">🎮 Practice Modes</h3>
+                <p className="text-sm text-yellow-400">⏳ Loading practice items...</p>
             </div>
         );
     }
 
     if (practiceItems.length === 0) {
-
-        // TEMPORARY: Show a message instead of hiding completely
         return (
             <div className="practice-modes-section space-y-4" style={{
                 padding: '20px',
