@@ -268,20 +268,11 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
             <div className="dialog-content vocabulary-dialog" onClick={(e) => e.stopPropagation()}>
                 <div className="dialog-header">
                     <h2>📚 Vocabulary Practice</h2>
-
-                    {/* Progress Bar */}
                     {!loading && !showSummary && queue.length > 0 && (
-                        <div className="progress-section">
-                            <div className="progress-info">
-                                <span className="progress-count">Card {currentIndex + 1} of {queue.length}</span>
-                                <span className="progress-count">{Math.round(((currentIndex) / queue.length) * 100)}%</span>
-                            </div>
-                            <div className="progress-bar-container">
-                                <div
-                                    className="progress-bar-fill"
-                                    style={{ width: `${((currentIndex) / queue.length) * 100}%` }}
-                                />
-                            </div>
+                        <div className="progress-info" style={{ marginTop: '16px' }}>
+                            <span>Card {currentIndex + 1} of {queue.length}</span>
+                            {correct > 0 && <span style={{ marginLeft: '12px', color: '#4CAF50' }}>✅ {correct}</span>}
+                            {wrong > 0 && <span style={{ marginLeft: '12px', color: '#f44336' }}>❌ {wrong}</span>}
                         </div>
                     )}
                 </div>
@@ -327,23 +318,13 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
                         </div>
 
                         <div className="dialog-footer">
-                            <button onClick={handleRestart} className="btn-secondary">
-                                ↻ {t('btn.restart')}
-                            </button>
                             <button
                                 onClick={playAudio}
                                 disabled={isPlaying}
                                 className={`btn-audio ${isPlaying ? 'playing' : ''}`}
                                 title="Play audio (A)"
                             >
-                                {isPlaying ? '🔊' : '🔊'} {t('btn.audio')}
-                            </button>
-                            <button
-                                onClick={toggleAutoPlay}
-                                className={`btn-autoplay ${autoPlay ? 'active' : ''}`}
-                                title={`Auto-play: ${autoPlay ? 'ON' : 'OFF'}`}
-                            >
-                                {autoPlay ? '🔊' : '🔇'} Auto
+                                {isPlaying ? '🔊 Playing...' : '🔊 Play Audio'}
                             </button>
                             <button
                                 onClick={cycleSpeed}
@@ -352,9 +333,14 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
                             >
                                 {getSpeedLabel(speechRate).emoji}
                             </button>
-                            <button onClick={onClose} className="btn-cancel">
-                                × {t('btn.cancel')}
+                            <button
+                                onClick={toggleAutoPlay}
+                                className={`btn-autoplay ${autoPlay ? 'active' : ''}`}
+                                title={`Auto-play: ${autoPlay ? 'ON' : 'OFF'}`}
+                            >
+                                {autoPlay ? '🔊' : '🔇'} Auto
                             </button>
+                            <button onClick={onClose} className="btn-cancel">× Close</button>
                         </div>
                     </>
                 ) : null}
@@ -426,124 +412,42 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
 
                 .btn-primary:hover {
                     background: rgba(0, 122, 255, 0.4);
-                    transform: translateY(-2px);
-                }
-
-                .progress-section {
-                    margin-top: 16px;
-                    margin-bottom: 12px;
-                }
-
-                .progress-info {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 8px;
-                }
-
-                .progress-count {
-                    font-size: 14px;
-                    font-weight: 600;
-                    color: rgba(255, 255, 255, 0.9);
-                }
-
-                .progress-bar-container {
-                    width: 100%;
-                    height: 8px;
-                    background: rgba(255, 255, 255, 0.1);
-                    border-radius: 8px;
-                    overflow: hidden;
-                    position: relative;
-                }
-
-                .progress-bar-fill {
-                    height: 100%;
-                    background: linear-gradient(90deg, #007AFF 0%, #00C7BE 100%);
-                    border-radius: 8px;
-                    transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
-                    box-shadow: 0 0 12px rgba(0, 199, 190, 0.4);
-                }
-
-                .card-container {
-                    margin: 24px 0;
+                    transform: translateY(-1px);
                 }
 
                 .dialog-footer {
                     display: flex;
                     gap: 12px;
                     justify-content: center;
+                    margin-top: 24px;
                 }
 
-                .btn-secondary, .btn-audio, .btn-autoplay, .btn-speed, .btn-cancel {
-                    padding: 12px 24px;
-                    border-radius: 12px;
-                    border: none;
+                .btn-audio, .btn-speed, .btn-autoplay, .btn-cancel {
+                    padding: 10px 16px;
+                    border-radius: 10px;
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    background: rgba(255, 255, 255, 0.05);
+                    color: #fff;
                     cursor: pointer;
-                    font-weight: 600;
+                    font-weight: 500;
                     transition: all 0.2s;
+                    font-size: 14px;
                 }
 
-                .btn-secondary {
-                    background: rgba(0, 122, 255, 0.2);
-                    color: #007AFF;
-                }
-
-                .btn-secondary:hover {
-                    background: rgba(0, 122, 255, 0.3);
-                }
-
-                .btn-audio {
-                    background: rgba(52, 199, 89, 0.2);
-                    color: #34C759;
-                }
-
-                .btn-audio:hover {
-                    background: rgba(52, 199, 89, 0.3);
+                .btn-audio:hover, .btn-speed:hover, .btn-autoplay:hover, .btn-cancel:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                    transform: translateY(-1px);
                 }
 
                 .btn-audio:disabled {
-                    opacity: 0.7;
+                    opacity: 0.5;
                     cursor: not-allowed;
                 }
 
-                .btn-autoplay {
-                    background: rgba(255, 159, 10, 0.15);
-                    color: rgba(255, 159, 10, 0.7);
-                    font-size: 13px;
-                    padding: 12px 16px;
-                }
-
-                .btn-autoplay:hover {
-                    background: rgba(255, 159, 10, 0.25);
-                    color: rgba(255, 159, 10, 0.9);
-                }
-
                 .btn-autoplay.active {
-                    background: rgba(255, 159, 10, 0.3);
-                    color: #FF9F0A;
-                    border: 1px solid rgba(255, 159, 10, 0.4);
-                }
-
-                .btn-speed {
-                    background: rgba(94, 92, 230, 0.15);
-                    color: rgba(94, 92, 230, 0.9);
-                    font-size: 20px;
-                    padding: 12px 16px;
-                    min-width: 56px;
-                }
-
-                .btn-speed:hover {
-                    background: rgba(94, 92, 230, 0.25);
-                    transform: scale(1.1);
-                }
-
-                .btn-cancel {
-                    background: rgba(255, 69, 58, 0.2);
-                    color: #FF453A;
-                }
-
-                .btn-cancel:hover {
-                    background: rgba(255, 69, 58, 0.3);
+                    background: rgba(0, 122, 255, 0.2);
+                    border-color: rgba(0, 122, 255, 0.4);
+                    color: #007AFF;
                 }
 
                 .icon-btn {
