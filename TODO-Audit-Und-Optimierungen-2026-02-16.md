@@ -8,7 +8,7 @@ Aktueller Kontext wird bald sehr knapp → neuer Tab / neue Session wird gestart
 Bitte bei jedem Neustart / neuer Session als allererstes diese Datei lesen und
 dann exakt ab dem nächsten offenen Punkt weiterarbeiten.
 
-Letzte erfolgreich bearbeitete Punkte (Stand: 2026-02-16 21:30):
+Letzte erfolgreich bearbeitete Punkte (Stand: 2026-02-16 22:00):
 • ✅ Punkt 1 & 2: .env.local Sicherheit + Hardcoded Admin-Credentials entfernt
 • ✅ Punkt 5: Rate-Limiter auf fail-closed umgestellt
 • ✅ Punkt 7: Hardcoded Supabase-URL entfernt
@@ -21,8 +21,21 @@ Letzte erfolgreich bearbeitete Punkte (Stand: 2026-02-16 21:30):
 
 **Fortschritt: 53% (10 von 19 Punkten)** 🎉
 
-Nächste geplante Schritte (priorisiert nach Aufwand):
-1. 🔒 Punkt 6: IP-Whitelisting server-seitig (1-3h, HOCH) ← NÄCHSTER SCHRITT
+⚠️ **WICHTIG: IMPROVMENT-16-02-25.md hat Priorität!**
+Bevor mit TODO-Audit fortgefahren wird, muss IMPROVMENT-16-02-25.md komplett abgeschlossen sein:
+- ⏳ Practice Modes Testing läuft (3 Agents aktiv)
+- ⏳ Admin UI Testing ausstehend
+- ⏳ i18n Verification ausstehend
+- ⏳ Dokumentation finalisieren
+
+**Status (22:00):**
+- Dashboard funktioniert fehlerfrei ✅
+- RPC-Lösung implementiert (Migration 069) ✅
+- Infinite Loop Bugs behoben ✅
+- Testing in Progress (3 Agents) ⏳
+
+Nächste geplante Schritte (NACH IMPROVMENT-Abschluss):
+1. 🔒 Punkt 6: IP-Whitelisting server-seitig (1-3h, HOCH)
 2. 🔒 Punkt 3: localStorage → httpOnly Cookies (3-8h, HOCH)
 3. 🔒 Punkt 9: CSRF-Protection (3-8h, MITTEL)
 4. 🔒 Punkt 10: TypeScript Strict Mode (3-8h, MITTEL)
@@ -31,7 +44,9 @@ Nächste geplante Schritte (priorisiert nach Aufwand):
 
 Anweisung für neue Sessions:
 "Sag mir bitte zuerst: 'Ich habe die TODO-Datei gelesen.'
- Danach fahre exakt mit dem nächsten offenen Punkt fort."
+ Prüfe zuerst ob IMPROVMENT-16-02-25.md abgeschlossen ist.
+ Falls NEIN: IMPROVMENT beenden.
+ Falls JA: Dann mit TODO-Audit fortfahren."
 
 ───────────────────────────────────────────────────────────────
 

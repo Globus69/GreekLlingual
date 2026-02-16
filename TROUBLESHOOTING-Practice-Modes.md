@@ -178,9 +178,44 @@ const knownPracticeIds = [
 
 ---
 
-## 🔄 TODO: RESTORE PROPER IMPLEMENTATION
+## ✅ RESOLVED: RPC-Based Solution Implemented (16.02.2026)
 
-**IMPORTANT:** This workaround MUST be reverted once the caching issue is resolved!
+**Status:** Cache-Problem dauerhaft gelöst mit RPC endpoint!
+
+### Implementierte Lösung:
+
+**Migration 069:** `get_practice_enabled_items()` RPC function
+- Bypasses PostgREST cache completely
+- Server-side filtering (better performance)
+- Automatically detects new practice-enabled items
+- No more hardcoded IDs needed
+
+**Frontend Update:**
+```typescript
+// OLD (Workaround):
+const knownPracticeIds = [...]; // 5 hardcoded IDs
+.in('id', knownPracticeIds)
+
+// NEW (RPC Solution):
+.rpc('get_practice_enabled_items')
+```
+
+**Benefits:**
+- ✅ No cache issues
+- ✅ Scalable (auto-detects new items)
+- ✅ Clean, maintainable code
+- ✅ Fast (<3s loading time)
+
+**Deployed:** 16.02.2026, 22:00 CET
+**Verified:** Dashboard loads with 5 items, no errors
+
+---
+
+## 🗑️ DEPRECATED: RESTORE PROPER IMPLEMENTATION
+
+~~**IMPORTANT:** This workaround MUST be reverted once the caching issue is resolved!~~
+
+**UPDATE:** Workaround has been replaced with RPC-based solution (see above). No restoration needed.
 
 ### When to restore:
 - [ ] After Supabase cache TTL expires (test after 24-48 hours)
