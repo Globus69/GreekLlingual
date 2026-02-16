@@ -2,6 +2,14 @@ import { supabase } from './client';
 import { Content, ContentInsert, ContentUpdate } from '../../types/content';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
+import {
+    filterParamsSchema,
+    safeParse,
+    contentInsertSchema,
+    contentUpdateSchema,
+    uuidSchema,
+    bulkDeleteSchema
+} from '../validation/schemas';
 
 interface FilterParams {
     search?: string;
@@ -13,24 +21,34 @@ interface FilterParams {
 }
 
 export async function fetchContent(params: FilterParams): Promise<{ data: Content[]; count: number }> {
+    // Validate filter params
+    const validationResult = safeParse(filterParamsSchema, params);
+    if (!validationResult.success) {
+        console.error('[fetchContent] Validation error:', validationResult.error);
+        toast.error('Invalid filter parameters: ' + validationResult.error);
+        return { data: [], count: 0 };
+    }
+
+    const validParams = validationResult.data;
     let query = supabase.from('content').select('*', { count: 'exact' });
 
-    if (params.search) {
-        query = query.or(`english.ilike.%${params.search}%,greek.ilike.%${params.search}%`);
+    if (validParams.search) {
+        // Sanitized search - validated by Zod, safe from SQL injection
+        query = query.or(`english.ilike.%${validParams.search}%,greek.ilike.%${validParams.search}%`);
     }
-    if (params.type) {
-        query = query.eq('type', params.type);
+    if (validParams.type) {
+        query = query.eq('type', validParams.type);
     }
-    if (params.level && params.level.length > 0) {
-        query = query.in('level', params.level);
+    if (validParams.level && validParams.level.length > 0) {
+        query = query.in('level', validParams.level);
     }
-    if (params.difficulty && params.difficulty.length > 0) {
-        query = query.in('difficulty', params.difficulty);
+    if (validParams.difficulty && validParams.difficulty.length > 0) {
+        query = query.in('difficulty', validParams.difficulty);
     }
 
-    if (params.page !== undefined && params.pageSize) {
-        const from = params.page * params.pageSize;
-        const to = from + params.pageSize - 1;
+    if (validParams.page !== undefined && validParams.pageSize) {
+        const from = validParams.page * validParams.pageSize;
+        const to = from + validParams.pageSize - 1;
         query = query.range(from, to);
     }
 
@@ -47,6 +65,15 @@ export async function fetchContent(params: FilterParams): Promise<{ data: Conten
 }
 
 export async function createContent(item: ContentInsert): Promise<Content | null> {
+    // Validate input
+    const validationResult = safeParse(contentInsertSchema, item);
+    if (!validationResult.success) {
+        toast.error('Invalid input: ' + validationResult.error);
+        return null;
+    }
+
+    const validItem = validationResult.data;
+
     // Get user from localStorage
     const storedUser = localStorage.getItem('greeklingua_user');
     if (!storedUser) {
@@ -59,15 +86,15 @@ export async function createContent(item: ContentInsert): Promise<Content | null
     // Use RPC function instead of direct insert (bypasses RLS with custom auth)
     const { data, error } = await supabase.rpc('admin_create_content', {
         p_user_id: user.id,
-        p_type: item.type,
-        p_english: item.english,
-        p_greek: item.greek,
-        p_level: item.level,
-        p_difficulty: item.difficulty,
-        p_phonetic: item.phonetic || null,
-        p_example_en: item.example_en || null,
-        p_example_gr: item.example_gr || null,
-        p_audio_url: item.audio_url || null,
+        p_type: validItem.type,
+        p_english: validItem.english,
+        p_greek: validItem.greek,
+        p_level: validItem.level,
+        p_difficulty: validItem.difficulty,
+        p_phonetic: validItem.phonetic || null,
+        p_example_en: validItem.example_en || null,
+        p_example_gr: validItem.example_gr || null,
+        p_audio_url: validItem.audio_url || null,
     });
 
     if (error) {
@@ -79,6 +106,22 @@ export async function createContent(item: ContentInsert): Promise<Content | null
 }
 
 export async function updateContent(id: string, updates: ContentUpdate): Promise<Content | null> {
+    // Validate ID
+    const idValidation = safeParse(uuidSchema, id);
+    if (!idValidation.success) {
+        toast.error('Invalid ID format');
+        return null;
+    }
+
+    // Validate updates
+    const validationResult = safeParse(contentUpdateSchema, updates);
+    if (!validationResult.success) {
+        toast.error('Invalid input: ' + validationResult.error);
+        return null;
+    }
+
+    const validUpdates = validationResult.data;
+
     // Get user from localStorage
     const storedUser = localStorage.getItem('greeklingua_user');
     if (!storedUser) {
@@ -91,16 +134,16 @@ export async function updateContent(id: string, updates: ContentUpdate): Promise
     // Use RPC function instead of direct update (bypasses RLS with custom auth)
     const { data, error } = await supabase.rpc('admin_update_content', {
         p_user_id: user.id,
-        p_content_id: id,
-        p_type: updates.type,
-        p_english: updates.english,
-        p_greek: updates.greek,
-        p_level: updates.level,
-        p_difficulty: updates.difficulty,
-        p_phonetic: updates.phonetic || null,
-        p_example_en: updates.example_en || null,
-        p_example_gr: updates.example_gr || null,
-        p_audio_url: updates.audio_url || null,
+        p_content_id: idValidation.data,
+        p_type: validUpdates.type,
+        p_english: validUpdates.english,
+        p_greek: validUpdates.greek,
+        p_level: validUpdates.level,
+        p_difficulty: validUpdates.difficulty,
+        p_phonetic: validUpdates.phonetic || null,
+        p_example_en: validUpdates.example_en || null,
+        p_example_gr: validUpdates.example_gr || null,
+        p_audio_url: validUpdates.audio_url || null,
     });
 
     if (error) {
@@ -112,6 +155,13 @@ export async function updateContent(id: string, updates: ContentUpdate): Promise
 }
 
 export async function deleteContent(id: string): Promise<boolean> {
+    // Validate ID
+    const idValidation = safeParse(uuidSchema, id);
+    if (!idValidation.success) {
+        toast.error('Invalid ID format');
+        return false;
+    }
+
     // Get user from localStorage
     const storedUser = localStorage.getItem('greeklingua_user');
     if (!storedUser) {
@@ -124,7 +174,7 @@ export async function deleteContent(id: string): Promise<boolean> {
     // Use RPC function instead of direct delete (bypasses RLS with custom auth)
     const { error } = await supabase.rpc('admin_delete_content', {
         p_user_id: user.id,
-        p_content_id: id,
+        p_content_id: idValidation.data,
     });
 
     if (error) {
@@ -136,11 +186,45 @@ export async function deleteContent(id: string): Promise<boolean> {
 }
 
 export async function bulkDeleteContent(ids: string[]): Promise<boolean> {
-    const { error } = await supabase.from('content').delete().in('id', ids);
+    // Validate IDs
+    const validationResult = safeParse(bulkDeleteSchema, { ids });
+    if (!validationResult.success) {
+        toast.error('Invalid IDs: ' + validationResult.error);
+        return false;
+    }
+
+    const validIds = validationResult.data.ids;
+
+    // Get user from localStorage
+    const storedUser = localStorage.getItem('greeklingua_user');
+    if (!storedUser) {
+        toast.error('Fehler beim Löschen: Nicht angemeldet');
+        return false;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    // Use RPC function with admin authorization check (SECURITY DEFINER)
+    const { data, error } = await supabase.rpc('admin_bulk_delete_content', {
+        p_user_id: user.id,
+        p_content_ids: validIds,
+    });
 
     if (error) {
         toast.error('Fehler beim Bulk-Löschen: ' + error.message);
         return false;
+    }
+
+    // Check results
+    if (data && data.length > 0) {
+        const result = data[0];
+        if (result.errors && result.errors.length > 0) {
+            console.warn('⚠️ Some items could not be deleted:', result.errors);
+            toast.warning(`${result.deleted_count} items deleted, ${result.errors.length} errors`);
+        } else {
+            toast.success(`${result.deleted_count} items successfully deleted`);
+        }
+        return result.deleted_count > 0;
     }
 
     return true;
@@ -160,38 +244,33 @@ export async function importFromCSV(file: File): Promise<{ validItems: ContentIn
             complete: (results) => {
                 const validItems: ContentInsert[] = [];
                 const invalidItems: { row: number; errors: string[] }[] = [];
-                const requiredFields = ['type', 'english', 'greek', 'level', 'difficulty'];
 
                 results.data.forEach((row: any, index: number) => {
-                    const errors: string[] = [];
-                    requiredFields.forEach((field) => {
-                        if (!row[field]) errors.push(`${field} fehlt`);
+                    // Skip empty rows
+                    if (!row || Object.keys(row).length === 0) {
+                        return;
+                    }
+
+                    // Use Zod validation for consistent and secure validation
+                    const validationResult = safeParse(contentInsertSchema, {
+                        type: row.type,
+                        english: row.english,
+                        greek: row.greek,
+                        level: row.level,
+                        difficulty: row.difficulty,
+                        phonetic: row.phonetic || undefined,
+                        example_en: row.example_en || undefined,
+                        example_gr: row.example_gr || undefined,
+                        audio_url: row.audio_url || undefined,
                     });
 
-                    if (row.type && !['vocabulary', 'phrase', 'grammar'].includes(row.type)) {
-                        errors.push('Ungültiger type');
-                    }
-                    if (row.level && !['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].includes(row.level)) {
-                        errors.push('Ungültiger level');
-                    }
-                    if (row.difficulty && !['easy', 'medium', 'hard'].includes(row.difficulty)) {
-                        errors.push('Ungültige difficulty');
-                    }
-
-                    if (errors.length === 0) {
-                        validItems.push({
-                            type: row.type,
-                            english: row.english,
-                            greek: row.greek,
-                            level: row.level,
-                            difficulty: row.difficulty,
-                            phonetic: row.phonetic || undefined,
-                            example_en: row.example_en || undefined,
-                            example_gr: row.example_gr || undefined,
-                            audio_url: row.audio_url || undefined,
-                        });
+                    if (validationResult.success) {
+                        validItems.push(validationResult.data);
                     } else {
-                        invalidItems.push({ row: index + 1, errors });
+                        invalidItems.push({
+                            row: index + 1,
+                            errors: [validationResult.error],
+                        });
                     }
                 });
 
