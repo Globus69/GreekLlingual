@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -74,7 +74,7 @@ export default function DashboardPage() {
         message: string;
     } | null>(null);
 
-    const fetchStats = async () => {
+    const fetchStats = useCallback(async () => {
         try {
             if (!user?.id) return;
 
@@ -118,7 +118,7 @@ export default function DashboardPage() {
                 streak: user?.streak_days || 0
             }));
         }
-    };
+    }, [user?.id]);
 
     useEffect(() => {
         if (!authLoading) {
