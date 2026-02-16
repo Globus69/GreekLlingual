@@ -27,10 +27,10 @@ export default function PinLoginPage() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    // If already logged in, redirect to dashboard
+    // If already logged in, redirect to mobile dashboard
     useEffect(() => {
         if (user) {
-            router.push('/dashboard');
+            router.push('/m');
         }
     }, [user, router]);
 
@@ -332,9 +332,9 @@ export default function PinLoginPage() {
                     success: true
                 });
 
-                // Nach 1.5 Sekunden: Redirect zum Dashboard
+                // Nach 1.5 Sekunden: Redirect zum Mobile Dashboard
                 setTimeout(() => {
-                    router.push('/dashboard');
+                    router.push('/m');
                 }, 1500);
             } else {
                 // PIN nicht gefunden - modernes Popup
@@ -641,45 +641,15 @@ export default function PinLoginPage() {
                         </button>
                     </div>
 
-                    {/* PIN Input Fields - Native Keyboard */}
+                    {/* PIN Display Fields - Read-only, no native keyboard */}
                     <div style={{
                         display: 'flex',
                         gap: '12px',
-                        marginBottom: '32px',
+                        marginBottom: '24px',
                     }}>
                         {pinDigits.map((digit, index) => (
-                            <input
+                            <div
                                 key={index}
-                                ref={(el) => { inputRefs.current[index] = el; }}
-                                type="tel"
-                                inputMode="numeric"
-                                maxLength={1}
-                                value={digit}
-                                disabled={isSubmitting}
-                                onChange={(e) => {
-                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                    if (value.length <= 1) {
-                                        const newDigits = [...pinDigits];
-                                        newDigits[index] = value;
-                                        setPinDigits(newDigits);
-
-                                        // Auto-advance to next input
-                                        if (value && index < 3) {
-                                            inputRefs.current[index + 1]?.focus();
-                                        }
-                                    }
-                                }}
-                                onKeyDown={(e) => {
-                                    // Handle backspace
-                                    if (e.key === 'Backspace' && !digit && index > 0) {
-                                        inputRefs.current[index - 1]?.focus();
-                                    }
-                                    // Submit on Enter
-                                    if (e.key === 'Enter' && isFull) {
-                                        handleSubmit();
-                                    }
-                                }}
-                                onFocus={(e) => e.target.select()}
                                 style={{
                                     width: '64px',
                                     height: '72px',
@@ -694,13 +664,144 @@ export default function PinLoginPage() {
                                     fontWeight: 700,
                                     color: '#fff',
                                     textAlign: 'center',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
                                     transition: 'all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)',
                                     boxShadow: digit ? '0 4px 16px rgba(0, 122, 255, 0.2)' : 'none',
-                                    outline: 'none',
-                                    caretColor: 'transparent',
                                 }}
-                            />
+                            >
+                                {digit || ''}
+                            </div>
                         ))}
+                    </div>
+
+                    {/* Button Numpad */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '12px',
+                        marginBottom: '24px',
+                        maxWidth: '280px',
+                        margin: '0 auto 24px',
+                    }}>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                            <button
+                                key={num}
+                                type="button"
+                                onClick={() => {
+                                    const firstEmpty = pinDigits.findIndex(d => d === '');
+                                    if (firstEmpty !== -1) {
+                                        const newDigits = [...pinDigits];
+                                        newDigits[firstEmpty] = String(num);
+                                        setPinDigits(newDigits);
+                                    }
+                                }}
+                                disabled={isSubmitting || pinDigits.every(d => d !== '')}
+                                style={{
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                                    borderRadius: '16px',
+                                    padding: '20px',
+                                    fontSize: '24px',
+                                    fontWeight: 600,
+                                    color: '#fff',
+                                    cursor: (isSubmitting || pinDigits.every(d => d !== '')) ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s',
+                                    opacity: (isSubmitting || pinDigits.every(d => d !== '')) ? 0.4 : 1,
+                                }}
+                                onTouchStart={(e) => {
+                                    if (!isSubmitting && !pinDigits.every(d => d !== '')) {
+                                        e.currentTarget.style.background = 'rgba(0, 122, 255, 0.2)';
+                                        e.currentTarget.style.transform = 'scale(0.95)';
+                                    }
+                                }}
+                                onTouchEnd={(e) => {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                }}
+                            >
+                                {num}
+                            </button>
+                        ))}
+
+                        {/* Delete Button */}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const lastFilled = pinDigits.map((d, i) => d !== '' ? i : -1).filter(i => i !== -1).pop();
+                                if (lastFilled !== undefined) {
+                                    const newDigits = [...pinDigits];
+                                    newDigits[lastFilled] = '';
+                                    setPinDigits(newDigits);
+                                }
+                            }}
+                            disabled={isSubmitting || pinDigits.every(d => d === '')}
+                            style={{
+                                background: 'rgba(255, 69, 58, 0.1)',
+                                border: '1px solid rgba(255, 69, 58, 0.3)',
+                                borderRadius: '16px',
+                                padding: '20px',
+                                fontSize: '20px',
+                                color: '#FF453A',
+                                cursor: (isSubmitting || pinDigits.every(d => d === '')) ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s',
+                                opacity: (isSubmitting || pinDigits.every(d => d === '')) ? 0.4 : 1,
+                            }}
+                            onTouchStart={(e) => {
+                                if (!isSubmitting && !pinDigits.every(d => d === '')) {
+                                    e.currentTarget.style.background = 'rgba(255, 69, 58, 0.25)';
+                                    e.currentTarget.style.transform = 'scale(0.95)';
+                                }
+                            }}
+                            onTouchEnd={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 69, 58, 0.1)';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                        >
+                            ⌫
+                        </button>
+
+                        {/* 0 Button */}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const firstEmpty = pinDigits.findIndex(d => d === '');
+                                if (firstEmpty !== -1) {
+                                    const newDigits = [...pinDigits];
+                                    newDigits[firstEmpty] = '0';
+                                    setPinDigits(newDigits);
+                                }
+                            }}
+                            disabled={isSubmitting || pinDigits.every(d => d !== '')}
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                borderRadius: '16px',
+                                padding: '20px',
+                                fontSize: '24px',
+                                fontWeight: 600,
+                                color: '#fff',
+                                cursor: (isSubmitting || pinDigits.every(d => d !== '')) ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s',
+                                opacity: (isSubmitting || pinDigits.every(d => d !== '')) ? 0.4 : 1,
+                            }}
+                            onTouchStart={(e) => {
+                                if (!isSubmitting && !pinDigits.every(d => d !== '')) {
+                                    e.currentTarget.style.background = 'rgba(0, 122, 255, 0.2)';
+                                    e.currentTarget.style.transform = 'scale(0.95)';
+                                }
+                            }}
+                            onTouchEnd={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                        >
+                            0
+                        </button>
+
+                        {/* Empty space for symmetry */}
+                        <div style={{ visibility: 'hidden' }} />
                     </div>
 
                     {/* Clear Button */}
