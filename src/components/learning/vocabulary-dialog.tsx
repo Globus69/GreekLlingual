@@ -109,6 +109,15 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
         }
     };
 
+    const handleRestart = () => {
+        setCurrentIndex(0);
+        setCorrect(0);
+        setWrong(0);
+        setShowSummary(false);
+        setFlipped(false);
+        loadVocabulary();
+    };
+
     // TTS Audio
     const playAudio = async () => {
         if (queue.length === 0 || currentIndex >= queue.length) return;
@@ -255,106 +264,286 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
     if (!isOpen) return null;
 
     return (
-        <div className="vocabulary-dialog-overlay" onClick={onClose}>
-            <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()}>
-                    {/* Header */}
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-white">📚 Vocabulary Practice</h2>
-                        <div className="flex gap-2">
+        <div className="dialog-overlay">
+            <div className="dialog-content vocabulary-dialog" onClick={(e) => e.stopPropagation()}>
+                <div className="dialog-header">
+                    <h2>📚 Vocabulary Practice</h2>
+
+                    {/* Progress Bar */}
+                    {!loading && !showSummary && queue.length > 0 && (
+                        <div className="progress-section">
+                            <div className="progress-info">
+                                <span className="progress-count">Card {currentIndex + 1} of {queue.length}</span>
+                                <span className="progress-count">{Math.round(((currentIndex) / queue.length) * 100)}%</span>
+                            </div>
+                            <div className="progress-bar-container">
+                                <div
+                                    className="progress-bar-fill"
+                                    style={{ width: `${((currentIndex) / queue.length) * 100}%` }}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {loading ? (
+                    <div className="empty-state">
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+                        <p>Loading vocabulary...</p>
+                    </div>
+                ) : showSummary || queue.length === 0 ? (
+                    <div className="empty-state">
+                        <div style={{ fontSize: '64px', marginBottom: '16px' }}>🎉</div>
+                        <h3>Session Complete!</h3>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', margin: '24px 0' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#4CAF50' }}>{correct}</div>
+                                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Correct</div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#f44336' }}>{wrong}</div>
+                                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>To Review</div>
+                            </div>
+                        </div>
+                        <div className="empty-actions">
+                            <button onClick={onClose} className="btn-primary">Close</button>
+                        </div>
+                    </div>
+                ) : currentItem ? (
+                    <>
+                        <div className="card-container">
+                            <FlashcardFSRS
+                                front={locale === 'ru' && currentItem.russian ? currentItem.russian : currentItem.english}
+                                back={currentItem.greek_word || currentItem.greek}
+                                phonetic={currentItem.phonetic}
+                                example={currentItem.example_gr || undefined}
+                                onFlip={() => setFlipped(!flipped)}
+                                flipped={flipped}
+                                showRatingButtons={true}
+                                onRating={handleRating}
+                                onBackClick={playAudio}
+                                useFSRS={false}
+                            />
+                        </div>
+
+                        <div className="dialog-footer">
+                            <button onClick={handleRestart} className="btn-secondary">
+                                ↻ {t('btn.restart')}
+                            </button>
                             <button
-                                onClick={cycleSpeed}
-                                className="icon-btn"
-                                title={`TTS Speed: ${speedInfo.label}`}
+                                onClick={playAudio}
+                                disabled={isPlaying}
+                                className={`btn-audio ${isPlaying ? 'playing' : ''}`}
+                                title="Play audio (A)"
                             >
-                                {speedInfo.emoji}
+                                {isPlaying ? '🔊' : '🔊'} {t('btn.audio')}
                             </button>
                             <button
                                 onClick={toggleAutoPlay}
-                                className="icon-btn"
-                                title={autoPlay ? 'Auto-play ON' : 'Auto-play OFF'}
+                                className={`btn-autoplay ${autoPlay ? 'active' : ''}`}
+                                title={`Auto-play: ${autoPlay ? 'ON' : 'OFF'}`}
                             >
-                                {autoPlay ? '🔊' : '🔇'}
+                                {autoPlay ? '🔊' : '🔇'} Auto
                             </button>
-                            <button onClick={onClose} className="icon-btn">✕</button>
-                        </div>
-                    </div>
-
-                    {loading ? (
-                        <div className="text-center py-20">
-                            <div className="inline-block animate-spin text-5xl">⏳</div>
-                            <p className="mt-4 text-white">Loading vocabulary...</p>
-                        </div>
-                    ) : showSummary || queue.length === 0 ? (
-                        <div className="text-center py-12">
-                            <div className="text-6xl mb-4">🎉</div>
-                            <h3 className="text-2xl font-bold text-white mb-6">Session Complete!</h3>
-                            <div className="flex justify-center gap-6 mb-8">
-                                <div className="text-center">
-                                    <div className="text-4xl font-bold text-green-400">{correct}</div>
-                                    <div className="text-sm text-gray-400">Correct</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-4xl font-bold text-red-400">{wrong}</div>
-                                    <div className="text-sm text-gray-400">To Review</div>
-                                </div>
-                            </div>
-                            <button onClick={onClose} className="btn-primary px-8 py-3 rounded-xl">
-                                Close
+                            <button
+                                onClick={cycleSpeed}
+                                className="btn-speed"
+                                title={`Speed: ${getSpeedLabel(speechRate).label}`}
+                            >
+                                {getSpeedLabel(speechRate).emoji}
+                            </button>
+                            <button onClick={onClose} className="btn-cancel">
+                                × {t('btn.cancel')}
                             </button>
                         </div>
-                    ) : currentItem ? (
-                        <>
-                            {/* Progress */}
-                            <div className="flex justify-between items-center mb-6 text-sm">
-                                <div className="text-gray-400">
-                                    Card {currentIndex + 1} of {queue.length}
-                                </div>
-                                <div className="flex gap-3">
-                                    {correct > 0 && <span className="text-green-400">✅ {correct}</span>}
-                                    {wrong > 0 && <span className="text-red-400">❌ {wrong}</span>}
-                                </div>
-                            </div>
-
-                            {/* Flashcard */}
-                            <div className="card-container">
-                                <FlashcardFSRS
-                                    front={locale === 'ru' && currentItem.russian ? currentItem.russian : currentItem.english}
-                                    back={currentItem.greek_word || currentItem.greek}
-                                    phonetic={currentItem.phonetic}
-                                    example={currentItem.example_gr || undefined}
-                                    onFlip={() => setFlipped(!flipped)}
-                                    flipped={flipped}
-                                    showRatingButtons={true}
-                                    onRating={handleRating}
-                                    onBackClick={playAudio}
-                                    useFSRS={false}
-                                />
-                            </div>
-
-                            {/* Manual audio button */}
-                            {flipped && (
-                                <div className="flex justify-center mt-4">
-                                    <button
-                                        onClick={playAudio}
-                                        disabled={isPlaying}
-                                        className="btn-secondary px-6 py-2 rounded-xl"
-                                    >
-                                        {isPlaying ? '🔊 Playing...' : '🔊 Play Audio'}
-                                    </button>
-                                </div>
-                            )}
-                        </>
-                    ) : null}
+                    </>
+                ) : null}
             </div>
 
             <ToastContainer toasts={toasts} onRemove={removeToast} />
 
             <style jsx>{`
-                .liquid-glass-panel {
-                    background: rgba(28, 28, 32, 0.85);
+                .dialog-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    backdrop-filter: blur(8px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                }
+
+                .dialog-content {
+                    background: rgba(20, 20, 24, 0.95);
+                    border-radius: 24px;
+                    padding: 32px;
+                    max-width: 600px;
+                    width: 90vw;
                     border: 1px solid rgba(255, 255, 255, 0.1);
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-                    backdrop-filter: blur(20px);
+                    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+                }
+
+                .dialog-header {
+                    text-align: center;
+                    margin-bottom: 24px;
+                }
+
+                .empty-state {
+                    text-align: center;
+                    padding: 40px 20px;
+                }
+
+                .empty-state h2, .empty-state h3 {
+                    font-size: 24px;
+                    margin-bottom: 16px;
+                    color: #fff;
+                }
+
+                .empty-state p {
+                    color: rgba(255, 255, 255, 0.7);
+                    margin-bottom: 12px;
+                    line-height: 1.5;
+                }
+
+                .empty-actions {
+                    display: flex;
+                    gap: 12px;
+                    justify-content: center;
+                    margin-top: 24px;
+                }
+
+                .btn-primary {
+                    padding: 12px 24px;
+                    border-radius: 12px;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                    background: rgba(0, 122, 255, 0.3);
+                    color: #007AFF;
+                }
+
+                .btn-primary:hover {
+                    background: rgba(0, 122, 255, 0.4);
+                    transform: translateY(-2px);
+                }
+
+                .progress-section {
+                    margin-top: 16px;
+                    margin-bottom: 12px;
+                }
+
+                .progress-info {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 8px;
+                }
+
+                .progress-count {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: rgba(255, 255, 255, 0.9);
+                }
+
+                .progress-bar-container {
+                    width: 100%;
+                    height: 8px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    overflow: hidden;
+                    position: relative;
+                }
+
+                .progress-bar-fill {
+                    height: 100%;
+                    background: linear-gradient(90deg, #007AFF 0%, #00C7BE 100%);
+                    border-radius: 8px;
+                    transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+                    box-shadow: 0 0 12px rgba(0, 199, 190, 0.4);
+                }
+
+                .card-container {
+                    margin: 24px 0;
+                }
+
+                .dialog-footer {
+                    display: flex;
+                    gap: 12px;
+                    justify-content: center;
+                }
+
+                .btn-secondary, .btn-audio, .btn-autoplay, .btn-speed, .btn-cancel {
+                    padding: 12px 24px;
+                    border-radius: 12px;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                }
+
+                .btn-secondary {
+                    background: rgba(0, 122, 255, 0.2);
+                    color: #007AFF;
+                }
+
+                .btn-secondary:hover {
+                    background: rgba(0, 122, 255, 0.3);
+                }
+
+                .btn-audio {
+                    background: rgba(52, 199, 89, 0.2);
+                    color: #34C759;
+                }
+
+                .btn-audio:hover {
+                    background: rgba(52, 199, 89, 0.3);
+                }
+
+                .btn-audio:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+
+                .btn-autoplay {
+                    background: rgba(255, 159, 10, 0.15);
+                    color: rgba(255, 159, 10, 0.7);
+                    font-size: 13px;
+                    padding: 12px 16px;
+                }
+
+                .btn-autoplay:hover {
+                    background: rgba(255, 159, 10, 0.25);
+                    color: rgba(255, 159, 10, 0.9);
+                }
+
+                .btn-autoplay.active {
+                    background: rgba(255, 159, 10, 0.3);
+                    color: #FF9F0A;
+                    border: 1px solid rgba(255, 159, 10, 0.4);
+                }
+
+                .btn-speed {
+                    background: rgba(94, 92, 230, 0.15);
+                    color: rgba(94, 92, 230, 0.9);
+                    font-size: 20px;
+                    padding: 12px 16px;
+                    min-width: 56px;
+                }
+
+                .btn-speed:hover {
+                    background: rgba(94, 92, 230, 0.25);
+                    transform: scale(1.1);
+                }
+
+                .btn-cancel {
+                    background: rgba(255, 69, 58, 0.2);
+                    color: #FF453A;
+                }
+
+                .btn-cancel:hover {
+                    background: rgba(255, 69, 58, 0.3);
                 }
 
                 .icon-btn {

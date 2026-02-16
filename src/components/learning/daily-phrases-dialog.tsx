@@ -267,100 +267,190 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
     if (!isOpen) return null;
 
     return (
-        <div className="vocabulary-dialog-overlay" onClick={onClose}>
-            <div className="vocabulary-dialog compact" onClick={(e) => e.stopPropagation()}>
-                    {/* Header */}
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h2 className="text-2xl font-bold text-white">💬 Daily Phrase</h2>
-                            <p className="text-sm text-gray-400 mt-1">
-                                {getTimeSlotEmoji(currentTimeSlot)} {currentTimeSlot} • 1 phrase per time slot
-                            </p>
+        <div className="dialog-overlay">
+            <div className="dialog-content vocabulary-dialog" onClick={(e) => e.stopPropagation()}>
+                <div className="dialog-header">
+                    <h2>💬 Daily Phrase</h2>
+                    <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '8px' }}>
+                        {getTimeSlotEmoji(currentTimeSlot)} {currentTimeSlot} • 1 phrase per time slot
+                    </p>
+                </div>
+
+                {loading ? (
+                    <div className="empty-state">
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+                        <p>Loading daily phrase...</p>
+                    </div>
+                ) : answered ? (
+                    <div className="empty-state">
+                        <div style={{ fontSize: '64px', marginBottom: '16px' }}>{wasCorrect ? '🎉' : '📖'}</div>
+                        <h3>{wasCorrect ? 'Well done!' : 'Keep practicing!'}</h3>
+                        <p style={{ marginTop: '16px' }}>Come back in the next time slot for a new phrase</p>
+                        <div className="empty-actions">
+                            <button onClick={onClose} className="btn-primary">Close</button>
                         </div>
-                        <div className="flex gap-2">
+                    </div>
+                ) : phrase ? (
+                    <>
+                        <div className="card-container">
+                            <FlashcardFSRS
+                                front={locale === 'ru' && phrase.russian ? phrase.russian : phrase.english}
+                                back={phrase.greek}
+                                phonetic={phrase.phonetic}
+                                example={phrase.example_gr || undefined}
+                                onFlip={() => setFlipped(!flipped)}
+                                flipped={flipped}
+                                showRatingButtons={true}
+                                onRating={handleRating}
+                                onBackClick={playAudio}
+                                useFSRS={false}
+                            />
+                        </div>
+
+                        <div className="dialog-footer">
+                            <button
+                                onClick={playAudio}
+                                disabled={isPlaying}
+                                className={`btn-audio ${isPlaying ? 'playing' : ''}`}
+                                title="Play audio (A)"
+                            >
+                                {isPlaying ? '🔊 Playing...' : '🔊 Play Audio'}
+                            </button>
                             <button
                                 onClick={cycleSpeed}
-                                className="icon-btn"
-                                title={`TTS Speed: ${speedInfo.label}`}
+                                className="btn-speed"
+                                title={`Speed: ${getSpeedLabel(speechRate).label}`}
                             >
-                                {speedInfo.emoji}
+                                {getSpeedLabel(speechRate).emoji}
                             </button>
                             <button
                                 onClick={toggleAutoPlay}
-                                className="icon-btn"
-                                title={autoPlay ? 'Auto-play ON' : 'Auto-play OFF'}
+                                className={`btn-autoplay ${autoPlay ? 'active' : ''}`}
+                                title={`Auto-play: ${autoPlay ? 'ON' : 'OFF'}`}
                             >
-                                {autoPlay ? '🔊' : '🔇'}
+                                {autoPlay ? '🔊' : '🔇'} Auto
                             </button>
-                            <button onClick={onClose} className="icon-btn">✕</button>
+                            <button onClick={onClose} className="btn-cancel">× Close</button>
                         </div>
+                    </>
+                ) : (
+                    <div className="empty-state">
+                        <div style={{ fontSize: '64px', marginBottom: '16px' }}>📭</div>
+                        <h3>No phrases available</h3>
                     </div>
-
-                    {loading ? (
-                        <div className="text-center py-20">
-                            <div className="inline-block animate-spin text-5xl">⏳</div>
-                            <p className="mt-4 text-white">Loading daily phrase...</p>
-                        </div>
-                    ) : answered ? (
-                        <div className="text-center py-12">
-                            <div className="text-6xl mb-4">{wasCorrect ? '🎉' : '📖'}</div>
-                            <h3 className="text-2xl font-bold text-white mb-4">
-                                {wasCorrect ? 'Well done!' : 'Keep practicing!'}
-                            </h3>
-                            <p className="text-gray-400 mb-8">
-                                Come back in the next time slot for a new phrase
-                            </p>
-                            <button onClick={onClose} className="btn-primary px-8 py-3 rounded-xl">
-                                Close
-                            </button>
-                        </div>
-                    ) : phrase ? (
-                        <>
-                            {/* Flashcard */}
-                            <div className="card-container">
-                                <FlashcardFSRS
-                                    front={locale === 'ru' && phrase.russian ? phrase.russian : phrase.english}
-                                    back={phrase.greek}
-                                    phonetic={phrase.phonetic}
-                                    example={phrase.example_gr || undefined}
-                                    onFlip={() => setFlipped(!flipped)}
-                                    flipped={flipped}
-                                    showRatingButtons={true}
-                                    onRating={handleRating}
-                                    onBackClick={playAudio}
-                                    useFSRS={false}
-                                />
-                            </div>
-
-                            {/* Manual audio button */}
-                            {flipped && (
-                                <div className="flex justify-center mt-4">
-                                    <button
-                                        onClick={playAudio}
-                                        disabled={isPlaying}
-                                        className="btn-secondary px-6 py-2 rounded-xl"
-                                    >
-                                        {isPlaying ? '🔊 Playing...' : '🔊 Play Audio'}
-                                    </button>
-                                </div>
-                            )}
-                        </>
-                    ) : (
-                        <div className="text-center py-12">
-                            <div className="text-6xl mb-4">📭</div>
-                            <h3 className="text-xl text-white">No phrases available</h3>
-                        </div>
-                    )}
+                )}
             </div>
 
             <ToastContainer toasts={toasts} onRemove={removeToast} />
 
             <style jsx>{`
-                .liquid-glass-panel {
-                    background: rgba(28, 28, 32, 0.85);
+                .dialog-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    backdrop-filter: blur(8px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                }
+
+                .dialog-content {
+                    background: rgba(20, 20, 24, 0.95);
+                    border-radius: 24px;
+                    padding: 32px;
+                    max-width: 600px;
+                    width: 90vw;
                     border: 1px solid rgba(255, 255, 255, 0.1);
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-                    backdrop-filter: blur(20px);
+                    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+                }
+
+                .dialog-header {
+                    text-align: center;
+                    margin-bottom: 24px;
+                }
+
+                .dialog-header h2 {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #fff;
+                    margin: 0;
+                }
+
+                .dialog-footer {
+                    display: flex;
+                    gap: 12px;
+                    justify-content: center;
+                    margin-top: 24px;
+                }
+
+                .empty-state {
+                    text-align: center;
+                    padding: 40px 20px;
+                }
+
+                .empty-state h3 {
+                    font-size: 24px;
+                    margin-bottom: 16px;
+                    color: #fff;
+                }
+
+                .empty-state p {
+                    color: rgba(255, 255, 255, 0.7);
+                    margin-bottom: 12px;
+                    line-height: 1.5;
+                }
+
+                .empty-actions {
+                    display: flex;
+                    gap: 12px;
+                    justify-content: center;
+                    margin-top: 24px;
+                }
+
+                .btn-primary {
+                    padding: 12px 24px;
+                    border-radius: 12px;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                    background: rgba(0, 122, 255, 0.3);
+                    color: #007AFF;
+                    border: 1px solid rgba(0, 122, 255, 0.5);
+                }
+
+                .btn-primary:hover {
+                    background: rgba(0, 122, 255, 0.4);
+                    transform: translateY(-1px);
+                }
+
+                .btn-audio, .btn-speed, .btn-autoplay, .btn-cancel {
+                    padding: 10px 16px;
+                    border-radius: 10px;
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    background: rgba(255, 255, 255, 0.05);
+                    color: #fff;
+                    cursor: pointer;
+                    font-weight: 500;
+                    transition: all 0.2s;
+                    font-size: 14px;
+                }
+
+                .btn-audio:hover, .btn-speed:hover, .btn-autoplay:hover, .btn-cancel:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                    transform: translateY(-1px);
+                }
+
+                .btn-audio:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+
+                .btn-autoplay.active {
+                    background: rgba(0, 122, 255, 0.2);
+                    border-color: rgba(0, 122, 255, 0.4);
+                    color: #007AFF;
                 }
 
                 .icon-btn {
