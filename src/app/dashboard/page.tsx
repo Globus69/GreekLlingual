@@ -23,6 +23,7 @@ import { StreakMilestoneToast } from '@/components/dashboard/streak-milestone-to
 import { useStreak } from '@/hooks/use-streak';
 import { useDeviceDetection } from '@/hooks/use-device-detection';
 import { PracticeModesSection } from '@/components/dashboard/practice-modes-section';
+import { PracticeModesTestDialog } from '@/components/dashboard/practice-modes-test-dialog';
 
 interface ActionTileProps {
     icon: string;
@@ -62,9 +63,14 @@ export default function DashboardPage() {
     const [isDailyPhrasesDialogOpen, setIsDailyPhrasesDialogOpen] = useState(false);
     const [isDueCardsDialogOpen, setIsDueCardsDialogOpen] = useState(false);
     const [isWeakWordsDialogOpen, setIsWeakWordsDialogOpen] = useState(false);
+    const [isPracticeModesTestDialogOpen, setIsPracticeModesTestDialogOpen] = useState(false);
     const [masteryProgress, setMasteryProgress] = useState(38);
     const [stats, setStats] = useState({ streak: 0, words: 47, weak: 'Verbs' });
     const { t } = useTranslation();
+
+    // Retry limiting for fetchStats to prevent infinite loops
+    const [statsRetryCount, setStatsRetryCount] = useState(0);
+    const MAX_STATS_RETRIES = 3;
 
     // Streak tracking
     const { updateStreak, getMilestoneMessage } = useStreak();
@@ -78,6 +84,17 @@ export default function DashboardPage() {
         try {
             if (!user?.id) return;
 
+            // Check retry limit
+            if (statsRetryCount >= MAX_STATS_RETRIES) {
+                console.warn(`⚠️ Max retries (${MAX_STATS_RETRIES}) reached for fetchStats, using fallback values`);
+                setMasteryProgress(38);
+                setStats(prev => ({
+                    ...prev,
+                    streak: user?.streak_days || 0
+                }));
+                return;
+            }
+
             const { data: progressData, error } = await supabase
                 .from('student_progress')
                 .select('correct_count, attempts')
@@ -85,11 +102,16 @@ export default function DashboardPage() {
 
             // Log error but don't block dashboard
             if (error) {
-                console.warn('student_progress query failed (non-blocking):', error.message);
+                // Increment retry counter
+                setStatsRetryCount(prev => prev + 1);
+                console.warn(`student_progress query failed (attempt ${statsRetryCount + 1}/${MAX_STATS_RETRIES}):`, error.message);
                 // Set default values
                 setMasteryProgress(38);
                 return;
             }
+
+            // Success - reset retry counter
+            setStatsRetryCount(0);
 
             if (progressData && progressData.length > 0) {
                 const totalCorrect = progressData.reduce((sum: number, p: any) => sum + (p.correct_count || 0), 0);
@@ -110,7 +132,9 @@ export default function DashboardPage() {
                 }));
             }
         } catch (err) {
-            console.error("Stats fetching error:", err);
+            // Increment retry counter
+            setStatsRetryCount(prev => prev + 1);
+            console.error(`Stats fetching error (attempt ${statsRetryCount + 1}/${MAX_STATS_RETRIES}):`, err);
             // Set defaults on error
             setMasteryProgress(38);
             setStats(prev => ({
@@ -118,7 +142,7 @@ export default function DashboardPage() {
                 streak: user?.streak_days || 0
             }));
         }
-    }, [user?.id]);
+    }, [user?.id, statsRetryCount]);
 
     useEffect(() => {
         if (!authLoading) {
@@ -361,10 +385,43 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Practice Modes Section */}
-                <div className="mt-8 px-4 md:px-6">
-                    <PracticeModesSection />
+                {/* GREEN TEST BUTTON - Practice Modes Test */}
+                <div className="mt-8 px-4 md:px-6 flex justify-center">
+                    <button
+                        onClick={() => setIsPracticeModesTestDialogOpen(true)}
+                        style={{
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            padding: '16px 32px',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                            transition: 'all 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                        }}
+                    >
+                        <span style={{ fontSize: '24px' }}>🎮</span>
+                        <span>Test Practice Modes</span>
+                    </button>
                 </div>
+
+                {/* Practice Modes Section - MOVED TO DIALOG */}
+                {/* <div className="mt-8 px-4 md:px-6">
+                    <PracticeModesSection />
+                </div> */}
             </main>
 
             {/* Vocabulary Dialog - NEW FSRS Version */}
@@ -416,6 +473,12 @@ export default function DashboardPage() {
             <WeakWordsDialog
                 isOpen={isWeakWordsDialogOpen}
                 onClose={() => setIsWeakWordsDialogOpen(false)}
+            />
+
+            {/* Practice Modes Test Dialog - NEW */}
+            <PracticeModesTestDialog
+                isOpen={isPracticeModesTestDialogOpen}
+                onClose={() => setIsPracticeModesTestDialogOpen(false)}
             />
         </div>
     );

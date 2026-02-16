@@ -1,6 +1,266 @@
 # Practice Modes Implementation - Status Report
 **Date:** 16. Februar 2026
-**Last Update:** 16:00 CET
+**Last Update:** 19:45 CET (Updated with Testing Plan)
+
+---
+
+## 🎯 ABLAUFPLAN - TESTING & FINALISIERUNG
+**Erstellt:** 16. Februar 2026, 19:45 CET
+**Status nach heutiger Arbeit:** Implementation komplett, Testing steht noch aus
+
+---
+
+### 📊 STATUS-ANALYSE (Stand 19:45 CET)
+
+#### ✅ HEUTE BEREITS GEFIXT:
+- ✅ **Practice Modes Section wird angezeigt** (5 Items sichtbar)
+  - **Workaround aktiv:** ID-basierte Query statt Filter-basiert
+  - **Grund:** Supabase PostgREST Caching-Problem
+  - **Dokumentiert in:** `TROUBLESHOOTING-Practice-Modes.md`
+- ✅ **Infinite Loop behoben** (Dashboard fetchStats mit useCallback)
+- ✅ **Dashboard funktioniert** (keine net::ERR_FAILED Errors mehr)
+- ✅ **Streak-System verifiziert** (update_user_streak RPC getestet in SQL)
+- ✅ **Datenbank komplett** (student_progress, RPCs, RLS Policies)
+
+#### ✅ KOMPLETT IMPLEMENTIERT (laut Original-Dokumentation):
+- ✅ **Phase 1:** Database & Backend (Migrations, RPCs, RLS)
+- ✅ **Phase 2:** Admin UI (Config Form, Content Modal)
+- ✅ **Phase 3:** Frontend Components (Matching, Multiple Choice, Write Input)
+- ✅ **Phase 4:** Dashboard Integration (PracticeModesSection)
+- ✅ **Phase 5:** i18n (EN, DE, ES translations)
+
+#### ❌ NOCH NICHT GETESTET:
+- ❌ **End-to-End User Flow:** Button → Dialog → Game → Ergebnis → DB-Eintrag
+- ❌ **Admin UI:** Practice Config bearbeiten & speichern
+- ❌ **FSRS Integration:** Wird Rating nach Practice korrekt gespeichert?
+- ❌ **Alle 3 Game Modes:** Matching, Multiple Choice, Write Input einzeln testen
+- ❌ **Unlock-Logik:** Funktioniert threshold korrekt? (Zeigt locked/unlocked richtig?)
+
+---
+
+### 📝 TODO-LISTE (Priorisiert)
+
+#### 🧪 SCHRITT 1: Practice Modes User Flow Testing (30 Min)
+**Ziel:** End-to-End Flow komplett durchspielen
+
+- [ ] **1.1 Dialog öffnen**
+  - Dashboard öffnen → Practice Modes Section finden
+  - "Matching" Button bei einem Item klicken (Hello oder Water - threshold=0)
+  - **Erwartet:** Dialog öffnet sich mit Matching Game
+  - **Falls Error:** Console-Fehler notieren
+
+- [ ] **1.2 Matching Game spielen**
+  - 6 Paare sollten angezeigt werden (Griechisch + Englisch)
+  - Karten klicken → Paare matchen
+  - **Prüfen:** Shake-Animation bei Fehler?
+  - **Prüfen:** Matched pairs verschwinden/disabled?
+  - **Prüfen:** Score wird angezeigt?
+
+- [ ] **1.3 Ergebnis prüfen**
+  - Nach allen Matches: Result Summary angezeigt?
+  - **Prüfen:** Score korrekt berechnet?
+  - **Prüfen:** Zeit angezeigt (MM:SS)?
+  - **Prüfen:** FSRS Rating angezeigt (1-4)?
+  - **Prüfen:** "Try Again" und "Close" Buttons funktionieren?
+
+- [ ] **1.4 Datenbank-Verifizierung**
+  - In Supabase SQL Editor ausführen:
+    ```sql
+    SELECT * FROM practice_attempts
+    ORDER BY created_at DESC
+    LIMIT 5;
+    ```
+  - **Erwartet:** Neuer Eintrag mit:
+    - user_id (korrekt)
+    - item_id (korrekt)
+    - mode_type = 'matching'
+    - score (0-100)
+    - time_taken (Sekunden)
+    - fsrs_rating (1-4)
+  - **Falls fehlt:** Debugging nötig
+
+---
+
+#### 🔧 SCHRITT 2: Admin UI Testing (20 Min)
+**Ziel:** Practice Config bearbeiten können
+
+- [ ] **2.1 Content Modal öffnen**
+  - Admin-Bereich öffnen (falls separater Bereich)
+  - ODER: Content-Management öffnen
+  - Ein existierendes Item auswählen (z.B. "Goodbye")
+  - Edit/Details Modal öffnen
+
+- [ ] **2.2 Practice Config Section finden**
+  - "Practice Modes Configuration" Section suchen
+  - **Erwartet:** Collapsible `<details>` Element
+  - Section ausklappen
+
+- [ ] **2.3 Practice Modes aktivieren**
+  - Master-Toggle "Enable Practice Modes" aktivieren
+  - **Prüfen:** Checkboxen für Modes erscheinen?
+  - Modes auswählen: ☑ Matching, ☑ Multiple Choice, ☑ Write Input
+  - **Prüfen:** Mode-spezifische Settings erscheinen?
+
+- [ ] **2.4 Settings konfigurieren**
+  - Activation Threshold setzen (z.B. 5)
+  - Matching Settings:
+    - Number of pairs: 6
+    - Time limit: 60
+    - Mistakes allowed: 10
+  - Multiple Choice Settings:
+    - Number of options: 4
+    - Time limit: 30
+    - Number of questions: 5
+  - Write Input Settings:
+    - Max attempts: 3
+    - Tolerance: 0.8
+    - Time limit: 45
+
+- [ ] **2.5 Speichern & Verifizieren**
+  - "Save" Button klicken
+  - **Erwartet:** Toast-Notification "Practice config saved successfully"
+  - Datenbank-Prüfung:
+    ```sql
+    SELECT id, english, practice_modes_config
+    FROM learning_items
+    WHERE id = 'ITEM-ID-HIER-EINFÜGEN';
+    ```
+  - **Erwartet:** Config ist korrekt gespeichert
+
+---
+
+#### 🎮 SCHRITT 3: Alle Game Modes einzeln testen (30 Min)
+
+- [ ] **3.1 Matching Game (nochmal ausführlich)**
+  - Item mit Matching aktiviert finden
+  - Button klicken → Game öffnet
+  - **Prüfen:** 6 Paare (oder konfigurierte Anzahl)
+  - **Prüfen:** Karten shuffled?
+  - **Prüfen:** Click-Interaktion flüssig?
+  - **Prüfen:** Shake-Animation bei Mismatch?
+  - **Prüfen:** Matched pairs disabled?
+  - **Prüfen:** Timer läuft?
+  - **Prüfen:** Score-Berechnung korrekt?
+    - Formel: `score = 100 - (mistakes / totalPairs * 2) * 30`
+  - Fertig spielen → Result prüfen
+
+- [ ] **3.2 Multiple Choice Quiz**
+  - Item mit Multiple Choice aktiviert finden
+  - Button klicken → Quiz öffnet
+  - **Prüfen:** 4 Optionen angezeigt?
+  - **Prüfen:** 1 korrekte Antwort?
+  - Option wählen:
+    - **Bei korrekt:** Grüne Markierung, Auto-Advance nach 1s
+    - **Bei falsch:** Rote Markierung, korrekte wird grün, Auto-Advance
+  - **Prüfen:** Timer läuft? (30s Standard)
+  - **Prüfen:** Fragen-Counter? (z.B. "3/5")
+  - **Prüfen:** Timeout-Handling? (Was passiert bei 0:00?)
+  - Fertig spielen → Result prüfen
+
+- [ ] **3.3 Write Input Practice**
+  - Item mit Write Input aktiviert finden
+  - Button klicken → Input-Form öffnet
+  - **Prüfen:** Text-Input sichtbar?
+  - **Prüfen:** Greek keyboard support? (spezielle Zeichen eingeben)
+  - Antwort eingeben (absichtlich falsch):
+    - **Prüfen:** "Incorrect" Feedback?
+    - **Prüfen:** Attempts Counter? (z.B. "Attempt 1/3")
+  - Antwort eingeben (nah dran):
+    - **Prüfen:** "Close!" Feedback?
+  - Antwort eingeben (korrekt):
+    - **Prüfen:** "Correct!" Feedback?
+  - **Prüfen:** Score-Penalty bei mehreren Attempts?
+  - Fertig → Result prüfen
+
+---
+
+#### 🐛 SCHRITT 4: Bug-Fixing (variabel)
+**Falls beim Testing Probleme gefunden werden**
+
+- [ ] **Bugs dokumentieren**
+  - Console-Errors screenshotten
+  - Reproduktions-Schritte notieren
+  - Erwartetes vs. tatsächliches Verhalten beschreiben
+
+- [ ] **Priorität setzen**
+  - 🔴 CRITICAL: Feature nicht nutzbar (Dialog öffnet nicht, Game crasht)
+  - 🟡 HIGH: Feature nutzbar aber Bugs (Score falsch, Feedback fehlt)
+  - 🟢 LOW: Kosmetik (Animation ruckelt, Text-Typo)
+
+- [ ] **Fixes implementieren**
+  - Critical Bugs sofort fixen
+  - High Bugs sammeln & in Batch fixen
+  - Low Bugs für später notieren
+
+---
+
+#### 📚 SCHRITT 5: Dokumentation finalisieren (10 Min)
+
+- [ ] **IMPROVMENT-Datei aktualisieren**
+  - SUCCESS CRITERIA abhaken
+  - Bugs dokumentieren (falls gefunden)
+  - Testing-Ergebnisse eintragen
+  - Status auf ✅ COMPLETE setzen
+
+- [ ] **TROUBLESHOOTING-Datei ergänzen**
+  - Falls neue Probleme gefunden: Lösungen dokumentieren
+
+- [ ] **TODO-Datei aktualisieren**
+  - Practice Modes als erledigt markieren
+  - Nächste Prioritäten setzen
+
+---
+
+### 🎯 SUCCESS CRITERIA (Abhak-Liste)
+
+#### User-Facing Functionality
+- [x] Practice Modes section visible on dashboard ✅ (heute gefixt)
+- [x] Shows "X items available" text ✅ (5 items)
+- [x] Displays cards for items ✅ (Hello, Thank you, Water)
+- [x] Shows mode buttons with lock/unlock icons ✅
+- [ ] **Button shows correct unlock state** (threshold-based)
+- [ ] **Clicking button opens PracticeModeDialog**
+- [ ] **Matching game loads with correct number of pairs**
+- [ ] **Game playable** (cards match, score calculates correctly)
+- [ ] **Result summary shows** (score, time, rating)
+- [ ] **FSRS rating recorded in database**
+- [ ] **Multiple Choice works**
+- [ ] **Write Input works**
+
+#### Admin Functionality
+- [ ] Admin can open content modal for existing item
+- [ ] Practice Modes Configuration section visible (collapsible)
+- [ ] Can toggle practice modes on/off
+- [ ] Can select available modes (checkboxes)
+- [ ] Can set activation threshold (number input)
+- [ ] Can configure mode-specific settings (collapsible sections)
+- [ ] Save button updates database correctly
+- [ ] Toast notification shows success message
+
+#### Technical Verification
+- [x] No console errors (infinite loop fixed) ✅
+- [x] Component renders (5 items visible) ✅
+- [x] Supabase connection works ✅
+- [x] RPC functions exist ✅
+- [ ] practice_attempts table gets populated
+- [ ] FSRS integration works (practice → card update)
+- [ ] i18n works (language switch → translations update)
+
+---
+
+### 📊 FORTSCHRITT
+
+**Implementation:** 100% ✅ (alle 5 Phasen komplett)
+**Testing:** 0% ❌ (noch nicht gestartet)
+**Dokumentation:** 80% ⚠️ (muss nach Testing aktualisiert werden)
+
+**Nächster Schritt:** SCHRITT 1.1 - Dialog öffnen testen
+
+---
+
+**Letzte Aktualisierung:** 16. Februar 2026, 19:45 CET
+**Status:** 🧪 BEREIT FÜR TESTING
+**Verantwortlich:** Testing & Bug-Fixing
 
 ---
 
