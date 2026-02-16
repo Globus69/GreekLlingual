@@ -242,24 +242,55 @@
 - [x] Component renders (5 items visible) ✅
 - [x] Supabase connection works ✅
 - [x] RPC functions exist ✅
-- [ ] practice_attempts table gets populated
-- [ ] FSRS integration works (practice → card update)
-- [ ] i18n works (language switch → translations update)
+- [x] **RPC endpoint deployed** (Migration 069) ✅
+- [x] **Cache-Problem gelöst** (RPC statt filter-based query) ✅
+- [x] **Dashboard lädt fehlerfrei** (<3 Sekunden) ✅
+- [ ] practice_attempts table gets populated (Testing ausstehend)
+- [ ] FSRS integration works (practice → card update) (Testing ausstehend)
+- [ ] i18n works (language switch → translations update) (Testing ausstehend)
 
 ---
 
 ### 📊 FORTSCHRITT
 
-**Implementation:** 100% ✅ (alle 5 Phasen komplett)
-**Testing:** 0% ❌ (noch nicht gestartet)
-**Dokumentation:** 80% ⚠️ (muss nach Testing aktualisiert werden)
+**Implementation:** 100% ✅ (alle 5 Phasen komplett + RPC-Lösung)
+**Testing:** 0% ⏳ (3 Agents gestartet, in Arbeit)
+**Dokumentation:** 90% ⚠️ (wird nach Testing finalisiert)
 
-**Nächster Schritt:** SCHRITT 1.1 - Dialog öffnen testen
+**Aktueller Status (16.02.2026, 22:00):**
+- ✅ Dashboard funktioniert fehlerfrei
+- ✅ Practice Modes Section zeigt 5 Items
+- ✅ RPC-basierte Lösung implementiert (kein Cache-Problem mehr)
+- ✅ Infinite Loop Bugs behoben (useRef Pattern)
+- ⏳ 3 Testing-Agents aktiv (User Flow, Admin UI, i18n)
+
+**Nächster Schritt:** Testing-Ergebnisse von Agents abwarten
 
 ---
 
-**Letzte Aktualisierung:** 16. Februar 2026, 19:45 CET
-**Status:** 🧪 BEREIT FÜR TESTING
+### 🔄 SESSION LOG (16.02.2026, Abend-Session)
+
+**21:00 - Dashboard Bugs behoben:**
+- Fixed: ANON_KEY korrigiert
+- Fixed: Infinite Loop in use-streak.ts (useRef)
+- Fixed: DialogTitle Accessibility warnings
+- Committed & Pushed
+
+**21:30 - RPC-Lösung implementiert:**
+- Created: Migration 069_get_practice_enabled_items.sql
+- Deployed: RPC endpoint in Supabase
+- Updated: practice-modes-section.tsx (RPC statt hardcoded IDs)
+- Fixed: Infinite Loop in dashboard/page.tsx (useRef)
+- Verified: Dashboard lädt fehlerfrei mit 5 Items
+
+**22:00 - Testing Phase eingeleitet:**
+- 3 parallele Testing-Agents gestartet (User Flow, Admin UI, i18n)
+- Dokumentation in Arbeit
+
+---
+
+**Letzte Aktualisierung:** 16. Februar 2026, 22:00 CET
+**Status:** ⏳ TESTING IN PROGRESS (3 Agents aktiv)
 **Verantwortlich:** Testing & Bug-Fixing
 
 ---

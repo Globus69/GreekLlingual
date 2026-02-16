@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -68,8 +68,8 @@ export default function DashboardPage() {
     const [stats, setStats] = useState({ streak: 0, words: 47, weak: 'Verbs' });
     const { t } = useTranslation();
 
-    // Retry limiting for fetchStats to prevent infinite loops
-    const [statsRetryCount, setStatsRetryCount] = useState(0);
+    // Retry limiting for fetchStats to prevent infinite loops (use ref to avoid re-renders)
+    const statsRetryCount = useRef(0);
     const MAX_STATS_RETRIES = 3;
 
     // Streak tracking
@@ -85,7 +85,7 @@ export default function DashboardPage() {
             if (!user?.id) return;
 
             // Check retry limit
-            if (statsRetryCount >= MAX_STATS_RETRIES) {
+            if (statsRetryCount.current >= MAX_STATS_RETRIES) {
                 console.warn(`⚠️ Max retries (${MAX_STATS_RETRIES}) reached for fetchStats, using fallback values`);
                 setMasteryProgress(38);
                 setStats(prev => ({
@@ -103,15 +103,15 @@ export default function DashboardPage() {
             // Log error but don't block dashboard
             if (error) {
                 // Increment retry counter
-                setStatsRetryCount(prev => prev + 1);
-                console.warn(`student_progress query failed (attempt ${statsRetryCount + 1}/${MAX_STATS_RETRIES}):`, error.message);
+                statsRetryCount.current += 1;
+                console.warn(`student_progress query failed (attempt ${statsRetryCount.current}/${MAX_STATS_RETRIES}):`, error.message);
                 // Set default values
                 setMasteryProgress(38);
                 return;
             }
 
             // Success - reset retry counter
-            setStatsRetryCount(0);
+            statsRetryCount.current = 0;
 
             if (progressData && progressData.length > 0) {
                 const totalCorrect = progressData.reduce((sum: number, p: any) => sum + (p.correct_count || 0), 0);
@@ -133,8 +133,8 @@ export default function DashboardPage() {
             }
         } catch (err) {
             // Increment retry counter
-            setStatsRetryCount(prev => prev + 1);
-            console.error(`Stats fetching error (attempt ${statsRetryCount + 1}/${MAX_STATS_RETRIES}):`, err);
+            statsRetryCount.current += 1;
+            console.error(`Stats fetching error (attempt ${statsRetryCount.current}/${MAX_STATS_RETRIES}):`, err);
             // Set defaults on error
             setMasteryProgress(38);
             setStats(prev => ({
@@ -142,7 +142,7 @@ export default function DashboardPage() {
                 streak: user?.streak_days || 0
             }));
         }
-    }, [user?.id, statsRetryCount]);
+    }, [user?.id]);
 
     useEffect(() => {
         if (!authLoading) {
@@ -418,10 +418,18 @@ export default function DashboardPage() {
                     </button>
                 </div>
 
-                {/* Practice Modes Section - MOVED TO DIALOG */}
-                {/* <div className="mt-8 px-4 md:px-6">
+                {/* Practice Modes Section - ENABLED FOR TESTING */}
+                <div className="mt-8 px-4 md:px-6" style={{
+                    background: 'rgba(255, 0, 0, 0.1)',
+                    border: '2px solid red',
+                    padding: '20px',
+                    borderRadius: '8px'
+                }}>
+                    <p style={{ color: 'lime', fontWeight: 'bold', marginBottom: '10px' }}>
+                        🔍 DEBUG: Practice Modes Section Container Rendered
+                    </p>
                     <PracticeModesSection />
-                </div> */}
+                </div>
             </main>
 
             {/* Vocabulary Dialog - NEW FSRS Version */}

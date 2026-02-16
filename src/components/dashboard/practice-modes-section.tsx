@@ -59,25 +59,10 @@ export function PracticeModesSection() {
         setLoading(true);
 
         try {
-            // TEMPORARY WORKAROUND for Supabase PostgREST Caching Issue
-            // Date: 2026-02-16
-            // Issue: Filter-based queries (.not()) return stale cached data
-            // Solution: Direct ID-based query bypasses filter cache
-            // TODO: Revert to dynamic filter-based query once cache issue resolved
-            // See: TROUBLESHOOTING-Practice-Modes.md for restoration instructions
-
-            const knownPracticeIds = [
-                'dde85935-6766-47e8-91aa-019fe8496fe9', // Hello
-                'e2493cf1-9b7f-44c4-862f-9a07f93abcfa', // Hello
-                '441731a2-395d-4037-9365-993a8b4cb144', // Hello
-                'eff9c69a-0860-402d-ad8f-f60d36bb0f69', // Thank you
-                '8cf23373-37e7-442f-a834-9a1dbef3f816'  // Water
-            ];
-
+            // Use RPC endpoint to bypass PostgREST cache issues
+            // Migration: 069_get_practice_enabled_items.sql
             const { data: items, error } = await supabase
-                .from('learning_items')
-                .select('id, english, greek, level, difficulty, practice_modes_config')
-                .in('id', knownPracticeIds);
+                .rpc('get_practice_enabled_items');
 
             if (error) {
                 console.error('Error loading practice items:', error);
