@@ -341,6 +341,9 @@ export function PracticeModeDialog({
         return (
             <Dialog open={isOpen} onOpenChange={handleClose}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="sr-only">Loading Practice Mode</DialogTitle>
+                    </DialogHeader>
                     <div className="flex items-center justify-center py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         <span className="ml-3 text-muted-foreground">Loading practice mode...</span>
@@ -377,6 +380,9 @@ export function PracticeModeDialog({
         return (
             <Dialog open={isOpen} onOpenChange={handleClose}>
                 <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="sr-only">Practice Results</DialogTitle>
+                    </DialogHeader>
                     <PracticeResultSummary
                         result={sessionResult}
                         item={item!}
