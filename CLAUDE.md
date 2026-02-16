@@ -20,10 +20,6 @@ Du arbeitest IMMER in diesem Projekt. Lies diese Datei + die verlinkten Dokument
 - vocabulary/  
   → klassische Vokabelkarten (Einzelwörter / kurze Wendungen), Anki-ähnliche Logik, separate SRS
 
-### 3. Wichtige Dateien im daily-phrases-Modul (aktuell vorhanden oder geplant)
-- modules/daily-phrases/README.md  
-- modules/daily-phrases/todo.md  
-- modules/daily-phrases/daily-phrases-due-logic.md   (ehemals DueCardsToday.md)
 
 ### 4. Workflow-Regeln für Claude
 - Immer Naming-Konvention prüfen, bevor du Dateien vorschlägst, änderst oder erstellst
@@ -37,3 +33,28 @@ Du arbeitest IMMER in diesem Projekt. Lies diese Datei + die verlinkten Dokument
 Falls eine der genannten Dateien fehlt oder veraltet ist, sag sofort Bescheid und frage nach Aktualisierung oder Ergänzung.
 
 Alle .md-Dateien im Projekt sind verbindlich. Ignoriere sie nicht.
+
+
+
+Beachte immer die Dateien:
+IMPROVMENT-16-02-25.md
+
+Beachte immer die Dateien:
+TODO-Audit-Und-Optimierungen-2026-02-16.md
+
+Beachte immer die Dateien: TROUBLESHOOTING-Practice-Modes.md
+
+Beachte immer die Dateien: 
+SESSION_TRACKING_SUMMARY.md
+
+beachte immer die Dateien:
+SECURITY_TESTS.md
+
+beachte immer die Dateien:
+SESSION_TRACKING_SUMMARY.md
+
+Halte alle dateien aktuell. Verfolge todo Status und Protokolle
+
+sie müssen vollständig abgearbeitet werden bevor wir mit der weiterentwickelung beginnen
+
+Berichte wenn eine Datei nicht gefunden wurde

@@ -31,7 +31,7 @@ interface GrammarDialogProps {
 }
 
 export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
-    console.log('🔍 GrammarDialog render - isOpen:', isOpen);
+    // console.log('🔍 GrammarDialog render - isOpen:', isOpen); // DISABLED - causes infinite loop
     const { user } = useAuth();
     const { t, locale } = useTranslation();
     const { toasts, showToast, removeToast, error, warning, success, info } = useToast();
