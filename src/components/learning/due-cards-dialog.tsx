@@ -625,9 +625,9 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     <h2>🎯 Due Cards Today</h2>
                     {!loading && vocabulary.length > 0 && (
                         <div className="progress-info" style={{ marginTop: '16px' }}>
-                            <span>Card {currentIndex + 1} of {total}</span>
+                            <span>Card {currentIndex + 1} of {vocabulary.length}</span>
                             {correct > 0 && <span style={{ marginLeft: '12px', color: '#4CAF50' }}>✅ {correct}</span>}
-                            {wrong > 0 && <span style={{ marginLeft: '12px', color: '#f44336' }}>❌ {wrong}</span>}
+                            {(total - correct) > 0 && <span style={{ marginLeft: '12px', color: '#f44336' }}>❌ {total - correct}</span>}
                         </div>
                     )}
                 </div>
