@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -25,7 +25,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import type { Content, ContentFormData } from '@/types/content';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronRight } from 'lucide-react';
+import { PracticeConfigForm } from './practice-config-form';
+import { updatePracticeModeConfig } from '@/lib/supabase/content';
 
 const contentSchema = z.object({
     type: z.enum(['vocabulary', 'phrase', 'grammar']),
@@ -293,6 +295,32 @@ export function ContentModal({
                             />
                         </div>
                     </div>
+
+                    {/* Practice Modes Configuration (Optional) */}
+                    {!isCreating && item && (
+                        <details className="group border-t border-border/30 pt-4 mt-4">
+                            <summary className="cursor-pointer font-medium text-sm flex items-center gap-2 hover:text-primary transition-colors">
+                                <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                                Practice Modes Configuration (Optional)
+                            </summary>
+                            <div className="mt-4 p-4 bg-accent/20 rounded-lg border border-border/30">
+                                <PracticeConfigForm
+                                    itemId={item.id}
+                                    initialConfig={(item as any).practice_modes_config || null}
+                                    onSave={async (config) => {
+                                        const success = await updatePracticeModeConfig(item.id, config);
+                                        if (success) {
+                                            // Optionally refresh item data
+                                            onClose();
+                                        }
+                                    }}
+                                    onCancel={() => {
+                                        // Just close the details section
+                                    }}
+                                />
+                            </div>
+                        </details>
+                    )}
 
                     <DialogFooter className="gap-2 sm:gap-0 pt-2">
                         <Button
