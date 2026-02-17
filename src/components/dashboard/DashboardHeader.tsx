@@ -150,6 +150,33 @@ export default function DashboardHeader({ studentName }: HeaderProps) {
                     </button>
                 )}
                 <button
+                    onClick={() => router.push('/settings')}
+                    style={{
+                        background: 'rgba(0, 122, 255, 0.12)',
+                        border: '1px solid rgba(0, 122, 255, 0.25)',
+                        borderRadius: '12px',
+                        padding: '8px 14px',
+                        color: '#007AFF',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(0, 122, 255, 0.22)';
+                        e.currentTarget.style.borderColor = 'rgba(0, 122, 255, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(0, 122, 255, 0.12)';
+                        e.currentTarget.style.borderColor = 'rgba(0, 122, 255, 0.25)';
+                    }}
+                >
+                    <span style={{ fontSize: '15px' }}>⚙️</span> {t('header.settings') || 'Settings'}
+                </button>
+                <button
                     onClick={logout}
                     style={{
                         background: 'rgba(255, 59, 48, 0.12)',
