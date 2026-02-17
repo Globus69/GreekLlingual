@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/db/supabase';
+import { useMobileCache } from '@/hooks/use-mobile-cache';
+import { CACHE_TTL } from '@/lib/cache/mobile-cache';
 import MobileBottomNav from '@/components/mobile/MobileBottomNav';
 
 /**
@@ -51,64 +53,106 @@ export default function MobileMemoryGamePage() {
   }, [isAuthenticated, router]);
 
   /**
-   * Fetch practice items and initialize game
+   * Fetcher function for practice items
+   * 🔧 FIX: Use cache instead of direct Supabase call
    */
-  useEffect(() => {
-    if (!user?.id) return;
-    loadGameData();
+  const fetchPracticeItems = useCallback(async (): Promise<PracticeItem[]> => {
+    if (!user?.id) return [];
+
+    console.log('🃏 [Memory Game] Fetching practice items');
+
+    const { data, error } = await supabase.rpc('get_practice_enabled_items');
+
+    if (error) {
+      console.error('Error fetching practice items:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn('No practice items found');
+      return [];
+    }
+
+    console.log('🃏 [Memory Game] Items loaded:', data.length);
+    return data.slice(0, 8) as PracticeItem[];
   }, [user?.id]);
 
   /**
-   * Load game data from Supabase
+   * Create card pairs from practice items
    */
-  const loadGameData = async () => {
-    try {
-      setLoading(true);
+  const createCardPairs = useCallback((items: PracticeItem[]): MemoryCard[] => {
+    const cardPairs: MemoryCard[] = items.flatMap((item) => [
+      {
+        id: `${item.id}-greek`,
+        content: item.greek,
+        language: 'greek' as const,
+        pairId: item.id,
+        isFlipped: false,
+        isMatched: false,
+      },
+      {
+        id: `${item.id}-user`,
+        content: item.english,
+        language: 'user' as const,
+        pairId: item.id,
+        isFlipped: false,
+        isMatched: false,
+      },
+    ]);
 
-      // Call RPC to get practice-enabled items
-      const { data, error } = await supabase.rpc('get_practice_enabled_items');
+    // Shuffle cards
+    return cardPairs.sort(() => Math.random() - 0.5);
+  }, []);
 
-      if (error) {
-        console.error('Error fetching practice items:', error);
-        return;
-      }
+  /**
+   * 🔧 FIX: Stable callbacks to prevent re-render loops
+   */
+  const handleCacheHit = useCallback((data: PracticeItem[]) => {
+    console.log('✅ [Memory Game] Using cached data');
+    setCards(createCardPairs(data));
+  }, [createCardPairs]);
 
-      if (!data || data.length === 0) {
-        console.warn('No practice items found');
-        setLoading(false);
-        return;
-      }
+  const handleCacheMiss = useCallback(() => {
+    console.log('❌ [Memory Game] Cache miss - fetching fresh data');
+  }, []);
 
-      // Create card pairs
-      const items = data.slice(0, 8) as PracticeItem[];
-      const cardPairs: MemoryCard[] = items.flatMap((item) => [
-        {
-          id: `${item.id}-greek`,
-          content: item.greek,
-          language: 'greek' as const,
-          pairId: item.id,
-          isFlipped: false,
-          isMatched: false,
-        },
-        {
-          id: `${item.id}-user`,
-          content: item.english,
-          language: 'user' as const,
-          pairId: item.id,
-          isFlipped: false,
-          isMatched: false,
-        },
-      ]);
+  /**
+   * Use cache for practice items
+   * 🔧 FIX: Cache practice items for offline support
+   */
+  const {
+    data: practiceItems,
+    loading: cacheLoading,
+    cached,
+    refresh,
+  } = useMobileCache<PracticeItem[]>({
+    storeName: 'practice_items',
+    key: `practice-items-${user?.id}`,
+    fetcher: fetchPracticeItems,
+    ttl: CACHE_TTL.PRACTICE_ITEMS, // 1 hour
+    enabled: !!user?.id,
+    onCacheHit: handleCacheHit,
+    onCacheMiss: handleCacheMiss,
+  });
 
-      // Shuffle cards
-      const shuffled = cardPairs.sort(() => Math.random() - 0.5);
-      setCards(shuffled);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error loading game data:', err);
-      setLoading(false);
+  /**
+   * Create cards when fresh data is fetched (cache miss)
+   * 🔧 FIX: Only create cards for fresh data, not cached data
+   */
+  useEffect(() => {
+    if (practiceItems && practiceItems.length > 0 && !cached) {
+      // Only create cards for fresh data (cache miss)
+      // For cached data, handleCacheHit already creates them
+      setCards(createCardPairs(practiceItems));
     }
-  };
+  }, [practiceItems, cached, createCardPairs]);
+
+  /**
+   * Set loading state from cache hook
+   */
+  useEffect(() => {
+    setLoading(cacheLoading);
+  }, [cacheLoading]);
 
   /**
    * Handle card tap
@@ -168,13 +212,18 @@ export default function MobileMemoryGamePage() {
 
   /**
    * Restart game
+   * 🔧 FIX: Reshuffle existing cards instead of refetching
    */
   const handleRestart = () => {
     setFlippedCards([]);
     setMatchedCards([]);
     setMistakes(0);
     setGameComplete(false);
-    loadGameData();
+
+    // Reshuffle cards
+    if (practiceItems && practiceItems.length > 0) {
+      setCards(createCardPairs(practiceItems));
+    }
   };
 
   /**
