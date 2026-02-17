@@ -10,7 +10,8 @@ import { FSRSScheduler } from '@/lib/fsrs/fsrs-scheduler';
 import type { Card, Rating } from '@/lib/fsrs/fsrs-types';
 import MobileBottomNav from '@/components/mobile/MobileBottomNav';
 import { OfflineBanner, CacheIndicator } from '@/components/mobile/OfflineBanner';
-import { useMobileCache, usePrefetch, CACHE_TTL } from '@/hooks/use-mobile-cache';
+import { useMobileCache, usePrefetch } from '@/hooks/use-mobile-cache';
+import { CACHE_TTL } from '@/lib/cache/mobile-cache';
 
 // Vocabulary Item with FSRS fields
 interface VocabularyItem {
@@ -146,7 +147,7 @@ export default function MobileVocabularyPage() {
 
     // TTS Audio
     const playAudio = async () => {
-        if (cards.length === 0 || currentIndex >= cards.length) return;
+        if (!cards || cards.length === 0 || currentIndex >= cards.length) return;
 
         const currentItem = cards[currentIndex];
         if (!currentItem) return;

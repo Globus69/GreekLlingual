@@ -208,6 +208,19 @@
   .duration-slower {
     transition-duration: var(--duration-slower);
   }
+
+  /* Memory Game - 3D Card Flip Animation */
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
 }
 
 @theme inline {
@@ -328,4 +341,34 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ============================================================================
+   MEMORY SPLIT GAME - 3D Flip Animation
+   ============================================================================ */
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-front {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+}
+
+.card-back {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(59, 130, 246, 0.1));
+  transform: rotateY(180deg);
 }

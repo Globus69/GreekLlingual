@@ -114,6 +114,18 @@ export async function getCached<T>(
     const db = await initDB();
     const cached = await db.get(storeName, key);
 
+    // 🐛 DEBUG: Log what we found
+    console.log(`🔍 [DEBUG] getCached result:`, {
+      storeName,
+      key,
+      found: !!cached,
+      hasData: cached ? !!cached.data : false,
+      timestamp: cached?.timestamp,
+      expiresAt: cached?.expiresAt,
+      now: Date.now(),
+      isExpired: cached ? cached.expiresAt < Date.now() : null,
+    });
+
     if (!cached) {
       console.log(`🔍 [Cache] Miss: ${storeName}/${key}`);
       return null;
@@ -158,6 +170,17 @@ export async function setCached<T>(
       expiresAt: now + ttl,
       version,
     };
+
+    // 🐛 DEBUG: Log what we're saving
+    console.log(`🔍 [DEBUG] setCached:`, {
+      storeName,
+      key,
+      dataLength: Array.isArray(data) ? data.length : 'N/A',
+      ttl,
+      now,
+      expiresAt: now + ttl,
+      expiresIn: `${Math.round(ttl / 1000 / 60)} minutes`,
+    });
 
     await db.put(storeName, cached as any);
     console.log(`💾 [Cache] Saved: ${storeName}/${key} (TTL: ${ttl}ms)`);

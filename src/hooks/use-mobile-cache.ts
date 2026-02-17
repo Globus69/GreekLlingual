@@ -158,6 +158,16 @@ export function useMobileCache<T>({
       setError(null);
 
       try {
+        // 🐛 DEBUG: Log cache key details
+        console.log('🔑 [DEBUG] Cache Key Details:', {
+          storeName,
+          key,
+          enabled,
+          forceRefresh,
+          ttl,
+          timestamp: new Date().toISOString(),
+        });
+
         // Try cache first (unless forcing refresh)
         if (!forceRefresh) {
           console.log(`🔍 [useMobileCache] Checking cache: ${storeName}/${key}`);

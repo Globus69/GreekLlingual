@@ -7,7 +7,8 @@ import { supabase } from '@/db/supabase';
 import { getPracticeConfig } from '@/lib/supabase/content';
 import { PracticeModesSheet } from '@/components/mobile/PracticeModesSheet';
 import { OfflineBanner, CacheIndicator } from '@/components/mobile/OfflineBanner';
-import { useMobileCache, CACHE_TTL } from '@/hooks/use-mobile-cache';
+import { useMobileCache } from '@/hooks/use-mobile-cache';
+import { CACHE_TTL } from '@/lib/cache/mobile-cache';
 import type { PracticeMode } from '@/lib/validation/schemas';
 
 interface PracticeItem {
@@ -50,61 +51,8 @@ export default function MobilePracticeModesPage() {
   }, [mounted, isAuthenticated, router]);
 
   /**
-   * Fetcher function for practice items
-   */
-  const fetchPracticeItems = useCallback(async (): Promise<PracticeItem[]> => {
-    if (!user?.id) return [];
-
-    console.log('🎮 [Mobile Practice] Fetching practice items');
-
-    const { data: items, error } = await supabase
-      .rpc('get_practice_enabled_items');
-
-    if (error) {
-      console.error('Error loading practice items:', error);
-      throw error;
-    }
-
-    // Filter enabled items
-    const enabledItems = (items || []).filter(
-      (item: any) => {
-        const hasConfig = !!item.practice_modes_config;
-        const isEnabled = item.practice_modes_config?.enabled === true;
-        const hasModes = (item.practice_modes_config?.available_modes?.length || 0) > 0;
-        return hasConfig && isEnabled && hasModes;
-      }
-    );
-
-    console.log('🎮 [Mobile Practice] Enabled items:', enabledItems.length);
-    return enabledItems;
-  }, [user?.id]);
-
-  /**
-   * Use cache for practice items
-   */
-  const {
-    data: practiceItems,
-    loading,
-    cached,
-    refresh,
-  } = useMobileCache<PracticeItem[]>({
-    storeName: 'practice_items',
-    key: `practice-items-${user?.id}`,
-    fetcher: fetchPracticeItems,
-    ttl: CACHE_TTL.PRACTICE_ITEMS, // 1 hour
-    enabled: !!user?.id,
-    onCacheHit: (data) => {
-      console.log('✅ [Practice] Using cached data');
-      // Load unlock statuses for cached data
-      loadUnlockStatuses(data);
-    },
-    onCacheMiss: () => {
-      console.log('❌ [Practice] Cache miss - fetching fresh data');
-    },
-  });
-
-  /**
    * Load unlock status for all items and modes
+   * 🔧 MOVED BEFORE useMobileCache to avoid dependency issues
    */
   const loadUnlockStatuses = useCallback(async (items: PracticeItem[]) => {
     if (!user?.id || !items) return;
@@ -137,13 +85,79 @@ export default function MobilePracticeModesPage() {
   }, [user?.id]);
 
   /**
+   * Fetcher function for practice items
+   */
+  const fetchPracticeItems = useCallback(async (): Promise<PracticeItem[]> => {
+    if (!user?.id) return [];
+
+    console.log('🎮 [Mobile Practice] Fetching practice items');
+
+    const { data: items, error } = await supabase
+      .rpc('get_practice_enabled_items');
+
+    if (error) {
+      console.error('Error loading practice items:', error);
+      throw error;
+    }
+
+    // Filter enabled items
+    const enabledItems = (items || []).filter(
+      (item: any) => {
+        const hasConfig = !!item.practice_modes_config;
+        const isEnabled = item.practice_modes_config?.enabled === true;
+        const hasModes = (item.practice_modes_config?.available_modes?.length || 0) > 0;
+        return hasConfig && isEnabled && hasModes;
+      }
+    );
+
+    console.log('🎮 [Mobile Practice] Enabled items:', enabledItems.length);
+    return enabledItems;
+  }, [user?.id]);
+
+  /**
+   * 🔧 FIX: Stable callbacks to prevent re-render loops
+   */
+  const handleCacheHit = useCallback((data: PracticeItem[]) => {
+    console.log('✅ [Practice] Using cached data');
+    // Load unlock statuses for cached data
+    loadUnlockStatuses(data);
+  }, [loadUnlockStatuses]);
+
+  const handleCacheMiss = useCallback(() => {
+    console.log('❌ [Practice] Cache miss - fetching fresh data');
+    // Note: loadUnlockStatuses will be called via useEffect when practiceItems updates
+  }, []);
+
+  /**
+   * Use cache for practice items
+   */
+  const {
+    data: practiceItems,
+    loading,
+    cached,
+    refresh,
+  } = useMobileCache<PracticeItem[]>({
+    storeName: 'practice_items',
+    key: `practice-items-${user?.id}`,
+    fetcher: fetchPracticeItems,
+    ttl: CACHE_TTL.PRACTICE_ITEMS, // 1 hour
+    enabled: !!user?.id,
+    onCacheHit: handleCacheHit,
+    onCacheMiss: handleCacheMiss,
+  });
+
+  /**
    * Load unlock statuses when practice items are available
+   * 🔧 FIX: Only load if data changed (not on every render)
+   * This handles the case when cache miss occurs (fresh data fetched)
    */
   useEffect(() => {
-    if (practiceItems && practiceItems.length > 0) {
+    if (practiceItems && practiceItems.length > 0 && !cached) {
+      // Only load unlock statuses for fresh data (cache miss)
+      // For cached data, handleCacheHit already loads them
       loadUnlockStatuses(practiceItems);
     }
-  }, [practiceItems, loadUnlockStatuses]);
+  }, [practiceItems, cached, loadUnlockStatuses]);
 
   /**
    * Handle item card click - open mode selection sheet
@@ -254,6 +268,171 @@ export default function MobilePracticeModesPage() {
         >
           🔄
         </button>
+      </div>
+
+      {/* Memory Games Section */}
+      <div style={{ padding: '16px', paddingBottom: '8px' }}>
+        <h2 style={{
+          fontSize: '16px',
+          fontWeight: '600',
+          color: 'white',
+          marginBottom: '12px',
+          paddingLeft: '4px'
+        }}>
+          Memory Games
+        </h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Memory Game - Classic */}
+          <button
+            onClick={() => router.push('/m/practice-modes/memory')}
+            style={{
+              width: '100%',
+              padding: '16px',
+              background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(219, 39, 119, 0.2) 100%)',
+              backdropFilter: 'blur(10px)',
+              border: '2px solid rgba(147, 51, 234, 0.3)',
+              borderRadius: '16px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              minHeight: '88px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ fontSize: '40px' }}>🎮</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  marginBottom: '4px'
+                }}>
+                  Memory Classic
+                </div>
+                <div style={{
+                  fontSize: '13px',
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }}>
+                  Match pairs • 4×4 Grid
+                </div>
+              </div>
+            </div>
+            <div style={{
+              fontSize: '24px',
+              color: 'rgba(147, 51, 234, 0.8)'
+            }}>
+              →
+            </div>
+          </button>
+
+          {/* Memory Split - NEW! */}
+          <button
+            onClick={() => router.push('/m/practice-modes/memory-split')}
+            style={{
+              width: '100%',
+              padding: '16px',
+              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%)',
+              backdropFilter: 'blur(10px)',
+              border: '2px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: '16px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              minHeight: '88px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ fontSize: '40px' }}>🎴</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  marginBottom: '4px'
+                }}>
+                  Memory Split
+                </div>
+                <div style={{
+                  fontSize: '13px',
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }}>
+                  Two grids • Solution help
+                </div>
+              </div>
+            </div>
+            <div style={{
+              fontSize: '24px',
+              color: 'rgba(59, 130, 246, 0.8)'
+            }}>
+              →
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Text Practice Section */}
+      <div style={{ padding: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
+        <h2 style={{
+          fontSize: '16px',
+          fontWeight: '600',
+          color: 'white',
+          marginBottom: '12px',
+          paddingLeft: '4px'
+        }}>
+          Text Practice
+        </h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Cloze Text */}
+          <button
+            onClick={() => router.push('/m/practice-modes/cloze-text')}
+            style={{
+              width: '100%',
+              padding: '16px',
+              background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.2) 100%)',
+              backdropFilter: 'blur(10px)',
+              border: '2px solid rgba(249, 115, 22, 0.3)',
+              borderRadius: '16px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              minHeight: '88px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ fontSize: '40px' }}>📝</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  marginBottom: '4px'
+                }}>
+                  Cloze Text
+                </div>
+                <div style={{
+                  fontSize: '13px',
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }}>
+                  Fill in blanks • 5 Sentences
+                </div>
+              </div>
+            </div>
+            <div style={{
+              fontSize: '24px',
+              color: 'rgba(249, 115, 22, 0.8)'
+            }}>
+              →
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Practice Items List */}

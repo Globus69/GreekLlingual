@@ -109,6 +109,57 @@ export default function PracticeModesPage() {
                     </div>
                 </div>
 
+                {/* Memory Games Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {/* Memory Game (Classic) */}
+                    <Link
+                        href="/practice-modes/memory"
+                        className="block p-6 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border-2 border-purple-400/30 rounded-2xl hover:border-purple-400/50 transition-all group"
+                    >
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="text-4xl">🎮</div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-1 group-hover:text-purple-300 transition-colors">
+                                        Memory Game
+                                    </h3>
+                                    <p className="text-sm text-white/70">
+                                        Classic flip & match
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-purple-300">
+                                <span className="text-sm font-medium">4×4 Grid • Single Grid</span>
+                                <span className="text-xl group-hover:translate-x-1 transition-transform">→</span>
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* Memory Split (NEW) */}
+                    <Link
+                        href="/practice-modes/memory-split"
+                        className="block p-6 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-sm border-2 border-blue-400/30 rounded-2xl hover:border-blue-400/50 transition-all group"
+                    >
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="text-4xl">🧩</div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-1 group-hover:text-blue-300 transition-colors">
+                                        Memory Split
+                                    </h3>
+                                    <p className="text-sm text-white/70">
+                                        Two grids • Split/Flip mode
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-blue-300">
+                                <span className="text-sm font-medium">6/8/12 Pairs • Desktop</span>
+                                <span className="text-xl group-hover:translate-x-1 transition-transform">→</span>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+
                 {/* Practice Modes Section */}
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
                     <PracticeModesSection />
