@@ -1,0 +1,18 @@
+# Practice Modes - Custom Glassmorphism Styling
+# These files contain carefully crafted inline styles and custom formatting
+# that should NOT be auto-formatted by Prettier to preserve design decisions
+
+# Practice Modes Components
+src/components/dashboard/practice-modes-section.tsx
+src/app/practice-modes/page.tsx
+
+# Practice Mode Dialog and Games
+src/components/learning/practice-modes/**/*.tsx
+
+# Build output and dependencies (standard ignores)
+.next/
+out/
+build/
+node_modules/
+*.min.js
+*.min.css

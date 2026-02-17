@@ -13,6 +13,22 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  // Disable formatting rules for Practice Modes (custom glassmorphism styling)
+  {
+    files: [
+      "src/components/dashboard/practice-modes-section.tsx",
+      "src/app/practice-modes/page.tsx",
+      "src/components/learning/practice-modes/**/*.tsx"
+    ],
+    rules: {
+      // Disable JSX formatting rules to preserve custom inline styles
+      "react/jsx-max-props-per-line": "off",
+      "react/jsx-first-prop-new-line": "off",
+      "react/jsx-indent": "off",
+      "react/jsx-indent-props": "off",
+      "@typescript-eslint/indent": "off",
+    }
+  }
 ]);
 
 export default eslintConfig;
