@@ -11,8 +11,8 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, X } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
@@ -68,11 +68,20 @@ export function PracticeModeDialog({
     itemId,
     modeType,
 }: PracticeModeDialogProps) {
+    console.log('[PracticeModeDialog] Component render', { isOpen, itemId, modeType });
+
+    // Track mount/unmount
+    useEffect(() => {
+        console.log('🟢 [PracticeModeDialog] MOUNTED');
+        return () => {
+            console.log('🔴 [PracticeModeDialog] UNMOUNTED');
+        };
+    }, []);
+
     const { user } = useAuth();
     const { success, error: showError, info } = useToast();
     const scheduler = useMemo(() => new FSRSScheduler(), []);
 
-    const [loading, setLoading] = useState(true);
     const [config, setConfig] = useState<any>(null);
     const [item, setItem] = useState<LearningItem | null>(null);
     const [sessionStartTime, setSessionStartTime] = useState<number>(0);
@@ -80,25 +89,45 @@ export function PracticeModeDialog({
     const [sessionResult, setSessionResult] = useState<SessionResult | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
 
+    // Track loading state with session key to prevent re-loading
+    const [loadingSession, setLoadingSession] = useState<string | null>(null);
+    const currentSessionKey = `${itemId}-${modeType}`;
+    const isLoading = loadingSession === currentSessionKey && !item && !loadError;
+    const hasLoaded = item !== null || loadError !== null;
+
     // Load config and item data when dialog opens
     useEffect(() => {
-        if (isOpen && user?.id) {
-            loadPracticeData();
-        } else {
+        if (!isOpen || !user?.id) {
             // Reset state when closing
+            console.log('[PracticeModeDialog] Dialog closing, resetting state');
+            setLoadingSession(null);
+            setConfig(null);
+            setItem(null);
             setSessionComplete(false);
             setSessionResult(null);
             setLoadError(null);
+            return;
+        }
+
+        // Only load if we haven't loaded this session yet
+        if (loadingSession !== currentSessionKey && !hasLoaded) {
+            console.log('[PracticeModeDialog] Loading new session', currentSessionKey);
+            setLoadingSession(currentSessionKey);
+            loadPracticeData();
+        } else {
+            console.log('[PracticeModeDialog] Session already loaded or loading, skipping', { loadingSession, currentSessionKey, hasLoaded });
         }
     }, [isOpen, itemId, modeType, user?.id]);
 
     const loadPracticeData = async () => {
-        setLoading(true);
+        console.log('[PracticeModeDialog] Loading started', { itemId, modeType, userId: user?.id });
         setLoadError(null);
 
         try {
             // Load practice config
+            console.log('🔍 [Step 1] Calling getPracticeConfig...');
             const configData = await getPracticeConfig(itemId, user!.id, modeType);
+            console.log('✅ [Step 1] Config loaded:', configData);
 
             if (!configData) {
                 throw new Error('Failed to load practice configuration');
@@ -116,23 +145,27 @@ export function PracticeModeDialog({
             setConfig(configData);
 
             // Load learning item with FSRS data
+            console.log('🔍 [Step 2] Loading learning item...');
             const { data: itemData, error: itemError } = await supabase
                 .from('learning_items')
                 .select('*')
                 .eq('id', itemId)
                 .single();
+            console.log('✅ [Step 2] Item loaded:', { itemData, itemError });
 
             if (itemError || !itemData) {
                 throw new Error('Failed to load learning item');
             }
 
             // Load FSRS progress
+            console.log('🔍 [Step 3] Loading FSRS progress...');
             const { data: progressData, error: progressError } = await supabase
                 .from('student_progress')
                 .select('*')
                 .eq('item_id', itemId)
                 .eq('student_id', user!.id)
-                .single();
+                .maybeSingle();
+            console.log('✅ [Step 3] Progress loaded:', { progressData, progressError });
 
             if (progressError && progressError.code !== 'PGRST116') {
                 // PGRST116 = no rows found (acceptable for new items)
@@ -153,12 +186,11 @@ export function PracticeModeDialog({
 
             setItem(mergedItem);
             setSessionStartTime(Date.now());
+            console.log('[PracticeModeDialog] Loading complete', { item: mergedItem });
         } catch (err: any) {
             console.error('[PracticeModeDialog] Load error:', err);
             setLoadError(err.message || 'Failed to load practice mode');
             showError(err.message || 'Failed to load practice mode');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -337,12 +369,16 @@ export function PracticeModeDialog({
     };
 
     // Render loading state
-    if (loading) {
+    if (isLoading) {
+        console.log('[PracticeModeDialog] Rendering loading state', { isLoading, hasLoaded, loadingSession });
         return (
             <Dialog open={isOpen} onOpenChange={handleClose}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="sr-only">Loading Practice Mode</DialogTitle>
+                        <DialogDescription className="sr-only">
+                            Preparing your practice session
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="flex items-center justify-center py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -355,6 +391,7 @@ export function PracticeModeDialog({
 
     // Render error state
     if (loadError) {
+        console.log('[PracticeModeDialog] Rendering error state', loadError);
         return (
             <Dialog open={isOpen} onOpenChange={handleClose}>
                 <DialogContent className="max-w-2xl">
@@ -363,6 +400,9 @@ export function PracticeModeDialog({
                             <X className="h-5 w-5" />
                             Error
                         </DialogTitle>
+                        <DialogDescription className="sr-only">
+                            An error occurred while loading the practice mode
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="py-6">
                         <p className="text-center text-muted-foreground">{loadError}</p>
@@ -377,11 +417,15 @@ export function PracticeModeDialog({
 
     // Render result summary
     if (sessionComplete && sessionResult) {
+        console.log('[PracticeModeDialog] Rendering result summary', sessionResult);
         return (
             <Dialog open={isOpen} onOpenChange={handleClose}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
                         <DialogTitle className="sr-only">Practice Results</DialogTitle>
+                        <DialogDescription className="sr-only">
+                            Your practice session results and score
+                        </DialogDescription>
                     </DialogHeader>
                     <PracticeResultSummary
                         result={sessionResult}
@@ -403,11 +447,18 @@ export function PracticeModeDialog({
             ? '🎯 Multiple Choice'
             : '✍️ Write It Out';
 
-    return (
+    console.log('[PracticeModeDialog] Rendering practice game', { item, config, modeType, isOpen });
+    console.log('[PracticeModeDialog] Dialog props', { open: isOpen, hasItem: !!item, hasConfig: !!config });
+    console.log('[PracticeModeDialog] About to return Dialog JSX with open =', isOpen);
+
+    const dialogJSX = (
         <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{modeTitle}</DialogTitle>
+                    <DialogDescription className="sr-only">
+                        Practice session for {item?.english}
+                    </DialogDescription>
                 </DialogHeader>
 
                 <div className="py-4">
