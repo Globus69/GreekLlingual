@@ -1,0 +1,145 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - main [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e6]:
+          - button "←" [ref=e7] [cursor=pointer]
+          - heading "⚙️ Settings" [level=1] [ref=e8]
+        - generic [ref=e9]:
+          - generic [ref=e10]:
+            - generic [ref=e11]: Account
+            - generic [ref=e12]: Student
+            - generic [ref=e13]: No email
+            - generic [ref=e14]: "Level: A1"
+          - generic [ref=e15]:
+            - button "🌍 Language Change app language →" [ref=e16] [cursor=pointer]:
+              - generic [ref=e17]: 🌍
+              - generic [ref=e18]:
+                - generic [ref=e19]: Language
+                - generic [ref=e20]: Change app language
+              - generic [ref=e21]: →
+            - button "🔔 Notifications Manage notifications →" [ref=e22] [cursor=pointer]:
+              - generic [ref=e23]: 🔔
+              - generic [ref=e24]:
+                - generic [ref=e25]: Notifications
+                - generic [ref=e26]: Manage notifications
+              - generic [ref=e27]: →
+            - button "🎨 Appearance Theme & display →" [ref=e28] [cursor=pointer]:
+              - generic [ref=e29]: 🎨
+              - generic [ref=e30]:
+                - generic [ref=e31]: Appearance
+                - generic [ref=e32]: Theme & display
+              - generic [ref=e33]: →
+            - button "📊 Learning Goals Set daily targets →" [ref=e34] [cursor=pointer]:
+              - generic [ref=e35]: 📊
+              - generic [ref=e36]:
+                - generic [ref=e37]: Learning Goals
+                - generic [ref=e38]: Set daily targets
+              - generic [ref=e39]: →
+            - button "🔐 Privacy Data & security →" [ref=e40] [cursor=pointer]:
+              - generic [ref=e41]: 🔐
+              - generic [ref=e42]:
+                - generic [ref=e43]: Privacy
+                - generic [ref=e44]: Data & security
+              - generic [ref=e45]: →
+          - button "🚪 Logout" [ref=e47] [cursor=pointer]
+          - generic [ref=e48]:
+            - generic [ref=e49]: GreekLingua Dashboard
+            - generic [ref=e50]: Version 1.0.0 • Made with ❤️
+        - generic [ref=e52]:
+          - button "🏠 Home" [ref=e53] [cursor=pointer]:
+            - generic [ref=e54]: 🏠
+            - generic [ref=e55]: Home
+          - button "📊 Stats" [ref=e56] [cursor=pointer]:
+            - generic [ref=e57]: 📊
+            - generic [ref=e58]: Stats
+          - button "⚙️ Settings" [ref=e59] [cursor=pointer]:
+            - generic [ref=e60]: ⚙️
+            - generic [ref=e61]: Settings
+    - navigation [ref=e62]:
+      - generic [ref=e63]:
+        - link "🏠Home" [ref=e64]:
+          - /url: /m
+        - link "📊Stats" [ref=e65]:
+          - /url: /m/stats
+        - link "⚙️Settings" [ref=e66]:
+          - /url: /m/settings
+          - text: ⚙️Settings
+  - region "Notifications alt+T"
+  - generic [active]:
+    - generic [ref=e69]:
+      - generic [ref=e70]:
+        - navigation [ref=e72]:
+          - button "previous" [disabled] [ref=e73]:
+            - img "previous" [ref=e74]
+          - generic [ref=e76]:
+            - generic [ref=e77]: 1/
+            - text: "1"
+          - button "next" [disabled] [ref=e78]:
+            - img "next" [ref=e79]
+        - link "Next.js 16.1.3 (stale) Turbopack" [ref=e82]:
+          - /url: https://nextjs.org/docs/messages/version-staleness
+          - img [ref=e83]
+          - generic "There is a newer version (16.1.6) available, upgrade recommended!" [ref=e85]: Next.js 16.1.3 (stale)
+          - generic [ref=e86]: Turbopack
+      - dialog "Build Error" [ref=e88]:
+        - generic [ref=e91]:
+          - generic [ref=e92]:
+            - generic [ref=e93]:
+              - generic [ref=e95]: Build Error
+              - generic [ref=e96]:
+                - button "Copy Error Info" [ref=e97] [cursor=pointer]:
+                  - img [ref=e98]
+                - button "No related documentation found" [disabled] [ref=e100]:
+                  - img [ref=e101]
+                - button "Attach Node.js inspector" [ref=e103] [cursor=pointer]:
+                  - img [ref=e104]
+            - generic [ref=e116]: Export CACHE_TTL doesn't exist in target module
+          - generic [ref=e118]:
+            - generic [ref=e120]:
+              - img [ref=e122]
+              - generic [ref=e126]: ./src/app/m/vocabulary/page.tsx (13:1)
+              - button "Open in editor" [ref=e127] [cursor=pointer]:
+                - img [ref=e129]
+            - generic [ref=e132]:
+              - generic [ref=e133]: Export CACHE_TTL doesn't exist in target module
+              - generic [ref=e134]: 11 |
+              - text: import MobileBottomNav from '@/components/mobile/MobileBottomNav';
+              - generic [ref=e135]: 12 |
+              - text: import
+              - generic [ref=e136]: "{"
+              - text: OfflineBanner, CacheIndicator
+              - generic [ref=e137]: "}"
+              - text: from '@/components/mobile/OfflineBanner'; >
+              - generic [ref=e138]: 13 |
+              - text: import
+              - generic [ref=e139]: "{ useMobileCache"
+              - text: ","
+              - generic [ref=e140]: usePrefetch
+              - text: ", CACHE_TTL"
+              - generic [ref=e141]: "}"
+              - text: from '@/hooks/use-mobile-cache';
+              - generic [ref=e142]: "|"
+              - text: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              - generic [ref=e143]: 14 |
+              - generic [ref=e144]: 15 |
+              - generic [ref=e145]: // Vocabulary Item with FSRS fields
+              - generic [ref=e146]: 16 |
+              - text: interface VocabularyItem
+              - generic [ref=e147]: "{"
+              - generic [ref=e148]: "The export CACHE_TTL was not found in module [project]/src/hooks/use-mobile-cache.ts [app-client] (ecmascript). Did you mean to import usePrefetch? All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. Import traces: Client Component Browser: ./src/app/m/vocabulary/page.tsx [Client Component Browser] ./src/app/m/vocabulary/page.tsx [Server Component] Client Component SSR: ./src/app/m/vocabulary/page.tsx [Client Component SSR] ./src/app/m/vocabulary/page.tsx [Server Component]"
+        - generic [ref=e149]: "1"
+        - generic [ref=e150]: "2"
+    - generic [ref=e155] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e156]:
+        - img [ref=e157]
+      - button "Open issues overlay" [ref=e163]:
+        - generic [ref=e164]:
+          - generic [ref=e165]: "0"
+          - generic [ref=e166]: "1"
+        - generic [ref=e167]: Issue
+  - alert [ref=e168]
+```

@@ -1,0 +1,180 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - main [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - generic [ref=e8]:
+              - generic [ref=e9]: 🔥
+              - generic [ref=e10]: "0"
+            - generic [ref=e11]: ·
+            - generic [ref=e12]:
+              - generic [ref=e13]: 📚
+              - generic [ref=e14]: "0"
+            - generic [ref=e15]: ·
+            - generic [ref=e16]:
+              - generic [ref=e17]: ⭐
+              - generic [ref=e18]: A1
+          - generic [ref=e19]: ▼
+        - generic [ref=e20]:
+          - heading "Welcome, Student! 👋" [level=1] [ref=e22]
+          - generic [ref=e23]:
+            - button "👩‍🏫 Magic Round Your lesson →" [ref=e24] [cursor=pointer]:
+              - generic [ref=e25]: 👩‍🏫
+              - generic [ref=e26]:
+                - generic [ref=e27]: Magic Round
+                - generic [ref=e28]: Your lesson
+              - generic [ref=e29]: →
+            - button "📅 Due Cards 0 waiting →" [ref=e30] [cursor=pointer]:
+              - generic [ref=e31]: 📅
+              - generic [ref=e32]:
+                - generic [ref=e33]: Due Cards
+                - generic [ref=e34]: 0 waiting
+              - generic [ref=e35]: →
+            - button "📖 Review Vocab Practice words →" [ref=e36] [cursor=pointer]:
+              - generic [ref=e37]: 📖
+              - generic [ref=e38]:
+                - generic [ref=e39]: Review Vocab
+                - generic [ref=e40]: Practice words
+              - generic [ref=e41]: →
+            - button "💪 Weak Words Train difficult →" [ref=e42] [cursor=pointer]:
+              - generic [ref=e43]: 💪
+              - generic [ref=e44]:
+                - generic [ref=e45]: Weak Words
+                - generic [ref=e46]: Train difficult
+              - generic [ref=e47]: →
+            - button "💬 Daily Phrases Useful phrases →" [ref=e48] [cursor=pointer]:
+              - generic [ref=e49]: 💬
+              - generic [ref=e50]:
+                - generic [ref=e51]: Daily Phrases
+                - generic [ref=e52]: Useful phrases
+              - generic [ref=e53]: →
+            - button "⚡ Quick Lesson 20 min session →" [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: ⚡
+              - generic [ref=e56]:
+                - generic [ref=e57]: Quick Lesson
+                - generic [ref=e58]: 20 min session
+              - generic [ref=e59]: →
+            - button "📚 Short Stories Read & learn →" [ref=e60] [cursor=pointer]:
+              - generic [ref=e61]: 📚
+              - generic [ref=e62]:
+                - generic [ref=e63]: Short Stories
+                - generic [ref=e64]: Read & learn
+              - generic [ref=e65]: →
+            - button "📐 Grammar Practice rules →" [ref=e66] [cursor=pointer]:
+              - generic [ref=e67]: 📐
+              - generic [ref=e68]:
+                - generic [ref=e69]: Grammar
+                - generic [ref=e70]: Practice rules
+              - generic [ref=e71]: →
+            - button "👂 Listening Audio practice →" [ref=e72] [cursor=pointer]:
+              - generic [ref=e73]: 👂
+              - generic [ref=e74]:
+                - generic [ref=e75]: Listening
+                - generic [ref=e76]: Audio practice
+              - generic [ref=e77]: →
+            - button "🗣️ Pronunciation Speak Greek →" [ref=e78] [cursor=pointer]:
+              - generic [ref=e79]: 🗣️
+              - generic [ref=e80]:
+                - generic [ref=e81]: Pronunciation
+                - generic [ref=e82]: Speak Greek
+              - generic [ref=e83]: →
+            - button "📝 Test Check progress →" [ref=e84] [cursor=pointer]:
+              - generic [ref=e85]: 📝
+              - generic [ref=e86]:
+                - generic [ref=e87]: Test
+                - generic [ref=e88]: Check progress
+              - generic [ref=e89]: →
+            - button "📊 Progress View stats →" [ref=e90] [cursor=pointer]:
+              - generic [ref=e91]: 📊
+              - generic [ref=e92]:
+                - generic [ref=e93]: Progress
+                - generic [ref=e94]: View stats
+              - generic [ref=e95]: →
+        - generic [ref=e97]:
+          - button "🏠 Home" [ref=e98] [cursor=pointer]:
+            - generic [ref=e99]: 🏠
+            - generic [ref=e100]: Home
+          - button "📊 Stats" [ref=e101] [cursor=pointer]:
+            - generic [ref=e102]: 📊
+            - generic [ref=e103]: Stats
+          - button "⚙️ Settings" [ref=e104] [cursor=pointer]:
+            - generic [ref=e105]: ⚙️
+            - generic [ref=e106]: Settings
+    - navigation [ref=e107]:
+      - generic [ref=e108]:
+        - link "🏠Home" [ref=e109]:
+          - /url: /m
+          - text: 🏠Home
+        - link "📊Stats" [ref=e110]:
+          - /url: /m/stats
+        - link "⚙️Settings" [ref=e111]:
+          - /url: /m/settings
+  - region "Notifications alt+T"
+  - generic [active]:
+    - generic [ref=e114]:
+      - generic [ref=e115]:
+        - navigation [ref=e117]:
+          - button "previous" [disabled] [ref=e118]:
+            - img "previous" [ref=e119]
+          - generic [ref=e121]:
+            - generic [ref=e122]: 1/
+            - text: "1"
+          - button "next" [disabled] [ref=e123]:
+            - img "next" [ref=e124]
+        - link "Next.js 16.1.3 (stale) Turbopack" [ref=e127]:
+          - /url: https://nextjs.org/docs/messages/version-staleness
+          - img [ref=e128]
+          - generic "There is a newer version (16.1.6) available, upgrade recommended!" [ref=e130]: Next.js 16.1.3 (stale)
+          - generic [ref=e131]: Turbopack
+      - dialog "Build Error" [ref=e133]:
+        - generic [ref=e136]:
+          - generic [ref=e137]:
+            - generic [ref=e138]:
+              - generic [ref=e140]: Build Error
+              - generic [ref=e141]:
+                - button "Copy Error Info" [ref=e142] [cursor=pointer]:
+                  - img [ref=e143]
+                - button "No related documentation found" [disabled] [ref=e145]:
+                  - img [ref=e146]
+                - button "Attach Node.js inspector" [ref=e148] [cursor=pointer]:
+                  - img [ref=e149]
+            - generic [ref=e161]: Parsing ecmascript source code failed
+          - generic [ref=e163]:
+            - generic [ref=e165]:
+              - img [ref=e167]
+              - generic [ref=e171]: ./src/app/m/practice-modes/page.tsx (383:1)
+              - button "Open in editor" [ref=e172] [cursor=pointer]:
+                - img [ref=e174]
+            - generic [ref=e177]:
+              - generic [ref=e178]: Parsing ecmascript source code failed
+              - generic [ref=e179]: 381 |
+              - text: </div>
+              - generic [ref=e180]: 382 |
+              - generic [ref=e181]: )
+              - text: ; >
+              - generic [ref=e182]: 383 |
+              - generic [ref=e183]: "}"
+              - generic [ref=e184]: "|"
+              - text: ^
+              - generic [ref=e185]: 384 |
+              - generic [ref=e186]: 385 |
+              - text: /**
+              - generic [ref=e187]: 386 |
+              - generic [ref=e188]: "* Practice Item Card Component"
+              - generic [ref=e189]: "Unexpected token. Did you mean `{'}'}` or `&rbrace;`? Import traces: Client Component Browser: ./src/app/m/practice-modes/page.tsx [Client Component Browser] ./src/app/m/practice-modes/page.tsx [Server Component] Client Component SSR: ./src/app/m/practice-modes/page.tsx [Client Component SSR] ./src/app/m/practice-modes/page.tsx [Server Component]"
+        - generic [ref=e190]: "1"
+        - generic [ref=e191]: "2"
+    - generic [ref=e196] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e197]:
+        - img [ref=e198]
+      - button "Open issues overlay" [ref=e204]:
+        - generic [ref=e205]:
+          - generic [ref=e206]: "0"
+          - generic [ref=e207]: "1"
+        - generic [ref=e208]: Issue
+  - alert [ref=e209]
+```

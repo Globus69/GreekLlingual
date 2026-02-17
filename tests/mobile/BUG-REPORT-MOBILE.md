@@ -1,13 +1,65 @@
-# Mobile Bug Report
+# Mobile Bug Report - E2E TEST RESULTS
 
-**Date:** 17. Februar 2026, 22:00 CET
-**Tester:** Agent 3 - Mobile Testing & Performance Specialist
-**Device Tested:** iPhone 12 (Simulator/Browser DevTools)
-**Branch:** agent-3-mobile-testing
+**Date:** 17. Februar 2026, 18:00 CET
+**Tester:** Agent 3 - Mobile Testing & QA Specialist
+**Device Tested:** iPhone 12 (WebKit - Safari Simulation)
+**Branch:** agent-2-mobile-caching
+**Test Framework:** Playwright 1.58.2
 
 ---
 
-## 🚨 CRITICAL FINDINGS (P0)
+## 📊 TEST EXECUTION SUMMARY
+
+**Total Tests:** 29
+- ✅ **PASSED:** 6 tests
+- ❌ **FAILED:** 12 tests
+- ⏭️ **SKIPPED:** 11 tests (marked as TODO)
+
+**Test Duration:** 3.1 minutes
+**Test Status:** 🔴 **FAILING BUILD**
+
+---
+
+## 🚨 CRITICAL FINDINGS (P0) - NEW BUGS FOUND
+
+### Bug #0: Build Error - CACHE_TTL Import Fehler (NEW! 🆕)
+**Severity:** CRITICAL (Build Blocker)
+**Component:** `/m/practice-modes/page.tsx` (Line 10)
+**Test Evidence:** ALL tests failed due to build error
+
+**Error Message:**
+```
+Export CACHE_TTL doesn't exist in target module
+./src/app/m/practice-modes/page.tsx (10:1)
+```
+
+**Root Cause:**
+- `page.tsx` importiert: `import { useMobileCache, CACHE_TTL } from '@/hooks/use-mobile-cache'`
+- ABER: `use-mobile-cache.ts` exportiert CACHE_TTL NICHT
+- CACHE_TTL ist in `@/lib/cache/mobile-cache` definiert
+
+**Impact:**
+- 🔴 **BUILD FAILURE** - App startet nicht
+- Alle Tests schlagen fehl wegen Build Error
+- Next.js Dev Overlay zeigt Error
+- Mobile Dashboard kann nicht geladen werden
+
+**Fix:**
+```typescript
+// FALSCH (page.tsx Zeile 10):
+import { useMobileCache, CACHE_TTL } from '@/hooks/use-mobile-cache';
+
+// RICHTIG:
+import { useMobileCache } from '@/hooks/use-mobile-cache';
+import { CACHE_TTL } from '@/lib/cache/mobile-cache';
+```
+
+**Status:** 🔴 BLOCKER
+**Assigned to:** Agent 2 (Mobile Caching Owner)
+**Priority:** P0 - MUST FIX IMMEDIATELY
+**ETA:** 2 minutes
+
+---
 
 ### Bug #1: Practice Modes Mobile Page Missing
 **Severity:** CRITICAL (Blocker)
@@ -56,6 +108,167 @@
 **Fix Required:** YES (BLOCKER)
 **Assigned to:** Agent 2
 **ETA:** 2-3 hours
+
+---
+
+---
+
+### Bug #2A: Authentication Redirect verhindert Tests (NEW! 🆕)
+**Severity:** HIGH (Test Infrastructure)
+**Component:** Mobile Routes Authentication
+**Test Evidence:**
+```
+⚠️ Not authenticated - skipping dashboard tests
+- 1 tests/mobile/e2e.spec.ts:38:7 › should load dashboard page without errors
+```
+
+**Description:**
+Tests werden auf `/login-pin` redirected, weil keine Test-Authentifizierung eingerichtet ist.
+
+**Impact:**
+- Viele Tests können nicht ausgeführt werden
+- Dashboard Tests skippen automatisch
+- Stats/Settings Tests redirect zu Login
+
+**Test Results:**
+- `/m` → redirects to `/login-pin`
+- `/m/stats` → redirects to `/login-pin`
+- `/m/settings` → works (no auth required)
+
+**Fix Required:**
+1. Setup Playwright auth state (storageState)
+2. Mock Supabase auth für Tests
+3. ODER: Bypass auth in test environment
+
+**Status:** 🟡 HIGH
+**Assigned to:** Agent 3
+**ETA:** 30 minutes
+
+---
+
+### Bug #2B: Multiple Element Locators - Strict Mode Violations (NEW! 🆕)
+**Severity:** HIGH (Test Reliability)
+**Component:** Mobile Bottom Navigation
+**Test Evidence:** 12 failed tests mit "strict mode violation"
+
+**Example Error:**
+```
+Error: strict mode violation: locator('text=Stats') resolved to 3 elements:
+  1) <div>View stats</div> (Dashboard Tile)
+  2) <span>Stats</span> (Bottom Sheet Button)
+  3) <span class="text-xs font-medium">Stats</span> (Bottom Nav Link)
+```
+
+**Root Cause:**
+- Text "Stats" erscheint 3x auf der Seite:
+  - Dashboard Tile: "📊 Progress - View stats"
+  - Bottom Nav Tab: "Stats"
+  - Bottom Sheet: "Stats" button
+- Playwright kann nicht unterscheiden welches Element gemeint ist
+
+**Failed Tests (12 total):**
+1. ❌ should show bottom navigation with 3 tabs
+2. ❌ should navigate to Stats page
+3. ❌ should navigate to Settings page
+4. ❌ should navigate back to Home
+5. ❌ should highlight active tab
+6. ❌ should display bottom navigation on stats page
+7. ❌ should display bottom navigation on settings page
+8. ❌ bottom navigation tabs should be at least 44px tall
+
+**Impact:**
+- Tests sind flaky und unreliable
+- Navigation tests fehlschlagen konstant
+- 30+ second timeouts
+
+**Fix Required:**
+Add unique `data-testid` attributes:
+
+```tsx
+// MobileBottomNav.tsx
+<nav data-testid="mobile-bottom-nav">
+  <Link href="/m" data-testid="nav-home">
+    <span>Home</span>
+  </Link>
+  <Link href="/m/stats" data-testid="nav-stats">
+    <span>Stats</span>
+  </Link>
+  <Link href="/m/settings" data-testid="nav-settings">
+    <span>Settings</span>
+  </Link>
+</nav>
+```
+
+**Status:** 🟡 HIGH
+**Assigned to:** Agent 1 (Mobile UI Owner)
+**ETA:** 15 minutes
+
+---
+
+### Bug #2C: Bottom Navigation Instability - Element Detachment (NEW! 🆕)
+**Severity:** HIGH (Navigation Bug)
+**Component:** `MobileBottomNav.tsx`
+**Test Evidence:**
+```
+Error: page.click: Test timeout of 30000ms exceeded.
+- element is not stable
+- element was detached from the DOM, retrying
+- <nextjs-portal> subtree intercepts pointer events
+```
+
+**Description:**
+Bottom Navigation Elemente werden während der Interaktion vom DOM detached und re-attached. Das deutet auf React Re-Rendering Issues hin.
+
+**Root Cause:**
+- Mögliche State Updates während Navigation
+- Next.js Dev Overlay intercepted Clicks
+- Re-Rendering während Navigation
+
+**Failed Tests:**
+- ❌ navigate to Stats page (30s timeout)
+- ❌ navigate to Settings page (30s timeout)
+- ❌ navigate back to Home (30s timeout)
+
+**Impact:**
+- Navigation ist unreliable
+- User könnte Clicks "verlieren"
+- 30 second delays in tests
+
+**Fix Required:**
+1. Check for unnecessary re-renders
+2. Use stable refs for navigation
+3. Test in production build (not dev mode)
+
+**Status:** 🟡 HIGH
+**Assigned to:** Agent 1
+**ETA:** 1 hour
+
+---
+
+### Bug #2D: Bottom Sheet Click nicht möglich (NEW! 🆕)
+**Severity:** HIGH (UX Bug)
+**Component:** Due Cards Bottom Sheet
+**Test Evidence:**
+```
+Test timeout of 30000ms exceeded
+Error: locator.click: element is not stable
+- <nextjs-portal> subtree intercepts pointer events
+```
+
+**Description:**
+"Due Cards" Tile kann nicht geklickt werden, weil:
+- Element ist nicht stabil
+- Next.js Dev Portal intercepted Clicks
+- Element detached während Click
+
+**Impact:**
+- Bottom Sheets können nicht geöffnet werden
+- User Experience ist broken
+- Core Feature nicht nutzbar
+
+**Status:** 🟡 HIGH
+**Assigned to:** Agent 1
+**ETA:** 30 minutes
 
 ---
 
@@ -387,25 +600,125 @@ const DueCardsSheet = dynamic(() => import('@/components/mobile/DueCardsSheet'))
 
 ---
 
-## 📊 SUMMARY
+---
+
+## 📊 E2E TEST RESULTS DETAILED
+
+### ✅ PASSED TESTS (6/29)
+
+1. ✅ **Mobile Dashboard: Stats Header** (1.1s)
+   - Stats header displays correctly
+   - Compact version visible
+
+2. ✅ **Mobile Stats Page: Display stats cards** (1.0s)
+   - Stats cards load successfully
+   - Content displays properly
+
+3. ✅ **Mobile Settings Page: Load without errors** (1.4s)
+   - Settings page loads successfully
+   - URL navigation correct
+
+4. ✅ **Mobile Settings Page: Display user info** (670ms)
+   - User information visible
+   - Settings options present
+
+5. ✅ **Mobile Performance: Dashboard load time** (2.0s)
+   - **Load time: 1680ms** ⚡ (target: < 3000ms)
+   - Excellent performance
+
+6. ✅ **Mobile Performance: No layout shifts** (1.6s)
+   - CLS check passed
+   - Stable layout
+
+---
+
+### ❌ FAILED TESTS (12/29)
+
+1. ❌ **Dashboard header with user name** (5.5s)
+   - Timeout: waitForSelector('text=/GreekLingua|Dashboard/')
+   - Build error prevented loading
+
+2. ❌ **Display 12 module tiles** (5.9s)
+   - Timeout: waitForSelector('[data-testid="module-tile"]')
+   - Tiles not rendering due to build error
+
+3. ❌ **Bottom navigation with 3 tabs** (1.8s)
+   - Strict mode violation: 'text=Stats' → 3 elements
+   - Cannot uniquely identify tabs
+
+4. ❌ **Navigate to Stats page** (30.0s TIMEOUT)
+   - Element not stable
+   - Element detached from DOM
+   - Next.js portal intercepts clicks
+
+5. ❌ **Navigate to Settings page** (30.1s TIMEOUT)
+   - Element not stable
+   - Same issue as Stats navigation
+
+6. ❌ **Navigate back to Home** (30.1s TIMEOUT)
+   - Next.js portal intercepts pointer events
+   - Element detachment
+
+7. ❌ **Highlight active tab** (1.1s)
+   - Strict mode violation: 'text=Home' → 2 elements
+
+8. ❌ **Stats page load without errors** (6.8s)
+   - Redirected to /login-pin
+   - Auth required but not set up
+
+9. ❌ **Stats page bottom navigation** (825ms)
+   - Strict mode violation: 'text=Home' → 2 elements
+
+10. ❌ **Settings page bottom navigation** (619ms)
+    - Strict mode violation: 'text=Home' → 2 elements
+
+11. ❌ **Open Due Cards bottom sheet** (30.1s TIMEOUT)
+    - Element click timeout
+    - Next.js portal intercepts clicks
+
+12. ❌ **Touch target >= 44px** (902ms)
+    - Strict mode violation: Cannot get bounding box
+
+---
+
+### ⏭️ SKIPPED TESTS (11/29)
+
+**Auth-related skip:**
+- Dashboard load (auth redirect)
+- Close bottom sheet (conditional skip)
+- Close via backdrop (conditional skip)
+- Touch target tests (conditional skip)
+
+**TODO (Not Implemented):**
+- Practice Modes Mobile (3 tests)
+- Vocabulary Mobile (4 tests)
+
+---
+
+## 📊 SUMMARY - UPDATED WITH TEST RESULTS
 
 | Category | Count | Status |
 |----------|-------|--------|
-| Critical Bugs (P0) | 2 | 🔴 BLOCKER |
-| High Priority (P1) | 3 | 🟡 Important |
+| **Critical Bugs (P0)** | **4** | 🔴 **BUILD BLOCKER** |
+| High Priority (P1) | 7 | 🟡 Test Failures |
 | Medium Priority (P2) | 3 | 🟢 Optional |
 | Low Priority (P3) | 3 | ⚪ Nice-to-have |
 | A11y Issues | 4 | 🟡 Important |
-| Performance Issues | 3 | 🟢 Optimize |
-| Test Coverage Issues | 2 | 🟡 Important |
+| Performance Issues | 0 | ✅ GOOD |
+| Test Coverage | 6/29 passing | 🔴 20% pass rate |
 
-**Overall Mobile Status:** ⚠️ NOT PRODUCTION-READY
+**Overall Mobile Status:** 🔴 **BUILD FAILING - NOT TESTABLE**
 
-**Blockers:**
-1. Practice Modes Mobile Page fehlt (Agent 1)
-2. Vocabulary Mobile Page fehlt (Agent 2)
+**Immediate Blockers:**
+1. 🔴 **Bug #0: CACHE_TTL Import Error** (Agent 2) - 2min fix
+2. 🔴 **Bug #2B: Strict Mode Violations** (Agent 1) - 15min fix
+3. 🔴 **Bug #2C: Navigation Instability** (Agent 1) - 1h fix
+4. 🟡 **Bug #2A: Test Auth Setup** (Agent 3) - 30min fix
 
-**Once Fixed:** Mobile App kann launched werden mit minor A11y + Performance Optimizations
+**Once Fixed:**
+- Re-run tests to verify fixes
+- Expected pass rate: 80%+ (24+/29 tests)
+- Then proceed with Performance & A11y optimization
 
 ---
 

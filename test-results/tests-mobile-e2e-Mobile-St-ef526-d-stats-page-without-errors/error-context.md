@@ -1,0 +1,115 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic [ref=e1]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: 🌐
+      - generic [ref=e5]:
+        - button "EN" [ref=e6] [cursor=pointer]
+        - button "RU" [ref=e7] [cursor=pointer]
+        - button "DE" [ref=e8] [cursor=pointer]
+        - button "ES" [ref=e9] [cursor=pointer]
+    - generic [ref=e10]:
+      - generic [ref=e11]: 🔐
+      - heading "PIN Login" [level=1] [ref=e12]
+      - paragraph [ref=e13]: Enter your 4-digit PIN
+      - generic [ref=e14]:
+        - button "👨‍💼 Admin" [ref=e15] [cursor=pointer]:
+          - generic [ref=e16]: 👨‍💼
+          - text: Admin
+        - button "👤 User" [ref=e17] [cursor=pointer]:
+          - generic [ref=e18]: 👤
+          - text: User
+      - generic [ref=e24]:
+        - button "1" [ref=e25] [cursor=pointer]
+        - button "2" [ref=e26] [cursor=pointer]
+        - button "3" [ref=e27] [cursor=pointer]
+        - button "4" [ref=e28] [cursor=pointer]
+        - button "5" [ref=e29] [cursor=pointer]
+        - button "6" [ref=e30] [cursor=pointer]
+        - button "7" [ref=e31] [cursor=pointer]
+        - button "8" [ref=e32] [cursor=pointer]
+        - button "9" [ref=e33] [cursor=pointer]
+        - button "⌫" [disabled] [ref=e34]
+        - button "0" [ref=e35] [cursor=pointer]
+      - button "Clear" [disabled] [ref=e37]
+      - generic [ref=e38]:
+        - button "Abbrechen" [ref=e39] [cursor=pointer]
+        - button "Anmelden" [disabled] [ref=e40]
+    - generic [ref=e41]: HellenicHorizons © 2026
+  - region "Notifications alt+T" [active]
+  - generic:
+    - generic [ref=e44]:
+      - generic [ref=e45]:
+        - navigation [ref=e47]:
+          - button "previous" [disabled] [ref=e48]:
+            - img "previous" [ref=e49]
+          - generic [ref=e51]:
+            - generic [ref=e52]: 1/
+            - text: "1"
+          - button "next" [disabled] [ref=e53]:
+            - img "next" [ref=e54]
+        - link "Next.js 16.1.3 (stale) Turbopack" [ref=e57]:
+          - /url: https://nextjs.org/docs/messages/version-staleness
+          - img [ref=e58]
+          - generic "There is a newer version (16.1.6) available, upgrade recommended!" [ref=e60]: Next.js 16.1.3 (stale)
+          - generic [ref=e61]: Turbopack
+      - dialog "Build Error" [ref=e63]:
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - generic [ref=e70]: Build Error
+              - generic [ref=e71]:
+                - button "Copy Error Info" [ref=e72] [cursor=pointer]:
+                  - img [ref=e73]
+                - button "No related documentation found" [disabled] [ref=e75]:
+                  - img [ref=e76]
+                - button "Attach Node.js inspector" [ref=e78] [cursor=pointer]:
+                  - img [ref=e79]
+            - generic [ref=e91]: Export CACHE_TTL doesn't exist in target module
+          - generic [ref=e93]:
+            - generic [ref=e95]:
+              - img [ref=e97]
+              - generic [ref=e101]: ./src/app/m/vocabulary/page.tsx (13:1)
+              - button "Open in editor" [ref=e102] [cursor=pointer]:
+                - img [ref=e104]
+            - generic [ref=e107]:
+              - generic [ref=e108]: Export CACHE_TTL doesn't exist in target module
+              - generic [ref=e109]: 11 |
+              - text: import MobileBottomNav from '@/components/mobile/MobileBottomNav';
+              - generic [ref=e110]: 12 |
+              - text: import
+              - generic [ref=e111]: "{"
+              - text: OfflineBanner, CacheIndicator
+              - generic [ref=e112]: "}"
+              - text: from '@/components/mobile/OfflineBanner'; >
+              - generic [ref=e113]: 13 |
+              - text: import
+              - generic [ref=e114]: "{ useMobileCache"
+              - text: ","
+              - generic [ref=e115]: usePrefetch
+              - text: ", CACHE_TTL"
+              - generic [ref=e116]: "}"
+              - text: from '@/hooks/use-mobile-cache';
+              - generic [ref=e117]: "|"
+              - text: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              - generic [ref=e118]: 14 |
+              - generic [ref=e119]: 15 |
+              - generic [ref=e120]: // Vocabulary Item with FSRS fields
+              - generic [ref=e121]: 16 |
+              - text: interface VocabularyItem
+              - generic [ref=e122]: "{"
+              - generic [ref=e123]: "The export CACHE_TTL was not found in module [project]/src/hooks/use-mobile-cache.ts [app-client] (ecmascript). Did you mean to import usePrefetch? All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. Import traces: Client Component Browser: ./src/app/m/vocabulary/page.tsx [Client Component Browser] ./src/app/m/vocabulary/page.tsx [Server Component] Client Component SSR: ./src/app/m/vocabulary/page.tsx [Client Component SSR] ./src/app/m/vocabulary/page.tsx [Server Component]"
+        - generic [ref=e124]: "1"
+        - generic [ref=e125]: "2"
+    - generic [ref=e130] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e131]:
+        - img [ref=e132]
+      - button "Open issues overlay" [ref=e138]:
+        - generic [ref=e139]:
+          - generic [ref=e140]: "0"
+          - generic [ref=e141]: "1"
+        - generic [ref=e142]: Issue
+  - alert [ref=e143]
+```
