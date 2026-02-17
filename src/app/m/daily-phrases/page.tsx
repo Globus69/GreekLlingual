@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/use-translation';
-import { createClient } from '@/lib/supabase/client';
+import { supabase } from '@/db/supabase';
 
 // Types
 interface DailyPhrase {
@@ -44,8 +44,6 @@ export default function MobileDailyPhrasesPage() {
       if (!user?.id) return;
 
       try {
-        const supabase = createClient();
-
         // Fetch 3 phrases for today (could be based on date/rotation logic)
         const { data, error } = await supabase
           .from('phrases')
@@ -83,8 +81,6 @@ export default function MobileDailyPhrasesPage() {
     if (!user?.id) return;
 
     try {
-      const supabase = createClient();
-
       // Insert or update phrase_progress
       const { error } = await supabase
         .from('phrase_progress')

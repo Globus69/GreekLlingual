@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+// @ts-ignore - next-pwa doesn't have TypeScript types
 import withPWA from 'next-pwa';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
@@ -134,7 +135,7 @@ const pwaConfig = withPWA({
       },
     },
     {
-      urlPattern: ({ url }) => {
+      urlPattern: ({ url }: { url: URL }) => {
         const isSameOrigin = self.origin === url.origin;
         if (!isSameOrigin) return false;
         const pathname = url.pathname;

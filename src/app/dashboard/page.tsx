@@ -390,6 +390,14 @@ export default function DashboardPage() {
                             label="16. Statistics"
                             onClick={() => router.push('/stats')}
                         />
+
+                        {/* Row 5 - Memory Game */}
+                        <ActionTile
+                            icon="🎮"
+                            label="17. Memory Game"
+                            primary
+                            onClick={() => router.push('/practice-modes/memory')}
+                        />
                     </div>
                 </div>
             </main>

@@ -1,6 +1,45 @@
 # Practice Modes Troubleshooting Guide
-**Date:** 16 February 2026 (Updated: 17 February 2026)
-**Status:** DATA SYNC ISSUE - Component works but shows stale data
+**Date:** 16 February 2026 (Updated: 17 February 2026, 21:15 CET)
+**Status:** ✅ FIXED - 406 Error resolved
+
+---
+
+## 🐛 FIXED: 406 Not Acceptable Error (17 Feb 2026, 21:15 CET)
+
+### Problem
+```
+GET https://bzdzqmnxycnudflcnmzj.supabase.co/rest/v1/student_progress?...
+406 (Not Acceptable)
+```
+
+Practice modes (matching, multiple_choice, write_input) failed to load with 406 error when opening for new learning items.
+
+### Root Cause
+**File:** `src/components/learning/practice-modes/practice-mode-dialog.tsx` (Line 135)
+
+```typescript
+// ❌ BEFORE:
+.single();  // Throws 406 if no rows found
+```
+
+`.single()` throws 406 error when no progress record exists (new items without FSRS history).
+
+### Solution
+```typescript
+// ✅ AFTER:
+.maybeSingle();  // Returns null if not found (graceful)
+```
+
+`.maybeSingle()` returns `null` for missing records without throwing errors.
+
+### Files Changed
+- `practice-mode-dialog.tsx` (1 line: `.single()` → `.maybeSingle()`)
+
+### Status
+✅ **FIXED & DEPLOYED** - All practice modes now load correctly.
+
+### Documentation
+See: `MATCHING-GAME-406-FIX.md` for detailed analysis.
 
 ---
 

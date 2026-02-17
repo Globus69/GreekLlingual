@@ -132,10 +132,10 @@ export function PracticeModeDialog({
                 .select('*')
                 .eq('item_id', itemId)
                 .eq('student_id', user!.id)
-                .single();
+                .maybeSingle();
 
-            if (progressError && progressError.code !== 'PGRST116') {
-                // PGRST116 = no rows found (acceptable for new items)
+            if (progressError) {
+                // maybeSingle() returns null if not found (no error), so any error here is real
                 console.error('Error loading progress:', progressError);
             }
 

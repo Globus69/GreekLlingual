@@ -302,6 +302,22 @@ export default function MobileDashboardPage() {
             color="green"
             onClick={() => router.push('/m/stats')}
           />
+
+          {/* Row 7 - Practice Modes */}
+          <ModuleTile
+            icon="🎮"
+            title="Practice Modes"
+            subtitle="Games & Quiz"
+            color="purple"
+            onClick={() => router.push('/m/practice-modes')}
+          />
+          <ModuleTile
+            icon="🎴"
+            title="Memory Split"
+            subtitle="Two grids"
+            color="blue"
+            onClick={() => router.push('/m/practice-modes/memory-split')}
+          />
         </div>
 
       </div>

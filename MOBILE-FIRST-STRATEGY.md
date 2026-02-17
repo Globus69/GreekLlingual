@@ -198,17 +198,20 @@ Mobile → Desktop portieren (etablierte Patterns nutzen).
 - ✅ Mobile Bottom Sheets (DueCards, TrainWeakWords)
 
 **Was fehlt:**
-- ⚠️ Practice Modes Mobile UI (nur Desktop vorhanden)
-- ⚠️ Vocabulary Mobile UI (nur Dialogs)
-- ⚠️ Grammar Mobile UI (nur Dialogs)
 - ⚠️ Admin Panel Mobile UI (nur Desktop)
 - ⚠️ Mobile E2E Tests
+- ⚠️ Mobile Performance Optimization
 
-**Priorität:**
-1. Practice Modes Mobile (HIGH)
-2. Vocabulary Mobile UI (HIGH)
-3. Grammar Mobile UI (MEDIUM)
-4. Admin Panel Mobile (LOW)
+**Erledigt (nach Status-Update 17.02.2026):**
+- ✅ Practice Modes Mobile UI - FERTIG!
+- ✅ Vocabulary Mobile UI - FERTIG!
+- ✅ Grammar Mobile UI - FERTIG!
+- ✅ Daily Phrases Mobile UI - FERTIG!
+
+**Priorität (verbleibend):**
+1. Mobile E2E Tests (HIGH)
+2. Mobile Performance Optimization (HIGH)
+3. Admin Panel Mobile (LOW)
 
 ---
 
