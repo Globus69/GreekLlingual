@@ -1,7 +1,20 @@
 # CURRENT WORK - HellenicHorizons GreekLingua
 
-**Last Update:** 17. Februar 2026, 20:30 CET
+**Last Update:** 17. Februar 2026, 21:00 CET
 **Purpose:** Single source of truth for current work status
+
+## 🚨 MOBILE-FIRST-STRATEGIE AKTIV
+
+**AB SOFORT (17. Februar 2026, 21:00 CET):**
+- ✅ Alle Entwicklung NUR für MOBILE (< 768px, Touch)
+- ❌ Desktop-Entwicklung GESTOPPT (bis Mobile fertig)
+- ✅ Mobile Layout = Verbindlicher Style-Guide
+- ✅ 3 Agents arbeiten unabhängig (UI, Logic, Tests)
+- 📱 Ziel: Mobile App fertigstellen → Dann Desktop portieren
+
+**Referenz:** `MOBILE-FIRST-STRATEGY.md`
+
+---
 
 ---
 
@@ -39,17 +52,26 @@
 
 ## 🔄 IN PROGRESS (Active Work)
 
-### **Master:**
-- ✅ All 6 Optimizations COMPLETE!
-- ✅ **Mobile/Desktop Porting COMPLETE!** (Option A)
-  - Commit: `b5c8172` - feat(porting): Add Stats and Settings pages
-  - Stats Page: `/stats` (275 lines)
-  - Settings Page: `/settings` (266 lines)
-  - Integration: Dashboard Tile #16 + Header Settings Button
-  - Time: ~1h (faster than estimated 3-5h)
-- 🎯 READY FOR NEXT TASK
-  - Wartet auf User-Entscheidung
-  - Optionen: Testing (B), Security (D), Vocabulary (E), oder Custom
+### **📱 MOBILE-FIRST STRATEGY (AKTIV):**
+- ✅ Strategie aktiviert (17. Feb 2026, 21:00 CET)
+- ✅ Agent-Bereiche definiert
+  - Agent 1: UI-Komponenten & Layout (Mobile)
+  - Agent 2: State-Management, Logic, API (Mobile)
+  - Agent 3: Tests, Performance, Accessibility (Mobile)
+- ✅ Dokumentation erstellt
+  - `MOBILE-FIRST-STRATEGY.md` (verbindliche Regel)
+  - `_Agent1_UI_Mobile.md` (UI Verantwortung)
+  - `_Agent2_Logic_Mobile.md` (Logic Verantwortung)
+  - `_Agent3_Tests_Mobile.md` (Test Verantwortung)
+  - `MASTER-SESSION-STATUS.md` (Agent-Übersicht)
+- 🎯 BEREIT FÜR MOBILE-ENTWICKLUNG
+  - Fokus: Practice Modes Mobile, Vocabulary Mobile, Tests
+
+### **Desktop Porting (PAUSIERT):**
+- ✅ Desktop Stats Page erstellt (PAUSIERT, nicht weiterentwickeln)
+- ✅ Desktop Settings Page erstellt (PAUSIERT, nicht weiterentwickeln)
+- ⏸️ Keine weitere Desktop-Entwicklung bis Mobile fertig
+- Commit: `b5c8172` (bleibt erhalten, wird nicht gelöscht)
 
 ### **Agent 1: Testing**
 - ⏳ Practice Modes User Flow Testing (Task #6)
@@ -67,30 +89,49 @@
 
 ---
 
-## 📋 NEXT UP (Prioritized)
+## 📋 NEXT UP (Prioritized - MOBILE-ONLY)
 
-### **🔥 CRITICAL DECISION POINT:**
+### **🔥 HIGH PRIORITY (MOBILE):**
 
-**User muss wählen zwischen:**
+**1. Practice Modes Mobile UI** (Agent 1)
+- Erstelle `/m/practice-modes/page.tsx`
+- Touch-optimierte Game Controls
+- Swipe gestures für Next/Previous
+- Bottom Sheet für Results
+- ETA: 3-4h
+- Priority: ⭐⭐⭐⭐⭐
 
-**OPTION A: Mobile/Desktop Porting** ⭐ EMPFOHLEN
-- Phase 1: Stats Page zu Desktop (2-3h)
-- Phase 2: Settings Page zu Desktop (1-2h)
-- Reference: `MODULE-PORTING-PLAN.md`
-- Ergebnis: Desktop = feature-complete
+**2. Vocabulary Mobile UI** (Agent 1)
+- Erstelle `/m/vocabulary/page.tsx`
+- Bottom Sheet statt Dialog
+- Touch card flipping, swipe gestures
+- Large rating buttons
+- ETA: 2-3h
+- Priority: ⭐⭐⭐⭐⭐
 
-**OPTION B: Practice Modes Testing**
-- End-to-end Testing (2-3h)
-- Reference: `PRACTICE-MODES-TESTING-SESSION.md`
-- Ergebnis: Practice Modes = production-ready
+**3. Mobile Performance Optimization** (Agent 2)
+- Code splitting für `/m/*` Routes
+- Lazy loading heavy components
+- Bundle size reduction (< 200KB)
+- Service Worker für Offline
+- ETA: 3-4h
+- Priority: ⭐⭐⭐⭐
 
-**OPTION C: Hybrid (Beides nacheinander)**
-- Erst Porting, dann Testing (6-8h gesamt)
+**4. Practice Modes Mobile E2E Tests** (Agent 3)
+- Playwright mobile viewport tests
+- Touch gesture testing
+- Offline-Mode testing
+- ETA: 3-4h
+- Priority: ⭐⭐⭐⭐
 
-**OPTION D: Security** (httpOnly Cookies, 2-4h)
-**OPTION E: Vocabulary** (Phases 5-8, 9-13h)
+### **MEDIUM PRIORITY (MOBILE):**
+5. Grammar Mobile UI (Agent 1, 2-3h)
+6. Mobile Data Caching Strategy (Agent 2, 2-3h)
+7. Mobile Accessibility Audit (Agent 3, 3h)
 
-→ Siehe `REAL-STATUS-AND-PLAN.md` für Details
+### **LOW PRIORITY (MOBILE):**
+8. Daily Phrases Mobile UI (Agent 1, 2h)
+9. Admin Panel Mobile UI (Agent 1, 4-5h)
 
 ---
 
