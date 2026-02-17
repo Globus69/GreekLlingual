@@ -263,30 +263,52 @@ Successfully implemented a comprehensive Quizlet-style practice modes system tha
 
 ---
 
-### Phase 5: i18n & Translations ✅
+### Phase 5: i18n & Translations ✅ (COMPLETE)
+
+**Status:** ✅ Complete (Updated: 17.02.2026 by Agent 2)
 
 #### File: `src/lib/use-translation.ts`
-**Status**: ✅ Updated
+**Status**: ✅ Complete
 
-**What was added**:
-- **English** (30 keys):
-  - Practice mode titles, instructions, feedback
-  - Result summary labels
-  - Admin config labels
-- **German** (30 keys):
-  - Übungsmodi, Zuordnungsspiel, etc.
-- **Spanish** (30 keys):
-  - Modos de práctica, Juego de emparejar, etc.
+**Supported Languages:**
+- ✅ English (EN) - 30+ keys
+- ✅ German (DE) - 30+ keys
+- ✅ Spanish (ES) - 30+ keys
+- ✅ **Russian (RU) - 30+ keys** (ADDED 17.02.2026)
+- ✅ **Greek (EL) - 30+ keys** (ADDED 17.02.2026)
 
-**Translation Keys Added**:
+**Translation Coverage:**
+- Practice Modes general UI (titles, buttons, navigation)
+- Game-specific instructions (matching, multiple choice, write input)
+- Feedback messages (correct, incorrect, close, timeout)
+- Result summaries (score, time, FSRS rating)
+- Admin configuration (practice config form)
+
+**Language-Specific Styles:**
+- **Greek (EL):** Dimotiki (modern Greek), NO Katharevousa
+  - Example: "Καλώς ήρθες" (not "Καλώς ήλθες")
+  - Imperativ 2. Person Singular
+- **Russian (RU):** Informal "ты" (not formal "Вы")
+  - Example: "Попробуй ещё раз" (try again - informal)
+  - Friendly, direct tone
+
+**Translation Keys (all 30 per language)**:
 ```
 practice.title, practice.locked, practice.unlocked
 practice.matching, practice.multiple_choice, practice.write_input
-practice.feedback.correct, practice.feedback.incorrect, practice.feedback.close
+practice.start, practice.timer, practice.score, practice.mistakes, practice.attempts
 practice.result.title, practice.result.score, practice.result.time, practice.result.fsrs_rating
+practice.result.retry, practice.result.close
+practice.feedback.correct, practice.feedback.incorrect, practice.feedback.close, practice.feedback.timeout
+practice.instructions.matching, practice.instructions.mc, practice.instructions.write
 admin.practice_config.title, admin.practice_config.enabled, admin.practice_config.saved
-... and 20+ more
+admin.practice_config.threshold, admin.practice_config.modes
 ```
+
+**Documentation:**
+- `i18n-TEST-CHECKLIST-Practice-Modes.md` - Comprehensive test checklist
+- `AGENT-2-STATUS.md` - i18n completion status
+- `AGENT-2-FINDINGS.md` - Insights and learnings
 
 ---
 
