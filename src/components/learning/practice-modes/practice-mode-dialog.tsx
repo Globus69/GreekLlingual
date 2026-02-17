@@ -373,7 +373,18 @@ export function PracticeModeDialog({
         console.log('[PracticeModeDialog] Rendering loading state', { isLoading, hasLoaded, loadingSession });
         return (
             <Dialog open={isOpen} onOpenChange={handleClose}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogContent
+                    className="max-w-4xl max-h-[90vh] overflow-y-auto"
+                    style={{
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 9999,
+                        maxWidth: '56rem',
+                        maxHeight: '90vh',
+                    }}
+                >
                     <DialogHeader>
                         <DialogTitle className="sr-only">Loading Practice Mode</DialogTitle>
                         <DialogDescription className="sr-only">
@@ -394,7 +405,17 @@ export function PracticeModeDialog({
         console.log('[PracticeModeDialog] Rendering error state', loadError);
         return (
             <Dialog open={isOpen} onOpenChange={handleClose}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent
+                    className="max-w-2xl"
+                    style={{
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 9999,
+                        maxWidth: '32rem',
+                    }}
+                >
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-red-500">
                             <X className="h-5 w-5" />
@@ -420,7 +441,17 @@ export function PracticeModeDialog({
         console.log('[PracticeModeDialog] Rendering result summary', sessionResult);
         return (
             <Dialog open={isOpen} onOpenChange={handleClose}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent
+                    className="max-w-2xl"
+                    style={{
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 9999,
+                        maxWidth: '32rem',
+                    }}
+                >
                     <DialogHeader>
                         <DialogTitle className="sr-only">Practice Results</DialogTitle>
                         <DialogDescription className="sr-only">
@@ -453,7 +484,18 @@ export function PracticeModeDialog({
 
     const dialogJSX = (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent
+                className="max-w-4xl max-h-[90vh] overflow-y-auto"
+                style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 9999,
+                    maxWidth: '56rem',
+                    maxHeight: '90vh',
+                }}
+            >
                 <DialogHeader>
                     <DialogTitle>{modeTitle}</DialogTitle>
                     <DialogDescription className="sr-only">
@@ -462,7 +504,12 @@ export function PracticeModeDialog({
                 </DialogHeader>
 
                 <div className="py-4">
-                    {item && config && (
+                    {!item || !config ? (
+                        <div className="flex items-center justify-center py-12">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            <span className="ml-3 text-muted-foreground">Preparing game...</span>
+                        </div>
+                    ) : (
                         <>
                             {modeType === 'matching' && (
                                 <MatchingGame
@@ -495,4 +542,7 @@ export function PracticeModeDialog({
             </DialogContent>
         </Dialog>
     );
+
+    console.log('[PracticeModeDialog] Returning Dialog JSX');
+    return dialogJSX;
 }
