@@ -2,7 +2,17 @@
 
 **Projekt:** HellenicHorizons GreekLingua Dashboard
 **Zweck:** Zentrale Referenz für Claude Agents zur eigenständigen Entwicklung
-**Aktualisiert:** 17. Februar 2026, 16:00 CET
+**Aktualisiert:** 17. Februar 2026, 21:30 CET
+
+## 🚨 MOBILE-FIRST-STRATEGIE AKTIV (seit 17.02.2026, 21:00 CET)
+
+**KRITISCHE REGEL - KEINE AUSNAHMEN:**
+- ✅ Alle Entwicklung NUR für MOBILE (< 768px, Touch, `/m/*` Routes)
+- ❌ Desktop-Entwicklung GESTOPPT bis Mobile fertig
+- 📱 Mobile Layout = Verbindlicher Style-Guide
+- 👥 3 Agents arbeiten unabhängig (UI, Logic, Tests)
+
+**Referenz:** [`MOBILE-FIRST-STRATEGY.md`](./MOBILE-FIRST-STRATEGY.md) ⭐⭐⭐ PFLICHT!
 
 ---
 
@@ -48,8 +58,23 @@ Nur essenzielle, aktive Dokumente:
 
 **DIESE DATEIEN IMMER ZUERST LESEN!**
 
+### 0. [`MOBILE-FIRST-STRATEGY.md`](./MOBILE-FIRST-STRATEGY.md) ⭐⭐⭐⭐⭐ KRITISCH!
+**Status:** ✅ AKTIV (seit 17.02.2026, 21:00 CET)
+**Zweck:** VERBINDLICHE Mobile-First-Regel – IRREVERSIBEL!
+
+**Inhalt:**
+- Entwicklung NUR für Mobile (< 768px, Touch)
+- Desktop GESTOPPT bis Mobile fertig
+- Agent-Aufteilung (UI, Logic, Tests)
+- Mobile Layout = Style-Guide
+- Dokumentationspflicht
+
+**WICHTIG:** Diese Regel überschreibt ALLE anderen Prioritäten!
+
+---
+
 ### 1. [`CLAUDE.md`](./CLAUDE.md) ⭐⭐⭐ KRITISCH
-**Status:** Aktiv (letztes Update: 16.02.2026)
+**Status:** Aktiv (letztes Update: 17.02.2026, 21:00 CET)
 **Zweck:** Claude AI-Anweisungen – HARTE Regeln für die Entwicklung
 
 **Inhalt:**
@@ -429,7 +454,58 @@ Nur essenzielle, aktive Dokumente:
 
 ---
 
-**Letzte Aktualisierung:** 17. Februar 2026, 14:00 CET
+## 📱 MOBILE-FIRST AGENT-DOKUMENTATION (NEU!)
+
+### 24. **Mobile Agent Prompts** ⭐⭐⭐⭐ AKTIV
+**Status:** ✅ Bereit für Ausführung (17.02.2026, 21:30 CET)
+**Zweck:** Mobile-fokussierte Agent-Aufgaben
+
+#### Agent-Dateien:
+- [`_Agent1_UI_Mobile.md`](./\_Agent1_UI_Mobile.md) - UI-Komponenten & Layout (Mobile)
+- [`_Agent2_Logic_Mobile.md`](./\_Agent2_Logic_Mobile.md) - State, Logic, API (Mobile)
+- [`_Agent3_Tests_Mobile.md`](./\_Agent3_Tests_Mobile.md) - Tests, Performance, A11y (Mobile)
+
+#### Master-Status:
+- [`MASTER-SESSION-STATUS.md`](./MASTER-SESSION-STATUS.md) - Zentrale Agent-Übersicht
+- ~~`MASTER-SESSION-STATUS-170225.md`~~ - Desktop Session (ARCHIVIERT)
+
+#### Aktuelle Prompts (17.02.2026, 21:30):
+- [`_Agent01_Mobile_170225-2130.md`](./\_Agent01_Mobile_170225-2130.md) - Practice Modes Mobile UI
+- [`_Agent02_Mobile_170225-2130.md`](./\_Agent02_Mobile_170225-2130.md) - Vocabulary Mobile UI
+- [`_Agent03_Mobile_170225-2130.md`](./\_Agent03_Mobile_170225-2130.md) - Mobile E2E Tests
+
+**Desktop Prompts (ARCHIVIERT):**
+- ~~`_Agent01_170225-0900.md`~~ - Desktop Practice Modes Testing (pausiert)
+- ~~`_Agent02_170225-0900.md`~~ - Desktop i18n (pausiert)
+- ~~`_Agent03_170225-0900.md`~~ - Desktop Admin UI (pausiert)
+
+---
+
+## 📋 WEITERE WICHTIGE DATEIEN (Mobile-fokussiert)
+
+### 25. [`WIE-WEITERMACHEN.md`](./WIE-WEITERMACHEN.md) ⭐⭐
+**Status:** Aktuell (17.02.2026)
+**Zweck:** Quick Start Guide nach Session-Resume
+
+### 26. [`RESTART-POINT-170225-1430.md`](./RESTART-POINT-170225-1430.md) ⭐⭐
+**Status:** Desktop Checkpoint (PAUSIERT)
+**Zweck:** Desktop Session Restart Point
+
+### 27. [`MODULE-PORTING-PLAN.md`](./MODULE-PORTING-PLAN.md) ⭐⭐
+**Status:** Desktop Porting (ABGESCHLOSSEN & PAUSIERT)
+**Zweck:** Stats + Settings Pages Desktop Porting (bereits fertig)
+
+### 28. [`REAL-STATUS-AND-PLAN.md`](./REAL-STATUS-AND-PLAN.md) ⭐⭐
+**Status:** Projekt-Übersicht
+**Zweck:** Gesamtstatus & 6 Optionen (vor Mobile-First)
+
+### 29. [`PRACTICE-MODES-TESTING-SESSION.md`](./PRACTICE-MODES-TESTING-SESSION.md) ⭐
+**Status:** Desktop Testing Guide
+**Zweck:** Practice Modes Testing-Checkliste (Desktop, pausiert)
+
+---
+
+**Letzte Aktualisierung:** 17. Februar 2026, 21:30 CET
 
 ---
 
