@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { useTranslation } from '@/lib/use-translation';
@@ -9,6 +9,8 @@ import { speakGreek } from '@/lib/tts/greek-tts';
 import { FSRSScheduler } from '@/lib/fsrs/fsrs-scheduler';
 import type { Card, Rating } from '@/lib/fsrs/fsrs-types';
 import MobileBottomNav from '@/components/mobile/MobileBottomNav';
+import { OfflineBanner, CacheIndicator } from '@/components/mobile/OfflineBanner';
+import { useMobileCache, usePrefetch, CACHE_TTL } from '@/hooks/use-mobile-cache';
 
 // Vocabulary Item with FSRS fields
 interface VocabularyItem {
@@ -42,10 +44,8 @@ export default function MobileVocabularyPage() {
     // Initialize FSRS scheduler (memoized to avoid re-creation)
     const scheduler = useMemo(() => new FSRSScheduler(), []);
 
-    const [cards, setCards] = useState<VocabularyItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
-    const [loading, setLoading] = useState(true);
     const [sessionStats, setSessionStats] = useState({
         again: 0,  // Rating 1
         hard: 0,   // Rating 2
@@ -58,6 +58,71 @@ export default function MobileVocabularyPage() {
     const [speechRate, setSpeechRate] = useState<number>(0.9);
 
     const STUDENT_ID = user?.id || '';
+
+    /**
+     * Fetcher function for vocabulary cards
+     */
+    const fetchVocabularyCards = useCallback(async (): Promise<VocabularyItem[]> => {
+        if (!STUDENT_ID) {
+            console.error('No user ID found');
+            return [];
+        }
+
+        // Call RPC function to get due vocabulary cards with FSRS data
+        const { data, error: rpcError } = await supabase.rpc('get_due_vocabulary_cards', {
+            p_user_id: STUDENT_ID,
+            p_limit: 20 // Mobile: Small batches!
+        });
+
+        if (rpcError) {
+            console.error('❌ RPC error:', rpcError);
+            throw rpcError;
+        }
+
+        console.log(`✅ Loaded ${data?.length || 0} due vocabulary cards (FSRS)`);
+        return (data || []) as VocabularyItem[];
+    }, [STUDENT_ID]);
+
+    /**
+     * Use cache for vocabulary cards
+     */
+    const {
+        data: cards,
+        loading,
+        cached,
+        refresh,
+    } = useMobileCache<VocabularyItem[]>({
+        storeName: 'vocabulary_cards',
+        key: `vocabulary-due-${STUDENT_ID}`,
+        fetcher: fetchVocabularyCards,
+        ttl: CACHE_TTL.VOCABULARY_CARDS, // 30 minutes
+        enabled: !!STUDENT_ID,
+        onCacheHit: (data) => {
+            console.log('✅ [Vocabulary] Using cached cards');
+        },
+        onCacheMiss: () => {
+            console.log('❌ [Vocabulary] Cache miss - fetching fresh cards');
+        },
+    });
+
+    /**
+     * Prefetch next batch of cards in background
+     */
+    usePrefetch(
+        'vocabulary_cards',
+        `vocabulary-due-${STUDENT_ID}-next`,
+        async () => {
+            const { data } = await supabase.rpc('get_due_vocabulary_cards', {
+                p_user_id: STUDENT_ID,
+                p_limit: 20,
+            });
+            return data || [];
+        },
+        {
+            ttl: CACHE_TTL.VOCABULARY_CARDS,
+            delay: 5000, // Prefetch after 5 seconds
+        }
+    );
 
     // Load preferences
     useEffect(() => {
@@ -78,43 +143,6 @@ export default function MobileVocabularyPage() {
             router.push('/login-pin');
         }
     }, [isAuthenticated, router]);
-
-    // Fetch Due Cards (FSRS-6)
-    useEffect(() => {
-        if (user?.id) {
-            fetchDueCards();
-        }
-    }, [user]);
-
-    async function fetchDueCards() {
-        setLoading(true);
-        try {
-            if (!STUDENT_ID) {
-                console.error('No user ID found');
-                setLoading(false);
-                return;
-            }
-
-            // Call RPC function to get due vocabulary cards with FSRS data
-            const { data, error: rpcError } = await supabase.rpc('get_due_vocabulary_cards', {
-                p_user_id: STUDENT_ID,
-                p_limit: 20 // Mobile: Small batches!
-            });
-
-            if (rpcError) {
-                console.error('❌ RPC error:', rpcError);
-                setCards([]);
-            } else {
-                setCards((data || []) as VocabularyItem[]);
-                console.log(`✅ Loaded ${data?.length || 0} due vocabulary cards (FSRS)`);
-            }
-        } catch (err) {
-            console.error('❌ Load error:', err);
-            setCards([]);
-        } finally {
-            setLoading(false);
-        }
-    }
 
     // TTS Audio
     const playAudio = async () => {
@@ -138,17 +166,17 @@ export default function MobileVocabularyPage() {
 
     // Auto-play TTS when card flips
     useEffect(() => {
-        if (isFlipped && autoPlay && cards.length > 0) {
+        if (isFlipped && autoPlay && cards && cards.length > 0) {
             const timer = setTimeout(() => {
                 playAudio();
             }, 300);
             return () => clearTimeout(timer);
         }
-    }, [isFlipped, currentIndex, autoPlay, cards.length]);
+    }, [isFlipped, currentIndex, autoPlay, cards]);
 
     // Handle FSRS rating (1-4: Again, Hard, Good, Easy)
     const handleRating = async (rating: Rating) => {
-        if (cards.length === 0 || currentIndex >= cards.length) return;
+        if (!cards || cards.length === 0 || currentIndex >= cards.length) return;
 
         const currentItem = cards[currentIndex];
 
@@ -202,18 +230,22 @@ export default function MobileVocabularyPage() {
             }));
 
             // Remove card from queue
-            const newCards = cards.filter((_, index) => index !== currentIndex);
-            setCards(newCards);
-
-            if (newCards.length === 0) {
-                // Session complete
+            // Note: We can't use setCards here anymore since cards come from cache
+            // Instead, we'll refresh the cache which will trigger a re-fetch
+            if (cards.length === 1) {
+                // Last card - show summary
                 setShowSummary(true);
             } else {
-                // Stay at same index (next card moves into this position)
-                if (currentIndex >= newCards.length) {
-                    setCurrentIndex(newCards.length - 1);
+                // Move to next card
+                if (currentIndex >= cards.length - 1) {
+                    setCurrentIndex(0);
+                } else {
+                    setCurrentIndex(currentIndex + 1);
                 }
             }
+
+            // Refresh cache to get updated card list
+            setTimeout(() => refresh(), 1000);
 
         } catch (err) {
             console.error('❌ Rating error:', err);
@@ -227,7 +259,7 @@ export default function MobileVocabularyPage() {
         setSessionStats({ again: 0, hard: 0, good: 0, easy: 0 });
         setShowSummary(false);
         setIsFlipped(false);
-        fetchDueCards();
+        refresh(); // Refresh cache
     };
 
     // Speed control
@@ -256,16 +288,18 @@ export default function MobileVocabularyPage() {
         localStorage.setItem('tts-autoplay', String(newAutoPlay));
     };
 
-    const currentItem = cards[currentIndex];
+    const currentItem = cards ? cards[currentIndex] : null;
     const speedInfo = getSpeedLabel(speechRate);
 
     return (
-        <div style={{
-            minHeight: '100vh',
-            backgroundColor: '#0F0F11',
-            paddingBottom: '80px'
-        }}>
-            {/* Header */}
+        <>
+            <OfflineBanner />
+            <div style={{
+                minHeight: '100vh',
+                backgroundColor: '#0F0F11',
+                paddingBottom: '80px'
+            }}>
+                {/* Header */}
             <div style={{
                 position: 'sticky',
                 top: 0,
@@ -295,17 +329,35 @@ export default function MobileVocabularyPage() {
                     >
                         ← Back
                     </button>
-                    <h1 style={{
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        color: 'white',
-                        margin: 0
-                    }}>
-                        📚 Vocabulary
-                    </h1>
-                    <div style={{ width: '60px' }} /> {/* Spacer for centering */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h1 style={{
+                            fontSize: '20px',
+                            fontWeight: 'bold',
+                            color: 'white',
+                            margin: 0
+                        }}>
+                            📚 Vocabulary
+                        </h1>
+                        {cached && <CacheIndicator cached={cached} />}
+                    </div>
+                    <button
+                        onClick={refresh}
+                        style={{
+                            background: 'rgba(0, 122, 255, 0.2)',
+                            border: '1px solid rgba(0, 122, 255, 0.3)',
+                            borderRadius: '8px',
+                            padding: '8px',
+                            color: '#007AFF',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            minWidth: '44px',
+                            minHeight: '44px',
+                        }}
+                    >
+                        🔄
+                    </button>
                 </div>
-                {!loading && !showSummary && cards.length > 0 && (
+                {!loading && !showSummary && cards && cards.length > 0 && (
                     <div style={{
                         maxWidth: '448px',
                         margin: '12px auto 0',
@@ -336,7 +388,7 @@ export default function MobileVocabularyPage() {
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
                         <p>Loading vocabulary...</p>
                     </div>
-                ) : showSummary || cards.length === 0 ? (
+                ) : showSummary || !cards || cards.length === 0 ? (
                     <div style={{
                         textAlign: 'center',
                         padding: '80px 20px',
@@ -640,9 +692,10 @@ export default function MobileVocabularyPage() {
                 ) : null}
             </div>
 
-            {/* Bottom Navigation */}
-            <MobileBottomNav />
-        </div>
+                {/* Bottom Navigation */}
+                <MobileBottomNav />
+            </div>
+        </>
     );
 }
 
