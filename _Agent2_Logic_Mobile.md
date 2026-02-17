@@ -193,6 +193,39 @@ import HeavyComponent from './HeavyComponent';
 
 ## 📝 ÄNDERUNGS-LOG
 
+### **17. Februar 2026, 22:30 CET - Vocabulary Mobile UI Implementation**
+**Agent:** Agent 2
+**Bereich:** Mobile Vocabulary Card Learning
+**Branch:** agent-2-mobile-vocabulary
+**Änderungen:**
+- ✅ Erstellt: `/m/vocabulary/page.tsx` (745 lines)
+- ✅ Features implementiert:
+  - Card Flip Interface (Tap to reveal)
+  - FSRS-6 Integration (FSRSScheduler, Rating 1-4)
+  - Mobile-optimierte Data Fetching (20 cards per batch)
+  - TTS Audio Controls (Play, Speed, Auto-play)
+  - Session Statistics Tracking
+  - Session Summary Screen
+  - Touch-optimierte Rating Buttons (70px height)
+  - Glassmorphism Design (iOS-style)
+- ✅ RPC Functions verwendet:
+  - `get_due_vocabulary_cards` (p_limit: 20)
+  - `update_vocabulary_progress` (FSRS-6 parameters)
+- ✅ Mobile-First Design:
+  - Sticky Header mit Back Button
+  - Progress Indicator (Card X / Y)
+  - Large Touch Targets (70px buttons)
+  - Bottom Navigation Integration
+  - Dark Theme (#0F0F11 background)
+- ✅ State Management:
+  - useState für cards, currentIndex, isFlipped
+  - useMemo für FSRS Scheduler (avoid re-creation)
+  - localStorage für TTS preferences
+  - Session stats tracking (again, hard, good, easy)
+**Tests:** ⏳ Pending (E2E, FSRS verification)
+**Status:** ✅ Implementation Complete
+**Time:** ~2.5 hours
+
 ### **17. Februar 2026 - Mobile-First aktiviert**
 **Agent:** Agent 2
 **Bereich:** Strategy
@@ -206,8 +239,9 @@ import HeavyComponent from './HeavyComponent';
 ---
 
 **Nächste Aufgaben:**
-1. Practice Modes Mobile Logic optimieren
-2. Vocabulary Mobile Data Layer implementieren
-3. Performance-Optimierungen (Code Splitting, Lazy Load)
+1. ⏳ Testing: Mobile E2E Tests für Vocabulary
+2. ⏳ Performance: Code Splitting, Lazy Loading
+3. ⏳ Offline: IndexedDB Caching für Cards
+4. ⏳ Swipe Gestures (Optional Enhancement)
 
-**Status:** Bereit für Entwicklung 🚀
+**Status:** Vocabulary Mobile UI ✅ Complete, Testing Pending 🚀

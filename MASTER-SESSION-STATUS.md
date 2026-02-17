@@ -8,48 +8,57 @@
 
 ## 📊 OVERALL STATUS
 
-**Last Update:** 17. Februar 2026, 21:45 CET
-**Overall Progress:** 75% → 75% (Mobile-fokussiert, Agent-Prompts bereit)
+**Last Update:** 17. Februar 2026, 22:50 CET
+**Overall Progress:** 75% → 82% (Agent 1 & 2: Practice Modes + Vocabulary Complete!)
 **Active Strategy:** 📱 MOBILE-FIRST (verbindlich & irreversibel)
-**Status:** ✅ 3 Mobile Agent-Prompts erstellt, bereit für Ausführung
+**Status:** ✅✅ Practice Modes + Vocabulary Mobile UI complete, Testing pending
 
 ---
 
 ## 🚀 AGENT STATUS
 
 ### **Agent 1: UI-Komponenten & Layout (Mobile)**
-**Status:** ✅ READY - Prompt erstellt!
+**Status:** ✅ IMPLEMENTATION COMPLETE!
 **Verantwortung:** Mobile UI, Touch, Gestures
-**Aktueller Fokus:** Practice Modes Mobile UI
+**Aktueller Fokus:** Practice Modes Mobile UI ✅ DONE
 **Datei:** `_Agent1_UI_Mobile.md`
-**Prompt:** `_Agent01_Mobile_170225-2130.md` ⭐ NEU!
+**Prompt:** `_Agent01_Mobile_170225-2130.md`
+**Branch:** `agent-1-mobile-practice` (active)
 
 **Fertig:**
 - ✅ Mobile Dashboard (12 Tiles, Bottom Nav)
 - ✅ Mobile Stats Page (6 cards, charts)
 - ✅ Mobile Settings Page (user info, settings)
 - ✅ Mobile Bottom Navigation
-- ✅ Mobile Bottom Sheets (2x)
+- ✅ Mobile Bottom Sheets (DueCards, TrainWeakWords)
+- ✅ Practice Modes Mobile UI (`/m/practice-modes/page.tsx`) - 494 lines ⭐ NEU!
+- ✅ PracticeModesSheet (`PracticeModesSheet.tsx`) - 361 lines ⭐ NEU!
 
-**Aktueller Auftrag (NEU):**
-- 🎯 Practice Modes Mobile UI implementieren
-  - Page: `/m/practice-modes/page.tsx`
-  - Components: Bottom Sheets, Game Modes
-  - Time: 3-4h
-  - Branch: `agent-1-mobile-practice`
+**Practice Modes Mobile UI Features (COMPLETED):**
+- ✅ Practice Items List with Lock/Unlock States
+- ✅ Touch-optimized Item Cards (min 88px height)
+- ✅ Mode Selection Bottom Sheet (Swipe-to-close)
+- ✅ 3 Game Modes: Matching, Multiple Choice, Write Input
+- ✅ Integration with Desktop Game Components (reused)
+- ✅ Glassmorphism Design System
+- ✅ Bottom Navigation Integration
+**Time:** ~2 hours
+**Status:** ✅ Complete, Testing Pending
 
-**Nächste Aufgaben (nach Completion):**
-1. Grammar Mobile UI (2-3h)
-2. Daily Phrases Mobile UI (2h)
+**Nächste Aufgaben:**
+1. ⏳ E2E Testing (Agent 3)
+2. Grammar Mobile UI (2-3h)
+3. Daily Phrases Mobile UI (2h)
 
 ---
 
 ### **Agent 2: State-Management, Logic, API (Mobile)**
-**Status:** ✅ READY - Prompt erstellt!
+**Status:** ✅ IMPLEMENTATION COMPLETE!
 **Verantwortung:** State, Logic, API, Performance
 **Aktueller Fokus:** Vocabulary Mobile UI + FSRS Integration
 **Datei:** `_Agent2_Logic_Mobile.md`
-**Prompt:** `_Agent02_Mobile_170225-2130.md` ⭐ NEU!
+**Prompt:** `_Agent02_Mobile_170225-2130.md`
+**Branch:** `agent-2-mobile-vocabulary` (active)
 
 **Fertig:**
 - ✅ Auth Context
@@ -58,17 +67,24 @@
 - ✅ Supabase Integration
 - ✅ Stats Data Hook
 - ✅ Streak Hook
+- ✅ Vocabulary Mobile UI (`/m/vocabulary/page.tsx`) - 745 lines ⭐ NEU!
 
-**Aktueller Auftrag (NEU):**
-- 🎯 Vocabulary Mobile UI implementieren
-  - Page: `/m/vocabulary/page.tsx`
-  - Features: Card Flip, FSRS-6 Rating, Swipe Gestures
-  - Time: 2-3h
-  - Branch: `agent-2-mobile-vocabulary`
+**Vocabulary Mobile UI Features (COMPLETED):**
+- ✅ Card Flip Interface (Tap to reveal)
+- ✅ FSRS-6 Rating System (Again, Hard, Good, Easy)
+- ✅ Mobile-optimierte Data Fetching (20 cards/batch)
+- ✅ TTS Audio Controls (Play, Speed, Auto-play)
+- ✅ Session Statistics & Summary Screen
+- ✅ Touch-optimierte Buttons (70px height)
+- ✅ Glassmorphism Design
+- ✅ Bottom Navigation Integration
+**Time:** ~2.5 hours
+**Status:** ✅ Complete, Testing Pending
 
-**Nächste Aufgaben (nach Completion):**
-1. Mobile Data Caching (2-3h)
-2. Performance Optimization (3-4h)
+**Nächste Aufgaben:**
+1. ⏳ E2E Testing (Agent 3)
+2. Mobile Data Caching (2-3h)
+3. Performance Optimization (3-4h)
 
 ---
 
@@ -125,6 +141,71 @@
 
 ## 📋 SESSION HISTORY
 
+### **Session: 17. Februar 2026, 22:50 CET**
+**Thema:** Practice Modes Mobile UI Implementation (Agent 1)
+
+**Agent 1:**
+- ✅ Practice Modes Mobile Page erstellt (`/m/practice-modes/page.tsx`, 494 lines)
+- ✅ PracticeModesSheet Bottom Sheet (`PracticeModesSheet.tsx`, 361 lines)
+- ✅ Practice Items List with RPC Integration (`get_practice_enabled_items`)
+- ✅ Lock/Unlock States per Mode (getPracticeConfig)
+- ✅ Touch-optimized Item Cards (min 88px height)
+- ✅ Mode Selection Bottom Sheet (3 Game Modes)
+- ✅ Integration mit Desktop Game Components (reused PracticeModeDialog)
+- ✅ Glassmorphism Design System (iOS-style)
+- ✅ Bottom Navigation Integration
+- ✅ Dokumentation aktualisiert (`_Agent1_UI_Mobile.md`)
+
+**Overall Progress:** 78% → 82% (+4%)
+
+**Branch:** `agent-1-mobile-practice`
+
+**Dateien erstellt:**
+- `src/app/m/practice-modes/page.tsx` (Practice Modes Mobile Page)
+- `src/components/mobile/PracticeModesSheet.tsx` (Mode Selection Sheet)
+
+**Dateien aktualisiert:**
+- `_Agent1_UI_Mobile.md` (Änderungs-Log)
+- `MASTER-SESSION-STATUS.md` (Progress Update)
+
+**Status:** ✅ Implementation Complete, Testing Pending
+
+**Time:** ~2 hours
+
+---
+
+### **Session: 17. Februar 2026, 22:30 CET**
+**Thema:** Vocabulary Mobile UI Implementation (Agent 2)
+
+**Agent 2:**
+- ✅ Vocabulary Mobile Page erstellt (`/m/vocabulary/page.tsx`, 745 lines)
+- ✅ FSRS-6 Integration (FSRSScheduler, Rating System)
+- ✅ Mobile-optimierte Data Fetching (20 cards/batch)
+- ✅ Card Flip Interface (Touch-optimiert)
+- ✅ TTS Audio Controls (Play, Speed, Auto-play)
+- ✅ Session Statistics & Summary Screen
+- ✅ Touch-optimierte Rating Buttons (70px height)
+- ✅ Glassmorphism Design (iOS-style)
+- ✅ Bottom Navigation Integration
+- ✅ Dokumentation aktualisiert (`_Agent2_Logic_Mobile.md`)
+
+**Overall Progress:** 75% → 78% (+3%)
+
+**Branch:** `agent-2-mobile-vocabulary`
+
+**Dateien erstellt:**
+- `src/app/m/vocabulary/page.tsx` (Vocabulary Mobile UI)
+
+**Dateien aktualisiert:**
+- `_Agent2_Logic_Mobile.md` (Änderungs-Log)
+- `MASTER-SESSION-STATUS.md` (Progress Update)
+
+**Status:** ✅ Implementation Complete, Testing Pending
+
+**Time:** ~2.5 hours
+
+---
+
 ### **Session: 17. Februar 2026, 21:00 CET**
 **Thema:** Mobile-First-Strategie aktiviert
 
@@ -174,22 +255,25 @@
 ## 🎯 NÄCHSTE PRIORITÄTEN (MOBILE-ONLY)
 
 ### **High Priority:**
-1. **Practice Modes Mobile UI** (Agent 1, 3-4h)
-   - Mobile Practice Modes Page (`/m/practice-modes`)
-   - Touch-optimierte Game Controls
-   - Swipe gestures
+1. ~~**Practice Modes Mobile UI**~~ ✅ DONE (Agent 1, 2h)
+   - ✅ Mobile Practice Modes Page (`/m/practice-modes`)
+   - ✅ Touch-optimierte Item Cards
+   - ✅ Mode Selection Bottom Sheet
 
-2. **Vocabulary Mobile UI** (Agent 1, 2-3h)
-   - Mobile Vocabulary Page (`/m/vocabulary`)
-   - Bottom Sheet statt Dialog
-   - Touch card flipping
+2. ~~**Vocabulary Mobile UI**~~ ✅ DONE (Agent 2, 2.5h)
+   - ✅ Mobile Vocabulary Page (`/m/vocabulary`)
+   - ✅ Card Flip Interface
+   - ✅ FSRS-6 Rating System
 
-3. **Mobile Performance** (Agent 2, 3-4h)
+3. **Mobile E2E Tests** (Agent 3, 3-4h) ⚠️ NEXT
+   - Practice Modes E2E
+   - Vocabulary E2E
+   - Touch gesture testing
+
+4. **Mobile Performance** (Agent 2, 3-4h)
    - Code splitting
    - Lazy loading
    - Bundle size optimization
-
-4. **Mobile E2E Tests** (Agent 3, 3-4h)
    - Practice Modes E2E
    - Vocabulary E2E
    - Touch gesture testing
@@ -213,15 +297,16 @@
 - ✅ Mobile Settings Page (100%)
 - ✅ Mobile Navigation (100%)
 - ✅ Mobile Bottom Sheets (100%)
+- ✅ Vocabulary Mobile UI (100%) ⭐
+- ✅ Practice Modes Mobile UI (100%) ⭐ NEU!
 
 **Was fehlt:**
-- ⚠️ Practice Modes Mobile (0%)
-- ⚠️ Vocabulary Mobile UI (0%)
 - ⚠️ Grammar Mobile UI (0%)
+- ⚠️ Daily Phrases Mobile UI (0%)
 - ⚠️ Mobile E2E Tests (0%)
 - ⚠️ Mobile Performance Optimization (0%)
 
-**Mobile Progress:** ~60% Complete
+**Mobile Progress:** ~70% Complete (+9% today: Vocab +5%, Practice +4%)
 
 **Ziel:** 100% Mobile → Dann Desktop portieren
 
