@@ -116,7 +116,7 @@ export default function PracticeModesPage() {
 
                 {/* Footer Help */}
                 <div className="mt-8 text-center text-sm text-white/50">
-                    <p>Need help? Check the console (F12) for debug logs with 🎮</p>
+                    <p>Practice modes help reinforce your learning with interactive games</p>
                 </div>
             </main>
         </div>

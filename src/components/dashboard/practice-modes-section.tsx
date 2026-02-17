@@ -202,33 +202,29 @@ export function PracticeModesSection() {
 
     if (loading) {
         return (
-            <div className="practice-modes-section" style={{
-                padding: '20px',
-                background: 'rgba(255, 255, 0, 0.1)',
-                border: '2px solid yellow',
-                borderRadius: '8px'
-            }}>
-                <h3 className="text-lg font-semibold mb-4">🎮 Practice Modes</h3>
-                <p className="text-sm text-yellow-400">⏳ Loading practice items...</p>
+            <div className="practice-modes-section p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+                <h3 className="text-lg font-semibold mb-4 text-white">🎮 Practice Modes</h3>
+                <div className="flex items-center gap-3">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white"></div>
+                    <p className="text-sm text-white/70">Loading practice items...</p>
+                </div>
             </div>
         );
     }
 
     if (practiceItems.length === 0) {
         return (
-            <div className="practice-modes-section space-y-4" style={{
-                padding: '20px',
-                background: '#2a2a2a',
-                border: '2px solid orange',
-                borderRadius: '8px'
-            }}>
-                <h3 className="text-lg font-semibold">🎮 Practice Modes</h3>
-                <p className="text-sm text-yellow-400">
-                    ⚠️ No practice items found. Check console for details.
-                </p>
-                <p className="text-xs text-gray-400">
-                    Loading: {loading ? 'true' : 'false'} | User: {user?.id ? 'logged in' : 'not logged in'}
-                </p>
+            <div className="practice-modes-section p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl space-y-4">
+                <div className="text-center py-8">
+                    <div className="text-6xl mb-4 opacity-50">📦</div>
+                    <h3 className="text-lg font-semibold text-white mb-2">No Practice Items Available</h3>
+                    <p className="text-sm text-white/60 mb-4">
+                        Complete flashcard reviews to unlock practice modes
+                    </p>
+                    <p className="text-xs text-white/40">
+                        Practice modes unlock after reviewing vocabulary items
+                    </p>
+                </div>
             </div>
         );
     }
@@ -250,7 +246,7 @@ export function PracticeModesSection() {
                         return (
                             <div
                                 key={item.id}
-                                className="p-4 bg-card border border-border rounded-lg space-y-3 hover:border-primary/50 transition-colors"
+                                className="p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl space-y-3 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02] transition-all duration-200"
                             >
                                 {/* Item Info */}
                                 <div className="space-y-1">
@@ -291,9 +287,9 @@ export function PracticeModesSection() {
                                                 }
                                             >
                                                 {isUnlocked ? (
-                                                    <Unlock className="h-3 w-3" />
+                                                    <Unlock className="h-4 w-4" />
                                                 ) : (
-                                                    <Lock className="h-3 w-3" />
+                                                    <Lock className="h-4 w-4" />
                                                 )}
                                                 <span>{getModeIcon(mode)}</span>
                                                 <span>{getModeLabel(mode)}</span>
