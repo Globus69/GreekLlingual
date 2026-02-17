@@ -1,8 +1,47 @@
 # Practice Modes Implementation - Complete ✅
 
-**Date**: 2026-02-16
-**Status**: Implementation Complete
+**Date**: 2026-02-16 (Updated: 2026-02-17)
+**Status**: Implementation Complete - Architecture Changed
 **Total Estimated Time**: 20-30 hours
+
+## 🏗️ Architecture Change (17. Februar 2026)
+
+### ✅ Separate Page Implementation
+
+**IMPORTANT UPDATE:** Practice Modes wurde aus dem Dashboard entfernt und auf eine eigenständige Page verschoben.
+
+#### New Structure:
+- **Route:** `/practice-modes` (standalone Next.js Page)
+- **File:** `src/app/practice-modes/page.tsx`
+- **Dashboard:** Cleaned up, only contains navigation link (Button 13)
+
+#### Why this change:
+- ✅ Dashboard remains stable during development
+- ✅ Isolated development and testing
+- ✅ Easier debugging
+- ✅ Clean separation of concerns
+- ✅ No conflicts with dashboard state/loading
+
+#### Implementation Details:
+```typescript
+// New file: src/app/practice-modes/page.tsx
+- Auth check (redirect to /login if not authenticated)
+- Beautiful header with "Back to Dashboard" link
+- Info card explaining how practice modes work
+- PracticeModesSection component integrated
+- Consistent styling (gradient background, glassmorphism)
+- User info display (name, level)
+```
+
+#### Dashboard Changes:
+- ✅ All Practice Modes imports removed
+- ✅ State variables removed
+- ✅ Test buttons removed
+- ✅ Debug containers removed
+- ✅ Loading screen restored
+- ✅ Button 13: "🎮 Practice Modes" → navigates to `/practice-modes`
+
+---
 
 ## Overview
 
@@ -170,12 +209,34 @@ Successfully implemented a comprehensive Quizlet-style practice modes system tha
 
 ---
 
-### Phase 4: Dashboard Integration ✅
+### Phase 4: Page Implementation ✅ (Architecture Changed)
 
-#### File: `src/components/dashboard/practice-modes-section.tsx`
-**Status**: ✅ Complete (NEW)
+#### File: `src/app/practice-modes/page.tsx` ← NEW! (17. Feb 2026)
+**Status**: ✅ Complete - Standalone Page
 
 **What was created**:
+- **Standalone Route:** `/practice-modes` (separate from dashboard)
+- **Auth Check:** Redirects to `/login` if not authenticated
+- **Header:**
+  - "Back to Dashboard" link with arrow icon
+  - Title: "🎮 Practice Modes"
+  - Subtitle: "Master Greek with interactive games"
+  - User info display (name, level)
+- **Info Card:**
+  - Explains how practice modes work
+  - 3 bullet points with checkmarks
+- **Practice Section:**
+  - PracticeModesSection component integrated
+  - Wrapped in glassmorphism card
+- **Styling:**
+  - Gradient background (gray-900 → blue-900)
+  - Consistent with app design system
+  - Responsive layout
+
+#### File: `src/components/dashboard/practice-modes-section.tsx`
+**Status**: ✅ Complete (Unchanged)
+
+**What it does**:
 - Fetches learning items with `practice_modes_config.enabled = true`
 - Checks unlock status for each item/mode via RPC
 - Displays practice mode cards with:
@@ -188,12 +249,17 @@ Successfully implemented a comprehensive Quizlet-style practice modes system tha
 - Auto-refreshes unlock statuses after practice completion
 
 #### File: `src/app/dashboard/page.tsx`
-**Status**: ✅ Updated
+**Status**: ✅ Cleaned Up (17. Feb 2026)
 
-**What was added**:
-- Import `PracticeModesSection`
-- Rendered after action tiles grid with spacing
-- Fully integrated into existing dashboard layout
+**What was REMOVED**:
+- ❌ All Practice Modes imports
+- ❌ Practice Modes state variables
+- ❌ Debug containers and test buttons
+- ❌ PracticeModesSection component render
+
+**What was ADDED**:
+- ✅ Button 13: "🎮 Practice Modes" → navigates to `/practice-modes`
+- ✅ Loading screen restored (was temporarily disabled)
 
 ---
 
@@ -359,7 +425,7 @@ The system converts practice performance to FSRS ratings:
 
 ## 📁 Files Created/Modified Summary
 
-### New Files (16)
+### New Files (17)
 1. `database/migrations/067_add_practice_modes.sql`
 2. `src/lib/utils/levenshtein.ts`
 3. `src/components/admin/practice-config-form.tsx`
@@ -369,14 +435,16 @@ The system converts practice performance to FSRS ratings:
 7. `src/components/learning/practice-modes/write-input-practice.tsx`
 8. `src/components/learning/practice-modes/practice-result-summary.tsx`
 9. `src/components/dashboard/practice-modes-section.tsx`
+10. **`src/app/practice-modes/page.tsx`** ← NEW! (17. Feb 2026)
 
-### Modified Files (6)
+### Modified Files (7)
 1. `src/lib/validation/schemas.ts` - Added practice schemas
 2. `src/lib/supabase/content.ts` - Added RPC wrappers
 3. `src/types/content.ts` - Added practice_modes_config field
 4. `src/components/admin/content-modal.tsx` - Integrated config form
-5. `src/app/dashboard/page.tsx` - Added practice section
+5. **`src/app/dashboard/page.tsx` - CLEANED UP (removed Practice Modes, added nav button)** ← Updated (17. Feb 2026)
 6. `src/lib/use-translation.ts` - Added 90+ translation keys
+7. **All documentation files** - Updated with architecture change
 
 ---
 

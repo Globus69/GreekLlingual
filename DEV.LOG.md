@@ -4,9 +4,68 @@
 **Repository:** https://github.com/Globus69/GreekLlingual.git
 **Maintainer:** SWS
 **Start:** 2025
-**Aktualisiert:** 2026-02-15
+**Aktualisiert:** 2026-02-17
 
 > Chronologisches Log aller wichtigen Entwicklungsschritte, Features und Fixes.
+
+---
+
+## 2026-02-17 - Practice Modes: Architecture Refactoring 🏗️
+
+### ✅ Practice Modes auf separate Page verschoben - COMPLETED
+**Commit:** `[pending]`
+
+**Ziel:** Practice Modes aus Dashboard entfernen und auf eigenständige Seite verschieben für stabilere Entwicklung
+
+**Motivation:**
+- Dashboard wurde instabil während Practice Modes Entwicklung
+- Loading-Probleme durch gemischten State
+- Schwierige Isolation beim Debugging
+
+**Implementiert:**
+
+#### 1. **Neue Standalone Page erstellt**
+- **Route:** `/practice-modes`
+- **Datei:** `src/app/practice-modes/page.tsx`
+- **Features:**
+  - Auth-Check (redirect to /login if not authenticated)
+  - Schöner Header mit "Back to Dashboard" Link
+  - Info-Card: "How Practice Modes Work"
+  - PracticeModesSection component integriert
+  - Konsistentes Styling (Gradient, Glassmorphism)
+  - User-Info Display (Name, Level)
+
+#### 2. **Dashboard komplett bereinigt**
+- **Entfernt:**
+  - ❌ Alle Practice Modes Imports
+  - ❌ State variables (`isPracticeModesTestDialogOpen`)
+  - ❌ Grüner Test-Button
+  - ❌ Roter Debug-Container
+  - ❌ Practice Modes Dialog
+  - ❌ PracticeModesSection component render
+- **Hinzugefügt:**
+  - ✅ Button 13: "🎮 Practice Modes" → `router.push('/practice-modes')`
+- **Wiederhergestellt:**
+  - ✅ Loading-Screen (war temporär deaktiviert)
+
+#### 3. **Dokumentation aktualisiert**
+- `IMPROVMENT-16-02-25.md` - Architektur-Änderung dokumentiert
+- `SESSION-PRACTICE-MODES-2026-02-16.md` - Status update
+- `PRACTICE-MODES-IMPLEMENTATION.md` - Phase 4 komplett neu geschrieben
+- `TROUBLESHOOTING-Practice-Modes.md` - Neue Route dokumentiert
+- `PROJECT-OVERVIEW-2026-02.md` - Practice Modes Sektion hinzugefügt
+
+**Vorteile:**
+- ✅ Dashboard bleibt stabil während Entwicklung
+- ✅ Isolierte Entwicklung und Testing möglich
+- ✅ Einfacheres Debugging
+- ✅ Keine State-Konflikte mehr
+- ✅ Saubere Separation of Concerns
+
+**Next Steps:**
+- Testing auf neuer `/practice-modes` Page
+- Mock-Daten oder DB-Items konfigurieren
+- Matching-Game End-to-End testen
 
 ---
 

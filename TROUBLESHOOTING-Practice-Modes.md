@@ -1,6 +1,26 @@
 # Practice Modes Troubleshooting Guide
-**Date:** 16 February 2026
+**Date:** 16 February 2026 (Updated: 17 February 2026)
 **Status:** DATA SYNC ISSUE - Component works but shows stale data
+
+---
+
+## 🏗️ Architecture Update (17 February 2026)
+
+**IMPORTANT:** Practice Modes moved to separate page `/practice-modes`
+
+### New Access Route:
+- **Old:** Dashboard → Practice Modes Section (embedded)
+- **New:** Dashboard → Button 13 "🎮 Practice Modes" → `/practice-modes` page
+
+### Files:
+- **New:** `src/app/practice-modes/page.tsx` (standalone page)
+- **Unchanged:** `src/components/dashboard/practice-modes-section.tsx` (used by new page)
+- **Cleaned:** `src/app/dashboard/page.tsx` (no Practice Modes code)
+
+### Testing:
+```
+http://localhost:3000/practice-modes
+```
 
 ---
 

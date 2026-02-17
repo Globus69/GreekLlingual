@@ -1,12 +1,50 @@
 # Practice Modes Implementation - Session 2026-02-16
 
-**Status:** In Progress - Phase 1 (Sichtbarkeit) abgeschlossen
-**Datum:** 16. Februar 2026
+**Status:** ✅ Architektur fertig - Separate Page implementiert
+**Datum:** 16-17. Februar 2026
 **Ziel:** Practice Modes zum Laufen bringen
 
 ---
 
-## ✅ Was heute erreicht wurde:
+## 🏗️ ARCHITEKTUR-ÄNDERUNG (17. Februar 2026, 10:30 CET)
+
+### ✅ Practice Modes auf separate Page verschoben
+
+**ENTSCHEIDUNG:** Practice Modes wurde komplett aus dem Dashboard entfernt und auf eine eigenständige Seite verschoben.
+
+#### Neue Architektur:
+- **Route:** `/practice-modes` (eigene Next.js Page)
+- **Datei:** `src/app/practice-modes/page.tsx` ← NEU erstellt
+- **Dashboard:** Komplett bereinigt, nur Link als Button 13
+- **Navigation:** `router.push('/practice-modes')` vom Dashboard
+
+#### Vorteile:
+- ✅ Dashboard bleibt stabil während Entwicklung
+- ✅ Isolierte Entwicklung möglich
+- ✅ Einfacheres Debugging
+- ✅ Keine Konflikte mit Dashboard-State
+- ✅ Saubere Separation of Concerns
+
+#### Implementierte Features auf `/practice-modes`:
+- Schöner Header mit "Back to Dashboard" Link
+- Info-Card: "How Practice Modes Work"
+- Auth-Check (redirect to login if not authenticated)
+- PracticeModesSection eingebunden
+- Konsistentes Styling (Gradient, Glassmorphism)
+- User-Info in Header (Name, Level)
+
+#### Dashboard-Bereinigung:
+- ✅ Alle Practice Modes Imports entfernt
+- ✅ State variables entfernt (`isPracticeModesTestDialogOpen`)
+- ✅ Grüner Test-Button entfernt
+- ✅ Roter Debug-Container entfernt
+- ✅ Practice Modes Dialog entfernt
+- ✅ Loading-Screen wiederhergestellt (war temporär deaktiviert)
+- ✅ Button 13: "🎮 Practice Modes" → `router.push('/practice-modes')`
+
+---
+
+## ✅ Was gestern (16. Februar) erreicht wurde:
 
 ### 1. Dashboard Loading-Issue behoben
 **Problem:** Dashboard hing im "Loading GreekLingua..." Screen
@@ -43,35 +81,41 @@
 
 ---
 
-## 🔧 Aktueller Code-Stand:
+## 🔧 Aktueller Code-Stand (17. Februar 2026):
 
-### dashboard/page.tsx
+### Neue Datei: practice-modes/page.tsx ← NEU!
 ```typescript
-// Zeile ~25: Import
-import { PracticeModesSection } from '@/components/dashboard/practice-modes-section';
+// Route: /practice-modes
+// Eigenständige Practice Modes Page
 
-// Zeile ~180: Loading-Check DEAKTIVIERT (auskommentiert)
-// AGGRESSIVE FIX: Skip loading screen entirely for debugging
-// if (authLoading || loading) {
-//     return (
-//         <div className="login-overlay">
-//             <h1 style={{ color: 'white', fontSize: '24px' }}>🏛️ Loading...</h1>
-//         </div>
-//     );
-// }
+- Auth-Check (redirect to /login if not logged in)
+- Schöner Header mit Back-Button
+- Info-Card über Practice Modes
+- PracticeModesSection eingebunden
+- Styling: Gradient background, Glassmorphism
+```
 
-// Zeile ~432: Practice Modes Section eingebunden
-<div className="mt-8 px-4 md:px-6" style={{
-    background: 'rgba(255, 0, 0, 0.1)',
-    border: '2px solid red',
-    padding: '20px',
-    borderRadius: '8px'
-}}>
-    <p style={{ color: 'lime', fontWeight: 'bold', marginBottom: '10px' }}>
-        🔍 DEBUG: Practice Modes Section Container Rendered
-    </p>
-    <PracticeModesSection />
-</div>
+### dashboard/page.tsx ← BEREINIGT!
+```typescript
+// KEINE Practice Modes Imports mehr
+// KEINE Practice Modes State mehr
+// KEINE Practice Modes Components mehr
+
+// Loading-Screen WIEDERHERGESTELLT (Zeile ~177)
+if (authLoading || loading) {
+    return (
+        <div className="login-overlay">
+            <h1>🏛️ {authLoading ? t('dashboard.authenticating') : t('dashboard.loading')}</h1>
+        </div>
+    );
+}
+
+// Button 13: Practice Modes Link (Zeile ~373)
+<ActionTile
+    icon="🎮"
+    label="13. Practice Modes"
+    onClick={() => router.push('/practice-modes')}
+/>
 ```
 
 ### practice-modes-section.tsx
@@ -84,15 +128,26 @@ import { PracticeModesSection } from '@/components/dashboard/practice-modes-sect
 
 ---
 
-## 🚧 Noch offen / Nächste Schritte:
+## 🚧 Nächste Schritte (17. Februar 2026):
 
-### SOFORT (Morgen):
-1. **Prüfen, was die Practice Modes Section anzeigt:**
+### ✅ ERLEDIGT (17. Februar Morgen):
+- ✅ Separate Page `/practice-modes` erstellt
+- ✅ Dashboard komplett bereinigt
+- ✅ Loading-Screen wiederhergestellt
+- ✅ Navigation eingebaut (Button 13)
+- ✅ Styling konsistent
+
+### JETZT: Testing auf neuer Page
+1. **Practice Modes Page öffnen:**
+   ```
+   http://localhost:3000/practice-modes
+   ```
+   - Dashboard → Button 13 "🎮 Practice Modes" klicken
    - Browser Console öffnen → Nach 🎮 Logs suchen
-   - Ist es Loading / Empty / Items?
+   - Was zeigt die Section? (Loading / Empty / Items)
    - Gibt es RPC-Fehler?
 
-2. **Falls RPC-Fehler (wahrscheinlich):**
+2. **Falls RPC-Fehler:**
    - Migration 071 in Supabase ausführen
    - ODER: get_practice_enabled_items RPC erstellen (Migration 069)
    - Items mit practice_modes_config.enabled = true erstellen
@@ -117,10 +172,10 @@ import { PracticeModesSection } from '@/components/dashboard/practice-modes-sect
 - use-translation.ts erweitern
 - Alle Practice Modes Texte übersetzen (DE, ES)
 
-### Schritt 5: Testing & Cleanup
-- Loading-Screen wieder aktivieren (dashboard/page.tsx)
-- Debug-Container entfernen
+### Schritt 5: Cleanup (nach Testing)
 - Test-Dateien löschen (-TEST.tsx, -MINIMAL.tsx)
+- Debug-Code entfernen
+- Dokumentation finalisieren
 
 ---
 
