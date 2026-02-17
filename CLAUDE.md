@@ -1,7 +1,46 @@
 # HellenicHorizons-GreekLingua-Dashboard – Claude Instructions
-(letztes Update: 16. Februar 2026)
+(letztes Update: 17. Februar 2026)
 
 Du arbeitest IMMER in diesem Projekt. Lies diese Datei + die verlinkten Dokumente bei jedem Gespräch / jeder Aufgabe zuerst.
+
+## 🚨 MOBILE-FIRST-STRATEGIE – VERBINDLICH & IRREVERSIBEL
+
+**AB SOFORT GILT (17. Februar 2026, 21:00 CET):**
+
+### ⚡ KRITISCHE REGEL – KEINE AUSNAHMEN:
+
+1. **Alle Entwicklung NUR für MOBILE** (iPhone/Android, < 768px, Touch)
+   - Alle Verbesserungen, Refactorings, Bugfixes, Tests, Features
+   - AUSSCHLIESSLICH für mobile Variante (`/m/*` Routes)
+
+2. **Desktop-Entwicklung GESTOPPT**
+   - Desktop wird ERST portiert NACH Mobile-Fertigstellung
+   - Keine parallele Desktop-Entwicklung mehr
+
+3. **Bestehende Desktop-Arbeit**
+   - Bleibt erhalten (Stats/Settings Pages)
+   - Wird NICHT weiterentwickelt bis Mobile fertig ist
+   - Fokus: Mobile-Version stabilisieren & fertigstellen
+
+4. **Mobile Layout = Verbindlicher Style-Guide**
+   - Design-System, Farben, Typografie, Spacing aus Mobile
+   - Keine Änderungen bis Mobile-Version abgeschlossen
+   - Beispiel-Stil: „Due Cards Today" Dialog
+
+5. **Agent-Aufteilung (3 Agents):**
+   - **Agent 1:** UI-Komponenten & Layout (mobile breakpoints, touch, gestures)
+   - **Agent 2:** State-Management, Logic, API (mobile-optimiert)
+   - **Agent 3:** Tests, Performance, Accessibility (mobile screenreader)
+
+6. **Dokumentation zwingend:**
+   - Jede Änderung → eigene `_AgentXX_*.md` Datei
+   - Zusammenfassung → `MASTER-SESSION-STATUS.md`
+
+**Ziel:** Mobile App fertigstellen, DANN Desktop portieren.
+
+**Referenz:** `MOBILE-FIRST-STRATEGY.md`
+
+---
 
 ## 🚨 KRITISCHE ARBEITSREIHENFOLGE (Stand: 16.02.2026)
 
