@@ -363,7 +363,47 @@ Diese Datei ist dein **Einstiegspunkt** als Agent. Sie verlinkt ALLE relevanten 
 - Wichtige Dokumentation hinzukommt
 - Struktur sich ändert
 
-**Letzte Aktualisierung:** 17. Februar 2026, 11:00 CET
+---
+
+## 📂 OPTIMIERUNGEN & KOORDINATION
+
+### 22. [`OPTIMIERUNGSKONZEPT-170225.md`](./OPTIMIERUNGSKONZEPT-170225.md) ⭐⭐
+**Status:** Aktiv (17.02.2026)
+**Zweck:** 6 Optimierungen mit ROI-Analyse
+
+**Inhalt:**
+- Quick Wins: Agent-Koordination, Linter-Config, Task Tracking
+- Mittelfristig: Design Tokens, Documentation Consolidation
+- Langfristig: Performance Monitoring
+- Jede Optimierung mit Aufwand/Nutzen/Zeit/ROI
+
+---
+
+### 23. **Agent-Koordination System** ⭐⭐⭐ NEU!
+**Status:** Implementiert (17.02.2026)
+**Zweck:** Tägliche Koordination zwischen Master und Agents
+
+#### Dateien:
+- [`AGENT-COORDINATION-WORKFLOW.md`](./AGENT-COORDINATION-WORKFLOW.md) - Workflow-Guide
+- [`DAILY-STANDUP-TEMPLATE.md`](./DAILY-STANDUP-TEMPLATE.md) - Wiederverwendbares Template
+- [`DAILY-STANDUP-2026-02-17.md`](./DAILY-STANDUP-2026-02-17.md) - Heutiges Standup
+
+#### Wie nutzen:
+1. **Agents:** Daily Standup Ende des Tages erstellen/updaten
+2. **Master:** Morgens reviewen, Blocker adressieren
+3. **Format:** Template kopieren, eigenen Abschnitt ausfüllen
+4. **Commit:** `standup(agent-X): Daily update [DATUM]`
+
+#### Vorteile:
+- ✅ Transparenz: Jeder weiß, woran andere arbeiten
+- ✅ Frühe Blocker-Erkennung (<4h Response)
+- ✅ Keine Doppelarbeit durch Dependencies-Tracking
+- ✅ Bessere Koordination (+70%)
+- ✅ ROI: ⭐⭐⭐⭐⭐ (Exzellent!)
+
+---
+
+**Letzte Aktualisierung:** 17. Februar 2026, 14:00 CET
 
 ---
 
