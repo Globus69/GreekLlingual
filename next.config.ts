@@ -1,11 +1,17 @@
 import type { NextConfig } from "next";
 import withPWA from 'next-pwa';
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig: NextConfig = {
   /* config options here */
   // Silence Turbopack warning (Next.js 16 uses Turbopack by default)
   turbopack: {},
 };
+
+// Bundle Analyzer Configuration
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 // PWA Configuration
 const pwaConfig = withPWA({
@@ -150,4 +156,5 @@ const pwaConfig = withPWA({
   ],
 });
 
-export default pwaConfig(nextConfig);
+// Apply PWA and Bundle Analyzer wrappers
+export default bundleAnalyzer(pwaConfig(nextConfig));
