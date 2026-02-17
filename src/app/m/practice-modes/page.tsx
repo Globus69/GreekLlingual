@@ -6,6 +6,8 @@ import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/db/supabase';
 import { getPracticeConfig } from '@/lib/supabase/content';
 import { PracticeModesSheet } from '@/components/mobile/PracticeModesSheet';
+import { OfflineBanner, CacheIndicator } from '@/components/mobile/OfflineBanner';
+import { useMobileCache, CACHE_TTL } from '@/hooks/use-mobile-cache';
 import type { PracticeMode } from '@/lib/validation/schemas';
 
 interface PracticeItem {
@@ -33,8 +35,6 @@ export default function MobilePracticeModesPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([]);
   const [unlockStatuses, setUnlockStatuses] = useState<Record<string, UnlockStatus>>({});
   const [selectedItem, setSelectedItem] = useState<PracticeItem | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -50,50 +50,64 @@ export default function MobilePracticeModesPage() {
   }, [mounted, isAuthenticated, router]);
 
   /**
-   * Load learning items with practice modes enabled
+   * Fetcher function for practice items
    */
-  const loadPracticeItems = useCallback(async () => {
-    if (!user?.id) return;
+  const fetchPracticeItems = useCallback(async (): Promise<PracticeItem[]> => {
+    if (!user?.id) return [];
 
-    setLoading(true);
-    try {
-      console.log('🎮 [Mobile Practice] Loading practice items');
+    console.log('🎮 [Mobile Practice] Fetching practice items');
 
-      const { data: items, error } = await supabase
-        .rpc('get_practice_enabled_items');
+    const { data: items, error } = await supabase
+      .rpc('get_practice_enabled_items');
 
-      if (error) {
-        console.error('Error loading practice items:', error);
-        return;
-      }
-
-      // Filter enabled items
-      const enabledItems = (items || []).filter(
-        (item: any) => {
-          const hasConfig = !!item.practice_modes_config;
-          const isEnabled = item.practice_modes_config?.enabled === true;
-          const hasModes = (item.practice_modes_config?.available_modes?.length || 0) > 0;
-          return hasConfig && isEnabled && hasModes;
-        }
-      );
-
-      console.log('🎮 [Mobile Practice] Enabled items:', enabledItems.length);
-      setPracticeItems(enabledItems);
-
-      // Load unlock statuses
-      await loadUnlockStatuses(enabledItems);
-    } catch (err) {
-      console.error('Error loading practice items:', err);
-    } finally {
-      setLoading(false);
+    if (error) {
+      console.error('Error loading practice items:', error);
+      throw error;
     }
+
+    // Filter enabled items
+    const enabledItems = (items || []).filter(
+      (item: any) => {
+        const hasConfig = !!item.practice_modes_config;
+        const isEnabled = item.practice_modes_config?.enabled === true;
+        const hasModes = (item.practice_modes_config?.available_modes?.length || 0) > 0;
+        return hasConfig && isEnabled && hasModes;
+      }
+    );
+
+    console.log('🎮 [Mobile Practice] Enabled items:', enabledItems.length);
+    return enabledItems;
   }, [user?.id]);
+
+  /**
+   * Use cache for practice items
+   */
+  const {
+    data: practiceItems,
+    loading,
+    cached,
+    refresh,
+  } = useMobileCache<PracticeItem[]>({
+    storeName: 'practice_items',
+    key: `practice-items-${user?.id}`,
+    fetcher: fetchPracticeItems,
+    ttl: CACHE_TTL.PRACTICE_ITEMS, // 1 hour
+    enabled: !!user?.id,
+    onCacheHit: (data) => {
+      console.log('✅ [Practice] Using cached data');
+      // Load unlock statuses for cached data
+      loadUnlockStatuses(data);
+    },
+    onCacheMiss: () => {
+      console.log('❌ [Practice] Cache miss - fetching fresh data');
+    },
+  });
 
   /**
    * Load unlock status for all items and modes
    */
-  const loadUnlockStatuses = async (items: PracticeItem[]) => {
-    if (!user?.id) return;
+  const loadUnlockStatuses = useCallback(async (items: PracticeItem[]) => {
+    if (!user?.id || !items) return;
 
     const statuses: Record<string, UnlockStatus> = {};
 
@@ -120,13 +134,16 @@ export default function MobilePracticeModesPage() {
     }
 
     setUnlockStatuses(statuses);
-  };
+  }, [user?.id]);
 
+  /**
+   * Load unlock statuses when practice items are available
+   */
   useEffect(() => {
-    if (user?.id) {
-      loadPracticeItems();
+    if (practiceItems && practiceItems.length > 0) {
+      loadUnlockStatuses(practiceItems);
     }
-  }, [user?.id, loadPracticeItems]);
+  }, [practiceItems, loadUnlockStatuses]);
 
   /**
    * Handle item card click - open mode selection sheet
@@ -146,25 +163,30 @@ export default function MobilePracticeModesPage() {
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        backgroundColor: '#0F0F11',
-      }}>
-        <div style={{ color: 'white', fontSize: '18px' }}>Loading practice modes...</div>
-      </div>
+      <>
+        <OfflineBanner />
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          backgroundColor: '#0F0F11',
+        }}>
+          <div style={{ color: 'white', fontSize: '18px' }}>Loading practice modes...</div>
+        </div>
+      </>
     );
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#0F0F11',
-      paddingBottom: '80px'
-    }}>
-      {/* Header */}
+    <>
+      <OfflineBanner />
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#0F0F11',
+        paddingBottom: '80px'
+      }}>
+        {/* Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -196,15 +218,17 @@ export default function MobilePracticeModesPage() {
           ←
         </button>
         <div style={{ flex: 1 }}>
-          <h1 style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            color: 'white',
-            margin: 0,
-            marginBottom: '4px'
-          }}>
-            🎮 Practice Modes
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <h1 style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: 'white',
+              margin: 0,
+            }}>
+              🎮 Practice Modes
+            </h1>
+            {cached && <CacheIndicator cached={cached} />}
+          </div>
           <p style={{
             fontSize: '14px',
             color: '#93C5FD',
@@ -213,11 +237,28 @@ export default function MobilePracticeModesPage() {
             {user?.name || 'Student'}
           </p>
         </div>
+        <button
+          onClick={refresh}
+          style={{
+            background: 'rgba(0, 122, 255, 0.2)',
+            border: '1px solid rgba(0, 122, 255, 0.3)',
+            borderRadius: '8px',
+            padding: '8px 12px',
+            color: '#007AFF',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            minWidth: '44px',
+            minHeight: '44px',
+          }}
+        >
+          🔄
+        </button>
       </div>
 
       {/* Practice Items List */}
       <div style={{ padding: '16px' }}>
-        {practiceItems.length === 0 ? (
+        {!practiceItems || practiceItems.length === 0 ? (
           <div style={{
             textAlign: 'center',
             padding: '48px 24px',
@@ -356,7 +397,8 @@ export default function MobilePracticeModesPage() {
           unlockStatuses={unlockStatuses[selectedItem.id] || {}}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
