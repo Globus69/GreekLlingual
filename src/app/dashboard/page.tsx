@@ -387,8 +387,8 @@ export default function DashboardPage() {
                         />
                         <ActionTile
                             icon="📊"
-                            label={`16. ${t('action.progress_history')}`}
-                            onClick={() => console.log('🔥 Button 16: Progress History clicked')}
+                            label="16. Statistics"
+                            onClick={() => router.push('/stats')}
                         />
                     </div>
                 </div>
