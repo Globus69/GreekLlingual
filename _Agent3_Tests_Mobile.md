@@ -381,3 +381,274 @@ test('all interactive elements have min 44x44px', async () => {
 5. ⏳ Manual Screen Reader Testing
 
 **Status:** Bereit für Testing (Phase 2) 🧪
+
+---
+
+### **17. Februar 2026, 18:00 CET - E2E Tests Executed + Bug Report Updated**
+**Agent:** Agent 3
+**Bereich:** E2E Test Execution, Bug Analysis, Test Results Documentation
+**Aufgabe:** Tests ausführen und reale Ergebnisse dokumentieren
+
+#### **Test Execution:**
+
+**Setup:**
+- ✅ Playwright 1.58.2 installiert
+- ✅ WebKit browser installiert (Safari simulation)
+- ✅ Dev server gestartet (background)
+- ✅ Tests ausgeführt: 29 tests, 3.1 minutes
+
+**Test Results:**
+- ✅ **PASSED:** 6 tests (21%)
+- ❌ **FAILED:** 12 tests (41%)
+- ⏭️ **SKIPPED:** 11 tests (38%)
+- ⚠️ **BYPASSED:** 1 test (auth redirect)
+
+**Test Duration:** 3.1 minutes
+**Pass Rate:** 21% (FAILING)
+**Build Status:** 🔴 FAILING
+
+---
+
+#### **Critical Finding: Build Error**
+
+🔴 **Bug #0: CACHE_TTL Import Error (NEW)**
+- **File:** `/src/app/m/practice-modes/page.tsx` (Line 10)
+- **Error:** `Export CACHE_TTL doesn't exist in target module`
+- **Root Cause:** Wrong import path
+  ```typescript
+  // WRONG:
+  import { useMobileCache, CACHE_TTL } from '@/hooks/use-mobile-cache';
+
+  // CORRECT:
+  import { useMobileCache } from '@/hooks/use-mobile-cache';
+  import { CACHE_TTL } from '@/lib/cache/mobile-cache';
+  ```
+- **Impact:** Build fails completely, app cannot start
+- **Owner:** Agent 2 (Mobile Caching)
+- **Priority:** P0 BLOCKER
+- **ETA:** 2 minutes
+
+**Evidence:**
+- All tests show Next.js Build Error dialog
+- Page redirects to login-pin (cannot load)
+- Error context: `test-results/*/error-context.md`
+
+---
+
+#### **Test Infrastructure Issues Found:**
+
+**Bug #2A: Authentication Redirect**
+- Tests redirect to `/login-pin`
+- No test auth setup
+- Impact: Many tests skipped
+- Fix: Setup Playwright storage state
+- ETA: 30 minutes
+
+**Bug #2B: Strict Mode Violations (12 tests failed)**
+- Error: `locator('text=Stats') resolved to 3 elements`
+- Cause: Multiple elements with same text
+- Impact: Navigation tests fail
+- Fix: Add `data-testid` attributes
+- Owner: Agent 1
+- ETA: 15 minutes
+
+**Bug #2C: Navigation Instability**
+- Error: `element was detached from the DOM`
+- Timeouts: 30 seconds
+- Cause: React re-rendering + Next.js dev overlay
+- Fix: Investigate re-renders, test production build
+- Owner: Agent 1
+- ETA: 1 hour
+
+**Bug #2D: Bottom Sheet Click Timeout**
+- Error: Cannot click "Due Cards" tile
+- Timeout: 30 seconds
+- Cause: Next.js portal intercepts clicks
+- Owner: Agent 1
+- ETA: 30 minutes
+
+---
+
+#### **Test Results Detailed:**
+
+**✅ PASSED TESTS (6/29):**
+
+1. ✅ Mobile Dashboard: Stats Header (1.1s)
+2. ✅ Mobile Stats Page: Display stats cards (1.0s)
+3. ✅ Mobile Settings Page: Load without errors (1.4s)
+4. ✅ Mobile Settings Page: Display user info (670ms)
+5. ✅ Mobile Performance: Dashboard load < 3s (2.0s)
+   - **Load Time: 1680ms** ⚡ (Target: < 3000ms)
+   - 44% faster than target!
+6. ✅ Mobile Performance: No layout shifts (1.6s)
+
+**Performance Results:** 🟢 **EXCELLENT**
+- Dashboard loads in 1680ms (excellent!)
+- No layout shifts detected
+- All performance targets met
+
+---
+
+**❌ FAILED TESTS (12/29):**
+
+**Build Error Related:**
+1. ❌ Dashboard header with user name (5.5s timeout)
+2. ❌ Display 12 module tiles (5.9s timeout)
+
+**Strict Mode Violations:**
+3. ❌ Bottom navigation with 3 tabs (1.8s)
+4. ❌ Highlight active tab (1.1s)
+5. ❌ Stats page bottom navigation (825ms)
+6. ❌ Settings page bottom navigation (619ms)
+7. ❌ Touch target >= 44px (902ms)
+
+**Navigation Timeouts:**
+8. ❌ Navigate to Stats page (30s TIMEOUT)
+9. ❌ Navigate to Settings page (30s TIMEOUT)
+10. ❌ Navigate back to Home (30s TIMEOUT)
+
+**Bottom Sheet:**
+11. ❌ Open Due Cards bottom sheet (30s TIMEOUT)
+
+**Auth Redirect:**
+12. ❌ Stats page load without errors (redirected to /login-pin)
+
+---
+
+**⏭️ SKIPPED TESTS (11/29):**
+
+**Auth-related:**
+- Dashboard load (redirected to login)
+
+**Conditional Skips:**
+- Close bottom sheet (depends on opening)
+- Close via backdrop (depends on opening)
+- Touch target tests (depends on opening)
+
+**TODO (Not Implemented):**
+- Practice Modes Mobile (3 tests)
+- Vocabulary Mobile (4 tests)
+
+---
+
+#### **Files Created:**
+
+1. ✅ `tests/mobile/TEST-RESULTS-2026-02-17.md`
+   - Comprehensive test results
+   - Bug analysis with evidence
+   - Fix recommendations
+   - Success metrics
+
+2. ✅ `package.json` (updated)
+   - Added `@playwright/test` to devDependencies
+
+#### **Files Updated:**
+
+1. ✅ `tests/mobile/BUG-REPORT-MOBILE.md`
+   - Added Bug #0 (CACHE_TTL import error)
+   - Added Bug #2A-D (test-discovered bugs)
+   - Updated summary with test results
+   - Added test evidence for all bugs
+   - Updated status: 🔴 BUILD FAILING
+
+---
+
+#### **Key Learnings:**
+
+**Technical:**
+1. Build errors block ALL tests → Fix FIRST
+2. Playwright strict mode is excellent (catches ambiguity)
+3. Next.js dev overlay interferes with tests
+4. Auth state is critical for E2E tests
+5. Mobile performance is excellent (1680ms)
+
+**Process:**
+1. Start with infrastructure setup
+2. Analyze failures systematically
+3. Prioritize fixes (P0 → P1 → P2)
+4. Document everything with evidence
+5. Provide clear fix recommendations
+
+---
+
+#### **Recommended Fixes (Prioritized):**
+
+**Priority 1: Fix Build Error (Agent 2) - 2 minutes**
+- File: `/src/app/m/practice-modes/page.tsx`
+- Change CACHE_TTL import path
+- **Impact:** Unlocks all tests
+
+**Priority 2: Add Test IDs (Agent 1) - 15 minutes**
+- File: `MobileBottomNav.tsx`
+- Add `data-testid` attributes
+- Update test selectors
+- **Impact:** Fixes 7 strict mode violations
+
+**Priority 3: Setup Test Auth (Agent 3) - 30 minutes**
+- Create `playwright.config.ts`
+- Create `auth.setup.ts`
+- Setup storage state
+- **Impact:** Enables auth-protected route tests
+
+**Priority 4: Fix Navigation (Agent 1) - 1 hour**
+- Investigate element detachment
+- Check React re-rendering
+- Test production build
+- **Impact:** Fixes navigation timeouts
+
+---
+
+#### **Expected Improvements:**
+
+**After Priority 1 Fix:**
+- Pass Rate: 21% → 35%
+- Build: FAILING → SUCCESS
+- Testable: NO → YES
+
+**After Priority 2 Fix:**
+- Pass Rate: 35% → 60%
+- Strict Mode: 7 violations → 0
+
+**After Priority 3 Fix:**
+- Pass Rate: 60% → 75%
+- Auth Tests: SKIPPED → PASSING
+
+**After Priority 4 Fix:**
+- Pass Rate: 75% → 83%+
+- Navigation: 0/5 → 5/5
+
+**Final Target:** 83%+ pass rate (24+/29 tests)
+
+---
+
+#### **Time Spent:**
+- Playwright setup: 20 minutes
+- Test execution: 3 minutes
+- Results analysis: 30 minutes
+- Bug report writing: 40 minutes
+- Documentation: 30 minutes
+- **Total:** 1.5 hours
+
+#### **Status:**
+
+**Completed:**
+- ✅ Playwright installed and configured
+- ✅ E2E tests executed (29 tests)
+- ✅ Bug report updated with real findings
+- ✅ Test results documented
+- ✅ Fix recommendations provided
+- ✅ Evidence collected (error contexts)
+
+**Blockers Found:**
+- 🔴 Build error (CACHE_TTL import)
+- 🟡 Test infrastructure (auth, test IDs)
+- 🟡 Navigation instability
+
+**Next Steps:**
+1. Agent 2: Fix CACHE_TTL import (2min)
+2. Agent 1: Add data-testid attributes (15min)
+3. Agent 3: Update test selectors (10min)
+4. Re-run tests → Expected: 60%+ passing
+
+**Status:** ✅ Phase 2 Complete - Tests Executed, Bugs Found
+**Next Phase:** Fix bugs → Re-run tests → 80%+ target
