@@ -363,7 +363,65 @@ Diese Datei ist dein **Einstiegspunkt** als Agent. Sie verlinkt ALLE relevanten 
 - Wichtige Dokumentation hinzukommt
 - Struktur sich ändert
 
-**Letzte Aktualisierung:** 17. Februar 2026, 11:00 CET
+### 22. **Agent Output-Dateien** (17.02.2026)
+**Zweck:** Arbeitsergebnisse der 3 Agents
+
+#### Agent 1 (Testing):
+- ⏳ Noch nicht gestartet
+- Branch: `agent-1-testing`
+
+#### Agent 2 (i18n): ✅ COMPLETE
+- [`AGENT-2-STATUS.md`](./AGENT-2-STATUS.md) - Final Status
+- [`AGENT-2-FINDINGS.md`](./AGENT-2-FINDINGS.md) - Erkenntnisse
+- [`AGENT-2-SYNC.md`](./AGENT-2-SYNC.md) - 50% Checkpoint
+- [`AGENT-2-UPDATES.md`](./AGENT-2-UPDATES.md) - File Changes
+- Branch: `agent-2-i18n` ✅ MERGED
+- **Ergebnis:** RU + EL Translations komplett (250 RU Keys, 30 EL Keys)
+
+#### Agent 3 (Admin UI):
+- ⏳ Noch nicht gestartet
+- Branch: `agent-3-admin`
+
+---
+
+### 23. **Test-Checklisten**
+- [`i18n-TEST-CHECKLIST-Practice-Modes.md`](./i18n-TEST-CHECKLIST-Practice-Modes.md) - i18n Testing Guide (Agent 2)
+
+---
+
+### 24. **Modul-Spezifisch: Vocabulary** ⭐
+**WICHTIG:** Vocabulary-Modul hat eigene Dokumentation!
+- `modules/vocabulary/README.md` (falls vorhanden)
+- `modules/vocabulary/vocabulary-todo.md`
+- `modules/vocabulary/vocabulary-srs-parameters.md`
+
+---
+
+### 25. **Deployment & Security** ⭐
+**Zweck:** Production-Deployment und Sicherheit
+
+#### Deployment:
+- `docs/deployment/PRODUCTION-DEPLOYMENT.md`
+- `docs/deployment/QUICK-START.md`
+- `docs/deployment/UPSTASH-SETUP.md`
+
+#### Security:
+- `docs/security/SECURITY-STATUS.md`
+- `docs/security/login-pin-security.md`
+- `docs/security/security-implementation-plan.md`
+- `docs/AUTHORIZATION.md`
+- `docs/IP-WHITELISTING.md`
+
+---
+
+### 26. **Aktive Session-Dateien** (17.02.2026)
+- [`MASTER-SESSION-STATUS-170225.md`](./MASTER-SESSION-STATUS-170225.md) - Aktuelle Session
+- [`DESIGN-AUDIT-170225.md`](./DESIGN-AUDIT-170225.md) - Design Audit Report
+- [`_MASTER_170225_0900.md`](./_MASTER_170225_0900.md) - UI Enhancement Plan
+
+---
+
+**Letzte Aktualisierung:** 17. Februar 2026, 11:30 CET
 
 ---
 
