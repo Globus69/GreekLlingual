@@ -32,18 +32,19 @@
 ## 🔄 IN PROGRESS (Active Work)
 
 ### **Master:**
-- 🔄 Documentation Consolidation (Optimization #4)
-  - Status: 60% complete
-  - Action: Organizing .md files into archive/ and docs/
-  - ETA: 1h remaining
+- ✅ All 6 Optimizations COMPLETE!
+- 🎯 CHECKPOINT: 17. Februar 2026, 19:00 CET
+  - Status: Wartet auf User-Entscheidung
+  - Action: Mobile/Desktop Porting-Plan erstellt
+  - Reference: `RESTART-POINT-170226-1900.md`
+  - Next: Option A (Porting) oder Option B (Testing)?
 
 ### **Agent 1: Testing**
 - ⏳ Practice Modes User Flow Testing (Task #6)
-  - Status: Not started
-  - Branch: `agent-1-testing`
+  - Status: Prepared (PRACTICE-MODES-TESTING-SESSION.md ready)
   - Priority: HIGH
-  - Blocker: None
-  - Reference: `_Agent01_170225-0900.md`
+  - Blocker: Wartet auf User-Entscheidung
+  - ETA: 2-3h wenn gestartet
 
 ### **Agent 3: Admin UI**
 - 🔄 Admin UI Testing (Task #7)
@@ -56,7 +57,32 @@
 
 ## 📋 NEXT UP (Prioritized)
 
-### **High Priority:**
+### **🔥 CRITICAL DECISION POINT:**
+
+**User muss wählen zwischen:**
+
+**OPTION A: Mobile/Desktop Porting** ⭐ EMPFOHLEN
+- Phase 1: Stats Page zu Desktop (2-3h)
+- Phase 2: Settings Page zu Desktop (1-2h)
+- Reference: `MODULE-PORTING-PLAN.md`
+- Ergebnis: Desktop = feature-complete
+
+**OPTION B: Practice Modes Testing**
+- End-to-end Testing (2-3h)
+- Reference: `PRACTICE-MODES-TESTING-SESSION.md`
+- Ergebnis: Practice Modes = production-ready
+
+**OPTION C: Hybrid (Beides nacheinander)**
+- Erst Porting, dann Testing (6-8h gesamt)
+
+**OPTION D: Security** (httpOnly Cookies, 2-4h)
+**OPTION E: Vocabulary** (Phases 5-8, 9-13h)
+
+→ Siehe `REAL-STATUS-AND-PLAN.md` für Details
+
+---
+
+### **High Priority (nach Entscheidung):**
 
 1. **Complete Practice Modes Testing** (Task #6)
    - End-to-end user flow
@@ -65,17 +91,16 @@
    - Database verification
    - Time: 2-3h
 
-2. **Complete Admin UI Testing** (Task #7)
+2. **Port Stats + Settings to Desktop** (NEW)
+   - Stats Page: `/stats` (2-3h)
+   - Settings Page: `/settings` (1-2h)
+   - Time: 3-5h total
+
+3. **Complete Admin UI Testing** (Task #7)
    - Practice Config editing
    - Content Modal functionality
    - Save verification
    - Time: 1-2h
-
-3. **Performance Monitoring Setup** (Task #5)
-   - Lighthouse CI
-   - Bundle size tracking
-   - GitHub Actions integration
-   - Time: 4h
 
 ### **Medium Priority:**
 
