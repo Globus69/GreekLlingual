@@ -20,30 +20,58 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 safe-area-inset-bottom z-50">
-      <div className="flex justify-around items-center h-16 max-w-md mx-auto px-4">
+    <nav
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        backgroundColor: 'rgba(28, 28, 30, 0.95)',
+        backdropFilter: 'blur(20px)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+        padding: '8px 16px 12px',
+      }}
+    >
+      <div style={{
+        maxWidth: '448px',
+        margin: '0 auto',
+        display: 'flex',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+      }}>
         {tabs.map((tab) => {
           const active = isActive(tab.href);
           return (
             <Link
               key={tab.key}
               href={tab.href}
-              className={`
-                flex flex-col items-center justify-center
-                min-w-[60px] h-full
-                transition-all duration-200
-                ${active ? 'text-blue-600' : 'text-gray-500'}
-              `}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '8px 16px',
+                minWidth: '60px',
+                textDecoration: 'none',
+                transition: 'transform 0.2s ease',
+                transform: active ? 'scale(1.05)' : 'scale(1)',
+              }}
             >
-              <span className={`text-2xl mb-1 transition-transform ${active ? 'scale-110' : 'scale-100'}`}>
+              <span style={{
+                fontSize: '24px',
+                lineHeight: 1,
+              }}>
                 {tab.icon}
               </span>
-              <span className={`text-xs font-medium ${active ? 'font-bold' : ''}`}>
+              <span style={{
+                fontSize: '11px',
+                fontWeight: active ? '600' : '500',
+                color: active ? '#007AFF' : '#8E8E93',
+                whiteSpace: 'nowrap',
+              }}>
                 {tab.label}
               </span>
-              {active && (
-                <div className="absolute bottom-0 h-1 w-12 bg-blue-600 rounded-t-full" />
-              )}
             </Link>
           );
         })}

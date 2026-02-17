@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { supabase } from '@/db/supabase';
+import { useMobileCache } from '@/hooks/use-mobile-cache';
+import { CACHE_TTL } from '@/lib/cache/mobile-cache';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 import MobileBottomNav from '@/components/mobile/MobileBottomNav';
@@ -94,71 +96,126 @@ export default function MobileMemorySplitPage() {
   }, [startTime, gameComplete]);
 
   /**
-   * Fetch practice items and initialize game
+   * Fetcher function for practice items
+   * 🔧 FIX: Use cache instead of direct Supabase call
    */
-  useEffect(() => {
-    if (!user?.id) return;
-    loadGameData(pairCount);
-  }, [user?.id, pairCount]);
+  const fetchPracticeItems = useCallback(async (): Promise<PracticeItem[]> => {
+    if (!user?.id) return [];
+
+    console.log('🎮 [Memory Split] Fetching practice items');
+
+    const { data, error } = await supabase
+      .from('learning_items')
+      .select('*')
+      .eq('type', 'vocabulary')
+      .limit(24); // Fetch enough for max 12 pairs
+
+    if (error) {
+      console.error('Error fetching practice items:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn('No practice items found');
+      return [];
+    }
+
+    console.log('🎮 [Memory Split] Items loaded:', data.length);
+    return data as PracticeItem[];
+  }, [user?.id]);
 
   /**
-   * Load game data from Supabase
+   * Create card grids from practice items
    */
-  const loadGameData = async (pairs: number = 6) => {
-    try {
-      setLoading(true);
+  const createCardGrids = useCallback((items: PracticeItem[], pairs: number) => {
+    const selectedItems = items.slice(0, pairs);
 
-      // Fetch vocabulary items
-      const { data, error } = await supabase
-        .from('learning_items')
-        .select('*')
-        .eq('type', 'vocabulary')
-        .limit(pairs * 2);
+    // Create TOP cards (User Language)
+    const topCardsData: MemorySplitCard[] = selectedItems.map((item) => ({
+      id: `${item.id}-user`,
+      content: item.english,
+      language: 'user' as const,
+      pairId: item.id,
+      isFlipped: false,
+      isMatched: false,
+    }));
 
-      if (error) {
-        console.error('Error fetching practice items:', error);
-        return;
+    // Create BOTTOM cards (Greek)
+    const bottomCardsData: MemorySplitCard[] = selectedItems.map((item) => ({
+      id: `${item.id}-greek`,
+      content: item.greek,
+      language: 'greek' as const,
+      pairId: item.id,
+      isFlipped: false,
+      isMatched: false,
+      audioUrl: item.audio_url,
+    }));
+
+    // Shuffle both grids independently
+    setTopCards(shuffleArray([...topCardsData]));
+    setBottomCards(shuffleArray([...bottomCardsData]));
+  }, []);
+
+  /**
+   * 🔧 FIX: Stable callbacks to prevent re-render loops
+   */
+  const handleCacheHit = useCallback((data: PracticeItem[]) => {
+    console.log('✅ [Memory Split] Using cached data');
+    createCardGrids(data, pairCount);
+  }, [createCardGrids, pairCount]);
+
+  const handleCacheMiss = useCallback(() => {
+    console.log('❌ [Memory Split] Cache miss - fetching fresh data');
+  }, []);
+
+  /**
+   * Use cache for practice items
+   * 🔧 FIX: Cache practice items for offline support
+   */
+  const {
+    data: practiceItems,
+    loading: cacheLoading,
+    cached,
+    refresh,
+  } = useMobileCache<PracticeItem[]>({
+    storeName: 'practice_items',
+    key: `practice-items-${user?.id}`,
+    fetcher: fetchPracticeItems,
+    ttl: CACHE_TTL.PRACTICE_ITEMS, // 1 hour
+    enabled: !!user?.id,
+    onCacheHit: handleCacheHit,
+    onCacheMiss: handleCacheMiss,
+  });
+
+  /**
+   * Create cards when fresh data is fetched or pairCount changes
+   * 🔧 FIX: Handle both cache miss and pair count changes
+   */
+  useEffect(() => {
+    if (practiceItems && practiceItems.length > 0) {
+      if (!cached) {
+        // Fresh data (cache miss) - create cards
+        createCardGrids(practiceItems, pairCount);
       }
-
-      if (!data || data.length === 0) {
-        console.warn('No practice items found');
-        setLoading(false);
-        return;
-      }
-
-      // Take first N items for pairs
-      const items = data.slice(0, pairs) as PracticeItem[];
-
-      // Create TOP cards (User Language)
-      const topCardsData: MemorySplitCard[] = items.map((item) => ({
-        id: `${item.id}-user`,
-        content: item.english,
-        language: 'user' as const,
-        pairId: item.id,
-        isFlipped: false,
-        isMatched: false,
-      }));
-
-      // Create BOTTOM cards (Greek)
-      const bottomCardsData: MemorySplitCard[] = items.map((item) => ({
-        id: `${item.id}-greek`,
-        content: item.greek,
-        language: 'greek' as const,
-        pairId: item.id,
-        isFlipped: false,
-        isMatched: false,
-        audioUrl: item.audio_url,
-      }));
-
-      // Shuffle both grids independently
-      setTopCards(shuffleArray([...topCardsData]));
-      setBottomCards(shuffleArray([...bottomCardsData]));
-      setLoading(false);
-    } catch (err) {
-      console.error('Error loading game data:', err);
-      setLoading(false);
     }
-  };
+  }, [practiceItems, cached, pairCount, createCardGrids]);
+
+  /**
+   * Update cards when pairCount changes (but data is cached)
+   */
+  useEffect(() => {
+    if (practiceItems && practiceItems.length > 0 && cached) {
+      // Cached data but pair count changed - recreate cards
+      createCardGrids(practiceItems, pairCount);
+    }
+  }, [pairCount]); // Only trigger on pairCount change
+
+  /**
+   * Set loading state from cache hook
+   */
+  useEffect(() => {
+    setLoading(cacheLoading);
+  }, [cacheLoading]);
 
   /**
    * Shuffle array (Fisher-Yates)
@@ -330,6 +387,7 @@ export default function MobileMemorySplitPage() {
 
   /**
    * Restart game
+   * 🔧 FIX: Reshuffle existing cards instead of refetching
    */
   const handleRestart = () => {
     setSelectedTop(null);
@@ -339,7 +397,11 @@ export default function MobileMemorySplitPage() {
     setGameComplete(false);
     setScore(0);
     setRevealAll(false);
-    loadGameData(pairCount);
+
+    // Reshuffle cards with current pair count
+    if (practiceItems && practiceItems.length > 0) {
+      createCardGrids(practiceItems, pairCount);
+    }
   };
 
   /**

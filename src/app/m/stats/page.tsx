@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/use-translation';
 import { useStatsData, formatStudyTime } from '@/hooks/use-stats-data';
 import WeeklyActivityChart from '@/components/weekly-activity-chart';
+import MobileBottomNav from '@/components/mobile/MobileBottomNav';
 
 export default function MobileStatsPage() {
   const { user, isAuthenticated } = useAuth();
@@ -13,6 +14,7 @@ export default function MobileStatsPage() {
   const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const { stats, loading } = useStatsData(mounted ? user?.id : undefined);
+  const [focusedSection, setFocusedSection] = useState<'detailed' | 'weekly' | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -39,9 +41,23 @@ export default function MobileStatsPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0F0F11', padding: '16px', paddingBottom: '80px' }}>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#0F0F11',
+      padding: '12px',
+      paddingBottom: '80px',
+      maxWidth: '100vw',
+      overflowX: 'hidden'
+    }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingTop: '24px', paddingBottom: '24px' }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        paddingTop: '12px',
+        paddingBottom: '16px',
+        marginBottom: '8px'
+      }}>
         <button
           onClick={() => router.push('/m')}
           style={{
@@ -51,15 +67,36 @@ export default function MobileStatsPage() {
             color: 'white',
             cursor: 'pointer',
             padding: 0,
+            minWidth: '44px',
+            minHeight: '44px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           ←
         </button>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={{
+            fontSize: 'clamp(18px, 5vw, 24px)',
+            fontWeight: 'bold',
+            color: 'white',
+            margin: 0,
+            marginBottom: '4px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
             📊 {t('perf.title') || 'Performance Statistics'}
           </h1>
-          <p style={{ fontSize: '14px', color: '#93C5FD', margin: 0 }}>
+          <p style={{
+            fontSize: '14px',
+            color: '#93C5FD',
+            margin: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
             {user?.name || 'Student'}
           </p>
         </div>
@@ -68,9 +105,9 @@ export default function MobileStatsPage() {
       {/* Main Stats Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '12px',
-        marginBottom: '16px',
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+        gap: '8px',
+        marginBottom: '12px',
       }}>
         {/* Streak */}
         <StatCard
@@ -127,120 +164,154 @@ export default function MobileStatsPage() {
         />
       </div>
 
-      {/* Detailed Stats */}
+      {/* Focused Section Backdrop */}
+      {focusedSection && (
+        <div
+          onClick={() => setFocusedSection(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            zIndex: 60,
+            backdropFilter: 'blur(4px)',
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+        />
+      )}
+
+      {/* Side-by-Side Stats Container */}
       <div style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '16px',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+        gap: '8px',
+        marginBottom: '12px',
       }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'white', marginBottom: '16px', marginTop: 0 }}>📈 Detailed Statistics</h2>
+        {/* Detailed Stats */}
+        <div
+          onClick={() => setFocusedSection(focusedSection === 'detailed' ? null : 'detailed')}
+          style={focusedSection === 'detailed' ? {
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            maxWidth: '380px',
+            maxHeight: '80vh',
+            zIndex: 70,
+            backgroundColor: '#1C1C1E',
+            borderRadius: '16px',
+            padding: '20px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            overflowY: 'auto',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            touchAction: 'manipulation'
+          } : {
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '12px',
+            padding: '16px 12px',
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            minHeight: '110px',
+            touchAction: 'manipulation'
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
+            <h2 style={{ fontSize: 'clamp(14px, 4vw, 16px)', fontWeight: 'bold', color: 'white', margin: 0 }}>📈 Stats</h2>
+            <span style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#93C5FD' }}>
+              {focusedSection === 'detailed' ? 'Tap to close' : 'Tap to view'}
+            </span>
+          </div>
 
-        <StatRow
-          label="Total Reviews"
-          value={stats.progressOverview?.total_reviews || 0}
-        />
-        <StatRow
-          label="Total Sessions"
-          value={stats.progressOverview?.total_sessions || 0}
-        />
-        <StatRow
-          label="Study Time"
-          value={formatStudyTime(stats.totalStudyTime || 0)}
-        />
-        <StatRow
-          label="Avg Session"
-          value={formatStudyTime(stats.avgSessionTime || 0)}
-        />
-        <StatRow
-          label="Consistency"
-          value={`${Math.round(stats.consistencyScore || 0)}%`}
-        />
-        <StatRow
-          label="Improvement Rate"
-          value={`${(stats.progressOverview?.improvement_rate || 0) > 0 ? '+' : ''}${Math.round(stats.progressOverview?.improvement_rate || 0)}%`}
-        />
-        <StatRow label="Level" value={stats.level} />
-      </div>
+          {focusedSection === 'detailed' && (
+            <div style={{ animation: 'fadeIn 0.3s ease-out', marginTop: '16px', textAlign: 'left' }}>
+              <h2 style={{ fontSize: 'clamp(16px, 4.5vw, 18px)', fontWeight: 'bold', color: 'white', marginBottom: '12px', marginTop: 0 }}>Detailed Stats</h2>
+              <StatRow
+                label="Total Reviews"
+                value={stats.progressOverview?.total_reviews || 0}
+              />
+              <StatRow
+                label="Total Sessions"
+                value={stats.progressOverview?.total_sessions || 0}
+              />
+              <StatRow
+                label="Study Time"
+                value={formatStudyTime(stats.totalStudyTime || 0)}
+              />
+              <StatRow
+                label="Avg Session"
+                value={formatStudyTime(stats.avgSessionTime || 0)}
+              />
+              <StatRow
+                label="Consistency"
+                value={`${Math.round(stats.consistencyScore || 0)}%`}
+              />
+              <StatRow
+                label="Improvement Rate"
+                value={`${(stats.progressOverview?.improvement_rate || 0) > 0 ? '+' : ''}${Math.round(stats.progressOverview?.improvement_rate || 0)}%`}
+              />
+              <StatRow label="Level" value={stats.level} />
+            </div>
+          )}
+        </div>
 
-      {/* Weekly Activity Chart */}
-      <div style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '16px',
-      }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'white', marginBottom: '16px', marginTop: 0 }}>📊 Weekly Activity</h2>
-        <WeeklyActivityChart data={stats.weeklyActivity || []} />
-      </div>
+        {/* Weekly Activity Chart */}
+        <div
+          onClick={() => setFocusedSection(focusedSection === 'weekly' ? null : 'weekly')}
+          style={focusedSection === 'weekly' ? {
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            maxWidth: '380px',
+            zIndex: 70,
+            backgroundColor: '#1C1C1E',
+            borderRadius: '16px',
+            padding: '20px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            touchAction: 'manipulation'
+          } : {
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '12px',
+            padding: '16px 12px',
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            minHeight: '110px',
+            touchAction: 'manipulation'
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
+            <h2 style={{ fontSize: 'clamp(14px, 4vw, 16px)', fontWeight: 'bold', color: 'white', margin: 0 }}>📊 Activity</h2>
+            <span style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#93C5FD' }}>
+              {focusedSection === 'weekly' ? 'Tap to close' : 'Tap to view'}
+            </span>
+          </div>
 
-      {/* Bottom Navigation */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          backgroundColor: 'rgba(28, 28, 30, 0.95)',
-          backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '8px 16px 12px',
-        }}
-      >
-        <div style={{ maxWidth: '448px', margin: '0 auto', display: 'flex', justifyContent: 'space-around' }}>
-          <button
-            onClick={() => router.push('/m')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '8px 16px',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ fontSize: '24px' }}>🏠</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Home</span>
-          </button>
-          <button
-            onClick={() => router.push('/m/stats')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '8px 16px',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ fontSize: '24px' }}>📊</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#007AFF' }}>Stats</span>
-          </button>
-          <button
-            onClick={() => router.push('/m/settings')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '8px 16px',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ fontSize: '24px' }}>⚙️</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Settings</span>
-          </button>
+          {focusedSection === 'weekly' && (
+            <div style={{ animation: 'fadeIn 0.3s ease-out', marginTop: '16px' }}>
+              <h2 style={{ fontSize: 'clamp(16px, 4.5vw, 18px)', fontWeight: 'bold', color: 'white', marginBottom: '12px', marginTop: 0 }}>Weekly Activity</h2>
+              <WeeklyActivityChart data={stats.weeklyActivity || []} />
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }
@@ -271,23 +342,39 @@ function StatCard({
     <div
       style={{
         background: colorMap[color] || '#3B82F6',
-        borderRadius: '16px',
-        padding: '16px',
+        borderRadius: '12px',
+        padding: '12px 8px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '120px',
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+        minHeight: '110px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
         transition: 'transform 0.2s ease',
+        touchAction: 'manipulation',
       }}
-      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
     >
-      <div style={{ fontSize: '36px', marginBottom: '8px' }}>{icon}</div>
-      <div style={{ fontSize: '30px', fontWeight: 'bold', color: 'white', marginBottom: '4px' }}>{value}</div>
-      {suffix && <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>{suffix}</div>}
-      <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.9)', marginTop: '4px', fontWeight: '500' }}>{label}</div>
+      <div style={{ fontSize: 'clamp(24px, 6vw, 32px)', marginBottom: '4px' }}>{icon}</div>
+      <div style={{
+        fontSize: 'clamp(22px, 5vw, 28px)',
+        fontWeight: 'bold',
+        color: 'white',
+        marginBottom: '2px',
+        lineHeight: 1.2
+      }}>{value}</div>
+      {suffix && <div style={{
+        fontSize: 'clamp(11px, 2.5vw, 13px)',
+        color: 'rgba(255, 255, 255, 0.8)',
+        whiteSpace: 'nowrap'
+      }}>{suffix}</div>}
+      <div style={{
+        fontSize: 'clamp(10px, 2.5vw, 12px)',
+        color: 'rgba(255, 255, 255, 0.9)',
+        marginTop: '2px',
+        fontWeight: '500',
+        textAlign: 'center',
+        lineHeight: 1.2
+      }}>{label}</div>
     </div>
   );
 }
@@ -298,11 +385,22 @@ function StatRow({ label, value }: { label: string; value: string | number }) {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '8px 0',
+      padding: '10px 0',
       borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+      gap: '12px',
     }}>
-      <span style={{ color: '#93C5FD' }}>{label}</span>
-      <span style={{ color: 'white', fontWeight: '600' }}>{value}</span>
+      <span style={{
+        color: '#93C5FD',
+        fontSize: 'clamp(13px, 3.5vw, 14px)',
+        flex: 1,
+        minWidth: 0
+      }}>{label}</span>
+      <span style={{
+        color: 'white',
+        fontWeight: '600',
+        fontSize: 'clamp(13px, 3.5vw, 15px)',
+        whiteSpace: 'nowrap'
+      }}>{value}</span>
     </div>
   );
 }
