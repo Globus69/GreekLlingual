@@ -8,19 +8,21 @@
 
 ## 📊 OVERALL STATUS
 
-**Last Update:** 17. Februar 2026, 21:00 CET
-**Overall Progress:** 75% → 75% (Mobile-fokussiert)
+**Last Update:** 17. Februar 2026, 21:45 CET
+**Overall Progress:** 75% → 75% (Mobile-fokussiert, Agent-Prompts bereit)
 **Active Strategy:** 📱 MOBILE-FIRST (verbindlich & irreversibel)
+**Status:** ✅ 3 Mobile Agent-Prompts erstellt, bereit für Ausführung
 
 ---
 
 ## 🚀 AGENT STATUS
 
 ### **Agent 1: UI-Komponenten & Layout (Mobile)**
-**Status:** ✅ READY
+**Status:** ✅ READY - Prompt erstellt!
 **Verantwortung:** Mobile UI, Touch, Gestures
 **Aktueller Fokus:** Practice Modes Mobile UI
 **Datei:** `_Agent1_UI_Mobile.md`
+**Prompt:** `_Agent01_Mobile_170225-2130.md` ⭐ NEU!
 
 **Fertig:**
 - ✅ Mobile Dashboard (12 Tiles, Bottom Nav)
@@ -29,21 +31,25 @@
 - ✅ Mobile Bottom Navigation
 - ✅ Mobile Bottom Sheets (2x)
 
-**In Arbeit:**
-- ⏳ Wartet auf Anweisung
+**Aktueller Auftrag (NEU):**
+- 🎯 Practice Modes Mobile UI implementieren
+  - Page: `/m/practice-modes/page.tsx`
+  - Components: Bottom Sheets, Game Modes
+  - Time: 3-4h
+  - Branch: `agent-1-mobile-practice`
 
-**Nächste Aufgaben:**
-1. Practice Modes Mobile UI (3-4h)
-2. Vocabulary Mobile UI (2-3h)
-3. Grammar Mobile UI (2-3h)
+**Nächste Aufgaben (nach Completion):**
+1. Grammar Mobile UI (2-3h)
+2. Daily Phrases Mobile UI (2h)
 
 ---
 
 ### **Agent 2: State-Management, Logic, API (Mobile)**
-**Status:** ✅ READY
+**Status:** ✅ READY - Prompt erstellt!
 **Verantwortung:** State, Logic, API, Performance
-**Aktueller Fokus:** Mobile-Optimierungen
+**Aktueller Fokus:** Vocabulary Mobile UI + FSRS Integration
 **Datei:** `_Agent2_Logic_Mobile.md`
+**Prompt:** `_Agent02_Mobile_170225-2130.md` ⭐ NEU!
 
 **Fertig:**
 - ✅ Auth Context
@@ -53,34 +59,43 @@
 - ✅ Stats Data Hook
 - ✅ Streak Hook
 
-**In Arbeit:**
-- ⏳ Wartet auf Anweisung
+**Aktueller Auftrag (NEU):**
+- 🎯 Vocabulary Mobile UI implementieren
+  - Page: `/m/vocabulary/page.tsx`
+  - Features: Card Flip, FSRS-6 Rating, Swipe Gestures
+  - Time: 2-3h
+  - Branch: `agent-2-mobile-vocabulary`
 
-**Nächste Aufgaben:**
-1. Practice Modes Mobile Logic (2-3h)
-2. Vocabulary Mobile Data Layer (2h)
-3. Performance Optimization (3-4h)
+**Nächste Aufgaben (nach Completion):**
+1. Mobile Data Caching (2-3h)
+2. Performance Optimization (3-4h)
 
 ---
 
 ### **Agent 3: Tests, Performance, Accessibility (Mobile)**
-**Status:** ✅ READY
+**Status:** ✅ READY - Prompt erstellt!
 **Verantwortung:** Testing, Performance, A11y
-**Aktueller Fokus:** Mobile Testing
+**Aktueller Fokus:** Mobile E2E Testing + Performance Audit
 **Datei:** `_Agent3_Tests_Mobile.md`
+**Prompt:** `_Agent03_Mobile_170225-2130.md` ⭐ NEU!
 
 **Fertig:**
 - ✅ Test-Strategie definiert
 - ✅ Performance-Targets festgelegt
 - ✅ A11y-Checkliste erstellt
 
-**In Arbeit:**
-- ⏳ Wartet auf Anweisung
+**Aktueller Auftrag (NEU):**
+- 🎯 Mobile E2E Tests + Performance Audit
+  - E2E Tests: Playwright (Dashboard, Practice, Vocab)
+  - Performance: Lighthouse Mobile (Score > 90)
+  - A11y: Touch Targets, Screen Reader, Contrast
+  - Bug Report erstellen
+  - Time: 3-4h
+  - Branch: `agent-3-mobile-testing`
 
-**Nächste Aufgaben:**
-1. Practice Modes E2E Tests (3-4h)
-2. Mobile Performance Testing (2h)
-3. Mobile A11y Audit (3h)
+**Nächste Aufgaben (nach Completion):**
+1. Mobile A11y Audit (weitere Details)
+2. Performance Optimization (Umsetzung)
 
 ---
 
