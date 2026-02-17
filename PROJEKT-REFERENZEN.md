@@ -2,7 +2,7 @@
 
 **Projekt:** HellenicHorizons GreekLingua Dashboard
 **Zweck:** Zentrale Referenz für Claude Agents zur eigenständigen Entwicklung
-**Aktualisiert:** 17. Februar 2026
+**Aktualisiert:** 17. Februar 2026, 16:00 CET
 
 ---
 
@@ -12,9 +12,35 @@ Diese Datei ist dein **Einstiegspunkt** als Agent. Sie verlinkt ALLE relevanten 
 
 **Workflow:**
 1. **PFLICHT:** Lies zuerst die "Essential Reading" Dateien
-2. **KONTEXT:** Lies Projekt-Übersicht für technisches Verständnis
-3. **AKTUELL:** Check aktuelle TODOs und Session-Status
+2. **AKTUELL:** Check [`CURRENT-WORK.md`](./CURRENT-WORK.md) für aktuellen Status ⭐ NEU!
+3. **KONTEXT:** Lies Projekt-Übersicht für technisches Verständnis
 4. **BEI BEDARF:** Nutze Implementation Guides, Troubleshooting, Logs
+
+---
+
+## 📁 NEUE DOKUMENTATIONS-STRUKTUR (17.02.2026)
+
+**Optimierung #4: Documentation Consolidation durchgeführt!**
+
+### **Root-Verzeichnis (20 Dateien):**
+Nur essenzielle, aktive Dokumente:
+- Core docs (CLAUDE.md, start.md, CURRENT-WORK.md)
+- Active work (IMPROVMENT-16-02-25.md, TODO-Audit)
+- Workflow (TASK-TRACKING, AGENT-COORDINATION, DAILY-STANDUP)
+- Optimizations (OPTIMIERUNGSKONZEPT, DESIGN-TOKENS, LINTER-CONFIG)
+- Agent prompts (_Agent01/02/03_*.md, _MASTER_*.md)
+
+### **archive/ (23 Dateien archiviert):**
+- `archive/sessions/` - Alte Session-Logs
+- `archive/agents/` - Abgeschlossene Agent-Outputs (Agent 2)
+- `archive/old-status/` - Überholte Status-Files
+
+### **docs/ (Neu organisiert):**
+- `docs/implementation/` - Implementation Guides (Practice Modes, Stats)
+- `docs/testing/` - Test-Checklisten
+- `docs/security/` - Security Audits, Tests, Findings
+
+**Vorteil:** Root von 44 → 20 Dateien reduziert! (+55% Übersichtlichkeit)
 
 ---
 
