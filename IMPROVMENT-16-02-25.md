@@ -1,6 +1,31 @@
 # Practice Modes Implementation - Status Report
 **Date:** 16. Februar 2026
-**Last Update:** 19:45 CET (Updated with Testing Plan)
+**Last Update:** 17. Februar 2026, 10:30 CET (Architecture Change: Separate Page)
+
+---
+
+## 🏗️ ARCHITEKTUR-ÄNDERUNG (17. Februar 2026)
+
+### ✅ Practice Modes auf separate Page verschoben
+
+**WICHTIGE ÄNDERUNG:** Practice Modes wurde aus dem Dashboard entfernt und auf eine eigenständige Seite verschoben.
+
+#### Neue Struktur:
+- **Route:** `/practice-modes` (eigene Next.js Page)
+- **Datei:** `src/app/practice-modes/page.tsx`
+- **Dashboard:** Komplett bereinigt, nur noch Link zu Practice Modes (Button 13)
+
+#### Vorteile:
+- ✅ Dashboard bleibt stabil während Entwicklung
+- ✅ Isolierte Entwicklung möglich
+- ✅ Einfacheres Debugging
+- ✅ Saubere Trennung der Concerns
+
+#### Details:
+- **Dashboard bereinigt:** Alle Practice Modes Imports, State, Components entfernt
+- **Loading-Screen:** Wiederhergestellt (war temporär deaktiviert)
+- **Navigation:** Action Tile 13 führt zu `/practice-modes`
+- **Styling:** Konsistent mit Rest der App (Gradient, Glassmorphism)
 
 ---
 
@@ -43,8 +68,14 @@
 #### 🧪 SCHRITT 1: Practice Modes User Flow Testing (30 Min)
 **Ziel:** End-to-End Flow komplett durchspielen
 
-- [ ] **1.1 Dialog öffnen**
-  - Dashboard öffnen → Practice Modes Section finden
+- [ ] **1.1 Practice Modes Page öffnen**
+  - Dashboard öffnen → Button 13 "🎮 Practice Modes" klicken
+  - **ODER** direkt: `http://localhost:3000/practice-modes`
+  - **Erwartet:** Separate Practice Modes Page lädt mit Header + Section
+  - **Falls Error:** Console-Fehler notieren
+
+- [ ] **1.2 Dialog öffnen**
+  - Practice Modes Section finden
   - "Matching" Button bei einem Item klicken (Hello oder Water - threshold=0)
   - **Erwartet:** Dialog öffnet sich mit Matching Game
   - **Falls Error:** Console-Fehler notieren

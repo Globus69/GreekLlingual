@@ -175,12 +175,35 @@
   ```
 - **Review-Logs:** Vollständige Historie in `fsrs_review_logs`
 
-### 2.5 Weitere Modi (in Dokumentation erwähnt, ggf. geplant)
-- Matching-Spiele (Quizlet-ähnlich)
-- Multiple Choice
-- Schreib-Übungen
-- Hör-Übungen
-- Gravity-ähnliche Spiele (siehe TODO.md)
+### 2.5 Practice Modes (Quizlet-style, in Finalisierung)
+**Status:** 🟡 Implementiert, Testing läuft (Stand: 17. Februar 2026)
+**Route:** `/practice-modes` (separate standalone page)
+**Pfad:** `src/app/practice-modes/page.tsx`
+
+**Features:**
+- **Matching Game:** Click-basierte Paarung (Greek ↔ English)
+- **Multiple Choice:** Timed quiz mit 4 Optionen
+- **Write Input:** Fuzzy-Matching mit Levenshtein-Algorithmus
+- **FSRS Integration:** Score → Rating (1-4) → Updates FSRS schedule
+- **Backend-konfigurierbar:** Admin kann Modi pro Item aktivieren/deaktivieren
+- **Unlock-Logik:** Modes unlock nach X FSRS reviews (threshold)
+- **i18n Support:** EN, DE, ES translations
+
+**Technische Details:**
+- Database: `practice_modes_config` (JSONB), `practice_attempts` table
+- RPCs: `get_practice_config`, `record_practice_attempt`, `get_practice_stats`
+- Components: `practice-mode-dialog.tsx`, `matching-game.tsx`, `multiple-choice-quiz.tsx`, `write-input-practice.tsx`
+- Admin UI: `practice-config-form.tsx` (in Content Modal)
+
+**Zugriff:**
+- Dashboard → Button 13: "🎮 Practice Modes"
+- Direkt: `http://localhost:3000/practice-modes`
+
+### 2.6 Weitere geplante Modi
+- Hör-Übungen (Audio-Only)
+- Gravity-ähnliche Spiele
+- Speed-Typing Challenge
+- Crossword Puzzles
 
 ---
 

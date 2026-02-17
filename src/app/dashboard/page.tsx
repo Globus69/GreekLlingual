@@ -22,8 +22,6 @@ import { StreakDisplay } from '@/components/dashboard/streak-display';
 import { StreakMilestoneToast } from '@/components/dashboard/streak-milestone-toast';
 import { useStreak } from '@/hooks/use-streak';
 import { useDeviceDetection } from '@/hooks/use-device-detection';
-import { PracticeModesSection } from '@/components/dashboard/practice-modes-section';
-import { PracticeModesTestDialog } from '@/components/dashboard/practice-modes-test-dialog';
 import VocabularyStatsWidget from '@/components/dashboard/vocabulary-stats-widget';
 
 interface ActionTileProps {
@@ -64,7 +62,6 @@ export default function DashboardPage() {
     const [isDailyPhrasesDialogOpen, setIsDailyPhrasesDialogOpen] = useState(false);
     const [isDueCardsDialogOpen, setIsDueCardsDialogOpen] = useState(false);
     const [isWeakWordsDialogOpen, setIsWeakWordsDialogOpen] = useState(false);
-    const [isPracticeModesTestDialogOpen, setIsPracticeModesTestDialogOpen] = useState(false);
     const [masteryProgress, setMasteryProgress] = useState(38);
     const [stats, setStats] = useState({ streak: 0, words: 47, weak: 'Verbs' });
     const { t } = useTranslation();
@@ -177,14 +174,13 @@ export default function DashboardPage() {
         }
     }, [user, authLoading, router, updateStreak, getMilestoneMessage, fetchStats]);
 
-    // AGGRESSIVE FIX: Skip loading screen entirely for debugging
-    // if (authLoading || loading) {
-    //     return (
-    //         <div className="login-overlay">
-    //             <h1 style={{ color: 'white', fontSize: '24px' }}>🏛️ Loading...</h1>
-    //         </div>
-    //     );
-    // }
+    if (authLoading || loading) {
+        return (
+            <div className="login-overlay">
+                <h1 style={{ color: 'white', fontSize: '24px' }}>🏛️ {authLoading ? t('dashboard.authenticating') : t('dashboard.loading')}</h1>
+            </div>
+        );
+    }
 
     return (
         <div id="app" className="dashboard-layout">
@@ -375,9 +371,9 @@ export default function DashboardPage() {
 
                         {/* Row 4 */}
                         <ActionTile
-                            icon="📝"
-                            label={`13. ${t('action.test')}`}
-                            onClick={() => console.log('🔥 Button 13: Test clicked')}
+                            icon="🎮"
+                            label="13. Practice Modes"
+                            onClick={() => router.push('/practice-modes')}
                         />
                         <ActionTile
                             icon="🏛️"
@@ -395,52 +391,6 @@ export default function DashboardPage() {
                             onClick={() => console.log('🔥 Button 16: Progress History clicked')}
                         />
                     </div>
-                </div>
-
-                {/* GREEN TEST BUTTON - Practice Modes Test */}
-                <div className="mt-8 px-4 md:px-6 flex justify-center">
-                    <button
-                        onClick={() => setIsPracticeModesTestDialogOpen(true)}
-                        style={{
-                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '12px',
-                            padding: '16px 32px',
-                            fontSize: '18px',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                            transition: 'all 0.3s ease',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
-                        }}
-                    >
-                        <span style={{ fontSize: '24px' }}>🎮</span>
-                        <span>Test Practice Modes</span>
-                    </button>
-                </div>
-
-                {/* Practice Modes Section - ENABLED FOR TESTING */}
-                <div className="mt-8 px-4 md:px-6" style={{
-                    background: 'rgba(255, 0, 0, 0.1)',
-                    border: '2px solid red',
-                    padding: '20px',
-                    borderRadius: '8px'
-                }}>
-                    <p style={{ color: 'lime', fontWeight: 'bold', marginBottom: '10px' }}>
-                        🔍 DEBUG: Practice Modes Section Container Rendered
-                    </p>
-                    <PracticeModesSection />
                 </div>
             </main>
 
@@ -493,12 +443,6 @@ export default function DashboardPage() {
             <WeakWordsDialog
                 isOpen={isWeakWordsDialogOpen}
                 onClose={() => setIsWeakWordsDialogOpen(false)}
-            />
-
-            {/* Practice Modes Test Dialog - NEW */}
-            <PracticeModesTestDialog
-                isOpen={isPracticeModesTestDialogOpen}
-                onClose={() => setIsPracticeModesTestDialogOpen(false)}
             />
         </div>
     );
