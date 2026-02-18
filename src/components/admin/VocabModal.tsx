@@ -26,19 +26,15 @@ export default function VocabModal({ mode, entry, onClose, onSave }: VocabModalP
 
         en_translation: entry?.en_translation || '',
         en_importance_reason: entry?.en_importance_reason || '',
-        en_audio_url: entry?.en_audio_url || '',
 
         de_translation: entry?.de_translation || '',
         de_importance_reason: entry?.de_importance_reason || '',
-        de_audio_url: entry?.de_audio_url || '',
 
         es_translation: entry?.es_translation || '',
         es_importance_reason: entry?.es_importance_reason || '',
-        es_audio_url: entry?.es_audio_url || '',
 
         ru_translation: entry?.ru_translation || '',
         ru_importance_reason: entry?.ru_importance_reason || '',
-        ru_audio_url: entry?.ru_audio_url || '',
 
         level: entry?.level || 'A1',
         difficulty: entry?.difficulty || 'easy',
@@ -238,10 +234,8 @@ export default function VocabModal({ mode, entry, onClose, onSave }: VocabModalP
                             onToggle={() => toggleSection('en')}
                             translation={formData.en_translation}
                             importanceReason={formData.en_importance_reason}
-                            audioUrl={formData.en_audio_url}
                             onTranslationChange={(val) => setFormData({ ...formData, en_translation: val })}
                             onReasonChange={(val) => setFormData({ ...formData, en_importance_reason: val })}
-                            onAudioChange={(val) => setFormData({ ...formData, en_audio_url: val })}
                         />
 
                         {/* German Section */}
@@ -252,10 +246,8 @@ export default function VocabModal({ mode, entry, onClose, onSave }: VocabModalP
                             onToggle={() => toggleSection('de')}
                             translation={formData.de_translation}
                             importanceReason={formData.de_importance_reason}
-                            audioUrl={formData.de_audio_url}
                             onTranslationChange={(val) => setFormData({ ...formData, de_translation: val })}
                             onReasonChange={(val) => setFormData({ ...formData, de_importance_reason: val })}
-                            onAudioChange={(val) => setFormData({ ...formData, de_audio_url: val })}
                         />
 
                         {/* Spanish Section */}
@@ -266,10 +258,8 @@ export default function VocabModal({ mode, entry, onClose, onSave }: VocabModalP
                             onToggle={() => toggleSection('es')}
                             translation={formData.es_translation}
                             importanceReason={formData.es_importance_reason}
-                            audioUrl={formData.es_audio_url}
                             onTranslationChange={(val) => setFormData({ ...formData, es_translation: val })}
                             onReasonChange={(val) => setFormData({ ...formData, es_importance_reason: val })}
-                            onAudioChange={(val) => setFormData({ ...formData, es_audio_url: val })}
                         />
 
                         {/* Russian Section */}
@@ -280,10 +270,8 @@ export default function VocabModal({ mode, entry, onClose, onSave }: VocabModalP
                             onToggle={() => toggleSection('ru')}
                             translation={formData.ru_translation}
                             importanceReason={formData.ru_importance_reason}
-                            audioUrl={formData.ru_audio_url}
                             onTranslationChange={(val) => setFormData({ ...formData, ru_translation: val })}
                             onReasonChange={(val) => setFormData({ ...formData, ru_importance_reason: val })}
-                            onAudioChange={(val) => setFormData({ ...formData, ru_audio_url: val })}
                         />
                     </div>
 
@@ -310,10 +298,8 @@ function LanguageSection({
     onToggle,
     translation,
     importanceReason,
-    audioUrl,
     onTranslationChange,
     onReasonChange,
-    onAudioChange,
 }: {
     language: string;
     langCode: string;
@@ -321,10 +307,8 @@ function LanguageSection({
     onToggle: () => void;
     translation?: string;
     importanceReason?: string;
-    audioUrl?: string;
     onTranslationChange: (val: string) => void;
     onReasonChange: (val: string) => void;
-    onAudioChange: (val: string) => void;
 }) {
     return (
         <div style={accordionStyle}>
@@ -354,16 +338,6 @@ function LanguageSection({
                             style={textareaStyle}
                             placeholder="Why is this word important?"
                             rows={2}
-                        />
-                    </div>
-                    <div style={fieldStyle}>
-                        <label style={labelStyle}>Audio URL 🔗</label>
-                        <input
-                            type="url"
-                            value={audioUrl}
-                            onChange={(e) => onAudioChange(e.target.value)}
-                            style={inputStyle}
-                            placeholder="https://..."
                         />
                     </div>
                 </div>
