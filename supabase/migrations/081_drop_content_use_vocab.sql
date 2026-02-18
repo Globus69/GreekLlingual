@@ -58,7 +58,7 @@ DROP TABLE IF EXISTS content CASCADE;
 -- Drop first if it exists as a view (table was already dropped above)
 DROP VIEW IF EXISTS content CASCADE;
 
-CREATE OR REPLACE VIEW content AS
+CREATE VIEW content AS
 SELECT
     id,
     'vocabulary'::TEXT as type,
@@ -78,10 +78,11 @@ FROM multilingual_vocabulary;
 -- View: learning_items (alternative alias)
 -- Some code may reference this name instead
 -- Drop first if it exists as a table or view
-DROP VIEW IF EXISTS learning_items CASCADE;
+-- IMPORTANT: Drop TABLE first, then VIEW (order matters!)
 DROP TABLE IF EXISTS learning_items CASCADE;
+DROP VIEW IF EXISTS learning_items CASCADE;
 
-CREATE OR REPLACE VIEW learning_items AS
+CREATE VIEW learning_items AS
 SELECT * FROM multilingual_vocabulary;
 
 -- ═══════════════════════════════════════════════════════════════
