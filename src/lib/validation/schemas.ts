@@ -49,21 +49,21 @@ export const uuidSchema = z
  * Content type validation
  */
 export const contentTypeSchema = z.enum(CONTENT_TYPES, {
-    errorMap: () => ({ message: 'Invalid content type' })
+    message: 'Invalid content type'
 });
 
 /**
  * Level validation
  */
 export const levelSchema = z.enum(LEVELS, {
-    errorMap: () => ({ message: 'Invalid level' })
+    message: 'Invalid level'
 });
 
 /**
  * Difficulty validation
  */
 export const difficultySchema = z.enum(DIFFICULTIES, {
-    errorMap: () => ({ message: 'Invalid difficulty' })
+    message: 'Invalid difficulty'
 });
 
 // ========================================
@@ -153,14 +153,14 @@ export const bulkDeleteSchema = z.object({
  * Practice mode type validation
  */
 export const practiceModeSchema = z.enum(PRACTICE_MODES, {
-    errorMap: () => ({ message: 'Invalid practice mode' })
+    message: 'Invalid practice mode'
 });
 
 /**
  * Practice tolerance validation (for write_input mode)
  */
 export const practiceToleranceSchema = z.enum(PRACTICE_TOLERANCE, {
-    errorMap: () => ({ message: 'Invalid tolerance setting' })
+    message: 'Invalid tolerance setting'
 });
 
 /**
@@ -204,7 +204,7 @@ export const practiceAttemptSchema = z.object({
     time_seconds: z.number().int().min(0),
     mistakes: z.number().int().min(0).default(0),
     fsrs_rating: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
-    metadata: z.record(z.unknown()).optional()
+    metadata: z.record(z.string(), z.unknown()).optional()
 });
 
 export type PracticeAttempt = z.infer<typeof practiceAttemptSchema>;
@@ -237,7 +237,7 @@ export function safeParse<T>(schema: z.ZodSchema<T>, data: unknown): { success: 
     const result = schema.safeParse(data);
 
     if (!result.success) {
-        const errors = result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+        const errors = result.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
         console.error('[Validation Error]', errors);
         return { success: false, error: errors };
     }

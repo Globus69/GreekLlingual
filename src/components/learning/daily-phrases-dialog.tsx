@@ -8,6 +8,7 @@ import { useTranslation } from '@/lib/use-translation';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { speakGreek } from '@/lib/tts/greek-tts';
 import { DialogPortalWrapper } from '@/components/ui/dialog-portal';
+import type { Rating } from '@/lib/fsrs/fsrs-types';
 import '@/styles/liquid-glass.css';
 
 interface DailyPhrase {
@@ -169,7 +170,7 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
     }, [flipped, autoPlay, phrase]);
 
     // Handle answer: Just mark as answered (no queue needed for 1 phrase)
-    const handleRating = (rating: 1 | 3) => {
+    const handleRating = (rating: Rating) => {
         if (!phrase || answered) return;
 
         setAnswered(true);

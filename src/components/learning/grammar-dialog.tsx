@@ -8,6 +8,7 @@ import { useTranslation } from '@/lib/use-translation';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { speakGreek } from '@/lib/tts/greek-tts';
 import { DialogPortalWrapper } from '@/components/ui/dialog-portal';
+import type { Rating } from '@/lib/fsrs/fsrs-types';
 import '@/styles/liquid-glass.css';
 
 interface GrammarRule {
@@ -149,7 +150,7 @@ export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
     }, [flipped, currentIndex, autoPlay, queue.length]);
 
     // Handle answer: 1 = Wrong (push to end), 3 = Correct (remove from queue)
-    const handleRating = (rating: 1 | 3) => {
+    const handleRating = (rating: Rating) => {
         if (queue.length === 0 || currentIndex >= queue.length) return;
 
         if (rating === 3) {
