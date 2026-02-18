@@ -140,12 +140,14 @@ export default function VocabImportModal({ onClose, onSuccess }: VocabImportModa
             setImportResult(result);
 
             if (result.success) {
-                toast.success(`Import complete: ${result.imported} entries imported`);
+                toast.success(`✅ Import erfolgreich: ${result.imported} Einträge importiert`);
                 setTimeout(() => {
                     onSuccess();
                 }, 2000);
+            } else if (result.imported > 0) {
+                toast.warning(`⚠️ Import mit Fehlern: ${result.imported} importiert, ${result.skipped} übersprungen`);
             } else {
-                toast.warning(`Import completed with errors: ${result.imported} imported, ${result.skipped} skipped`);
+                toast.error(`❌ Import fehlgeschlagen: ${result.skipped} Einträge übersprungen. Siehe Details unten.`);
             }
         } catch (error: any) {
             console.error('Import error:', error);
@@ -320,29 +322,29 @@ export default function VocabImportModal({ onClose, onSuccess }: VocabImportModa
                     {/* Import Result */}
                     {importResult && (
                         <div style={resultSectionStyle}>
-                            <h3 style={resultTitleStyle}>Import Results</h3>
+                            <h3 style={resultTitleStyle}>Import Ergebnis</h3>
                             <div style={resultStatsStyle}>
                                 <div style={resultStatStyle}>
-                                    <span style={resultStatLabelStyle}>Imported:</span>
+                                    <span style={resultStatLabelStyle}>Importiert:</span>
                                     <span style={resultStatValueStyle(true)}>{importResult.imported}</span>
                                 </div>
                                 <div style={resultStatStyle}>
-                                    <span style={resultStatLabelStyle}>Skipped:</span>
+                                    <span style={resultStatLabelStyle}>Übersprungen:</span>
                                     <span style={resultStatValueStyle(false)}>{importResult.skipped}</span>
                                 </div>
                             </div>
                             {importResult.errors.length > 0 && (
                                 <div style={errorListContainerStyle}>
-                                    <div style={errorListTitleStyle}>Errors:</div>
+                                    <div style={errorListTitleStyle}>Fehler ({importResult.errors.length}):</div>
                                     <div style={errorListStyle}>
-                                        {importResult.errors.slice(0, 5).map((error, index) => (
+                                        {importResult.errors.slice(0, 10).map((error, index) => (
                                             <div key={index} style={errorItemStyle}>
-                                                {typeof error === 'string' ? error : `Row ${error.row}: ${error.message}`}
+                                                {typeof error === 'string' ? error : `Zeile ${error.row}: ${error.message}`}
                                             </div>
                                         ))}
-                                        {importResult.errors.length > 5 && (
+                                        {importResult.errors.length > 10 && (
                                             <div style={errorMoreStyle}>
-                                                + {importResult.errors.length - 5} more errors
+                                                + {importResult.errors.length - 10} weitere Fehler
                                             </div>
                                         )}
                                     </div>
