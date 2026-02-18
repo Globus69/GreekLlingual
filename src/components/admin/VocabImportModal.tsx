@@ -65,7 +65,7 @@ export default function VocabImportModal({ onClose, onSuccess }: VocabImportModa
                     'Audio in deutsch': 'de_audio_url',
                     'Level': 'level',
                     'difficulty (easy/middle/hard)': 'difficulty',
-                    'Häufigkeit im täglichen Gebrauch (1;2;3;4;5)': 'frequency',
+                    'Häufigkeit im täglichen Gebrauch': 'frequency',
                 };
                 return mapping[header] || header;
             },
@@ -84,17 +84,33 @@ export default function VocabImportModal({ onClose, onSuccess }: VocabImportModa
         const errors = new Map<number, string[]>();
 
         data.forEach((row, index) => {
+            // Clean and validate data
+            const greekTranscription = row.greek_transcription?.trim() || '';
+            const level = row.level?.trim() || '';
+
             // Normalize difficulty value (middle → medium)
-            let difficultyValue = row.difficulty?.trim().toLowerCase();
+            let difficultyValue = row.difficulty?.trim().toLowerCase() || '';
             if (difficultyValue === 'middle') {
                 difficultyValue = 'medium';
             }
 
+            // Parse frequency safely
+            const frequencyStr = row.frequency?.toString().trim() || '0';
+            const frequency = parseInt(frequencyStr, 10);
+
+            console.log('Validating row', index, {
+                greek_transcription: greekTranscription,
+                level,
+                difficulty: difficultyValue,
+                frequency,
+                raw: row
+            });
+
             const validation = validateVocabEntry({
-                greek_transcription: row.greek_transcription,
-                level: row.level?.trim() as any,
+                greek_transcription: greekTranscription,
+                level: level as any,
                 difficulty: difficultyValue as any,
-                frequency: parseInt(row.frequency) as any,
+                frequency: frequency as any,
             });
 
             if (!validation.valid) {
@@ -266,6 +282,7 @@ export default function VocabImportModal({ onClose, onSuccess }: VocabImportModa
                                             <th style={previewThStyle}>EN</th>
                                             <th style={previewThStyle}>Level</th>
                                             <th style={previewThStyle}>Difficulty</th>
+                                            <th style={previewThStyle}>Frequency</th>
                                             <th style={previewThStyle}>Status</th>
                                         </tr>
                                     </thead>
@@ -281,6 +298,7 @@ export default function VocabImportModal({ onClose, onSuccess }: VocabImportModa
                                                     <td style={previewTdStyle}>{row.en_translation}</td>
                                                     <td style={previewTdStyle}>{row.level}</td>
                                                     <td style={previewTdStyle}>{row.difficulty}</td>
+                                                    <td style={previewTdStyle}>{row.frequency}</td>
                                                     <td style={previewTdStyle}>
                                                         {isValid ? (
                                                             <span style={validBadgeStyle}>✓ Valid</span>

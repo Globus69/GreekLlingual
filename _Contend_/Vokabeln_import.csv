@@ -1,0 +1,91 @@
+Nr.;Griechisch (Transkription);Lautschrift (Griechisch);Russische Übersetzung;Wichtigkeit (Begründung) in Russisch;Audio in russisch;Englische Übersetzung;Wichtigkeit (Begründung)in Englisch;Audio in englisch;Spanische Übersetzung;Wichtigkeit (Begründung)in Spanisch;Audio in Spanisch;Deutsche Übersetzung;Wichtigkeit (Begründung)in Deutsch;Audio in deutsch;Level;difficulty (easy/middle/hard);Häufigkeit im täglichen Gebrauch
+1;γεια σου;gia sou;привет;самое важное приветствие при встрече;;hello;basic everyday greeting;;hola;saludo más común;;hallo;wichtigste Begrüßung;;A1;easy;1
+2;ευχαριστώ;efcharistó;спасибо;обязательно для вежливости;;thank you;essential politeness;;gracias;básico para ser educado;;danke;Grund der Höflichkeit;;A1;easy;1
+3;ναι;ne;да;основное слово согласия;;yes;core affirmation word;;sí;palabra básica de afirmación;;ja;Grundwort für Zustimmung;;A1;easy;1
+4;καλημέρα;kaliméra;доброе утро;стандартное утреннее приветствие;;good morning;standard morning greeting;;buenos días;saludo matutino habitual;;guten Morgen;morgendliche Standardbegrüßung;;A1;easy;2
+5;όχι;óchi;нет;самое частое отрицание;;no;most common negation;;no;negación más común;;nein;häufigste Verneinung;;A1;easy;2
+6;παρακαλώ;parakaló;пожалуйста;основное слово вежливости;;please;basic politeness word;;por favor;palabra básica de cortesía;;bitte;grundlegendes Höflichkeitswort;;A1;easy;2
+7;ένα;éna;один;базовое числительное;;one;basic number;;uno;número básico;;eins;Grundzahl;;A1;easy;3
+8;δυο;dío;два;базовое числительное;;two;basic number;;dos;número básico;;zwei;Grundzahl;;A1;easy;3
+9;συγγνώμη;sygnómi;извините;важно для извинений;;sorry;important for apologies;;lo siento;importante para disculpas;;entschuldigung;wichtig für Entschuldigungen;;A1;easy;3
+10;καλησπέρα;kalispéra;добрый вечер;стандартное вечернее приветствие;;good evening;standard evening greeting;;buenas tardes;saludo vespertino habitual;;guten Abend;abendliche Standardbegrüßung;;A1;easy;4
+11;καληνύχτα;kalinýchta;спокойной ночи;стандартное ночное приветствие;;good night;standard night greeting;;buenas noches;saludo nocturno habitual;;gute Nacht;nächtliche Standardbegrüßung;;A1;easy;4
+12;εγώ;egó;я;основное личное местоимение;;I;basic personal pronoun;;yo;pronombre personal básico;;ich;grundlegendes Personalpronomen;;A1;easy;4
+13;εσύ;esí;ты;основное личное местоимение;;you;basic personal pronoun;;tú;pronombre personal básico;;du;grundlegendes Personalpronomen;;A1;easy;5
+14;αυτός;aftós;он;основное личное местоимение;;he;basic personal pronoun;;él;pronombre personal básico;;er;grundlegendes Personalpronomen;;A1;easy;5
+15;αυτή;aftí;она;основное личное местоимение;;she;basic personal pronoun;;ella;pronombre personal básico;;sie;grundlegendes Personalpronomen;;A1;easy;5
+16;νερό;neró;вода;жизненно важное слово;;water;basic survival word;;agua;palabra esencial de supervivencia;;Wasser;elementares Überlebenswort;;A1;middle;1
+17;φαγητό;fagitό;еда;жизненно важное слово;;food;basic survival word;;comida;palabra esencial de supervivencia;;Essen;elementares Überlebenswort;;A1;middle;1
+18;ψωμί;psomí;хлеб;важное для питания;;bread;important for nutrition;;pan;importante para nutrición;;Brot;wichtig für Ernährung;;A1;middle;1
+19;γάλα;galá;молоко;важное для питания;;milk;important for nutrition;;leche;importante para nutrición;;Milch;wichtig für Ernährung;;A1;middle;2
+20;τρία;tría;три;базовое числительное;;three;basic number;;tres;número básico;;drei;Grundzahl;;A1;middle;2
+21;τέσσερα;tésera;четыре;базовое числительное;;four;basic number;;cuatro;número básico;;vier;Grundzahl;;A1;middle;2
+22;ημέρα;iméra;день;ежедневно используемое слово;;day;daily essential;;día;palabra diaria esencial;;Tag;tägliches Grundwort;;A1;middle;3
+23;νύχτα;nýchta;ночь;ежедневно используемое слово;;night;daily essential;;noche;palabra diaria esencial;;Nacht;tägliches Grundwort;;A1;middle;3
+24;μήνας;mínas;месяц;важно для времени;;month;important for time;;mes;importante para tiempo;;Monat;wichtig für Zeit;;A1;middle;3
+25;έτος;étos;год;важно для времени;;year;important for time;;año;importante para tiempo;;Jahr;wichtig für Zeit;;A1;middle;4
+26;εβδομάδα;evdomáda;неделя;важно для времени;;week;important for time;;semana;importante para tiempo;;Woche;wichtig für Zeit;;A1;middle;4
+27;σήμερα;símera;сегодня;ежедневно используемое слово;;today;daily essential;;hoy;palabra diaria esencial;;heute;tägliches Grundwort;;A1;middle;4
+28;αύριο;ávrio;завтра;ежедневно используемое слово;;tomorrow;daily essential;;mañana;palabra diaria esencial;;morgen;tägliches Grundwort;;A1;middle;5
+29;χθες;chthes;вчера;ежедневно используемое слово;;yesterday;daily essential;;ayer;palabra diaria esencial;;gestern;tägliches Grundwort;;A1;middle;5
+30;πρωί;proí;утро;важно для времени;;morning;important for time;;mañana;importante para tiempo;;Morgen;wichtig für Zeit;;A1;middle;5
+31;σπίτι;spíti;дом;ежедневно используемое слово;;house;daily essential;;casa;palabra diaria esencial;;Haus;tägliches Grundwort;;A1;hard;1
+32;οικογένεια;ikoyénia;семья;важно для общения;;family;important for social;;familia;importante para interacción social;;Familie;wichtig für soziale Kontakte;;A1;hard;1
+33;μητέρα;mitéra;мать;важно для семьи;;mother;important for family;;madre;importante para familia;;Mutter;wichtig für Familie;;A1;hard;1
+34;πατέρας;patéras;отец;важно для семьи;;father;important for family;;padre;importante para familia;;Vater;wichtig für Familie;;A1;hard;2
+35;αδερφός;aderfós;брат;важно для семьи;;brother;important for family;;hermano;importante para familia;;Bruder;wichtig für Familie;;A1;hard;2
+36;αδερφή;aderfí;сестра;важно для семьи;;sister;important for family;;hermana;importante para familia;;Schwester;wichtig für Familie;;A1;hard;2
+37;παιδί;pedí;ребенок;важно для семьи;;child;important for family;;niño;importante para familia;;Kind;wichtig für Familie;;A1;hard;3
+38;γιος;yos;сын;важно для семьи;;son;important for family;;hijo;importante para familia;;Sohn;wichtig für Familie;;A1;hard;3
+39;κόρη;kóri;дочь;важно для семьи;;daughter;important for family;;hija;importante para familia;;Tochter;wichtig für Familie;;A1;hard;3
+40;φίλος;fílos;друг;важно для общения;;friend;important for social interaction;;amigo;importante para interacción social;;Freund;wichtig für soziale Kontakte;;A1;hard;4
+41;βιβλίο;vivlío;книга;важно для учебы и отдыха;;book;important for study and leisure;;libro;esencial para estudio y ocio;;Buch;wichtig für Lernen und Freizeit;;A1;hard;4
+42;σχολείο;scholeío;школа;важно для учебы;;school;important for education;;escuela;importante para educación;;Schule;wichtig für Bildung;;A1;hard;4
+43;δάσκαλος;dáskalos;учитель;важно для учебы;;teacher;important for education;;profesor;importante para educación;;Lehrer;wichtig für Bildung;;A1;hard;5
+44;μαθητής;mathitís;ученик;важно для учебы;;student;important for education;;estudiante;importante para educación;;Schüler;wichtig für Bildung;;A1;hard;5
+45;πέντε;pénde;пять;базовое числительное;;five;basic number;;cinco;número básico;;fünf;Grundzahl;;A1;hard;5
+46;εγώ;egó;я;основное личное местоимение;;I;basic personal pronoun;;yo;pronombre personal básico;;ich;grundlegendes Personalpronomen;;A2;easy;1
+47;εμείς;emís;мы;основное личное местоимение;;we;basic personal pronoun;;nosotros;pronombre personal básico;;wir;grundlegendes Personalpronomen;;A2;easy;1
+48;εσείς;esís;вы;основное личное местоимение;;you (plural);basic personal pronoun;;vosotros;pronombre personal básico;;ihr;grundlegendes Personalpronomen;;A2;easy;1
+49;αυτοί;aftí;они;основное личное местоимение;;they (masc);basic personal pronoun;;ellos;pronombre personal básico;;sie (masc);grundlegendes Personalpronomen;;A2;easy;2
+50;αυτές;aftés;они;основное личное местоимение;;they (fem);basic personal pronoun;;ellas;pronombre personal básico;;sie (fem);grundlegendes Personalpronomen;;A2;easy;2
+51;αυτά;aftá;они;основное личное местоимение;;they (neut);basic personal pronoun;;ellos (neut);pronombre personal básico;;sie (neut);grundlegendes Personalpronomen;;A2;easy;2
+52;τι;ti;что;основное вопросительное слово;;what;core question word;;qué;palabra interrogativa básica;;was;Grundfragewort;;A2;easy;3
+53;ποιος;pios;кто;основное вопросительное слово;;who;core question word;;quién;palabra interrogativa básica;;wer;Grundfragewort;;A2;easy;3
+54;πού;pou;где;основное вопросительное слово;;where;core question word;;dónde;palabra interrogativa básica;;wo;Grundfragewort;;A2;easy;3
+55;πότε;póte;когда;основное вопросительное слово;;when;core question word;;cuándo;palabra interrogativa básica;;wann;Grundfragewort;;A2;easy;4
+56;γιατί;giati;почему;основное вопросительное слово;;why;core question word;;por qué;palabra interrogativa básica;;warum;Grundfragewort;;A2;easy;4
+57;πώς;pos;как;основное вопросительное слово;;how;core question word;;cómo;palabra interrogativa básica;;wie;Grundfragewort;;A2;easy;4
+58;μηδέν;midén;ноль;базовое числительное;;zero;basic number;;cero;número básico;;null;Grundzahl;;A2;easy;5
+59;έξι;éxi;шесть;базовое числительное;;six;basic number;;seis;número básico;;sechs;Grundzahl;;A2;easy;5
+60;επτά;eptá;семь;базовое числительное;;seven;basic number;;siete;número básico;;sieben;Grundzahl;;A2;easy;5
+61;Δευτέρα;Deftéra;понедельник;день недели;;Monday;day of the week;;lunes;día de la semana;;Montag;Wochentag;;A2;middle;1
+62;Τρίτη;Tríti;вторник;день недели;;Tuesday;day of the week;;martes;día de la semana;;Dienstag;Wochentag;;A2;middle;1
+63;Τετάρτη;Tetárti;среда;день недели;;Wednesday;day of the week;;miércoles;día de la semana;;Mittwoch;Wochentag;;A2;middle;1
+64;Πέμπτη;Pémpti;четверг;день недели;;Thursday;day of the week;;jueves;día de la semana;;Donnerstag;Wochentag;;A2;middle;2
+65;Παρασκευή;Paraskeví;пятница;день недели;;Friday;day of the week;;viernes;día de la semana;;Freitag;Wochentag;;A2;middle;2
+66;Σάββατο;Sávvato;суббота;день недели;;Saturday;day of the week;;sábado;día de la semana;;Samstag;Wochentag;;A2;middle;2
+67;Κυριακή;Kyriakí;воскресенье;день недели;;Sunday;day of the week;;domingo;día de la semana;;Sonntag;Wochentag;;A2;middle;3
+68;ώρα;óra;час;важно для времени;;hour;important for time;;hora;importante para tiempo;;Stunde;wichtig für Zeit;;A2;middle;3
+69;λεπτό;leptó;минута;важно для времени;;minute;important for time;;minuto;importante para tiempo;;Minute;wichtig für Zeit;;A2;middle;3
+70;δευτερόλεπτο;defteólepto;секунда;важно для времени;;second;important for time;;segundo;importante para tiempo;;Sekunde;wichtig für Zeit;;A2;middle;4
+71;μεσημέρι;mesiméri;полдень;важно для времени;;midday;important for time;;mediodía;importante para tiempo;;Mittag;wichtig für Zeit;;A2;middle;4
+72;απόγευμα;apógevma;вечер;важно для времени;;afternoon;important for time;;tarde;importante para tiempo;;Nachmittag;wichtig für Zeit;;A2;middle;4
+73;βράδυ;vrádi;вечер;важно для времени;;evening;important for time;;noche;importante para tiempo;;Abend;wichtig für Zeit;;A2;middle;5
+74;γιαγιά;yayá;бабушка;важно для семьи;;grandmother;important for family;;abuela;importante para familia;;Großmutter;wichtig für Familie;;A2;middle;5
+75;παππούς;papús;дедушка;важно для семьи;;grandfather;important for family;;abuelo;importante para familia;;Großvater;wichtig für Familie;;A2;middle;5
+76;οκτώ;októ;восемь;базовое числительное;;eight;basic number;;ocho;número básico;;acht;Grundzahl;;A2;hard;1
+77;εννιά;eniá;девять;базовое числительное;;nine;basic number;;nueve;número básico;;neun;Grundzahl;;A2;hard;1
+78;δέκα;déka;десять;базовое числительное;;ten;basic number;;diez;número básico;;zehn;Grundzahl;;A2;hard;1
+79;δικηγόρος;dikigóros;адвокат;важно для профессий;;lawyer;important for professions;;abogado;importante para profesiones;;Anwalt;wichtig für Berufe;;A2;hard;2
+80;γιατρός;yatrós;врач;важно для профессий;;doctor;important for professions;;médico;importante para profesiones;;Arzt;wichtig für Berufe;;A2;hard;2
+81;νοσοκόμος;nosokómos;медбрат;важно для профессий;;nurse (m);important for professions;;enfermero;importante para profesiones;;Krankenpfleger;wichtig für Berufe;;A2;hard;2
+82;αστυνομικός;astinomikós;полицейский;важно для профессий;;police officer;important for professions;;policía;importante para profesiones;;Polizist;wichtig für Berufe;;A2;hard;3
+83;ημερομηνία;imerominía;дата;важно для времени;;date;important for time;;fecha;importante para tiempo;;Datum;wichtig für Zeit;;A2;hard;3
+84;αυτό;aftó;это;основное указательное слово;;this;basic demonstrative;;esto;pronombre demostrativo básico;;dies;grundlegendes Demonstrativpronomen;;A2;hard;3
+85;εκείνος;ekínos;тот;основное указательное слово;;that;basic demonstrative;;eso;pronombre demostrativo básico;;das;grundlegendes Demonstrativpronomen;;A2;hard;4
+86;αυτοί;aftí;эти;основное указательное слово;;these;basic demonstrative;;estos;pronombre demostrativo básico;;diese;grundlegendes Demonstrativpronomen;;A2;hard;4
+87;εκείνοι;ekíni;те;основное указательное слово;;those;basic demonstrative;;esos;pronombre demostrativo básico;;jene;grundlegendes Demonstrativpronomen;;A2;hard;4
+88;ποιο;pio;какой;основное вопросительное слово;;which;core question word;;cuál;palabra interrogativa básica;;welcher;Grundfragewort;;A2;hard;5
+89;από;apó;от;основное предлог;;from;basic preposition;;de;preposición básica;;von;grundlegende Präposition;;A2;hard;5
+90;σε;se;в;основное предлог;;in;basic preposition;;en;preposición básica;;in;grundlegende Präposition;;A2;hard;5

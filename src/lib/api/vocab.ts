@@ -275,7 +275,7 @@ export async function importCSV(file: File, mode: ImportMode): Promise<ImportRes
                     'Audio in deutsch': 'de_audio_url',
                     'Level': 'level',
                     'difficulty (easy/middle/hard)': 'difficulty',
-                    'Häufigkeit im täglichen Gebrauch (1;2;3;4;5)': 'frequency',
+                    'Häufigkeit im täglichen Gebrauch': 'frequency',
                 };
                 return mapping[header] || header;
             },

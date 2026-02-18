@@ -17,7 +17,7 @@ Der Vokabel-CSV-Import unterstützt jetzt:
 **Beispiel:** `_Contend_/Vokabeln_import.csv`
 
 ```csv
-Nr.;Griechisch (Transkription);Lautschrift (Griechisch);Russische Übersetzung;Wichtigkeit (Begründung) in Russisch;Audio in russisch;Englische Übersetzung;Wichtigkeit (Begründung)in Englisch;Audio in englisch;Spanische Übersetzung;Wichtigkeit (Begründung)in Spanisch;Audio in Spanisch;Deutsche Übersetzung;Wichtigkeit (Begründung)in Deutsch;Audio in deutsch;Level;difficulty (easy/middle/hard);Häufigkeit im täglichen Gebrauch (1;2;3;4;5)
+Nr.;Griechisch (Transkription);Lautschrift (Griechisch);Russische Übersetzung;Wichtigkeit (Begründung) in Russisch;Audio in russisch;Englische Übersetzung;Wichtigkeit (Begründung)in Englisch;Audio in englisch;Spanische Übersetzung;Wichtigkeit (Begründung)in Spanisch;Audio in Spanisch;Deutsche Übersetzung;Wichtigkeit (Begründung)in Deutsch;Audio in deutsch;Level;difficulty (easy/middle/hard);Häufigkeit im täglichen Gebrauch
 1;γεια σου;gia sou;привет;самое важное приветствие;;hello;basic greeting;;hola;saludo básico;;hallo;wichtigste Begrüßung;;A1;easy;1
 ```
 
@@ -39,7 +39,7 @@ Nr.;Griechisch (Transkription);Lautschrift (Griechisch);Russische Übersetzung;W
 - `Audio in deutsch` - Optional (URL)
 - `Level` - **Pflicht** (A1, A2, B1, B2, C1, C2)
 - `difficulty (easy/middle/hard)` - **Pflicht** (easy, middle, hard)
-- `Häufigkeit im täglichen Gebrauch (1;2;3;4;5)` - **Pflicht** (1-5)
+- `Häufigkeit im täglichen Gebrauch` - **Pflicht** (1-5)
 
 ### Format 2: Englisches Format (Komma-getrennt)
 
@@ -158,4 +158,4 @@ Der Import verwendet `papaparse` mit folgender Konfiguration:
 | `Audio in deutsch` | `de_audio_url` |
 | `Level` | `level` |
 | `difficulty (easy/middle/hard)` | `difficulty` |
-| `Häufigkeit im täglichen Gebrauch (1;2;3;4;5)` | `frequency` |
+| `Häufigkeit im täglichen Gebrauch` | `frequency` |
