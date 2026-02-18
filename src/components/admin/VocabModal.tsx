@@ -23,6 +23,7 @@ export default function VocabModal({ mode, entry, onClose, onSave }: VocabModalP
         nr: entry?.nr,
         greek_transcription: entry?.greek_transcription || '',
         greek_phonetic: entry?.greek_phonetic || '',
+        audio_url: entry?.audio_url || '',
 
         en_translation: entry?.en_translation || '',
         en_importance_reason: entry?.en_importance_reason || '',
@@ -165,6 +166,20 @@ export default function VocabModal({ mode, entry, onClose, onSave }: VocabModalP
                                 onChange={(e) => setFormData({ ...formData, greek_phonetic: e.target.value })}
                                 style={inputStyle}
                                 placeholder="ya su"
+                            />
+                        </div>
+
+                        {/* Audio URL */}
+                        <div style={fieldStyle}>
+                            <label style={labelStyle}>
+                                Audio URL 🔗 <span style={optionalStyle}>(optional)</span>
+                            </label>
+                            <input
+                                type="url"
+                                value={formData.audio_url}
+                                onChange={(e) => setFormData({ ...formData, audio_url: e.target.value })}
+                                style={inputStyle}
+                                placeholder="https://..."
                             />
                         </div>
 
