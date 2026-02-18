@@ -137,7 +137,6 @@ export default function PhrasesStats() {
                 borderRadius: '16px',
                 padding: '24px',
                 border: '1px solid rgba(255,255,255,0.08)',
-                marginBottom: '24px',
             }}>
                 <h3 style={{
                     fontSize: '16px',
@@ -155,29 +154,6 @@ export default function PhrasesStats() {
                     <DifficultyBar label="Easy" count={stats.by_difficulty?.easy ?? 0} color="#34C759" />
                     <DifficultyBar label="Medium" count={stats.by_difficulty?.medium ?? 0} color="#FFD60A" />
                     <DifficultyBar label="Hard" count={stats.by_difficulty?.hard ?? 0} color="#FF3B30" />
-                </div>
-            </div>
-
-            {/* Audio Coverage */}
-            <div style={{
-                background: 'rgba(255,255,255,0.04)',
-                borderRadius: '16px',
-                padding: '24px',
-                border: '1px solid rgba(255,255,255,0.08)',
-            }}>
-                <h3 style={{
-                    fontSize: '16px',
-                    fontWeight: 700,
-                    marginBottom: '16px',
-                    color: '#fff',
-                }}>
-                    Audio Coverage
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <AudioBar lang="EN" count={stats.with_audio?.en ?? 0} total={stats.total} />
-                    <AudioBar lang="DE" count={stats.with_audio?.de ?? 0} total={stats.total} />
-                    <AudioBar lang="ES" count={stats.with_audio?.es ?? 0} total={stats.total} />
-                    <AudioBar lang="RU" count={stats.with_audio?.ru ?? 0} total={stats.total} />
                 </div>
             </div>
         </div>
@@ -270,40 +246,6 @@ function DifficultyBar({ label, count, color }: { label: string; count: number; 
                     height: '100%',
                     width: `${Math.max((count / 100) * 100, 0)}%`,
                     background: color,
-                    transition: 'width 0.3s ease',
-                }} />
-            </div>
-        </div>
-    );
-}
-
-function AudioBar({ lang, count, total }: { lang: string; count: number; total: number }) {
-    const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
-
-    return (
-        <div>
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-                fontSize: '13px',
-                color: '#8E8E93',
-            }}>
-                <span>{lang}</span>
-                <span style={{ fontWeight: 700, color: '#fff' }}>
-                    {count} / {total} ({percentage}%)
-                </span>
-            </div>
-            <div style={{
-                height: '8px',
-                background: 'rgba(255,255,255,0.08)',
-                borderRadius: '4px',
-                overflow: 'hidden',
-            }}>
-                <div style={{
-                    height: '100%',
-                    width: `${percentage}%`,
-                    background: percentage >= 75 ? '#34C759' : percentage >= 50 ? '#FFD60A' : '#FF9500',
                     transition: 'width 0.3s ease',
                 }} />
             </div>
