@@ -17,22 +17,18 @@ export interface MultilingualContent {
   // English fields
   en_translation?: string;
   en_importance_reason?: string;
-  en_audio_url?: string;
 
   // German fields
   de_translation?: string;
   de_importance_reason?: string;
-  de_audio_url?: string;
 
   // Spanish fields
   es_translation?: string;
   es_importance_reason?: string;
-  es_audio_url?: string;
 
   // Russian fields
   ru_translation?: string;
   ru_importance_reason?: string;
-  ru_audio_url?: string;
 
   // Metadata
   level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
@@ -89,22 +85,18 @@ export interface MultilingualContentFormData {
   // English fields
   en_translation?: string;
   en_importance_reason?: string;
-  en_audio_url?: string;
 
   // German fields
   de_translation?: string;
   de_importance_reason?: string;
-  de_audio_url?: string;
 
   // Spanish fields
   es_translation?: string;
   es_importance_reason?: string;
-  es_audio_url?: string;
 
   // Russian fields
   ru_translation?: string;
   ru_importance_reason?: string;
-  ru_audio_url?: string;
 
   // Metadata
   level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
