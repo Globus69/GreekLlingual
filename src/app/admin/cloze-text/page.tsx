@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import PhrasesStats from '@/components/admin/PhrasesStats';
-import PhrasesTable from '@/components/admin/PhrasesTable';
-import PhrasesModal from '@/components/admin/PhrasesModal';
-import PhrasesImportModal from '@/components/admin/PhrasesImportModal';
-import PhrasesBulkEditModal from '@/components/admin/PhrasesBulkEditModal';
+import ClozeTextStats from '@/components/admin/ClozeTextStats';
+import ClozeTextTable from '@/components/admin/ClozeTextTable';
+import ClozeTextModal from '@/components/admin/ClozeTextModal';
+import ClozeTextImportModal from '@/components/admin/ClozeTextImportModal';
+import ClozeTextBulkEditModal from '@/components/admin/ClozeTextBulkEditModal';
 import { fetchClozeTextsList, exportCSV, deleteClozeTextEntry, bulkDeleteClozeTexts } from '@/lib/api/cloze-text';
 import type { ClozeTextFilters, ClozeTextEntry } from '@/types/cloze-text';
 import { toast } from 'sonner';
@@ -169,7 +169,7 @@ export default function ClozeTextManagementPage() {
             </header>
 
             {/* Statistics */}
-            <PhrasesStats />
+            <ClozeTextStats />
 
             {/* Filters */}
             <div style={{
@@ -239,7 +239,7 @@ export default function ClozeTextManagementPage() {
             </div>
 
             {/* Table */}
-            <PhrasesTable
+            <ClozeTextTable
                 entries={entries}
                 loading={loading}
                 selectedIds={selectedIds}
@@ -292,7 +292,7 @@ export default function ClozeTextManagementPage() {
 
             {/* Modals */}
             {showCreateModal && (
-                <PhrasesModal
+                <ClozeTextModal
                     mode="create"
                     onClose={() => setShowCreateModal(false)}
                     onSave={() => {
@@ -304,7 +304,7 @@ export default function ClozeTextManagementPage() {
             )}
 
             {editEntry && (
-                <PhrasesModal
+                <ClozeTextModal
                     mode="edit"
                     entry={editEntry}
                     onClose={() => setEditEntry(null)}
@@ -317,7 +317,7 @@ export default function ClozeTextManagementPage() {
             )}
 
             {showImportModal && (
-                <PhrasesImportModal
+                <ClozeTextImportModal
                     onClose={() => setShowImportModal(false)}
                     onSuccess={() => {
                         setShowImportModal(false);
@@ -327,7 +327,7 @@ export default function ClozeTextManagementPage() {
             )}
 
             {showBulkEditModal && (
-                <PhrasesBulkEditModal
+                <ClozeTextBulkEditModal
                     selectedIds={selectedIds}
                     onClose={() => setShowBulkEditModal(false)}
                     onSave={() => {
