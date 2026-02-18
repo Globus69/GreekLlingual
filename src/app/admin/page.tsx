@@ -308,6 +308,56 @@ export default function AdminPage() {
                     </div>
 
                     <div style={{
+                        background: 'rgba(255, 204, 0, 0.08)',
+                        borderRadius: '20px',
+                        padding: '32px',
+                        border: '1px solid rgba(255, 204, 0, 0.15)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                    }}
+                        onClick={() => router.push('/admin/daily-phrases')}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 204, 0, 0.15)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 204, 0, 0.08)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        <div style={{ fontSize: '40px', marginBottom: '12px' }}>📅</div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Daily Phrases</h3>
+                        <p style={{ fontSize: '13px', color: '#8E8E93' }}>
+                            Schedule and manage daily phrases • 3 per day
+                        </p>
+                    </div>
+
+                    <div style={{
+                        background: 'rgba(65, 105, 225, 0.08)',
+                        borderRadius: '20px',
+                        padding: '32px',
+                        border: '1px solid rgba(65, 105, 225, 0.15)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                    }}
+                        onClick={() => router.push('/admin/vocab')}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(65, 105, 225, 0.15)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(65, 105, 225, 0.08)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        <div style={{ fontSize: '40px', marginBottom: '12px' }}>📚</div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Vocabulary Management</h3>
+                        <p style={{ fontSize: '13px', color: '#8E8E93' }}>
+                            Manage multilingual vocabulary • Import/Export CSV
+                        </p>
+                    </div>
+
+                    <div style={{
                         background: 'rgba(255, 149, 0, 0.08)',
                         borderRadius: '20px',
                         padding: '32px',
