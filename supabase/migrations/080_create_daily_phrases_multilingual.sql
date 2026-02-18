@@ -7,11 +7,47 @@
 -- This migration ensures 100% schema consistency with multilingual_vocabulary
 -- ═══════════════════════════════════════════════════════════════
 
--- Drop old tables if they exist (BACKUP DATA FIRST!)
+-- ═══════════════════════════════════════════════════════════════
+-- STEP 1: Backup existing data (if table exists)
+-- ═══════════════════════════════════════════════════════════════
+
+DO $$
+BEGIN
+    -- Backup phrases table if it exists
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name = 'phrases'
+    ) THEN
+        EXECUTE format(
+            'CREATE TABLE _phrases_backup_%s AS SELECT * FROM phrases',
+            to_char(now(), 'YYYYMMDD_HH24MISS')
+        );
+        RAISE NOTICE '✅ Phrases table backed up to _phrases_backup_*';
+    END IF;
+END $$;
+
+-- ═══════════════════════════════════════════════════════════════
+-- STEP 2: Drop old functions from Migration 077 (if they exist)
+-- ═══════════════════════════════════════════════════════════════
+
+DROP FUNCTION IF EXISTS admin_create_daily_phrase CASCADE;
+DROP FUNCTION IF EXISTS admin_update_daily_phrase CASCADE;
+DROP FUNCTION IF EXISTS admin_delete_daily_phrase CASCADE;
+DROP FUNCTION IF EXISTS check_daily_phrase_limit CASCADE;
+DROP FUNCTION IF EXISTS get_upcoming_phrases CASCADE;
+
+-- ═══════════════════════════════════════════════════════════════
+-- STEP 3: Drop old tables (now that functions are removed)
+-- ═══════════════════════════════════════════════════════════════
+
 DROP TABLE IF EXISTS phrases CASCADE;
 DROP TABLE IF EXISTS daily_phrases CASCADE;
 
--- Create daily_phrases with EXACT vocab structure
+-- ═══════════════════════════════════════════════════════════════
+-- STEP 4: Create daily_phrases with EXACT vocab structure
+-- ═══════════════════════════════════════════════════════════════
+
 CREATE TABLE public.daily_phrases (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
@@ -259,14 +295,15 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ═══════════════════════════════════════════════════════════════
--- GRANT PERMISSIONS
+-- GRANT PERMISSIONS (FIXED: Full function signatures)
 -- ═══════════════════════════════════════════════════════════════
 
-GRANT EXECUTE ON FUNCTION get_phrases_filtered TO authenticated, anon;
-GRANT EXECUTE ON FUNCTION get_phrases_stats TO authenticated, anon;
-GRANT EXECUTE ON FUNCTION bulk_update_phrases TO authenticated;
-GRANT EXECUTE ON FUNCTION bulk_delete_phrases TO authenticated;
-GRANT EXECUTE ON FUNCTION check_phrases_duplicate TO authenticated;
+-- Grant with complete signatures (PostgreSQL requirement)
+GRANT EXECUTE ON FUNCTION get_phrases_filtered(TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER, INTEGER) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION get_phrases_stats() TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION bulk_update_phrases(UUID[], TEXT, TEXT, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION bulk_delete_phrases(UUID[]) TO authenticated;
+GRANT EXECUTE ON FUNCTION check_phrases_duplicate(TEXT, TEXT, UUID) TO authenticated;
 
 -- ═══════════════════════════════════════════════════════════════
 -- COMMENTS (for documentation)
@@ -293,6 +330,7 @@ BEGIN
     RAISE NOTICE '║  RPC Functions: 5 created                      ║';
     RAISE NOTICE '║  RLS: Enabled (Admin full, others read-only)   ║';
     RAISE NOTICE '║  Schema: 100% matching multilingual_vocabulary ║';
+    RAISE NOTICE '║  ✅ FIXED: Backup, function drops, GRANTs      ║';
     RAISE NOTICE '╚════════════════════════════════════════════════╝';
     RAISE NOTICE '';
 END $$;
