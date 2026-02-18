@@ -370,6 +370,34 @@ export default function AdminPage() {
                     </div>
 
                     <div style={{
+                        background: 'rgba(138, 43, 226, 0.08)',
+                        borderRadius: '20px',
+                        padding: '24px',
+                        border: '1px solid rgba(138, 43, 226, 0.15)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        minHeight: '140px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                    }}
+                        onClick={() => router.push('/admin/cloze-text')}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(138, 43, 226, 0.15)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(138, 43, 226, 0.08)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        <div style={{ fontSize: '40px', marginBottom: '12px' }}>📝</div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Cloze Text Management</h3>
+                        <p style={{ fontSize: '13px', color: '#8E8E93' }}>
+                            Manage cloze texts • Fill-in-the-blank exercises
+                        </p>
+                    </div>
+
+                    <div style={{
                         background: 'rgba(255, 149, 0, 0.08)',
                         borderRadius: '20px',
                         padding: '24px',
