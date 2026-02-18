@@ -14,6 +14,7 @@ export default function AdminPage() {
     const { locale, setLocale } = useLanguage();
     const router = useRouter();
     const [studentDialogOpen, setStudentDialogOpen] = useState(false);
+    const [loginHistoryModalOpen, setLoginHistoryModalOpen] = useState(false);
 
     useEffect(() => {
         if (!loading && !isAuthenticated) {
@@ -423,14 +424,34 @@ export default function AdminPage() {
                             {t('admin.settings_desc')}
                         </p>
                     </div>
-                </div>
 
-                {/* Admin Login Log */}
-                <div style={{ marginTop: '32px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: '#fff' }}>
-                        🔐 Admin Login History
-                    </h3>
-                    <AdminLoginLog />
+                    <div style={{
+                        background: 'rgba(255, 59, 48, 0.08)',
+                        borderRadius: '20px',
+                        padding: '24px',
+                        border: '1px solid rgba(255, 59, 48, 0.15)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        minHeight: '140px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                    }}
+                        onClick={() => setLoginHistoryModalOpen(true)}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 59, 48, 0.15)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 59, 48, 0.08)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔐</div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Admin Login History</h3>
+                        <p style={{ fontSize: '13px', color: '#8E8E93' }}>
+                            View login attempts • Security audit log
+                        </p>
+                    </div>
                 </div>
 
                 {/* User-Info */}
@@ -449,6 +470,82 @@ export default function AdminPage() {
                     <span>Role: {user?.role || 'admin'}</span>
                 </div>
             </main>
+
+            {/* Login History Modal */}
+            {loginHistoryModalOpen && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0, 0, 0, 0.7)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000,
+                        padding: '20px',
+                    }}
+                    onClick={() => setLoginHistoryModalOpen(false)}
+                >
+                    <div
+                        style={{
+                            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                            borderRadius: '20px',
+                            maxWidth: '1000px',
+                            width: '100%',
+                            maxHeight: '90vh',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '24px',
+                            borderBottom: '1px solid rgba(255,255,255,0.1)',
+                        }}>
+                            <h2 style={{
+                                fontSize: '24px',
+                                fontWeight: 700,
+                                color: '#fff',
+                                margin: 0,
+                            }}>
+                                🔐 Admin Login History
+                            </h2>
+                            <button
+                                onClick={() => setLoginHistoryModalOpen(false)}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: '#8E8E93',
+                                    fontSize: '24px',
+                                    cursor: 'pointer',
+                                    padding: '8px',
+                                    lineHeight: 1,
+                                }}
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div style={{
+                            flex: 1,
+                            overflowY: 'auto',
+                            padding: '24px',
+                        }}>
+                            <AdminLoginLog />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Schueler-Verwaltungs-Dialog */}
             <StudentManagementDialog
