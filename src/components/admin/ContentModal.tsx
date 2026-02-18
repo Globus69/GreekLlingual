@@ -17,6 +17,7 @@ export interface MultilingualContent {
     type: ContentType;
     greek_transcription: string;
     greek_phonetic?: string;
+    audio_url?: string;
     en_translation?: string;
     en_importance_reason?: string;
     en_audio_url?: string;
@@ -70,6 +71,7 @@ export function ContentModal({
         type: entry?.type || 'vocabulary',
         greek_transcription: entry?.greek_transcription || '',
         greek_phonetic: entry?.greek_phonetic || '',
+        audio_url: entry?.audio_url || '',
 
         en_translation: entry?.en_translation || '',
         en_importance_reason: entry?.en_importance_reason || '',
@@ -240,6 +242,20 @@ export function ContentModal({
                                 onChange={(e) => setFormData({ ...formData, greek_phonetic: e.target.value })}
                                 style={inputStyle}
                                 placeholder="ya su"
+                            />
+                        </div>
+
+                        {/* Audio URL */}
+                        <div style={fieldStyle}>
+                            <label style={labelStyle}>
+                                Audio URL 🔗 <span style={optionalStyle}>(optional)</span>
+                            </label>
+                            <input
+                                type="url"
+                                value={formData.audio_url}
+                                onChange={(e) => setFormData({ ...formData, audio_url: e.target.value })}
+                                style={inputStyle}
+                                placeholder="https://..."
                             />
                         </div>
 

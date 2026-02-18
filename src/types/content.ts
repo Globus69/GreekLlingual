@@ -12,6 +12,7 @@ export interface MultilingualContent {
   // Greek fields (core)
   greek_transcription: string; // Required
   greek_phonetic?: string;
+  audio_url?: string;
 
   // English fields
   en_translation?: string;
@@ -83,6 +84,7 @@ export interface MultilingualContentFormData {
   // Greek fields
   greek_transcription: string;
   greek_phonetic?: string;
+  audio_url?: string;
 
   // English fields
   en_translation?: string;
