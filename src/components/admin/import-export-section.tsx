@@ -242,8 +242,8 @@ export function ImportExportSection({ onImport, filters }: ImportExportSectionPr
                                         >
                                             <TableCell>{row._rowIndex}</TableCell>
                                             <TableCell>{row.type}</TableCell>
-                                            <TableCell className="max-w-xs truncate">{row.english}</TableCell>
-                                            <TableCell className="max-w-xs truncate">{row.greek}</TableCell>
+                                            <TableCell className="max-w-xs truncate">{row.en_translation}</TableCell>
+                                            <TableCell className="max-w-xs truncate">{row.greek_transcription}</TableCell>
                                             <TableCell>{row.level}</TableCell>
                                             <TableCell>{row.difficulty}</TableCell>
                                             <TableCell>

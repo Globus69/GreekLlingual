@@ -115,7 +115,83 @@ const urlSchema = z
     .optional();
 
 /**
- * Content insert validation
+ * Frequency validation (1-5 scale)
+ */
+const frequencySchema = z.union([
+    z.literal(1),
+    z.literal(2),
+    z.literal(3),
+    z.literal(4),
+    z.literal(5)
+]).refine((val) => val >= 1 && val <= 5, {
+    message: 'Frequency must be 1, 2, 3, 4, or 5'
+});
+
+/**
+ * Optional number field
+ */
+const optionalNumberSchema = z.number().int().optional();
+
+/**
+ * Long text field validation (for importance reasons)
+ * - Max 2000 characters
+ */
+const longTextFieldSchema = z
+    .string()
+    .max(2000, 'Text too long')
+    .transform(str => str.trim())
+    .optional();
+
+/**
+ * Multilingual content insert validation
+ * Matches multilingual_content table schema
+ */
+export const multilingualContentInsertSchema = z.object({
+    nr: optionalNumberSchema,
+    type: contentTypeSchema,
+
+    // Greek fields (core)
+    greek_transcription: textFieldSchema,
+    greek_phonetic: optionalTextFieldSchema,
+
+    // English fields
+    en_translation: longTextFieldSchema,
+    en_importance_reason: longTextFieldSchema,
+    en_audio_url: urlSchema,
+
+    // German fields
+    de_translation: longTextFieldSchema,
+    de_importance_reason: longTextFieldSchema,
+    de_audio_url: urlSchema,
+
+    // Spanish fields
+    es_translation: longTextFieldSchema,
+    es_importance_reason: longTextFieldSchema,
+    es_audio_url: urlSchema,
+
+    // Russian fields
+    ru_translation: longTextFieldSchema,
+    ru_importance_reason: longTextFieldSchema,
+    ru_audio_url: urlSchema,
+
+    // Metadata
+    level: levelSchema,
+    difficulty: difficultySchema,
+    frequency: frequencySchema,
+});
+
+export type MultilingualContentInsert = z.infer<typeof multilingualContentInsertSchema>;
+
+/**
+ * Multilingual content update validation (all fields optional)
+ */
+export const multilingualContentUpdateSchema = multilingualContentInsertSchema.partial();
+
+export type MultilingualContentUpdate = z.infer<typeof multilingualContentUpdateSchema>;
+
+/**
+ * @deprecated Use multilingualContentInsertSchema instead
+ * Legacy content insert validation
  */
 export const contentInsertSchema = z.object({
     type: contentTypeSchema,
@@ -132,7 +208,8 @@ export const contentInsertSchema = z.object({
 export type ContentInsert = z.infer<typeof contentInsertSchema>;
 
 /**
- * Content update validation (same as insert but all fields required)
+ * @deprecated Use multilingualContentUpdateSchema instead
+ * Legacy content update validation (same as insert but all fields required)
  */
 export const contentUpdateSchema = contentInsertSchema;
 
