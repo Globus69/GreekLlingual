@@ -114,20 +114,22 @@ export async function fetchClozeTextsStats(): Promise<ClozeTextStats> {
 
 /**
  * Create new cloze text entry
+ * Uses server-side API with service_role key to bypass RLS
  */
 export async function createClozeTextEntry(entry: CreateClozeTextPayload): Promise<ClozeTextEntry> {
     try {
-        const { data, error } = await supabase
-            .from('cloze_texts')
-            .insert([entry])
-            .select()
-            .single();
+        const response = await fetch('/api/admin/cloze-text', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(entry),
+        });
 
-        if (error) {
-            console.error('Create cloze text error:', error);
-            throw new Error(error.message);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Create failed');
         }
 
+        const data = await response.json();
         return data as ClozeTextEntry;
     } catch (error) {
         console.error('createClozeTextEntry error:', error);
@@ -137,21 +139,22 @@ export async function createClozeTextEntry(entry: CreateClozeTextPayload): Promi
 
 /**
  * Update existing cloze text entry
+ * Uses server-side API with service_role key to bypass RLS
  */
 export async function updateClozeTextEntry(id: string, updates: UpdateClozeTextPayload): Promise<ClozeTextEntry> {
     try {
-        const { data, error } = await supabase
-            .from('cloze_texts')
-            .update(updates)
-            .eq('id', id)
-            .select()
-            .single();
+        const response = await fetch('/api/admin/cloze-text', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, ...updates }),
+        });
 
-        if (error) {
-            console.error('Update cloze text error:', error);
-            throw new Error(error.message);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Update failed');
         }
 
+        const data = await response.json();
         return data as ClozeTextEntry;
     } catch (error) {
         console.error('updateClozeTextEntry error:', error);
@@ -161,17 +164,17 @@ export async function updateClozeTextEntry(id: string, updates: UpdateClozeTextP
 
 /**
  * Delete cloze text entry
+ * Uses server-side API with service_role key to bypass RLS
  */
 export async function deleteClozeTextEntry(id: string): Promise<void> {
     try {
-        const { error } = await supabase
-            .from('cloze_texts')
-            .delete()
-            .eq('id', id);
+        const response = await fetch(`/api/admin/cloze-text?id=${id}`, {
+            method: 'DELETE',
+        });
 
-        if (error) {
-            console.error('Delete cloze text error:', error);
-            throw new Error(error.message);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Delete failed');
         }
     } catch (error) {
         console.error('deleteClozeTextEntry error:', error);
