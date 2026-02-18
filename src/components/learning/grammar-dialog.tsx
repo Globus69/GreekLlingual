@@ -47,6 +47,7 @@ export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
     const [autoPlay, setAutoPlay] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const [speechRate, setSpeechRate] = useState<number>(0.9);
+    const [loadError, setLoadError] = useState<string | null>(null);
 
     const STUDENT_ID = user?.id || '';
 
@@ -77,17 +78,21 @@ export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
 
     const loadGrammar = async () => {
         setLoading(true);
+        setLoadError(null);
         try {
+            // Load from multilingual_vocabulary instead of learning_items
+            // Note: learning_items table doesn't have a 'type' column
             const { data, error: dbError } = await supabase
-                .from('learning_items')
+                .from('multilingual_vocabulary')
                 .select('*')
-                .eq('type', 'grammar')
                 .eq('level', user?.level || 'A1')
                 .limit(15);
 
             if (dbError) {
                 console.error('❌ DB error:', dbError);
-                error('Failed to load grammar rules');
+                const errorMsg = `Failed to load: ${dbError.message}`;
+                setLoadError(errorMsg);
+                error(errorMsg);
                 setQueue([]);
                 return;
             }
@@ -96,14 +101,18 @@ export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
                 // Shuffle items
                 const shuffled = [...data].sort(() => Math.random() - 0.5);
                 setQueue(shuffled);
-                console.log(`✅ Loaded ${shuffled.length} grammar rules`);
+                console.log(`✅ Loaded ${shuffled.length} grammar items`);
+                setLoadError(null);
             } else {
                 setQueue([]);
-                info('No grammar rules found');
+                setLoadError(null);
+                info('No grammar items found');
             }
         } catch (err) {
             console.error('❌ Load error:', err);
-            error('Failed to load grammar rules');
+            const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+            setLoadError(`Failed to load: ${errorMsg}`);
+            error('Failed to load grammar items');
             setQueue([]);
         } finally {
             setLoading(false);
@@ -278,7 +287,19 @@ export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
                         <p>Loading grammar rules...</p>
                     </div>
-                ) : showSummary || queue.length === 0 ? (
+                ) : loadError ? (
+                    <div className="empty-state">
+                        <div style={{ fontSize: '64px', marginBottom: '16px' }}>⚠️</div>
+                        <h3>Error Loading Grammar</h3>
+                        <p style={{ color: 'rgba(255, 69, 58, 0.9)', marginTop: '16px', fontFamily: 'monospace', fontSize: '13px' }}>
+                            {loadError}
+                        </p>
+                        <div className="empty-actions">
+                            <button onClick={handleRestart} className="btn-secondary">Retry</button>
+                            <button onClick={onClose} className="btn-primary">Close</button>
+                        </div>
+                    </div>
+                ) : showSummary ? (
                     <div className="empty-state">
                         <div style={{ fontSize: '64px', marginBottom: '16px' }}>🎉</div>
                         <h3>Session Complete!</h3>
@@ -292,6 +313,18 @@ export default function GrammarDialog({ isOpen, onClose }: GrammarDialogProps) {
                                 <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>To Review</div>
                             </div>
                         </div>
+                        <div className="empty-actions">
+                            <button onClick={handleRestart} className="btn-secondary">Restart</button>
+                            <button onClick={onClose} className="btn-primary">Close</button>
+                        </div>
+                    </div>
+                ) : queue.length === 0 ? (
+                    <div className="empty-state">
+                        <div style={{ fontSize: '64px', marginBottom: '16px' }}>📭</div>
+                        <h3>No Grammar Items</h3>
+                        <p style={{ marginTop: '16px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                            No grammar items found for level {user?.level || 'A1'}
+                        </p>
                         <div className="empty-actions">
                             <button onClick={onClose} className="btn-primary">Close</button>
                         </div>
