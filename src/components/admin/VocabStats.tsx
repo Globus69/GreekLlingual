@@ -81,20 +81,20 @@ export default function VocabStats() {
                 />
                 <StatCard
                     icon="📊"
-                    value={stats.avg_frequency.toFixed(1)}
+                    value={stats.avg_frequency != null ? stats.avg_frequency.toFixed(1) : '0.0'}
                     label="Avg Frequency"
                     color="#5856D6"
                     suffix="★"
                 />
                 <StatCard
                     icon="🔊"
-                    value={`${Math.round((stats.with_audio.en / stats.total) * 100)}%`}
+                    value={stats.total > 0 ? `${Math.round((stats.with_audio.en / stats.total) * 100)}%` : '0%'}
                     label="EN Audio Coverage"
                     color="#34C759"
                 />
                 <StatCard
                     icon="🎯"
-                    value={stats.by_difficulty.easy + stats.by_difficulty.medium + stats.by_difficulty.hard}
+                    value={(stats.by_difficulty?.easy ?? 0) + (stats.by_difficulty?.medium ?? 0) + (stats.by_difficulty?.hard ?? 0)}
                     label="Ready to Practice"
                     color="#FF9500"
                 />
@@ -121,12 +121,12 @@ export default function VocabStats() {
                     gridTemplateColumns: 'repeat(6, 1fr)',
                     gap: '12px',
                 }}>
-                    <LevelBar level="A1" count={stats.by_level.A1} color="#34C759" />
-                    <LevelBar level="A2" count={stats.by_level.A2} color="#30D158" />
-                    <LevelBar level="B1" count={stats.by_level.B1} color="#64D2FF" />
-                    <LevelBar level="B2" count={stats.by_level.B2} color="#0A84FF" />
-                    <LevelBar level="C1" count={stats.by_level.C1} color="#BF5AF2" />
-                    <LevelBar level="C2" count={stats.by_level.C2} color="#AF52DE" />
+                    <LevelBar level="A1" count={stats.by_level?.A1 ?? 0} color="#34C759" />
+                    <LevelBar level="A2" count={stats.by_level?.A2 ?? 0} color="#30D158" />
+                    <LevelBar level="B1" count={stats.by_level?.B1 ?? 0} color="#64D2FF" />
+                    <LevelBar level="B2" count={stats.by_level?.B2 ?? 0} color="#0A84FF" />
+                    <LevelBar level="C1" count={stats.by_level?.C1 ?? 0} color="#BF5AF2" />
+                    <LevelBar level="C2" count={stats.by_level?.C2 ?? 0} color="#AF52DE" />
                 </div>
             </div>
 
@@ -151,9 +151,9 @@ export default function VocabStats() {
                     gridTemplateColumns: 'repeat(3, 1fr)',
                     gap: '12px',
                 }}>
-                    <DifficultyBar label="Easy" count={stats.by_difficulty.easy} color="#34C759" />
-                    <DifficultyBar label="Medium" count={stats.by_difficulty.medium} color="#FFD60A" />
-                    <DifficultyBar label="Hard" count={stats.by_difficulty.hard} color="#FF3B30" />
+                    <DifficultyBar label="Easy" count={stats.by_difficulty?.easy ?? 0} color="#34C759" />
+                    <DifficultyBar label="Medium" count={stats.by_difficulty?.medium ?? 0} color="#FFD60A" />
+                    <DifficultyBar label="Hard" count={stats.by_difficulty?.hard ?? 0} color="#FF3B30" />
                 </div>
             </div>
 
@@ -173,10 +173,10 @@ export default function VocabStats() {
                     Audio Coverage
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <AudioBar lang="EN" count={stats.with_audio.en} total={stats.total} />
-                    <AudioBar lang="DE" count={stats.with_audio.de} total={stats.total} />
-                    <AudioBar lang="ES" count={stats.with_audio.es} total={stats.total} />
-                    <AudioBar lang="RU" count={stats.with_audio.ru} total={stats.total} />
+                    <AudioBar lang="EN" count={stats.with_audio?.en ?? 0} total={stats.total} />
+                    <AudioBar lang="DE" count={stats.with_audio?.de ?? 0} total={stats.total} />
+                    <AudioBar lang="ES" count={stats.with_audio?.es ?? 0} total={stats.total} />
+                    <AudioBar lang="RU" count={stats.with_audio?.ru ?? 0} total={stats.total} />
                 </div>
             </div>
         </div>

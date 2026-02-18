@@ -260,10 +260,13 @@ export default function AdminPage() {
                     <div style={{
                         background: 'rgba(88, 86, 214, 0.08)',
                         borderRadius: '20px',
-                        padding: '32px',
+                        padding: '24px',
                         border: '1px solid rgba(88, 86, 214, 0.15)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
+                        minHeight: '140px',
+                        display: 'flex',
+                        flexDirection: 'column',
                     }}
                         onClick={() => setStudentDialogOpen(true)}
                         onMouseEnter={(e) => {
@@ -285,10 +288,13 @@ export default function AdminPage() {
                     <div style={{
                         background: 'rgba(52, 199, 89, 0.08)',
                         borderRadius: '20px',
-                        padding: '32px',
+                        padding: '24px',
                         border: '1px solid rgba(52, 199, 89, 0.15)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
+                        minHeight: '140px',
+                        display: 'flex',
+                        flexDirection: 'column',
                     }}
                         onClick={() => router.push('/admin/content')}
                         onMouseEnter={(e) => {
@@ -310,10 +316,13 @@ export default function AdminPage() {
                     <div style={{
                         background: 'rgba(255, 204, 0, 0.08)',
                         borderRadius: '20px',
-                        padding: '32px',
+                        padding: '24px',
                         border: '1px solid rgba(255, 204, 0, 0.15)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
+                        minHeight: '140px',
+                        display: 'flex',
+                        flexDirection: 'column',
                     }}
                         onClick={() => router.push('/admin/daily-phrases')}
                         onMouseEnter={(e) => {
@@ -335,10 +344,13 @@ export default function AdminPage() {
                     <div style={{
                         background: 'rgba(65, 105, 225, 0.08)',
                         borderRadius: '20px',
-                        padding: '32px',
+                        padding: '24px',
                         border: '1px solid rgba(65, 105, 225, 0.15)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
+                        minHeight: '140px',
+                        display: 'flex',
+                        flexDirection: 'column',
                     }}
                         onClick={() => router.push('/admin/vocab')}
                         onMouseEnter={(e) => {
@@ -360,10 +372,13 @@ export default function AdminPage() {
                     <div style={{
                         background: 'rgba(255, 149, 0, 0.08)',
                         borderRadius: '20px',
-                        padding: '32px',
+                        padding: '24px',
                         border: '1px solid rgba(255, 149, 0, 0.15)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
+                        minHeight: '140px',
+                        display: 'flex',
+                        flexDirection: 'column',
                     }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.background = 'rgba(255, 149, 0, 0.15)';
