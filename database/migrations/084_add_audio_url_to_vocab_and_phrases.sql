@@ -75,17 +75,13 @@ WHERE audio_url IS NOT NULL;
 -- ============================================================================
 
 -- Drop and recreate admin_create_vocabulary function
-DROP FUNCTION IF EXISTS admin_create_vocabulary(
-    VARCHAR, VARCHAR, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    VARCHAR, VARCHAR, INTEGER, INTEGER
-);
+DROP FUNCTION IF EXISTS admin_create_vocabulary;
 
 CREATE OR REPLACE FUNCTION admin_create_vocabulary(
     p_greek_transcription VARCHAR,
+    p_level VARCHAR,
+    p_difficulty VARCHAR,
+    p_frequency INTEGER,
     p_greek_phonetic VARCHAR DEFAULT NULL,
     p_audio_url VARCHAR DEFAULT NULL,
     p_en_translation TEXT DEFAULT NULL,
@@ -100,9 +96,6 @@ CREATE OR REPLACE FUNCTION admin_create_vocabulary(
     p_ru_translation TEXT DEFAULT NULL,
     p_ru_importance_reason TEXT DEFAULT NULL,
     p_ru_audio_url VARCHAR DEFAULT NULL,
-    p_level VARCHAR,
-    p_difficulty VARCHAR,
-    p_frequency INTEGER,
     p_nr INTEGER DEFAULT NULL
 )
 RETURNS UUID
@@ -118,19 +111,21 @@ BEGIN
     END IF;
 
     INSERT INTO multilingual_vocabulary (
-        nr, greek_transcription, greek_phonetic, audio_url,
+        greek_transcription, level, difficulty, frequency,
+        greek_phonetic, audio_url,
         en_translation, en_importance_reason, en_audio_url,
         de_translation, de_importance_reason, de_audio_url,
         es_translation, es_importance_reason, es_audio_url,
         ru_translation, ru_importance_reason, ru_audio_url,
-        level, difficulty, frequency
+        nr
     ) VALUES (
-        p_nr, p_greek_transcription, p_greek_phonetic, p_audio_url,
+        p_greek_transcription, p_level, p_difficulty, p_frequency,
+        p_greek_phonetic, p_audio_url,
         p_en_translation, p_en_importance_reason, p_en_audio_url,
         p_de_translation, p_de_importance_reason, p_de_audio_url,
         p_es_translation, p_es_importance_reason, p_es_audio_url,
         p_ru_translation, p_ru_importance_reason, p_ru_audio_url,
-        p_level, p_difficulty, p_frequency
+        p_nr
     )
     RETURNING id INTO v_id;
 
@@ -139,18 +134,14 @@ END;
 $$;
 
 -- Drop and recreate admin_update_vocabulary function
-DROP FUNCTION IF EXISTS admin_update_vocabulary(
-    UUID, VARCHAR, VARCHAR, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    VARCHAR, VARCHAR, INTEGER, INTEGER
-);
+DROP FUNCTION IF EXISTS admin_update_vocabulary;
 
 CREATE OR REPLACE FUNCTION admin_update_vocabulary(
     p_id UUID,
     p_greek_transcription VARCHAR DEFAULT NULL,
+    p_level VARCHAR DEFAULT NULL,
+    p_difficulty VARCHAR DEFAULT NULL,
+    p_frequency INTEGER DEFAULT NULL,
     p_greek_phonetic VARCHAR DEFAULT NULL,
     p_audio_url VARCHAR DEFAULT NULL,
     p_en_translation TEXT DEFAULT NULL,
@@ -165,9 +156,6 @@ CREATE OR REPLACE FUNCTION admin_update_vocabulary(
     p_ru_translation TEXT DEFAULT NULL,
     p_ru_importance_reason TEXT DEFAULT NULL,
     p_ru_audio_url VARCHAR DEFAULT NULL,
-    p_level VARCHAR DEFAULT NULL,
-    p_difficulty VARCHAR DEFAULT NULL,
-    p_frequency INTEGER DEFAULT NULL,
     p_nr INTEGER DEFAULT NULL
 )
 RETURNS VOID
@@ -207,17 +195,13 @@ END;
 $$;
 
 -- Drop and recreate admin_create_phrase function
-DROP FUNCTION IF EXISTS admin_create_phrase(
-    VARCHAR, VARCHAR, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    VARCHAR, VARCHAR, INTEGER, INTEGER
-);
+DROP FUNCTION IF EXISTS admin_create_phrase;
 
 CREATE OR REPLACE FUNCTION admin_create_phrase(
     p_greek_transcription VARCHAR,
+    p_level VARCHAR,
+    p_difficulty VARCHAR,
+    p_frequency INTEGER,
     p_greek_phonetic VARCHAR DEFAULT NULL,
     p_audio_url VARCHAR DEFAULT NULL,
     p_en_translation TEXT DEFAULT NULL,
@@ -232,9 +216,6 @@ CREATE OR REPLACE FUNCTION admin_create_phrase(
     p_ru_translation TEXT DEFAULT NULL,
     p_ru_importance_reason TEXT DEFAULT NULL,
     p_ru_audio_url VARCHAR DEFAULT NULL,
-    p_level VARCHAR,
-    p_difficulty VARCHAR,
-    p_frequency INTEGER,
     p_nr INTEGER DEFAULT NULL
 )
 RETURNS UUID
@@ -250,19 +231,21 @@ BEGIN
     END IF;
 
     INSERT INTO daily_phrases (
-        nr, greek_transcription, greek_phonetic, audio_url,
+        greek_transcription, level, difficulty, frequency,
+        greek_phonetic, audio_url,
         en_translation, en_importance_reason, en_audio_url,
         de_translation, de_importance_reason, de_audio_url,
         es_translation, es_importance_reason, es_audio_url,
         ru_translation, ru_importance_reason, ru_audio_url,
-        level, difficulty, frequency
+        nr
     ) VALUES (
-        p_nr, p_greek_transcription, p_greek_phonetic, p_audio_url,
+        p_greek_transcription, p_level, p_difficulty, p_frequency,
+        p_greek_phonetic, p_audio_url,
         p_en_translation, p_en_importance_reason, p_en_audio_url,
         p_de_translation, p_de_importance_reason, p_de_audio_url,
         p_es_translation, p_es_importance_reason, p_es_audio_url,
         p_ru_translation, p_ru_importance_reason, p_ru_audio_url,
-        p_level, p_difficulty, p_frequency
+        p_nr
     )
     RETURNING id INTO v_id;
 
@@ -271,18 +254,14 @@ END;
 $$;
 
 -- Drop and recreate admin_update_phrase function
-DROP FUNCTION IF EXISTS admin_update_phrase(
-    UUID, VARCHAR, VARCHAR, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    TEXT, TEXT, VARCHAR,
-    VARCHAR, VARCHAR, INTEGER, INTEGER
-);
+DROP FUNCTION IF EXISTS admin_update_phrase;
 
 CREATE OR REPLACE FUNCTION admin_update_phrase(
     p_id UUID,
     p_greek_transcription VARCHAR DEFAULT NULL,
+    p_level VARCHAR DEFAULT NULL,
+    p_difficulty VARCHAR DEFAULT NULL,
+    p_frequency INTEGER DEFAULT NULL,
     p_greek_phonetic VARCHAR DEFAULT NULL,
     p_audio_url VARCHAR DEFAULT NULL,
     p_en_translation TEXT DEFAULT NULL,
@@ -297,9 +276,6 @@ CREATE OR REPLACE FUNCTION admin_update_phrase(
     p_ru_translation TEXT DEFAULT NULL,
     p_ru_importance_reason TEXT DEFAULT NULL,
     p_ru_audio_url VARCHAR DEFAULT NULL,
-    p_level VARCHAR DEFAULT NULL,
-    p_difficulty VARCHAR DEFAULT NULL,
-    p_frequency INTEGER DEFAULT NULL,
     p_nr INTEGER DEFAULT NULL
 )
 RETURNS VOID
