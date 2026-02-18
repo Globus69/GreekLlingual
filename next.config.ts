@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-// @ts-ignore - next-pwa doesn't have TypeScript types
+// @ts-expect-error - next-pwa doesn't have TypeScript types
 import withPWA from 'next-pwa';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 

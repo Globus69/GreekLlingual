@@ -8,6 +8,7 @@
  * - NEXT_PUBLIC_SUPABASE_ANON_KEY
  */
 
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: '.env.local' });
 
@@ -21,37 +22,84 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const testUsers = [
-    { name: 'Anna Meier', pin_4digit: '3741', level: 'A1', difficulty: 'easy', preply: 'anna_m', outside_preply: '-', fee_per_hour: 28.50, currency: 'Euro' },
-    { name: 'Lukas Braun', pin_4digit: '8192', level: 'A1', difficulty: 'easy', preply: 'lukas_b', outside_preply: 'braun_outside', fee_per_hour: 32.00, currency: 'Euro' },
-    { name: 'Sofia Müller', pin_4digit: '5624', level: 'A1', difficulty: 'easy', preply: 'sofia_m', outside_preply: '-', fee_per_hour: 25.00, currency: 'Dollar' },
-    { name: 'Dimitris Papadopoulos', pin_4digit: '7358', level: 'A1', difficulty: 'easy', preply: 'dimitris_p', outside_preply: 'papadopoulos_ext', fee_per_hour: 30.00, currency: 'Euro' },
-    { name: 'Elena Schmidt', pin_4digit: '9103', level: 'A1', difficulty: 'easy', preply: 'elena_s', outside_preply: '-', fee_per_hour: 27.50, currency: 'Dollar' },
-];
+/**
+ * Helper: Generiert 4-stellige PIN
+ */
+function generatePin() {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+}
 
-async function createUsers() {
-    console.log('🔄 Erstelle Test-User mit 4-stelligem PIN...\n');
+/**
+ * Erstellt einen Test-User mit PIN
+ */
+async function createPinUser(username, pin) {
+    try {
+        // 1. User in auth.users erstellen (mit fake Email)
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+            email: `${username}@test.local`,
+            password: pin,
+            email_confirm: true,
+            user_metadata: {
+                username,
+                pin,
+                is_test_user: true
+            }
+        });
 
-    for (const user of testUsers) {
-        const userData = {
-            ...user,
-            role: 'student',
-            performance_index: `${user.level}-${user.difficulty}`,
-        };
+        if (authError) throw authError;
+        if (!authData?.user) throw new Error('No user returned from auth.admin.createUser');
 
-        const { data, error } = await supabase
-            .from('users')
-            .insert([userData])
-            .select();
+        console.log(`✅ User ${username} created (ID: ${authData.user.id})`);
 
-        if (error) {
-            console.error(`❌ Fehler bei ${user.name}:`, error.message);
-        } else {
-            console.log(`✅ ${user.name} erstellt (PIN: ${user.pin_4digit})`);
+        // 2. Profil in public.profiles erstellen
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+                id: authData.user.id,
+                username,
+                pin,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            });
+
+        if (profileError) throw profileError;
+
+        console.log(`   Profile created for ${username}`);
+        return { username, pin, userId: authData.user.id };
+
+    } catch (error) {
+        console.error(`❌ Error creating user ${username}:`, error);
+        throw error;
+    }
+}
+
+/**
+ * Main: Erstellt 5 Test-User
+ */
+async function main() {
+    console.log('🚀 Creating 5 test users with PIN authentication...\n');
+
+    const users = [];
+
+    for (let i = 1; i <= 5; i++) {
+        const username = `testuser${i}`;
+        const pin = generatePin();
+
+        try {
+            const result = await createPinUser(username, pin);
+            users.push(result);
+        } catch (error) {
+            console.error(`Failed to create ${username}`);
         }
     }
 
-    console.log('\n🎉 Fertig! Du kannst jetzt mit den PINs testen.');
+    console.log('\n📋 Summary:');
+    console.log('═══════════════════════════════════════');
+    users.forEach(u => {
+        console.log(`Username: ${u.username.padEnd(12)} | PIN: ${u.pin} | ID: ${u.userId}`);
+    });
+    console.log('═══════════════════════════════════════');
+    console.log(`\n✅ Created ${users.length}/5 users successfully`);
 }
 
-createUsers().catch(console.error);
+main().catch(console.error);

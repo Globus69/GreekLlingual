@@ -85,7 +85,7 @@ function detectDevice(): DeviceInfo {
     const isTouchDevice =
         'ontouchstart' in window ||
         navigator.maxTouchPoints > 0 ||
-        // @ts-ignore - IE11 compatibility
+        // @ts-expect-error - IE11 compatibility
         navigator.msMaxTouchPoints > 0;
 
     return {
