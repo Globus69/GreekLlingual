@@ -248,213 +248,55 @@ export async function checkDuplicate(
 
 /**
  * Import CSV file
+ *
+ * Uses server-side API route that has service_role key to bypass RLS.
+ * This is secure because:
+ * - service_role key stays server-side only
+ * - Never exposed to browser
+ * - Can add additional auth checks in API route if needed
+ *
+ * Why not client-side?
+ * - RLS policies can be complex and may block authenticated users
+ * - Using service_role server-side ensures consistent behavior
+ * - Better error handling and logging
  */
 export async function importCSV(file: File, mode: ImportMode): Promise<ImportResult> {
-    return new Promise((resolve, reject) => {
-        Papa.parse<any>(file, {
-            header: true,
-            skipEmptyLines: true,
-            delimiter: ';', // Support semicolon-separated CSV
-            transformHeader: (header: string) => {
-                // Map German column names to English keys
-                const mapping: Record<string, string> = {
-                    'Nr.': 'nr',
-                    'Griechisch (Transkription)': 'greek_transcription',
-                    'Lautschrift (Griechisch)': 'greek_phonetic',
-                    'Russische Übersetzung': 'ru_translation',
-                    'Wichtigkeit (Begründung) in Russisch': 'ru_importance_reason',
-                    'Audio in russisch': 'ru_audio_url',
-                    'Englische Übersetzung': 'en_translation',
-                    'Wichtigkeit (Begründung)in Englisch': 'en_importance_reason',
-                    'Audio in englisch': 'en_audio_url',
-                    'Spanische Übersetzung': 'es_translation',
-                    'Wichtigkeit (Begründung)in Spanisch': 'es_importance_reason',
-                    'Audio in Spanisch': 'es_audio_url',
-                    'Deutsche Übersetzung': 'de_translation',
-                    'Wichtigkeit (Begründung)in Deutsch': 'de_importance_reason',
-                    'Audio in deutsch': 'de_audio_url',
-                    'Level': 'level',
-                    'difficulty (easy/middle/hard)': 'difficulty',
-                    'Häufigkeit im täglichen Gebrauch': 'frequency',
-                };
-                return mapping[header] || header;
-            },
-            complete: async (results) => {
-                try {
-                    const errors: ImportResult['errors'] = [];
-                    let imported = 0;
-                    let skipped = 0;
+    try {
+        console.log(`📤 Sending import request to server API...`);
 
-                    // If overwrite mode, delete all existing entries
-                    if (mode === 'overwrite') {
-                        console.log('🗑️ Overwrite mode: Deleting all existing entries...');
-                        const { data: existingIds, error: selectError } = await supabase
-                            .from('multilingual_vocabulary')
-                            .select('id');
+        // Create FormData
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('mode', mode);
 
-                        if (selectError) {
-                            console.error('Failed to fetch existing entries:', selectError);
-                            throw new Error(`Fehler beim Abrufen bestehender Einträge: ${selectError.message}`);
-                        }
-
-                        if (existingIds && existingIds.length > 0) {
-                            console.log(`Found ${existingIds.length} existing entries to delete`);
-                            const { error: deleteError } = await supabase
-                                .from('multilingual_vocabulary')
-                                .delete()
-                                .in('id', existingIds.map(e => e.id));
-
-                            if (deleteError) {
-                                console.error('Failed to delete entries:', deleteError);
-                                throw new Error(`Fehler beim Löschen: ${deleteError.message}`);
-                            }
-                            console.log('✅ All existing entries deleted successfully');
-                        } else {
-                            console.log('No existing entries to delete');
-                        }
-                    }
-
-                    // Process each row
-                    console.log(`📥 Starting import of ${results.data.length} rows...`);
-                    for (let i = 0; i < results.data.length; i++) {
-                        const row = results.data[i];
-                        const rowNum = i + 2; // Account for header row
-
-                        try {
-                            // Validate required fields
-                            if (!row.greek_transcription || row.greek_transcription.trim() === '') {
-                                errors.push({
-                                    row: rowNum,
-                                    field: 'greek_transcription',
-                                    message: 'Greek transcription is required',
-                                });
-                                skipped++;
-                                continue;
-                            }
-
-                            if (!row.level) {
-                                errors.push({
-                                    row: rowNum,
-                                    field: 'level',
-                                    message: 'Level is required',
-                                });
-                                skipped++;
-                                continue;
-                            }
-
-                            if (!row.difficulty) {
-                                errors.push({
-                                    row: rowNum,
-                                    field: 'difficulty',
-                                    message: 'Difficulty is required',
-                                });
-                                skipped++;
-                                continue;
-                            }
-
-                            // Parse frequency
-                            const frequency = parseInt(row.frequency || '3', 10);
-                            if (isNaN(frequency) || frequency < 1 || frequency > 5) {
-                                errors.push({
-                                    row: rowNum,
-                                    field: 'frequency',
-                                    message: 'Frequency must be 1-5',
-                                });
-                                skipped++;
-                                continue;
-                            }
-
-                            // Normalize difficulty value (middle → medium)
-                            let difficultyValue = row.difficulty?.trim().toLowerCase();
-                            if (difficultyValue === 'middle') {
-                                difficultyValue = 'medium';
-                            }
-
-                            // Create entry object
-                            const entry: CreateVocabPayload = {
-                                nr: row.nr ? parseInt(row.nr, 10) : undefined,
-                                greek_transcription: row.greek_transcription.trim(),
-                                greek_phonetic: row.greek_phonetic?.trim(),
-
-                                en_translation: row.en_translation?.trim(),
-                                en_importance_reason: row.en_importance_reason?.trim(),
-                                en_audio_url: row.en_audio_url?.trim(),
-
-                                de_translation: row.de_translation?.trim(),
-                                de_importance_reason: row.de_importance_reason?.trim(),
-                                de_audio_url: row.de_audio_url?.trim(),
-
-                                es_translation: row.es_translation?.trim(),
-                                es_importance_reason: row.es_importance_reason?.trim(),
-                                es_audio_url: row.es_audio_url?.trim(),
-
-                                ru_translation: row.ru_translation?.trim(),
-                                ru_importance_reason: row.ru_importance_reason?.trim(),
-                                ru_audio_url: row.ru_audio_url?.trim(),
-
-                                level: row.level?.trim() as CreateVocabPayload['level'],
-                                difficulty: difficultyValue as CreateVocabPayload['difficulty'],
-                                frequency: frequency as CreateVocabPayload['frequency'],
-                            };
-
-                            // Insert to database
-                            const { error: insertError } = await supabase
-                                .from('multilingual_vocabulary')
-                                .insert([entry]);
-
-                            if (insertError) {
-                                if (insertError.code === '23505') {
-                                    // Unique constraint violation
-                                    console.warn(`❌ Row ${rowNum}: Duplicate - ${entry.greek_transcription} (${entry.level})`);
-                                    errors.push({
-                                        row: rowNum,
-                                        message: `Duplikat: ${entry.greek_transcription} (${entry.level})`,
-                                    });
-                                    skipped++;
-                                } else {
-                                    console.error(`❌ Row ${rowNum}: ${insertError.message}`);
-                                    errors.push({
-                                        row: rowNum,
-                                        message: insertError.message,
-                                    });
-                                    skipped++;
-                                }
-                            } else {
-                                imported++;
-                                if (imported % 10 === 0) {
-                                    console.log(`✓ Imported ${imported} entries so far...`);
-                                }
-                            }
-                        } catch (rowError) {
-                            errors.push({
-                                row: rowNum,
-                                message: rowError instanceof Error ? rowError.message : 'Unknown error',
-                            });
-                            skipped++;
-                        }
-                    }
-
-                    console.log(`\n📊 Import Summary:`);
-                    console.log(`   ✅ Imported: ${imported}`);
-                    console.log(`   ⏭️  Skipped: ${skipped}`);
-                    console.log(`   ❌ Errors: ${errors.length}`);
-
-                    resolve({
-                        success: errors.length === 0,
-                        imported,
-                        skipped,
-                        errors,
-                        message: `Imported ${imported} entries, skipped ${skipped}`,
-                    });
-                } catch (error) {
-                    reject(error);
-                }
-            },
-            error: (error) => {
-                reject(new Error(`CSV parsing failed: ${error.message}`));
-            },
+        // Send to server-side API
+        const response = await fetch('/api/admin/vocab/import', {
+            method: 'POST',
+            body: formData,
         });
-    });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Server API error:', errorData);
+
+            // User-friendly error messages
+            if (errorData.error?.includes('SUPABASE_SERVICE_ROLE_KEY')) {
+                throw new Error(
+                    'Server-Konfigurationsfehler: SUPABASE_SERVICE_ROLE_KEY fehlt. ' +
+                        'Bitte füge den Key zur .env.local hinzu.'
+                );
+            }
+
+            throw new Error(errorData.error || 'Import fehlgeschlagen');
+        }
+
+        const result: ImportResult = await response.json();
+        console.log('✅ Import completed:', result);
+        return result;
+    } catch (error) {
+        console.error('importCSV error:', error);
+        throw error;
+    }
 }
 
 /**
