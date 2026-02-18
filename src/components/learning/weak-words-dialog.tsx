@@ -13,17 +13,16 @@ import '@/styles/liquid-glass.css';
 
 interface WeakWord {
     id: string;
-    type: string;
-    english: string;
-    russian?: string;
-    greek: string;
-    greek_word?: string;
-    phonetic?: string;
-    example_en: string | null;
-    example_gr: string | null;
-    audio_url: string | null;
-    level?: string;
-    difficulty?: string;
+    greek_transcription: string;
+    greek_phonetic?: string;
+    audio_url?: string;
+    en_translation?: string;
+    ru_translation?: string;
+    de_translation?: string;
+    es_translation?: string;
+    level: string;
+    difficulty: string;
+    frequency: number;
 }
 
 interface WeakWordsDialogProps {
@@ -79,9 +78,8 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
         try {
             // Load vocabulary items with higher difficulty first
             const { data, error: dbError } = await supabase
-                .from('learning_items')
+                .from('multilingual_vocabulary')
                 .select('*')
-                .eq('type', 'vocabulary')
                 .eq('level', user?.level || 'A1')
                 .order('difficulty', { ascending: false }) // Most difficult first
                 .limit(15);
@@ -119,7 +117,7 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
         const currentItem = queue[currentIndex];
         if (!currentItem) return;
 
-        const text = currentItem.greek_word || currentItem.greek;
+        const text = currentItem.greek_transcription;
         if (!text) return;
 
         setIsPlaying(true);
@@ -293,10 +291,14 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
                     <>
                         <div className="card-container">
                             <FlashcardFSRS
-                                front={locale === 'ru' && currentItem.russian ? currentItem.russian : currentItem.english}
-                                back={currentItem.greek_word || currentItem.greek}
-                                phonetic={currentItem.phonetic}
-                                example={currentItem.example_gr || undefined}
+                                front={
+                                    locale === 'ru' && currentItem.ru_translation
+                                        ? currentItem.ru_translation
+                                        : currentItem.en_translation || currentItem.de_translation || currentItem.es_translation || ''
+                                }
+                                back={currentItem.greek_transcription}
+                                phonetic={currentItem.greek_phonetic}
+                                example={undefined}
                                 onFlip={() => setFlipped(!flipped)}
                                 flipped={flipped}
                                 showRatingButtons={true}
