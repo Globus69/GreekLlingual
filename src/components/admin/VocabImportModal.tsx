@@ -40,10 +40,35 @@ export default function VocabImportModal({ onClose, onSuccess }: VocabImportModa
     };
 
     const previewFile = (file: File) => {
-        Papa.parse<VocabCSVRow>(file, {
+        Papa.parse<any>(file, {
             header: true,
             skipEmptyLines: true,
+            delimiter: ';', // Support semicolon-separated CSV
             preview: 10,
+            transformHeader: (header: string) => {
+                // Map German column names to English keys
+                const mapping: Record<string, string> = {
+                    'Nr.': 'nr',
+                    'Griechisch (Transkription)': 'greek_transcription',
+                    'Lautschrift (Griechisch)': 'greek_phonetic',
+                    'Russische Übersetzung': 'ru_translation',
+                    'Wichtigkeit (Begründung) in Russisch': 'ru_importance_reason',
+                    'Audio in russisch': 'ru_audio_url',
+                    'Englische Übersetzung': 'en_translation',
+                    'Wichtigkeit (Begründung)in Englisch': 'en_importance_reason',
+                    'Audio in englisch': 'en_audio_url',
+                    'Spanische Übersetzung': 'es_translation',
+                    'Wichtigkeit (Begründung)in Spanisch': 'es_importance_reason',
+                    'Audio in Spanisch': 'es_audio_url',
+                    'Deutsche Übersetzung': 'de_translation',
+                    'Wichtigkeit (Begründung)in Deutsch': 'de_importance_reason',
+                    'Audio in deutsch': 'de_audio_url',
+                    'Level': 'level',
+                    'difficulty (easy/middle/hard)': 'difficulty',
+                    'Häufigkeit im täglichen Gebrauch (1;2;3;4;5)': 'frequency',
+                };
+                return mapping[header] || header;
+            },
             complete: (results) => {
                 setPreviewData(results.data);
                 validatePreview(results.data);
@@ -59,10 +84,16 @@ export default function VocabImportModal({ onClose, onSuccess }: VocabImportModa
         const errors = new Map<number, string[]>();
 
         data.forEach((row, index) => {
+            // Normalize difficulty value (middle → medium)
+            let difficultyValue = row.difficulty?.trim().toLowerCase();
+            if (difficultyValue === 'middle') {
+                difficultyValue = 'medium';
+            }
+
             const validation = validateVocabEntry({
                 greek_transcription: row.greek_transcription,
-                level: row.level as any,
-                difficulty: row.difficulty as any,
+                level: row.level?.trim() as any,
+                difficulty: difficultyValue as any,
                 frequency: parseInt(row.frequency) as any,
             });
 
