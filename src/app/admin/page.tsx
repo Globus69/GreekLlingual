@@ -291,27 +291,34 @@ export default function AdminPage() {
                         borderRadius: '20px',
                         padding: '24px',
                         border: '1px solid rgba(52, 199, 89, 0.15)',
-                        cursor: 'pointer',
+                        cursor: 'not-allowed',
                         transition: 'all 0.2s',
                         minHeight: '140px',
                         display: 'flex',
                         flexDirection: 'column',
+                        opacity: 0.4,
+                        position: 'relative',
                     }}
-                        onClick={() => router.push('/admin/content')}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(52, 199, 89, 0.15)';
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(52, 199, 89, 0.08)';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                        }}
                     >
                         <div style={{ fontSize: '40px', marginBottom: '12px' }}>📦</div>
                         <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Content Management</h3>
                         <p style={{ fontSize: '13px', color: '#8E8E93' }}>
                             Import, verwalten und pflegen Sie Vokabeln, Phrasen und Grammatik
                         </p>
+                        <div style={{
+                            position: 'absolute',
+                            top: '12px',
+                            right: '12px',
+                            background: 'rgba(255, 59, 48, 0.2)',
+                            border: '1px solid rgba(255, 59, 48, 0.3)',
+                            borderRadius: '6px',
+                            padding: '4px 8px',
+                            fontSize: '10px',
+                            fontWeight: 600,
+                            color: '#FF3B30',
+                        }}>
+                            DISABLED
+                        </div>
                     </div>
 
                     <div style={{
