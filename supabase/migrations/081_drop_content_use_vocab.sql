@@ -28,9 +28,9 @@ BEGIN
             'CREATE TABLE _content_backup_%s AS SELECT * FROM content',
             to_char(now(), 'YYYYMMDD_HH24MISS')
         );
-        RAISE NOTICE '✅ Content table backed up to _content_backup_*';
+        RAISE NOTICE 'Content table backed up to _content_backup_*';
     ELSE
-        RAISE NOTICE 'ℹ️  Content table does not exist - skipping backup';
+        RAISE NOTICE 'Content table does not exist - skipping backup';
     END IF;
 END $$;
 
@@ -98,33 +98,24 @@ GRANT SELECT ON multilingual_vocabulary TO authenticated, anon;
 COMMENT ON VIEW content IS 'DEPRECATED: Backward compatibility READ-ONLY view mapping multilingual_vocabulary to old content structure. For write operations, use multilingual_vocabulary directly.';
 COMMENT ON VIEW learning_items IS 'Alias for multilingual_vocabulary. Provides full multilingual support. Use this directly for all operations.';
 
--- Success message
-DO $$
-BEGIN
-    RAISE NOTICE '';
-    RAISE NOTICE '╔════════════════════════════════════════════════╗';
-    RAISE NOTICE '║  ✅ CONTENT TABLE CLEANUP COMPLETE            ║';
-    RAISE NOTICE '╠════════════════════════════════════════════════╣';
-    RAISE NOTICE '║  Action: Dropped incompatible content table    ║';
-    RAISE NOTICE '║  Backup: Created in _content_backup_* table    ║';
-    RAISE NOTICE '║  Views: Created for READ-ONLY compatibility    ║';
-    RAISE NOTICE '║  ✅ FIXED: Permissions on underlying table     ║';
-    RAISE NOTICE '║                                                ║';
-    RAISE NOTICE '║  ⚠️  IMPORTANT:                                ║';
-    RAISE NOTICE '║  - Views are READ-ONLY (no INSERT/UPDATE/DEL)  ║';
-    RAISE NOTICE '║  - Use multilingual_vocabulary for writes      ║';
-    RAISE NOTICE '║  - learning_items = full multilingual support  ║';
-    RAISE NOTICE '║  - content view is DEPRECATED (EN only)        ║';
-    RAISE NOTICE '╚════════════════════════════════════════════════╝';
-    RAISE NOTICE '';
-    RAISE NOTICE '📋 NEXT STEPS FOR /admin/content:';
-    RAISE NOTICE '1. Update API routes to use multilingual_vocabulary table';
-    RAISE NOTICE '2. Update TypeScript types to match vocab structure';
-    RAISE NOTICE '3. Use shared vocab components (reuse from /admin/vocab)';
-    RAISE NOTICE '4. Remove old content-specific code';
-    RAISE NOTICE '5. Test CRUD operations with new schema';
-    RAISE NOTICE '';
-    RAISE NOTICE '💡 TIP: /admin/content can share ALL logic with /admin/vocab';
-    RAISE NOTICE '   since both now use the same multilingual_vocabulary table!';
-    RAISE NOTICE '';
-END $$;
+-- Migration 081 Complete
+-- Action: Dropped incompatible content table
+-- Backup: Created in _content_backup_* table (if existed)
+-- Views: Created for READ-ONLY backward compatibility
+-- Permissions: Granted on views AND underlying multilingual_vocabulary table
+--
+-- IMPORTANT:
+-- - Views are READ-ONLY (no INSERT/UPDATE/DELETE support)
+-- - Use multilingual_vocabulary table directly for write operations
+-- - learning_items view = full multilingual support
+-- - content view = DEPRECATED (EN only, legacy compatibility)
+--
+-- NEXT STEPS FOR /admin/content:
+-- 1. Update API routes to use multilingual_vocabulary table
+-- 2. Update TypeScript types to match vocab structure
+-- 3. Use shared vocab components (reuse from /admin/vocab)
+-- 4. Remove old content-specific code
+-- 5. Test CRUD operations with new schema
+--
+-- TIP: /admin/content can share ALL logic with /admin/vocab
+--      since both now use the same multilingual_vocabulary table!

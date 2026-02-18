@@ -23,7 +23,7 @@ BEGIN
             'CREATE TABLE _phrases_backup_%s AS SELECT * FROM phrases',
             to_char(now(), 'YYYYMMDD_HH24MISS')
         );
-        RAISE NOTICE '✅ Phrases table backed up to _phrases_backup_*';
+        RAISE NOTICE 'Phrases table backed up to _phrases_backup_*';
     END IF;
 END $$;
 
@@ -316,21 +316,11 @@ COMMENT ON COLUMN public.daily_phrases.greek_transcription IS 'Greek text in Lat
 COMMENT ON COLUMN public.daily_phrases.greek_phonetic IS 'Phonetic pronunciation guide';
 COMMENT ON COLUMN public.daily_phrases.frequency IS 'Importance rating from 1 (rare) to 5 (very common)';
 
--- Success message
-DO $$
-BEGIN
-    RAISE NOTICE '';
-    RAISE NOTICE '╔════════════════════════════════════════════════╗';
-    RAISE NOTICE '║  ✅ DAILY PHRASES MULTILINGUAL SYSTEM         ║';
-    RAISE NOTICE '╠════════════════════════════════════════════════╣';
-    RAISE NOTICE '║  Table: daily_phrases                          ║';
-    RAISE NOTICE '║  Columns: 21 (18 content + 3 system)           ║';
-    RAISE NOTICE '║  Languages: EN, DE, ES, RU                     ║';
-    RAISE NOTICE '║  Indexes: 11 (9 standard + 2 phrases-specific) ║';
-    RAISE NOTICE '║  RPC Functions: 5 created                      ║';
-    RAISE NOTICE '║  RLS: Enabled (Admin full, others read-only)   ║';
-    RAISE NOTICE '║  Schema: 100% matching multilingual_vocabulary ║';
-    RAISE NOTICE '║  ✅ FIXED: Backup, function drops, GRANTs      ║';
-    RAISE NOTICE '╚════════════════════════════════════════════════╝';
-    RAISE NOTICE '';
-END $$;
+-- Migration 080 Complete
+-- Table: daily_phrases created with 21 columns
+-- Languages: EN, DE, ES, RU (4 languages × 3 fields each)
+-- Indexes: 11 (9 standard + 2 phrases-specific)
+-- RPC Functions: 5 created
+-- RLS: Enabled (Admin full access, others read-only)
+-- Schema: 100% matching multilingual_vocabulary
+-- Fixes: Backup, function drops, GRANT signatures
