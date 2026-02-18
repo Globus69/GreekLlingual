@@ -251,9 +251,34 @@ export async function checkDuplicate(
  */
 export async function importCSV(file: File, mode: ImportMode): Promise<ImportResult> {
     return new Promise((resolve, reject) => {
-        Papa.parse<VocabCSVRow>(file, {
+        Papa.parse<any>(file, {
             header: true,
             skipEmptyLines: true,
+            delimiter: ';', // Support semicolon-separated CSV
+            transformHeader: (header: string) => {
+                // Map German column names to English keys
+                const mapping: Record<string, string> = {
+                    'Nr.': 'nr',
+                    'Griechisch (Transkription)': 'greek_transcription',
+                    'Lautschrift (Griechisch)': 'greek_phonetic',
+                    'Russische Übersetzung': 'ru_translation',
+                    'Wichtigkeit (Begründung) in Russisch': 'ru_importance_reason',
+                    'Audio in russisch': 'ru_audio_url',
+                    'Englische Übersetzung': 'en_translation',
+                    'Wichtigkeit (Begründung)in Englisch': 'en_importance_reason',
+                    'Audio in englisch': 'en_audio_url',
+                    'Spanische Übersetzung': 'es_translation',
+                    'Wichtigkeit (Begründung)in Spanisch': 'es_importance_reason',
+                    'Audio in Spanisch': 'es_audio_url',
+                    'Deutsche Übersetzung': 'de_translation',
+                    'Wichtigkeit (Begründung)in Deutsch': 'de_importance_reason',
+                    'Audio in deutsch': 'de_audio_url',
+                    'Level': 'level',
+                    'difficulty (easy/middle/hard)': 'difficulty',
+                    'Häufigkeit im täglichen Gebrauch (1;2;3;4;5)': 'frequency',
+                };
+                return mapping[header] || header;
+            },
             complete: async (results) => {
                 try {
                     const errors: ImportResult['errors'] = [];
@@ -323,6 +348,12 @@ export async function importCSV(file: File, mode: ImportMode): Promise<ImportRes
                                 continue;
                             }
 
+                            // Normalize difficulty value (middle → medium)
+                            let difficultyValue = row.difficulty?.trim().toLowerCase();
+                            if (difficultyValue === 'middle') {
+                                difficultyValue = 'medium';
+                            }
+
                             // Create entry object
                             const entry: CreateVocabPayload = {
                                 nr: row.nr ? parseInt(row.nr, 10) : undefined,
@@ -345,8 +376,8 @@ export async function importCSV(file: File, mode: ImportMode): Promise<ImportRes
                                 ru_importance_reason: row.ru_importance_reason?.trim(),
                                 ru_audio_url: row.ru_audio_url?.trim(),
 
-                                level: row.level as CreateVocabPayload['level'],
-                                difficulty: row.difficulty as CreateVocabPayload['difficulty'],
+                                level: row.level?.trim() as CreateVocabPayload['level'],
+                                difficulty: difficultyValue as CreateVocabPayload['difficulty'],
                                 frequency: frequency as CreateVocabPayload['frequency'],
                             };
 
