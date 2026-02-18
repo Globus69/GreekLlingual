@@ -1,0 +1,11 @@
+nr,greek_transcription,greek_phonetic,en_translation,en_importance_reason,en_audio_url,de_translation,de_importance_reason,de_audio_url,es_translation,es_importance_reason,es_audio_url,ru_translation,ru_importance_reason,ru_audio_url,level,difficulty,frequency
+1,καλησπέρα,kalispera,good evening,evening greeting,,guten Abend,abendliche Begrüßung,,buenas noches,saludo nocturno,,добрый вечер,вечернее приветствие,,A2,easy,5
+2,παρακαλώ,parakalo,please,polite request,,bitte,höfliche Bitte,,por favor,petición cortés,,пожалуйста,вежливая просьба,,A2,easy,5
+3,ευχαριστώ,efharisto,thank you,expression of gratitude,,danke,Ausdruck der Dankbarkeit,,gracias,expresión de gratitud,,спасибо,выражение благодарности,,A2,easy,5
+4,συγγνώμη,signomi,excuse me / sorry,apology,,Entschuldigung,Entschuldigung,,perdón / lo siento,disculpa,,извините,извинение,,A2,easy,5
+5,πώς πας;,pos pas,how are you?,informal greeting,,wie geht's?,informelle Begrüßung,,¿cómo estás?,saludo informal,,как дела?,неформальное приветствие,,A2,easy,4
+6,τι κάνεις;,ti kanis,what are you doing?,question about activity,,was machst du?,Frage nach Aktivität,,¿qué haces?,pregunta sobre actividad,,что делаешь?,вопрос о занятии,,A2,easy,4
+7,πού είναι;,pou ine,where is it?,question about location,,wo ist es?,Frage nach Standort,,¿dónde está?,pregunta sobre ubicación,,где находится?,вопрос о местонахождении,,A2,easy,5
+8,πόσο κοστίζει;,poso kostizi,how much does it cost?,question about price,,wie viel kostet es?,Frage nach Preis,,¿cuánto cuesta?,pregunta sobre precio,,сколько стоит?,вопрос о цене,,A2,medium,5
+9,μιλάς αγγλικά;,milas anglika,do you speak English?,question about language,,sprichst du Englisch?,Frage nach Sprache,,¿hablas inglés?,pregunta sobre idioma,,ты говоришь по-английски?,вопрос о языке,,A2,medium,4
+10,δεν καταλαβαίνω,den katalaveno,I don't understand,expression of confusion,,ich verstehe nicht,Ausdruck von Unverständnis,,no entiendo,expresión de confusión,,я не понимаю,выражение непонимания,,A2,medium,4
