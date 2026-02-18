@@ -12,15 +12,15 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import type { Content } from '@/types/content';
+import type { MultilingualContent } from '@/types/content';
 import { Pencil, Trash2, Loader2 } from 'lucide-react';
 
 interface ContentTableProps {
-    items: Content[];
+    items: MultilingualContent[];
     loading?: boolean;
     selectedIds: string[];
     onSelectionChange: (ids: string[]) => void;
-    onEdit: (item: Content) => void;
+    onEdit: (item: MultilingualContent) => void;
     onDelete: (id: string) => void;
     onBulkDelete: (ids: string[]) => void;
 }
@@ -139,7 +139,7 @@ export function ContentTable({
                                     <Checkbox
                                         checked={selectedIds.includes(item.id)}
                                         onCheckedChange={() => handleSelectItem(item.id)}
-                                        aria-label={`Select ${item.english}`}
+                                        aria-label={`Select ${item.en_translation || item.greek_transcription}`}
                                     />
                                 </TableCell>
                                 <TableCell>
@@ -148,10 +148,10 @@ export function ContentTable({
                                     </span>
                                 </TableCell>
                                 <TableCell className="font-medium max-w-xs truncate">
-                                    {item.english}
+                                    {item.en_translation || '-'}
                                 </TableCell>
                                 <TableCell className="max-w-xs truncate text-blue-300">
-                                    {item.greek}
+                                    {item.greek_transcription}
                                 </TableCell>
                                 <TableCell>
                                     <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-500/20">
@@ -190,7 +190,7 @@ export function ContentTable({
                                             onClick={() => {
                                                 if (
                                                     confirm(
-                                                        `Delete "${item.english}"? This action cannot be undone.`
+                                                        `Delete "${item.en_translation || item.greek_transcription}"? This action cannot be undone.`
                                                     )
                                                 ) {
                                                     onDelete(item.id);

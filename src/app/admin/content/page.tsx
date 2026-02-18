@@ -6,7 +6,14 @@ import { useState, useEffect, CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { ContentModal } from '@/components/admin/ContentModal';
-import { Content, ContentInsert, ContentUpdate } from '@/types/content';
+import {
+    Content,
+    MultilingualContent,
+    ContentInsert,
+    ContentUpdate,
+    MultilingualContentInsert,
+    MultilingualContentUpdate
+} from '@/types/content';
 import {
     fetchContent,
     createContent,
@@ -22,7 +29,7 @@ export default function ContentPage() {
     const { user, isAdmin } = useAuth();
     const router = useRouter();
 
-    const [data, setData] = useState<Content[]>([]);
+    const [data, setData] = useState<MultilingualContent[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
     const [page, setPage] = useState(0);
@@ -36,7 +43,7 @@ export default function ContentPage() {
 
     // Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<Content | null>(null);
+    const [editingItem, setEditingItem] = useState<MultilingualContent | null>(null);
 
     // Delete confirmation
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -88,15 +95,17 @@ export default function ContentPage() {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (item: Content) => {
+    const handleEdit = (item: MultilingualContent) => {
         setEditingItem(item);
         setIsModalOpen(true);
     };
 
-    const handleSave = async (formData: ContentInsert) => {
+    const handleSave = async (formData?: MultilingualContentInsert) => {
+        if (!formData) return;
+
         try {
             if (editingItem) {
-                await updateContent(editingItem.id, formData as ContentUpdate);
+                await updateContent(editingItem.id, formData as MultilingualContentUpdate);
                 setSuccessMsg('✅ Eintrag aktualisiert');
             } else {
                 await createContent(formData);
@@ -372,10 +381,10 @@ export default function ContentPage() {
                                             <span style={tagDiff}>{item.difficulty}</span>
                                         </div>
                                         <div style={{ fontSize: '13px', fontWeight: 600, color: '#fff', marginBottom: '2px' }}>
-                                            {item.english}
+                                            {item.en_translation || '-'}
                                         </div>
                                         <div style={{ fontSize: '12px', color: '#8E8E93' }}>
-                                            {item.greek}
+                                            {item.greek_transcription}
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>

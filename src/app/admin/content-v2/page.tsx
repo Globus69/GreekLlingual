@@ -6,9 +6,16 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ContentFilters } from '@/components/admin/content-filters';
 import { ContentTable } from '@/components/admin/content-table';
-import { ContentModal } from '@/components/admin/content-modal';
+import { ContentModal } from '@/components/admin/ContentModal';
 import { ImportExportSection } from '@/components/admin/import-export-section';
-import type { Content, ContentFilters as Filters, ContentFormData, BulkImportResult } from '@/types/content';
+import type {
+    Content,
+    MultilingualContent,
+    ContentFilters as Filters,
+    ContentFormData,
+    MultilingualContentFormData,
+    BulkImportResult
+} from '@/types/content';
 import {
     fetchContent,
     createContent,
@@ -25,7 +32,7 @@ export default function ContentV2Page() {
     const { user, isAdmin } = useAuth();
     const router = useRouter();
 
-    const [items, setItems] = useState<Content[]>([]);
+    const [items, setItems] = useState<MultilingualContent[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
@@ -37,7 +44,7 @@ export default function ContentV2Page() {
     });
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<Content | null>(null);
+    const [editingItem, setEditingItem] = useState<MultilingualContent | null>(null);
     const [isCreating, setIsCreating] = useState(false);
 
     // Check admin access
@@ -95,13 +102,15 @@ export default function ContentV2Page() {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (item: Content) => {
+    const handleEdit = (item: MultilingualContent) => {
         setEditingItem(item);
         setIsCreating(false);
         setIsModalOpen(true);
     };
 
-    const handleSave = async (formData: ContentFormData) => {
+    const handleSave = async (formData?: MultilingualContentFormData) => {
+        if (!formData) return;
+
         try {
             if (isCreating) {
                 const data = await createContent(formData);

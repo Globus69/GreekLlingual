@@ -1,5 +1,12 @@
 import { supabase } from './client';
-import { Content, ContentInsert, ContentUpdate } from '../../types/content';
+import {
+    Content,
+    ContentInsert,
+    ContentUpdate,
+    MultilingualContent,
+    MultilingualContentInsert,
+    MultilingualContentUpdate
+} from '../../types/content';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import {
@@ -7,6 +14,8 @@ import {
     safeParse,
     contentInsertSchema,
     contentUpdateSchema,
+    multilingualContentInsertSchema,
+    multilingualContentUpdateSchema,
     uuidSchema,
     bulkDeleteSchema,
     practiceModesConfigSchema,
@@ -24,7 +33,10 @@ interface FilterParams {
     pageSize?: number;
 }
 
-export async function fetchContent(params: FilterParams): Promise<{ data: Content[]; count: number }> {
+/**
+ * Fetch multilingual content with filtering and pagination
+ */
+export async function fetchContent(params: FilterParams): Promise<{ data: MultilingualContent[]; count: number }> {
     // Validate filter params
     const validationResult = safeParse(filterParamsSchema, params);
     if (!validationResult.success) {
@@ -34,11 +46,18 @@ export async function fetchContent(params: FilterParams): Promise<{ data: Conten
     }
 
     const validParams = validationResult.data;
-    let query = supabase.from('content').select('*', { count: 'exact' });
+    let query = supabase.from('multilingual_content').select('*', { count: 'exact' });
 
     if (validParams.search) {
         // Sanitized search - validated by Zod, safe from SQL injection
-        query = query.or(`english.ilike.%${validParams.search}%,greek.ilike.%${validParams.search}%`);
+        // Search in greek_transcription and all translation fields
+        query = query.or(
+            `greek_transcription.ilike.%${validParams.search}%,` +
+            `en_translation.ilike.%${validParams.search}%,` +
+            `de_translation.ilike.%${validParams.search}%,` +
+            `es_translation.ilike.%${validParams.search}%,` +
+            `ru_translation.ilike.%${validParams.search}%`
+        );
     }
     if (validParams.type) {
         query = query.eq('type', validParams.type);
@@ -65,12 +84,16 @@ export async function fetchContent(params: FilterParams): Promise<{ data: Conten
         return { data: [], count: 0 };
     }
 
-    return { data: data as Content[], count: count || 0 };
+    return { data: data as MultilingualContent[], count: count || 0 };
 }
 
-export async function createContent(item: ContentInsert): Promise<Content | null> {
+/**
+ * Create multilingual content
+ * Uses RPC function to bypass RLS with custom auth
+ */
+export async function createContent(item: MultilingualContentInsert): Promise<MultilingualContent | null> {
     // Validate input
-    const validationResult = safeParse(contentInsertSchema, item);
+    const validationResult = safeParse(multilingualContentInsertSchema, item);
     if (!validationResult.success) {
         toast.error('Invalid input: ' + validationResult.error);
         return null;
@@ -88,17 +111,27 @@ export async function createContent(item: ContentInsert): Promise<Content | null
     const user = JSON.parse(storedUser);
 
     // Use RPC function instead of direct insert (bypasses RLS with custom auth)
-    const { data, error } = await supabase.rpc('admin_create_content', {
+    const { data, error } = await supabase.rpc('admin_create_multilingual_content', {
         p_user_id: user.id,
+        p_nr: validItem.nr || null,
         p_type: validItem.type,
-        p_english: validItem.english,
-        p_greek: validItem.greek,
+        p_greek_transcription: validItem.greek_transcription,
+        p_greek_phonetic: validItem.greek_phonetic || null,
+        p_en_translation: validItem.en_translation || null,
+        p_en_importance_reason: validItem.en_importance_reason || null,
+        p_en_audio_url: validItem.en_audio_url || null,
+        p_de_translation: validItem.de_translation || null,
+        p_de_importance_reason: validItem.de_importance_reason || null,
+        p_de_audio_url: validItem.de_audio_url || null,
+        p_es_translation: validItem.es_translation || null,
+        p_es_importance_reason: validItem.es_importance_reason || null,
+        p_es_audio_url: validItem.es_audio_url || null,
+        p_ru_translation: validItem.ru_translation || null,
+        p_ru_importance_reason: validItem.ru_importance_reason || null,
+        p_ru_audio_url: validItem.ru_audio_url || null,
         p_level: validItem.level,
         p_difficulty: validItem.difficulty,
-        p_phonetic: validItem.phonetic || null,
-        p_example_en: validItem.example_en || null,
-        p_example_gr: validItem.example_gr || null,
-        p_audio_url: validItem.audio_url || null,
+        p_frequency: validItem.frequency,
     });
 
     if (error) {
@@ -106,10 +139,14 @@ export async function createContent(item: ContentInsert): Promise<Content | null
         return null;
     }
 
-    return data as Content;
+    return data as MultilingualContent;
 }
 
-export async function updateContent(id: string, updates: ContentUpdate): Promise<Content | null> {
+/**
+ * Update multilingual content
+ * Uses RPC function to bypass RLS with custom auth
+ */
+export async function updateContent(id: string, updates: MultilingualContentUpdate): Promise<MultilingualContent | null> {
     // Validate ID
     const idValidation = safeParse(uuidSchema, id);
     if (!idValidation.success) {
@@ -118,7 +155,7 @@ export async function updateContent(id: string, updates: ContentUpdate): Promise
     }
 
     // Validate updates
-    const validationResult = safeParse(contentUpdateSchema, updates);
+    const validationResult = safeParse(multilingualContentUpdateSchema, updates);
     if (!validationResult.success) {
         toast.error('Invalid input: ' + validationResult.error);
         return null;
@@ -136,18 +173,28 @@ export async function updateContent(id: string, updates: ContentUpdate): Promise
     const user = JSON.parse(storedUser);
 
     // Use RPC function instead of direct update (bypasses RLS with custom auth)
-    const { data, error } = await supabase.rpc('admin_update_content', {
+    const { data, error } = await supabase.rpc('admin_update_multilingual_content', {
         p_user_id: user.id,
         p_content_id: idValidation.data,
+        p_nr: validUpdates.nr !== undefined ? validUpdates.nr : null,
         p_type: validUpdates.type,
-        p_english: validUpdates.english,
-        p_greek: validUpdates.greek,
+        p_greek_transcription: validUpdates.greek_transcription,
+        p_greek_phonetic: validUpdates.greek_phonetic !== undefined ? validUpdates.greek_phonetic : null,
+        p_en_translation: validUpdates.en_translation !== undefined ? validUpdates.en_translation : null,
+        p_en_importance_reason: validUpdates.en_importance_reason !== undefined ? validUpdates.en_importance_reason : null,
+        p_en_audio_url: validUpdates.en_audio_url !== undefined ? validUpdates.en_audio_url : null,
+        p_de_translation: validUpdates.de_translation !== undefined ? validUpdates.de_translation : null,
+        p_de_importance_reason: validUpdates.de_importance_reason !== undefined ? validUpdates.de_importance_reason : null,
+        p_de_audio_url: validUpdates.de_audio_url !== undefined ? validUpdates.de_audio_url : null,
+        p_es_translation: validUpdates.es_translation !== undefined ? validUpdates.es_translation : null,
+        p_es_importance_reason: validUpdates.es_importance_reason !== undefined ? validUpdates.es_importance_reason : null,
+        p_es_audio_url: validUpdates.es_audio_url !== undefined ? validUpdates.es_audio_url : null,
+        p_ru_translation: validUpdates.ru_translation !== undefined ? validUpdates.ru_translation : null,
+        p_ru_importance_reason: validUpdates.ru_importance_reason !== undefined ? validUpdates.ru_importance_reason : null,
+        p_ru_audio_url: validUpdates.ru_audio_url !== undefined ? validUpdates.ru_audio_url : null,
         p_level: validUpdates.level,
         p_difficulty: validUpdates.difficulty,
-        p_phonetic: validUpdates.phonetic || null,
-        p_example_en: validUpdates.example_en || null,
-        p_example_gr: validUpdates.example_gr || null,
-        p_audio_url: validUpdates.audio_url || null,
+        p_frequency: validUpdates.frequency,
     });
 
     if (error) {
@@ -155,9 +202,13 @@ export async function updateContent(id: string, updates: ContentUpdate): Promise
         return null;
     }
 
-    return data as Content;
+    return data as MultilingualContent;
 }
 
+/**
+ * Delete multilingual content
+ * Uses RPC function to bypass RLS with custom auth
+ */
 export async function deleteContent(id: string): Promise<boolean> {
     // Validate ID
     const idValidation = safeParse(uuidSchema, id);
@@ -176,7 +227,7 @@ export async function deleteContent(id: string): Promise<boolean> {
     const user = JSON.parse(storedUser);
 
     // Use RPC function instead of direct delete (bypasses RLS with custom auth)
-    const { error } = await supabase.rpc('admin_delete_content', {
+    const { error } = await supabase.rpc('admin_delete_multilingual_content', {
         p_user_id: user.id,
         p_content_id: idValidation.data,
     });
@@ -189,6 +240,10 @@ export async function deleteContent(id: string): Promise<boolean> {
     return true;
 }
 
+/**
+ * Bulk delete multilingual content
+ * Uses RPC function to bypass RLS with custom auth
+ */
 export async function bulkDeleteContent(ids: string[]): Promise<boolean> {
     // Validate IDs
     const validationResult = safeParse(bulkDeleteSchema, { ids });
@@ -209,7 +264,7 @@ export async function bulkDeleteContent(ids: string[]): Promise<boolean> {
     const user = JSON.parse(storedUser);
 
     // Use RPC function with admin authorization check (SECURITY DEFINER)
-    const { data, error } = await supabase.rpc('admin_bulk_delete_content', {
+    const { data, error } = await supabase.rpc('admin_bulk_delete_multilingual_content', {
         p_user_id: user.id,
         p_content_ids: validIds,
     });
@@ -234,19 +289,34 @@ export async function bulkDeleteContent(ids: string[]): Promise<boolean> {
     return true;
 }
 
-export function generateCSV(data: Content[]): string {
+/**
+ * Generate CSV from multilingual content data
+ */
+export function generateCSV(data: MultilingualContent[]): string {
     return Papa.unparse(data, {
         header: true,
-        columns: ['id', 'type', 'english', 'greek', 'level', 'difficulty', 'phonetic', 'example_en', 'example_gr', 'audio_url', 'created_at', 'updated_at'],
+        columns: [
+            'id', 'nr', 'type',
+            'greek_transcription', 'greek_phonetic',
+            'en_translation', 'en_importance_reason', 'en_audio_url',
+            'de_translation', 'de_importance_reason', 'de_audio_url',
+            'es_translation', 'es_importance_reason', 'es_audio_url',
+            'ru_translation', 'ru_importance_reason', 'ru_audio_url',
+            'level', 'difficulty', 'frequency',
+            'created_at', 'updated_at'
+        ],
     });
 }
 
-export async function importFromCSV(file: File): Promise<{ validItems: ContentInsert[]; invalidItems: { row: number; errors: string[] }[] }> {
+/**
+ * Import multilingual content from CSV file
+ */
+export async function importFromCSV(file: File): Promise<{ validItems: MultilingualContentInsert[]; invalidItems: { row: number; errors: string[] }[] }> {
     return new Promise((resolve) => {
         Papa.parse(file, {
             header: true,
             complete: (results) => {
-                const validItems: ContentInsert[] = [];
+                const validItems: MultilingualContentInsert[] = [];
                 const invalidItems: { row: number; errors: string[] }[] = [];
 
                 results.data.forEach((row: any, index: number) => {
@@ -256,16 +326,26 @@ export async function importFromCSV(file: File): Promise<{ validItems: ContentIn
                     }
 
                     // Use Zod validation for consistent and secure validation
-                    const validationResult = safeParse(contentInsertSchema, {
+                    const validationResult = safeParse(multilingualContentInsertSchema, {
+                        nr: row.nr ? parseInt(row.nr) : undefined,
                         type: row.type,
-                        english: row.english,
-                        greek: row.greek,
+                        greek_transcription: row.greek_transcription,
+                        greek_phonetic: row.greek_phonetic || undefined,
+                        en_translation: row.en_translation || undefined,
+                        en_importance_reason: row.en_importance_reason || undefined,
+                        en_audio_url: row.en_audio_url || undefined,
+                        de_translation: row.de_translation || undefined,
+                        de_importance_reason: row.de_importance_reason || undefined,
+                        de_audio_url: row.de_audio_url || undefined,
+                        es_translation: row.es_translation || undefined,
+                        es_importance_reason: row.es_importance_reason || undefined,
+                        es_audio_url: row.es_audio_url || undefined,
+                        ru_translation: row.ru_translation || undefined,
+                        ru_importance_reason: row.ru_importance_reason || undefined,
+                        ru_audio_url: row.ru_audio_url || undefined,
                         level: row.level,
                         difficulty: row.difficulty,
-                        phonetic: row.phonetic || undefined,
-                        example_en: row.example_en || undefined,
-                        example_gr: row.example_gr || undefined,
-                        audio_url: row.audio_url || undefined,
+                        frequency: row.frequency ? parseInt(row.frequency) : 3, // Default to 3
                     });
 
                     if (validationResult.success) {
@@ -284,7 +364,11 @@ export async function importFromCSV(file: File): Promise<{ validItems: ContentIn
     });
 }
 
-export async function bulkImport(items: ContentInsert[]): Promise<{ success: number; errors: string[] }> {
+/**
+ * Bulk import multilingual content from parsed CSV data
+ * Uses RPC function to bypass RLS with custom auth
+ */
+export async function bulkImport(items: MultilingualContentInsert[]): Promise<{ success: number; errors: string[] }> {
     // Get user from localStorage
     const storedUser = localStorage.getItem('greeklingua_user');
     if (!storedUser) {
@@ -294,7 +378,7 @@ export async function bulkImport(items: ContentInsert[]): Promise<{ success: num
     const user = JSON.parse(storedUser);
 
     // Use RPC function for bulk import (bypasses RLS with custom auth)
-    const { data, error } = await supabase.rpc('admin_bulk_import_content', {
+    const { data, error } = await supabase.rpc('admin_bulk_import_multilingual_content', {
         p_user_id: user.id,
         p_items: items,
     });
@@ -314,9 +398,26 @@ export async function bulkImport(items: ContentInsert[]): Promise<{ success: num
     return { success: 0, errors: ['Unbekannter Fehler'] };
 }
 
+/**
+ * Generate template CSV for multilingual content import
+ */
 export function generateTemplateCSV(): string {
-    const headers = ['type', 'english', 'greek', 'level', 'difficulty', 'phonetic', 'example_en', 'example_gr', 'audio_url'];
-    const exampleRow = ['vocabulary', 'Hello', 'Γεια', 'A1', 'easy', 'he-lo', 'Hello, how are you?', 'Γεια, πώς είσαι;', 'https://audio.example.com/hello.mp3'];
+    const headers = [
+        'nr', 'type', 'greek_transcription', 'greek_phonetic',
+        'en_translation', 'en_importance_reason', 'en_audio_url',
+        'de_translation', 'de_importance_reason', 'de_audio_url',
+        'es_translation', 'es_importance_reason', 'es_audio_url',
+        'ru_translation', 'ru_importance_reason', 'ru_audio_url',
+        'level', 'difficulty', 'frequency'
+    ];
+    const exampleRow = [
+        '1', 'vocabulary', 'Γεια', 'YAH-soo',
+        'Hello', 'Common greeting used daily', 'https://audio.example.com/hello-en.mp3',
+        'Hallo', 'Häufige Begrüßung im Alltag', 'https://audio.example.com/hello-de.mp3',
+        'Hola', 'Saludo común usado diariamente', 'https://audio.example.com/hello-es.mp3',
+        'Привет', 'Обычное приветствие для повседневного использования', 'https://audio.example.com/hello-ru.mp3',
+        'A1', 'easy', '5'
+    ];
     return Papa.unparse([exampleRow], { header: true, columns: headers });
 }
 

@@ -35,20 +35,18 @@ setup('authenticate', async ({ page }) => {
 
   console.log('📍 On login page, entering PIN...');
 
-  // Find PIN input field (tel type for numeric keyboard)
-  const pinInput = page.locator('input[type="tel"]');
+  // Wait for numpad to be visible (custom button-based PIN entry)
+  await page.waitForSelector('button:has-text("1")', { timeout: 10000 });
 
-  // Wait for input to be visible
-  await pinInput.waitFor({ state: 'visible', timeout: 5000 });
+  // Click numpad buttons to enter PIN 3741 (Anna Meier)
+  const pin = '3741';
+  for (const digit of pin) {
+    const button = page.locator(`button:has-text("${digit}")`).first();
+    await button.click();
+    await page.waitForTimeout(150); // Small delay between clicks for UI update
+  }
 
-  // Fill test PIN (3741 - Anna Meier)
-  await pinInput.fill('3741');
-
-  console.log('✅ PIN entered');
-
-  // Find and click submit button
-  const submitButton = page.locator('button[type="submit"]');
-  await submitButton.click();
+  console.log('✅ PIN entered via numpad');
 
   console.log('📤 Login submitted, waiting for redirect...');
 
