@@ -262,8 +262,6 @@ export async function checkDuplicate(
  */
 export async function importCSV(file: File, mode: ImportMode): Promise<ImportResult> {
     try {
-        console.log(`📤 Sending import request to server API...`);
-
         // Create FormData
         const formData = new FormData();
         formData.append('file', file);
@@ -291,7 +289,6 @@ export async function importCSV(file: File, mode: ImportMode): Promise<ImportRes
         }
 
         const result: ImportResult = await response.json();
-        console.log('✅ Import completed:', result);
         return result;
     } catch (error) {
         console.error('importCSV error:', error);
