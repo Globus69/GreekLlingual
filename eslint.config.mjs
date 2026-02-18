@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Project-specific ignores:
+    "archive/**",
+    "venv/**",
+    "web/**",
   ]),
   // Disable formatting rules for Practice Modes (custom glassmorphism styling)
   {
