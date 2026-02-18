@@ -287,19 +287,35 @@ export async function importCSV(file: File, mode: ImportMode): Promise<ImportRes
 
                     // If overwrite mode, delete all existing entries
                     if (mode === 'overwrite') {
-                        const { data: existingIds } = await supabase
+                        console.log('🗑️ Overwrite mode: Deleting all existing entries...');
+                        const { data: existingIds, error: selectError } = await supabase
                             .from('multilingual_vocabulary')
                             .select('id');
 
+                        if (selectError) {
+                            console.error('Failed to fetch existing entries:', selectError);
+                            throw new Error(`Fehler beim Abrufen bestehender Einträge: ${selectError.message}`);
+                        }
+
                         if (existingIds && existingIds.length > 0) {
-                            await supabase
+                            console.log(`Found ${existingIds.length} existing entries to delete`);
+                            const { error: deleteError } = await supabase
                                 .from('multilingual_vocabulary')
                                 .delete()
                                 .in('id', existingIds.map(e => e.id));
+
+                            if (deleteError) {
+                                console.error('Failed to delete entries:', deleteError);
+                                throw new Error(`Fehler beim Löschen: ${deleteError.message}`);
+                            }
+                            console.log('✅ All existing entries deleted successfully');
+                        } else {
+                            console.log('No existing entries to delete');
                         }
                     }
 
                     // Process each row
+                    console.log(`📥 Starting import of ${results.data.length} rows...`);
                     for (let i = 0; i < results.data.length; i++) {
                         const row = results.data[i];
                         const rowNum = i + 2; // Account for header row
@@ -389,12 +405,14 @@ export async function importCSV(file: File, mode: ImportMode): Promise<ImportRes
                             if (insertError) {
                                 if (insertError.code === '23505') {
                                     // Unique constraint violation
+                                    console.warn(`❌ Row ${rowNum}: Duplicate - ${entry.greek_transcription} (${entry.level})`);
                                     errors.push({
                                         row: rowNum,
-                                        message: `Duplicate: ${entry.greek_transcription} (${entry.level})`,
+                                        message: `Duplikat: ${entry.greek_transcription} (${entry.level})`,
                                     });
                                     skipped++;
                                 } else {
+                                    console.error(`❌ Row ${rowNum}: ${insertError.message}`);
                                     errors.push({
                                         row: rowNum,
                                         message: insertError.message,
@@ -403,6 +421,9 @@ export async function importCSV(file: File, mode: ImportMode): Promise<ImportRes
                                 }
                             } else {
                                 imported++;
+                                if (imported % 10 === 0) {
+                                    console.log(`✓ Imported ${imported} entries so far...`);
+                                }
                             }
                         } catch (rowError) {
                             errors.push({
@@ -412,6 +433,11 @@ export async function importCSV(file: File, mode: ImportMode): Promise<ImportRes
                             skipped++;
                         }
                     }
+
+                    console.log(`\n📊 Import Summary:`);
+                    console.log(`   ✅ Imported: ${imported}`);
+                    console.log(`   ⏭️  Skipped: ${skipped}`);
+                    console.log(`   ❌ Errors: ${errors.length}`);
 
                     resolve({
                         success: errors.length === 0,
