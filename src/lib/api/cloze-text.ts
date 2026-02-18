@@ -20,6 +20,7 @@ import Papa from 'papaparse';
 
 /**
  * Fetch filtered cloze texts list
+ * Uses server-side API with service_role key to bypass RLS
  */
 export async function fetchClozeTextsList(filters: ClozeTextFilters = {}): Promise<ClozeTextListResponse> {
     const {
@@ -34,59 +35,25 @@ export async function fetchClozeTextsList(filters: ClozeTextFilters = {}): Promi
     } = filters;
 
     try {
-        let query = supabase
-            .from('cloze_texts')
-            .select('*', { count: 'exact' });
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (level) params.append('level', level);
+        if (difficulty) params.append('difficulty', difficulty);
+        if (frequency_min !== undefined) params.append('frequency_min', frequency_min.toString());
+        if (frequency_max !== undefined) params.append('frequency_max', frequency_max.toString());
+        if (category) params.append('category', category);
+        params.append('page', page.toString());
+        params.append('limit', limit.toString());
 
-        // Apply filters
-        if (search && search.trim() !== '') {
-            query = query.or(`greek_transcription.ilike.%${search}%,en_translation.ilike.%${search}%,de_translation.ilike.%${search}%,es_translation.ilike.%${search}%,ru_translation.ilike.%${search}%,cloze_answer.ilike.%${search}%`);
+        const response = await fetch(`/api/admin/cloze-text/list?${params.toString()}`);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Fetch failed');
         }
 
-        if (level && level !== 'All') {
-            query = query.eq('level', level);
-        }
-
-        if (difficulty && difficulty !== 'All') {
-            query = query.eq('difficulty', difficulty);
-        }
-
-        if (frequency_min !== undefined) {
-            query = query.gte('frequency', frequency_min);
-        }
-
-        if (frequency_max !== undefined) {
-            query = query.lte('frequency', frequency_max);
-        }
-
-        if (category && category.trim() !== '') {
-            query = query.eq('category', category);
-        }
-
-        // Pagination
-        const from = (page - 1) * limit;
-        const to = from + limit - 1;
-
-        query = query
-            .order('created_at', { ascending: false })
-            .range(from, to);
-
-        const { data, error, count } = await query;
-
-        if (error) {
-            console.error('Fetch cloze texts error:', error);
-            throw new Error(error.message);
-        }
-
-        const total = count ?? 0;
-
-        return {
-            data: (data as ClozeTextEntry[]) || [],
-            total,
-            page,
-            limit,
-            hasMore: total > page * limit,
-        };
+        const data = await response.json();
+        return data as ClozeTextListResponse;
     } catch (error) {
         console.error('fetchClozeTextsList error:', error);
         throw error;
