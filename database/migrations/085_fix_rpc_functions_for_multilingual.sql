@@ -18,6 +18,8 @@ END $$;
 -- 1. Create get_practice_enabled_items function
 -- ============================================================================
 
+DROP FUNCTION IF EXISTS get_practice_enabled_items();
+
 CREATE OR REPLACE FUNCTION get_practice_enabled_items()
 RETURNS TABLE (
     id UUID,
