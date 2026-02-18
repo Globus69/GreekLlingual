@@ -21,7 +21,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Volume2, Lightbulb, RotateCcw, Check, X, Clock } from 'lucide-react';
-import * as confetti from 'canvas-confetti';
+import confetti from 'canvas-confetti';
 
 // ============================================================================
 // TYPES

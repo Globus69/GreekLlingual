@@ -141,7 +141,7 @@ export function useMobileCache<T>({
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const [cached, setCached] = useState<boolean>(false);
+  const [cached, setIsCached] = useState<boolean>(false);
   const [hasCached, setHasCached] = useState<boolean>(false);
 
   /**
@@ -176,7 +176,7 @@ export function useMobileCache<T>({
           if (cachedData !== null) {
             console.log(`✅ [useMobileCache] Cache hit: ${storeName}/${key}`);
             setData(cachedData);
-            setCached(true);
+            setIsCached(true);
             setHasCached(true);
             setLoading(false);
             onCacheHit?.(cachedData);
@@ -201,7 +201,7 @@ export function useMobileCache<T>({
         });
 
         setData(freshData);
-        setCached(false);
+        setIsCached(false);
         setHasCached(true);
         console.log(`💾 [useMobileCache] Cached fresh data: ${storeName}/${key}`);
       } catch (err) {

@@ -13,7 +13,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import * as confetti from 'canvas-confetti';
+import confetti from 'canvas-confetti';
 import { Button } from '@/components/ui/button';
 import { Check, X, Clock, RotateCcw } from 'lucide-react';
 

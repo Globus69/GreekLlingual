@@ -61,7 +61,7 @@ export function PracticeConfigForm({
         watch,
         setValue,
     } = useForm<PracticeModesConfig>({
-        resolver: zodResolver(practiceModesConfigSchema),
+        resolver: zodResolver(practiceModesConfigSchema) as any,
         defaultValues: initialConfig || {
             enabled: false,
             available_modes: [],
