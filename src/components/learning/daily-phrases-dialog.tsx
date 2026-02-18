@@ -338,6 +338,12 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
                     <div className="empty-state">
                         <div style={{ fontSize: '64px', marginBottom: '16px' }}>📭</div>
                         <h3>No phrases available</h3>
+                        <p style={{ marginTop: '16px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                            No daily phrases found in the database
+                        </p>
+                        <div className="empty-actions">
+                            <button onClick={onClose} className="btn-primary">Close</button>
+                        </div>
                     </div>
                 )}
             </div>
