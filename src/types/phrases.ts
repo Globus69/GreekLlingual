@@ -32,6 +32,7 @@ export interface PhraseEntry {
     // Greek content
     greek_transcription: string;
     greek_phonetic?: string;
+    audio_url?: string;
 
     // English
     en_translation?: string;
@@ -127,6 +128,7 @@ export interface CreatePhrasePayload {
     nr?: number;
     greek_transcription: string;
     greek_phonetic?: string;
+    audio_url?: string;
 
     en_translation?: string;
     en_importance_reason?: string;
