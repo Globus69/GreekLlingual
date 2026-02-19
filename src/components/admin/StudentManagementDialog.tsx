@@ -11,10 +11,12 @@ interface Student {
     name: string;
     email: string;
     whatsapp: string;
+    pin?: string;
     role: string;
     level: string;
     difficulty: string;
     performance_index: string;
+    preferred_locale?: string;
     locked_until?: string | null;
     failed_attempts?: number;
 }
@@ -26,6 +28,7 @@ interface StudentFormData {
     pin: string;
     level: string;
     difficulty: string;
+    preferred_locale: string;
 }
 
 interface Props {
@@ -37,6 +40,13 @@ interface Props {
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2'];
 const DIFFICULTIES = ['easy', 'middle', 'hard'];
+const LOCALES = [
+    { code: 'en', label: 'English 🇬🇧' },
+    { code: 'ru', label: 'Русский 🇷🇺' },
+    { code: 'el', label: 'Ελληνικά 🇬🇷' },
+    { code: 'de', label: 'Deutsch 🇩🇪' },
+    { code: 'es', label: 'Español 🇪🇸' }
+];
 
 // Honeypot-PINs (verboten, lösen sofort Alarm aus)
 const HONEYPOT_PINS = new Set([
@@ -52,6 +62,7 @@ const EMPTY_FORM: StudentFormData = {
     pin: '',
     level: 'A1',
     difficulty: 'easy',
+    preferred_locale: 'en',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -72,9 +83,61 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const [studentStats, setStudentStats] = useState<Record<string, any>>({});
     const [loadingStats, setLoadingStats] = useState<string | null>(null);
+    const [pinCheckMsg, setPinCheckMsg] = useState<string | null>(null);
 
     // ── Computed ──────────────────────────────────────────────────────────────
     const indexKey = `${form.level}-${form.difficulty}`;
+
+    // ── PIN Duplikat-Check (automatisch bei Eingabe) ──────────────────────────
+    useEffect(() => {
+        const checkPinDuplicate = async () => {
+            // Nur prüfen wenn PIN 4 Ziffern hat
+            if (form.pin.length !== 4) {
+                setPinCheckMsg(null);
+                return;
+            }
+
+            // Honeypot-Check
+            if (HONEYPOT_PINS.has(form.pin)) {
+                setPinCheckMsg('⚠️ PIN ungültig (Sicherheitsregel)');
+                return;
+            }
+
+            // Bei Edit: Wenn PIN unverändert, kein Check nötig
+            if (mode === 'edit' && editingId) {
+                const currentStudent = students.find(s => s.id === editingId);
+                if (currentStudent?.pin === form.pin) {
+                    setPinCheckMsg('✓ PIN unverändert');
+                    return;
+                }
+            }
+
+            // Duplikat-Check via RPC
+            try {
+                const { data, error } = await supabase.rpc('is_pin_taken', {
+                    p_pin: form.pin,
+                    p_exclude_user_id: mode === 'edit' ? editingId : null
+                });
+
+                if (error) {
+                    console.error('PIN check error:', error);
+                    setPinCheckMsg(null);
+                    return;
+                }
+
+                if (data === true) {
+                    setPinCheckMsg('❌ PIN bereits vergeben');
+                } else {
+                    setPinCheckMsg('✓ PIN verfügbar');
+                }
+            } catch (err) {
+                console.error('PIN check failed:', err);
+                setPinCheckMsg(null);
+            }
+        };
+
+        checkPinDuplicate();
+    }, [form.pin, mode, editingId, students]);
 
     // ── PIN Generator (4-stellig) mit Honeypot- und Duplikat-Check ──────────
     const generatePin = async () => {
@@ -150,13 +213,14 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
 
     // ── CSV Export ────────────────────────────────────────────────────────────
     const exportCSV = () => {
-        const headers = ['Name', 'Email', 'WhatsApp', 'Level', 'Difficulty', 'Index-Key'];
+        const headers = ['Name', 'Email', 'WhatsApp', 'Level', 'Difficulty', 'Language', 'Index-Key'];
         const rows = students.map(s => [
             s.name || '',
             s.email || '',
             s.whatsapp || '',
             s.level || 'A1',
             s.difficulty || 'easy',
+            s.preferred_locale || 'en',
             s.performance_index || '',
         ]);
         const csvContent = [
@@ -190,7 +254,7 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                 console.warn('RPC list_students failed, trying direct query:', rpcErr);
                 const { data, error: fetchErr } = await supabase
                     .from('users')
-                    .select('id, name, email, whatsapp, role, level, difficulty, performance_index, locked_until, failed_attempts')
+                    .select('id, name, email, whatsapp, pin, role, level, difficulty, performance_index, preferred_locale, locked_until, failed_attempts')
                     .eq('role', 'student')
                     .order('name', { ascending: true });
 
@@ -233,6 +297,7 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
         setMode('add');
         setError(null);
         setSuccessMsg(null);
+        setPinCheckMsg(null);
 
         // Auto-generiere sichere PIN beim Öffnen des Add-Dialogs
         // Verzögert, damit Dialog zuerst erscheint
@@ -280,14 +345,16 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
             name: student.name || '',
             email: student.email || '',
             whatsapp: student.whatsapp || '',
-            pin: '', // PIN nie anzeigen, nur neu setzen
+            pin: student.pin || '',
             level: student.level || 'A1',
             difficulty: student.difficulty || 'easy',
+            preferred_locale: student.preferred_locale || 'en',
         });
         setEditingId(student.id);
         setMode('edit');
         setError(null);
         setSuccessMsg(null);
+        setPinCheckMsg(null);
     };
 
     const handleSave = async () => {
@@ -314,6 +381,35 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
             return;
         }
 
+        // Duplikat-Check (wenn PIN geändert wurde)
+        if (form.pin.length === 4) {
+            // Bei Edit: Prüfen ob PIN geändert wurde
+            if (mode === 'edit' && editingId) {
+                const currentStudent = students.find(s => s.id === editingId);
+                if (currentStudent?.pin !== form.pin) {
+                    // PIN wurde geändert - Duplikat-Check durchführen
+                    const { data: isDuplicate } = await supabase.rpc('is_pin_taken', {
+                        p_pin: form.pin,
+                        p_exclude_user_id: editingId
+                    });
+                    if (isDuplicate) {
+                        setError('PIN bereits vergeben – bitte anderen PIN wählen');
+                        return;
+                    }
+                }
+            } else if (mode === 'add') {
+                // Neuer Student - Duplikat-Check durchführen
+                const { data: isDuplicate } = await supabase.rpc('is_pin_taken', {
+                    p_pin: form.pin,
+                    p_exclude_user_id: null
+                });
+                if (isDuplicate) {
+                    setError('PIN bereits vergeben – bitte anderen PIN wählen');
+                    return;
+                }
+            }
+        }
+
         setSaving(true);
 
         try {
@@ -326,6 +422,7 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                     p_pin: form.pin,
                     p_level: form.level,
                     p_difficulty: form.difficulty,
+                    p_preferred_locale: form.preferred_locale,
                 });
 
                 if (rpcErr) {
@@ -367,6 +464,7 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                     p_pin: form.pin.length === 4 ? form.pin : null,
                     p_level: form.level,
                     p_difficulty: form.difficulty,
+                    p_preferred_locale: form.preferred_locale,
                 });
 
                 if (rpcErr) {
@@ -730,7 +828,7 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                                     />
                                 </label>
                                 <label style={labelStyle}>
-                                    {t('students.field_pin')} {mode === 'add' ? '*' : `(${t('students.pin_optional')})`}
+                                    PIN (4 Ziffern) {mode === 'add' ? '*' : ''}
                                     <div style={{ display: 'flex', gap: '4px' }}>
                                         <input
                                             type="text"
@@ -769,6 +867,16 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                                             🎲
                                         </button>
                                     </div>
+                                    {pinCheckMsg && (
+                                        <div style={{
+                                            marginTop: '4px',
+                                            fontSize: '11px',
+                                            color: pinCheckMsg.includes('✓') ? '#34C759' : pinCheckMsg.includes('❌') ? '#FF3B30' : '#FFD60A',
+                                            fontWeight: '500'
+                                        }}>
+                                            {pinCheckMsg}
+                                        </div>
+                                    )}
                                 </label>
                             </div>
 
@@ -836,7 +944,32 @@ export default function StudentManagementDialog({ open, onClose }: Props) {
                                 </fieldset>
                             </div>
 
-                            {/* Zeile 4: Index-Key + Save-Button nebeneinander */}
+                            {/* Zeile 4: Language */}
+                            <label style={labelStyle}>
+                                Language / Sprache
+                                <select
+                                    value={form.preferred_locale}
+                                    onChange={e => setForm(f => ({ ...f, preferred_locale: e.target.value }))}
+                                    style={{
+                                        ...inputStyle,
+                                        cursor: 'pointer',
+                                        appearance: 'none',
+                                        backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e")',
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundPosition: 'right 10px center',
+                                        backgroundSize: '16px',
+                                        paddingRight: '35px',
+                                    }}
+                                >
+                                    {LOCALES.map(loc => (
+                                        <option key={loc.code} value={loc.code}>
+                                            {loc.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            {/* Zeile 5: Index-Key + Save-Button nebeneinander */}
                             <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch' }}>
                                 <div style={{
                                     background: 'rgba(255, 149, 0, 0.08)',
