@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import { useTranslation } from '@/lib/use-translation';
 import { useStatsData } from '@/hooks/use-stats-data';
 import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
+import MobileBottomNav from '@/components/mobile/MobileBottomNav';
 import VocabularyDialog from '@/components/learning/vocabulary-dialog';
 import DailyPhrasesDialog from '@/components/learning/daily-phrases-dialog';
 import DueCardsDialog from '@/components/learning/due-cards-dialog';
@@ -175,7 +176,7 @@ export default function MobileDashboardPage() {
             onClick={() => router.push('/m/admin/unlock')}
             style={{
               width: '100%',
-              minHeight: '56px',
+              minHeight: '73px',  // Changed from 56px (30% increase: 56 * 1.3 = 72.8px)
               padding: '10px 14px',
               borderRadius: '14px',
               backgroundColor: 'rgba(255, 204, 0, 0.2)',
@@ -185,9 +186,25 @@ export default function MobileDashboardPage() {
               alignItems: 'center',
               gap: '12px',
               marginBottom: '12px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              position: 'relative'
             }}
           >
+            {/* DEBUG: Button ID */}
+            <span style={{
+              position: 'absolute',
+              top: '4px',
+              right: '4px',
+              backgroundColor: 'rgba(255, 204, 0, 0.3)',
+              color: '#FFCC00',
+              fontSize: '9px',
+              fontWeight: 'bold',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              lineHeight: '1'
+            }}>
+              #A1
+            </span>
             <span style={{ fontSize: '28px' }}>🔓</span>
             <div style={{ flex: 1, textAlign: 'left' }}>
               <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#FFCC00' }}>Admin Panel</div>
@@ -197,21 +214,14 @@ export default function MobileDashboardPage() {
           </button>
         )}
 
-        {/* 2×6 Grid Layout - 12 Modules */}
+        {/* 1-Column Layout - 6 Modules (Extras moved to Bottom Nav) */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: '1fr',
           gap: '8px',
           marginBottom: '16px'
         }}>
-          {/* Row 1 */}
-          <ModuleTile
-            icon="👩‍🏫"
-            title="Magic Round"
-            subtitle="Your lesson"
-            color="purple"
-            onClick={() => alert('Magic Round - Coming soon!')}
-          />
+          {/* Main Learning Tiles */}
           <ModuleTile
             icon="📅"
             title="Due Cards"
@@ -219,8 +229,6 @@ export default function MobileDashboardPage() {
             color="blue"
             onClick={() => setShowDueCardsSheet(true)}
           />
-
-          {/* Row 2 */}
           <ModuleTile
             icon="📖"
             title="Review Vocab"
@@ -235,8 +243,6 @@ export default function MobileDashboardPage() {
             color="orange"
             onClick={() => setShowWeakWordsDialog(true)}
           />
-
-          {/* Row 3 */}
           <ModuleTile
             icon="💬"
             title="Daily Phrases"
@@ -244,149 +250,40 @@ export default function MobileDashboardPage() {
             color="purple"
             onClick={() => setShowDailyPhrasesDialog(true)}
           />
-          <ModuleTile
-            icon="⚡"
-            title="Quick Lesson"
-            subtitle="20 min session"
-            color="blue"
-            onClick={() => alert('Quick Lesson - Coming soon!')}
-          />
-
-          {/* Row 4 */}
-          <ModuleTile
-            icon="📚"
-            title="Short Stories"
-            subtitle="Read & learn"
-            color="green"
-            onClick={() => alert('Short Stories - Coming soon!')}
-          />
+          {/* Grammar - DISABLED (grau, kein Action) */}
           <ModuleTile
             icon="📐"
             title="Grammar"
             subtitle="Practice rules"
             color="orange"
-            onClick={() => {
-              console.log('🔵 Grammar button clicked, setting showGrammarDialog to true');
-              setShowGrammarDialog(true);
-            }}
+            disabled={true}
+            onClick={() => {}}
           />
 
-          {/* Row 5 */}
+          {/* Brain Gym - NEW (Memory Training) */}
           <ModuleTile
-            icon="👂"
-            title="Listening"
-            subtitle="Audio practice"
-            color="blue"
-            onClick={() => alert('Listening - Coming soon!')}
-          />
-          <ModuleTile
-            icon="🗣️"
-            title="Pronunciation"
-            subtitle="Speak Greek"
-            color="purple"
-            onClick={() => alert('Pronunciation - Coming soon!')}
-          />
-
-          {/* Row 6 */}
-          <ModuleTile
-            icon="📝"
-            title="Test"
-            subtitle="Check progress"
+            icon="🧠"
+            title="Brain Gym"
+            subtitle="Memory Training"
             color="orange"
-            onClick={() => alert('Test - Coming soon!')}
-          />
-          <ModuleTile
-            icon="📊"
-            title="Progress"
-            subtitle="View stats"
-            color="green"
-            onClick={() => router.push('/m/stats')}
+            onClick={() => router.push('/m/brain-gym')}
           />
 
-          {/* Row 7 - Practice Modes */}
+          {/* Spiele - DISABLED (grau, kein Action) */}
           <ModuleTile
             icon="🎮"
-            title="Practice Modes"
-            subtitle="Games & Quiz"
+            title="Spiele"
+            subtitle="Games & Practice"
             color="purple"
-            onClick={() => router.push('/m/practice-modes')}
-          />
-          <ModuleTile
-            icon="🎴"
-            title="Memory Split"
-            subtitle="Two grids"
-            color="blue"
-            onClick={() => router.push('/m/practice-modes/memory-split')}
+            disabled={true}
+            onClick={() => {}}
           />
         </div>
 
       </div>
 
-      {/* Bottom Navigation */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          backgroundColor: 'rgba(28, 28, 30, 0.95)',
-          backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '8px 16px 12px'
-        }}
-      >
-        <div style={{ maxWidth: '448px', margin: '0 auto', display: 'flex', justifyContent: 'space-around' }}>
-          <button
-            onClick={() => router.push('/m')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '8px 16px',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            <span style={{ fontSize: '24px' }}>🏠</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#007AFF' }}>Home</span>
-          </button>
-          <button
-            onClick={() => router.push('/m/stats')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '8px 16px',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            <span style={{ fontSize: '24px' }}>📊</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Stats</span>
-          </button>
-          <button
-            onClick={() => router.push('/m/settings')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '8px 16px',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            <span style={{ fontSize: '24px' }}>⚙️</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Settings</span>
-          </button>
-        </div>
-      </div>
+      {/* Bottom Navigation Component */}
+      <MobileBottomNav />
 
       {/* Bottom Sheets */}
       <TrainWeakWordsSheet
@@ -439,6 +336,7 @@ export default function MobileDashboardPage() {
 }
 
 interface ModuleTileProps {
+  debugId?: string;
   icon: string;
   title: string;
   subtitle: string;
@@ -447,7 +345,7 @@ interface ModuleTileProps {
   onClick: () => void;
 }
 
-function ModuleTile({ icon, title, subtitle, color, disabled, onClick }: ModuleTileProps) {
+function ModuleTile({ debugId, icon, title, subtitle, color, disabled, onClick }: ModuleTileProps) {
   const colors = {
     blue: { bg: 'rgba(0, 122, 255, 0.25)', border: 'rgba(0, 122, 255, 0.5)', text: '#007AFF' },
     green: { bg: 'rgba(52, 199, 89, 0.25)', border: 'rgba(52, 199, 89, 0.5)', text: '#34C759' },
@@ -455,7 +353,10 @@ function ModuleTile({ icon, title, subtitle, color, disabled, onClick }: ModuleT
     purple: { bg: 'rgba(191, 90, 242, 0.25)', border: 'rgba(191, 90, 242, 0.5)', text: '#BF5AF2' },
   };
 
-  const c = colors[color];
+  // If disabled, override with gray colors
+  const c = disabled
+    ? { bg: 'rgba(255, 255, 255, 0.05)', border: 'rgba(255, 255, 255, 0.1)', text: '#666666' }
+    : colors[color];
 
   return (
     <button
@@ -463,7 +364,7 @@ function ModuleTile({ icon, title, subtitle, color, disabled, onClick }: ModuleT
       disabled={disabled}
       style={{
         width: '100%',
-        minHeight: '48px',
+        minHeight: '62px',  // Changed from 48px (30% increase: 48 * 1.3 = 62.4px)
         padding: '8px 10px',
         borderRadius: '12px',
         backgroundColor: c.bg,
@@ -475,6 +376,7 @@ function ModuleTile({ icon, title, subtitle, color, disabled, onClick }: ModuleT
         opacity: disabled ? 0.4 : 1,
         cursor: disabled ? 'not-allowed' : 'pointer',
         transition: 'transform 0.2s ease, opacity 0.2s ease',
+        position: 'relative'
       }}
       onMouseDown={(e) => {
         if (!disabled) {
@@ -488,6 +390,23 @@ function ModuleTile({ icon, title, subtitle, color, disabled, onClick }: ModuleT
         e.currentTarget.style.transform = 'scale(1)';
       }}
     >
+      {/* DEBUG: Button ID */}
+      {debugId && (
+        <span style={{
+          position: 'absolute',
+          top: '4px',
+          right: '4px',
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          color: c.text,
+          fontSize: '9px',
+          fontWeight: 'bold',
+          padding: '2px 5px',
+          borderRadius: '4px',
+          lineHeight: '1'
+        }}>
+          #{debugId}
+        </span>
+      )}
       <span style={{ fontSize: '24px' }}>{icon}</span>
       <div style={{ flex: 1, textAlign: 'left' }}>
         <div style={{ fontWeight: 'bold', fontSize: '13px', color: 'white', lineHeight: '1.2' }}>{title}</div>
