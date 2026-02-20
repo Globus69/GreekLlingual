@@ -1,0 +1,30 @@
+Beta 0.7.6 - Vocabular Dialoge fertig
+
+Fertiggestellt:
+✅ Vocabulary 3-Module-System (Due Cards, Review Vocab, Weak Words)
+✅ Mobile UI Complete (Dashboard, Stats, Settings, Practice Modes)
+✅ Brain Gym RPC Implementation (Multi-Language Support)
+✅ Daily Phrases Mobile Dialog
+✅ Auth Redirect Loop Fix (login-pin white screen)
+✅ Mobile Caching System (IndexedDB, 30min TTL)
+✅ FSRS-6 Spaced Repetition Integration
+✅ Admin Tools (Vocab, Phrases, Cloze Text Management)
+
+Database Migrations:
+✅ 092_vocabulary_review_weak_rpcs.sql (4 new RPC functions)
+✅ 092_vocabulary_review_vocab_HOTFIX.sql (fsrs_review_logs fix)
+
+Offene Punkte:
+🔄 Tests Funktion (E2E pass rate 52% → target 62%)
+🔄 Memory Game Testing (manual validation needed)
+🔄 Datenimport (CSV Bulk Upload validation)
+🔄 Dashboard Integration (Review/Weak counts)
+
+Technical Details:
+- 72 commits since last main update
+- 288 files changed (+78,542 / -10,203 lines)
+- Routes: /m/vocabulary, /m/vocabulary/review, /m/vocabulary/weak
+- Auth: Fixed authLoading race condition
+- Cache: Separate keys per module (vocabulary-due-, vocabulary-review-, vocabulary-weak-)
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>

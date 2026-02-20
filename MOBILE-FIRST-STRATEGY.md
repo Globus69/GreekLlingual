@@ -48,24 +48,6 @@
 - Fokus vermeidet Code-Duplikation
 - Stabilität durch schrittweises Vorgehen
 
----
-
-### **3. BESTEHENDE ARBEITEN AUF MOBILE ÜBERTRAGEN**
-
-**Alle teilweise begonnenen Desktop-Features MÜSSEN auf Mobile portiert werden:**
-
-**Beispiele:**
-- Practice Modes Desktop → Practice Modes Mobile (priorisiert)
-- Vocabulary Dialog Desktop → Vocabulary Mobile UI
-- Grammar Dialog Desktop → Grammar Mobile UI
-- Admin Panel Desktop → Admin Mobile (später)
-
-**Prozess:**
-1. Desktop-Feature analysieren
-2. Auf Mobile-Patterns anpassen (Bottom Sheets, Touch, etc.)
-3. Mobile-Version implementieren
-4. Mobile-Version testen
-5. Desktop-Version später portieren (wenn Mobile fertig)
 
 ---
 

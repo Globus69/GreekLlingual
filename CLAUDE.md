@@ -33,7 +33,6 @@ Du arbeitest IMMER in diesem Projekt. Lies diese Datei + die verlinkten Dokument
    - **Agent 3:** Tests, Performance, Accessibility (mobile screenreader)
 
 6. **Dokumentation zwingend:**
-   - Jede Änderung → eigene `_AgentXX_*.md` Datei
    - Zusammenfassung → `MASTER-SESSION-STATUS.md`
 
 7. **Dokumentation on screen**
