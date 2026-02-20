@@ -1,0 +1,102 @@
+# HellenicHorizons – GreekLingua Dashboard  
+Zentrale TODO-Liste  
+Stand: 20. Februar 2026
+
+**Regel**: Alle neuen TODOs landen nur noch hier.  
+Alte TODO-Kommentare im Code werden nach Migration entfernt oder mit Datum + [DONE] markiert.
+
+## Prioritäten
+
+### 🔥 Prio 1 – Jetzt oder bald (High)
+- [ ]  ### Due Cards Today Modul
+**Status:** ⚠️ in Planung (nur Platzhalter vorhanden)  
+**Priorität:** 🟡 Hoch (Kernmodul für Mobile / tägliches Review)  
+**Geschätzter Aufwand:** 8–13 Stunden (ohne Tests)  
+**Letzte Notiz:** 14.02.2026
+
+**Wichtigster nächster Schritt:**
+- [ ] Phase 2: Datenbank – RPC-Funktion `get_due_cards_today` erstellen & testen (1–2 h)  
+  → Filter: next_review < NOW()  
+  → Test-Query in Supabase: SELECT * FROM get_due_cards_today('<user-id>', 10);
+
+**Danach (nach RPC):**
+- [ ] Phase 3: DueCardsDialog.tsx bauen (3–5 h) – Basis: VocabularyDialog.tsx kopieren  
+- [ ] SRS-Integration (SM2 aus lib/sm2.ts) & Progress-Speichern
+
+**Offene Fragen (bitte beantworte, wenn du magst):**
+1. Ist Due Cards Today wirklich MVP-kritisch (tägliches Review)?
+2. Soll es Swipe-Gesten von Anfang an geben oder erst später?
+3. Wie viele Karten pro Session maximal? (z. B. 10–20)
+4. Multi-Language: Welche 4 Locales zuerst? (EN, EL, RU, DE?)
+
+**Referenz:** modules/due-cards-today/todo.md (detaillierter Plan – wird nach Migration archiviert/gelöscht)
+- [ ]  
+
+### ⚡ Prio 2 – Bald machen (Medium)
+### Daily Phrases Modul
+**Status:** 🟡 in Arbeit – Phase 4 fast abgeschlossen (91–100 %)  
+**Priorität:** 🟡 Hoch (tägliches Lernen, Kern-Feature)  
+**Geschätzter Restaufwand:** 1–3 Stunden (Accessibility + Testing)  
+**Letzte Notiz:** 15.02.2026
+
+**Aktueller Stand (kurz):**
+- FSRS-6 Core Library vollständig (scheduler, types, tests)  
+- VocabularyDialogFSRS.tsx mit FSRS-Integration, Swipe, Progress, TTS & Speed-Toggle  
+- DB-Schema + RPC-Funktionen (get_due_cards_fsrs, update_card_fsrs) erweitert  
+- Auto-Play, Speed-Control (🐢 0.6x / ▶️ 0.9x / 🐇 1.2x), localStorage-Persistence  
+
+**Wichtigste offene Schritte (Rest von Phase 4):**
+- [ ] Accessibility final verbessern (aria-live, keyboard, screen-reader) – 30–60 min  
+- [ ] Integration-Testing (alle Features zusammen) – 1–2 h  
+- [ ] Mobile-PWA-Optimierung (falls nötig)  
+
+**Offene Fragen (bitte beantworte, wenn du magst):**
+1. Ist Daily Phrases für dich aktuell höher priorisiert als Short Stories?  
+2. TTS-Speed-Toggle reicht so (0.6/0.9/1.2) oder weitere Stufen?  
+3. Auto-Play standardmäßig an oder aus?  
+4. Möchtest du Analytics für Daily Phrases (z. B. Retention-Rate im Dashboard)?
+
+**Referenz:** modules/daily-phrases/daily-phrases-dev-log.md (detaillierter Log – wird nach Abschluss archiviert)
+- [ ] Mobile E2E-Tests erweitern (tests/mobile/e2e.spec.ts – 9 Treffer)
+- [ ] Short-Stories-Modul: offene Punkte klären (modules/short-stories/todo.md – 7 Treffer)
+- [ ] Due-Cards-Today: TODOs übertragen & prüfen (modules/due-cards-today/todo.md – 7 Treffer)
+
+### Short Stories Modul
+**Status:** ⚠️ **Blockiert – wartet auf Analyse**  
+**Priorität:** 🟢 Mittel (Nice-to-have, nicht MVP-kritisch)  
+**Geschätzter Aufwand:** 1,5–14,5 Stunden (abhängig von Analyse)  
+**Letzte Notiz:** 14.02.2026
+
+**Offene Entscheidung (Blocker):**
+- [ ] Analyse durchführen: Was ist bereits implementiert? (Phase 1: 1–2 h)
+  → Ordner `modules/short-stories/` öffnen, Dateien lesen, Struktur verstehen
+  → Szenario festlegen: A (fertig), B (teilweise), C (neu), D (archivieren)
+
+**Kritische nächste Schritte (nach Analyse):**
+- [ ] README.md im Modul erstellen (Beschreibung + Status)
+- [ ] Entscheiden: integrieren, migrieren, neu bauen oder archivieren?
+
+**Offene Fragen (bitte beantworte, wenn du kannst):**
+1. Ist Short Stories für dich noch relevant? (Leseverständnis? Kultur? Nice-to-have?)
+2. Soll es Mobile-First werden oder erst später?
+3. Gibt es schon Content (Geschichten in Supabase/JSON)?
+4. Verständnisfragen + Audio geplant?
+
+**Referenz:** modules/short-stories/todo.md (detaillierter Plan – wird nach Migration gelöscht/archiviert)
+
+### 🌱 Prio 3 – Kann warten (Low)
+- [ ] Daily-Phrases Dev-Log bereinigen (modules/daily-phrases/daily-phrases-dev-log.md – 7 Treffer)
+- [ ] Security-Audit nachholen (docs/security/AUDIT-REPORT.md – 9 Treffer)
+- [ ] Design-Audit finalisieren (docs/DESIGN-AUDIT-170225.md – 6 Treffer)
+
+## Erledigt / Archiviert (seit letztem Cleanup)
+- [x] Root komplett bereinigt (71+ .md-Dateien archiviert) – 20.02.2026  
+- [x] TypeScript-Fehler in import/route.ts gefixt – 20.02.2026  
+
+## Wie wir weitermachen
+1. grep -r TODO/FIXME in src/ & modules/ durchgehen  
+2. Wichtige Einträge hierher kopieren (mit Dateipfad + Zeile)  
+3. Im Code [DONE] oder entfernen  
+4. Dezentrale todo.md → löschen oder archivieren
+
+Aktuelle Gesamtzahl: 325 Treffer (Stand heute)
