@@ -1,0 +1,185 @@
+./cleanup-reports/all_files_list.txt:187:./BRAIN-GYM-USER-TODO.md
+./cleanup-reports/all_files_list.txt:495:./TODO-Audit-Und-Optimierungen-2026-02-16.md
+./database/migrations/059_FIX_GUIDE.md:124:4. Mark TODO Task 0 as complete ✅
+./database/migrations/060_TESTING_GUIDE.md:319:1. ✅ Mark migration as complete in TODO.md
+./database/migrations/001_verify_user_4digit_pin_complete.sql:102:        -- TODO: Hier könnte man einen Telegram-Alert triggern
+./database/EXECUTE_THIS_MASTER_MIGRATION.md:306:- [ ] TODO.md → Aufgabe 1 (SQL-Migrationen) als ✅ markieren
+./IMPROVMENT-16-02-25.md:66:### 📝 TODO-LISTE (Priorisiert)
+./IMPROVMENT-16-02-25.md:239:- [ ] **TODO-Datei aktualisieren**
+./IMPROVMENT-16-02-25.md:566:## 🔧 IMMEDIATE TODO (Priority Order)
+./IMPROVMENT-16-02-25.md:568:### TODO 1: Verify Console Logs Visibility
+./IMPROVMENT-16-02-25.md:575:### TODO 2: Verify Auth Context
+./IMPROVMENT-16-02-25.md:583:### TODO 3: Simplify Component to Minimal Test
+./IMPROVMENT-16-02-25.md:598:### TODO 4: Check React DevTools Component Tree
+./IMPROVMENT-16-02-25.md:604:### TODO 5: Verify Supabase Query Works in Browser
+./IMPROVMENT-16-02-25.md:617:### TODO 6: Check for TypeScript Build Errors
+./CSV-IMPORT-GUIDE.md:754:### Client-Side Validierung (TODO):
+./CSV-IMPORT-GUIDE.md:944:2. **Validierungs-Script verwenden (TODO):**
+./SCHEMA-ALIGNMENT-COMPLETE.md:317:- [ ] `/api/admin/content/*` created (or marked as TODO)
+Binary file ./project-backup-2026-02-20.zip matches
+./before-cleanup.txt:18:├── BRAIN-GYM-USER-TODO.md
+./before-cleanup.txt:70:├── TODO-Audit-Und-Optimierungen-2026-02-16.md
+./archive/agents/desktop-prompts-170225/_Agent01_170225-0900.md:43:   - TODO-Liste, Schritt 1: Practice Modes User Flow Testing
+./archive/agents/desktop-prompts-170225/_Agent03_170225-0900.md:48:   - TODO-Liste, Schritt 3: Admin UI Testing
+./archive/agents/desktop-prompts-170225/_MASTER_170225_0900.md:60:## 📋 TODO-LISTE (Step by Step)
+./archive/agents/desktop-prompts-170225/_MASTER_170225_0900.md:425:   - Nächsten TODO-Item besprechen
+./archive/sessions/SESSION-LOG-2026-02-16-Evening.md:129:1. `CLAUDE.md` - Arbeitsreihenfolge eingetragen (IMPROVMENT vor TODO-Audit)
+./archive/sessions/SESSION-LOG-2026-02-16-Evening.md:131:3. `TODO-Audit-Und-Optimierungen-2026-02-16.md` - Status aktualisiert
+./archive/sessions/SESSION-LOG-2026-02-16-Evening.md:170:- docs: Update TODO-Audit status
+./archive/sessions/SESSION-LOG-2026-02-16-Evening.md:251:1. TODO-Audit-Und-Optimierungen-2026-02-16.md weiterarbeiten
+./archive/sessions/SESSION-LOG-2026-02-16-Evening.md:276:   - Klare TODO-Listen
+./archive/sessions/SESSION-LOG-2026-02-16-Evening.md:294:- `TODO-Audit-Und-Optimierungen-2026-02-16.md`
+./archive/sessions/SESSION-HANDOFF-2026-02-16.md:29:**3. TODO-Liste aktualisiert**
+./archive/sessions/SESSION-HANDOFF-2026-02-16.md:38:M  TODO-Audit-Und-Optimierungen-2026-02-16.md
+./archive/sessions/SESSION-HANDOFF-2026-02-16.md:101:4. `TODO-Audit-Und-Optimierungen-2026-02-16.md` - Aktuelle TODO-Liste
+./archive/sessions/SESSION-HANDOFF-2026-02-16.md:195:- **Fortschritt TODO-Liste:** 50% (10 von 20)
+./archive/sessions/SESSION-2026-02-16-PHASE1.md:9:PHASE 1 aus TODO-Audit abarbeiten: Dashboard Bugs fixen
+./archive/sessions/SESSION-2026-02-16-PHASE1.md:64:## 📊 Status-Update: TODO-Audit
+./archive/sessions/SESSION-2026-02-16-PHASE1.md:74:**Fortschritt TODO-Audit:** 53% → Bleibt gleich (PHASE 1 war Diagnose/Verifizierung)
+./archive/sessions/SESSION-2026-02-16-PHASE1.md:81:Laut CLAUDE.md muss **IMPROVMENT-16-02-25.md** (Practice Modes Testing) ZUERST abgeschlossen werden, BEVOR weitere TODO-Audit-Punkte angegangen werden.
+./archive/learning-components-old/daily-phrases-dialog.tsx:47:            // TODO: Replace with RPC call when backend is ready
+./archive/learning-components-old/daily-phrases-dialog.tsx:91:        // TODO: Save to backend when ready
+./BRAIN-GYM-USER-TODO.md:1:# Brain Gym RPC Functions - User TODO Checklist
+./PROJECT-CONSOLIDATION-AUDIT.md:20:- ⏳ **TODO-Audit:** 37% offen (7 von 19 Punkten)
+./PROJECT-CONSOLIDATION-AUDIT.md:387:### PHASE 3: TODO-AUDIT COMPLETION (8-15h)
+./PROJECT-CONSOLIDATION-AUDIT.md:392:**Aufgabe:** TODO-Audit Punkte 3, 6, 9 abschließen
+./PROJECT-CONSOLIDATION-AUDIT.md:410:**Aufgabe:** TODO-Audit Punkt 10
+./PROJECT-CONSOLIDATION-AUDIT.md:428:**Aufgabe:** TODO-Audit Punkte 11-13
+./PROJECT-CONSOLIDATION-AUDIT.md:609:- ✅ TODO-Audit 100% (19/19 Punkte)
+./web/index.html:543:        const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // TODO: Replace with your Supabase URL
+./web/index.html:544:        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // TODO: Replace with your Supabase Anon Key
+./web/vocabulary-dialog-compact.html:539:    // TODO: Save to Supabase with SRS logic
+./MOBILE-NAVIGATION-FIX-CHECKLIST.md:73:### Manual Testing (TODO - Agent 3)
+./MOBILE-NAVIGATION-FIX-CHECKLIST.md:81:### E2E Testing (TODO - Agent 3)
+./tests/mobile/TEST-RESULTS-2026-02-17.md:142:- ⏭️ **3 skipped** (TODO - not implemented)
+./tests/mobile/TEST-RESULTS-2026-02-17.md:149:- ⏭️ **4 skipped** (TODO - not implemented)
+./tests/mobile/BUG-REPORT-MOBILE.md:16:- ⏭️ **SKIPPED:** 11 tests (marked as TODO)
+./tests/mobile/BUG-REPORT-MOBILE.md:692:**TODO (Not Implemented):**
+./tests/mobile/e2e.spec.ts:404:test.describe('Practice Modes Mobile (TODO)', () => {
+./tests/mobile/e2e.spec.ts:407:    // TODO: Implement after Agent 1 creates /m/practice-modes
+./tests/mobile/e2e.spec.ts:413:    // TODO: Test practice item click → bottom sheet opens
+./tests/mobile/e2e.spec.ts:417:    // TODO: Test matching game interaction
+./tests/mobile/e2e.spec.ts:426:test.describe('Vocabulary Mobile (TODO)', () => {
+./tests/mobile/e2e.spec.ts:429:    // TODO: Implement after Agent 2 creates /m/vocabulary
+./tests/mobile/e2e.spec.ts:435:    // TODO: Test card visibility
+./tests/mobile/e2e.spec.ts:439:    // TODO: Test card flip interaction
+./tests/mobile/e2e.spec.ts:443:    // TODO: Test rating buttons
+./tests/mobile/TEST-RESULTS-2026-02-18-VERIFICATION.md:239:7. Implement TODO tests (Practice Modes, Vocabulary)
+./tests/mobile/TEST-RESULTS-2026-02-18.md:64:- ⏳ E2E tests pending (marked as TODO)
+./tests/mobile/TEST-RESULTS-2026-02-18.md:77:- ⏳ E2E tests pending (marked as TODO)
+./tests/mobile/TEST-RESULTS-2026-02-18.md:209:### TODO Tests - Not Implemented (7 tests)
+./tests/mobile/TEST-RESULTS-2026-02-18.md:349:### Priority 4: Implement TODO Tests (2 hours) - Agent 3
+./tests/mobile/TEST-RESULTS-2026-02-18.md:374:| Practice Modes       | 3     | 0       | 0% (TODO)|
+./tests/mobile/TEST-RESULTS-2026-02-18.md:375:| Vocabulary           | 4     | 0       | 0% (TODO)|
+./tests/mobile/TEST-RESULTS-2026-02-18.md:417:5. ⏳ TODO tests (7 tests to implement)
+./tests/mobile/TEST-RESULTS-2026-02-18.md:441:4. ⏳ **Implement TODO tests** (Agent 3, 2h)
+./tests/mobile/README.md:33:### ⏳ TODO (After Blockers Resolved):
+./tests/mobile/E2E-TEST-SUMMARY.md:48:- **Implement TODO tests** → Adds 7 tests
+./RESUME-SESSION-2026-02-18.md:264:## 🎯 TODO NACH MIGRATION DEPLOYMENT
+./AGENT2-MIGRATION-COMPLETION-SUMMARY.md:367:- `TODO-Audit-Und-Optimierungen-2026-02-16.md` - TODO list
+./.claude/settings.local.json:87:      "Bash(/Users/SWS/DEVELOP/HellenicHorizons-GreekLingua-Dashboard/MIGRATION-CLEANUP-REPORT.md << 'EOF'\n# MIGRATION CLEANUP REPORT\n\n**Agent 15: Database Migration Specialist**  \n**Date:** February 18, 2026  \n**Branch:** agent-2-admin-daily-phrases  \n**Commit:** bba26eb\n\n---\n\n## EXECUTIVE SUMMARY\n\nSuccessfully cleaned up database migrations and prepared for production deployment. All diagnostic files archived, duplicate migrations resolved, and migration sequence verified.\n\n**Status:** COMPLETE ✅\n\n---\n\n## TASKS COMPLETED\n\n### 1. DIAGNOSTIC FILES ARCHIVED ✅\n\n**Moved to `/archive/diagnostics/`:**\n- 069_diagnose_dashboard_bugs.sql\n- 069_diagnose_dashboard_bugs_results.sql\n- 069_diagnose_dashboard_issues.sql\n- 069_diagnose_simple.sql\n- 069_get_practice_enabled_items.sql\n- 070_diagnostic_dashboard_complete.sql\n- 070_diagnostic_simple.sql\n- 070_test_rls_policy.sql\n- check_users_table.sql\n- create_content_table.sql\n- diagnose_practice_config.sql\n- verify_practice_modes.sql\n\n**Total:** 12 diagnostic files archived\n\n### 2. OLD MIGRATIONS ARCHIVED ✅\n\n**Moved to `/archive/old-migrations/`:**\n- 078_add_multilingual_vocab_support.sql\n- 078_create_multilingual_vocabulary.sql\n\n**Reason:** Superseded by cleaner versions \\(078_cleanup + 079_create\\)\n\n### 3. CLEAN MIGRATION SEQUENCE ✅\n\n**Production migrations \\(13 files\\):**\n```\n060_add_spanish_translations.sql\n067_add_practice_modes.sql\n068_enable_practice_test_data.sql\n071_practice_modes_implementation.sql\n072_vocabulary_fsrs_rpc.sql\n073_vocabulary_stats_rpc.sql\n074_fix_student_progress_rls.sql\n075_fix_student_progress_rls_custom_auth.sql\n076_fix_rls_anon_role.sql\n077_add_daily_phrases_scheduling.sql\n078_cleanup_vocabulary.sql\n079_create_vocabulary.sql\n20260218_add_audio_storage.sql\n```\n\n**Gap Analysis:**\n- Missing 061-066: Likely in production already or never created\n- Missing 069-070: Moved to archive \\(diagnostics\\)\n- All remaining migrations are sequential and production-ready\n\n### 4. DUPLICATE DETECTION ✅\n\n**Command run:**\n```bash\nls migrations/*.sql | xargs -n 1 basename | cut -d'_' -f1 | sort | uniq -d\n```\n\n**Result:** No duplicates found ✅\n\n### 5. MIGRATION VERIFICATION ✅\n\n**Checked for:**\n- TODO comments: None found ✅\n- FIXME comments: None found ✅\n- XXX comments: None found ✅\n\nAll migrations are production-ready with no placeholders or unfinished work.\n\n### 6. MIGRATION EXECUTION SCRIPT ✅\n\n**Created:** `/scripts/run-migrations.sh`\n\n**Features:**\n- Bash script with error handling \\(set -e\\)\n- Runs migrations in order\n- Stops on first error\n- Clear console output with status indicators\n- Focuses on critical migrations \\(078, 079\\)\n- Includes informational notes\n\n**Usage:**\n```bash\nexport DATABASE_URL=\"postgresql://...\"\n./scripts/run-migrations.sh\n```\n\n### 7. ARCHIVE DOCUMENTATION ✅\n\n**Created:** `/archive/README.md`\n\n**Content:**\n- Explanation of archived files\n- Diagnostic files section\n- Old migrations section\n- Replacement information\n- Archive date\n- Migration status summary\n- Historical context notes\n\n### 8. GIT OPERATIONS ✅\n\n**Commit:** bba26eb\n\n**Changes:**\n- 81 files changed\n- 22,584 insertions\n- All diagnostic files renamed \\(git tracked as renames\\)\n- Old migrations archived\n- New production migrations added\n- Archive structure created\n- Documentation added\n\n**Git detected renames properly:** All file moves show as `rename` operations, preserving file history.\n\n---\n\n## FILE SUMMARY\n\n### Before Cleanup\n- Total migrations: 27 files\n- Diagnostic files: 12\n- Duplicate 078 migrations: 3\n- Unnumbered diagnostics: 4\n\n### After Cleanup\n- Production migrations: 13 files\n- Archived diagnostics: 12 files\n- Archived old migrations: 2 files\n- Clean sequence: 060 → 079 + audio storage\n\n**Reduction:** 14 files removed from production path \\(48% cleanup\\)\n\n---\n\n## ARCHIVE STRUCTURE\n\n```\narchive/\n├── README.md \\(comprehensive documentation\\)\n├── diagnostics/\n│   ├── 069_diagnose_dashboard_bugs.sql\n│   ├── 069_diagnose_dashboard_bugs_results.sql\n│   ├── 069_diagnose_dashboard_issues.sql\n│   ├── 069_diagnose_simple.sql\n│   ├── 069_get_practice_enabled_items.sql\n│   ├── 070_diagnostic_dashboard_complete.sql\n│   ├── 070_diagnostic_simple.sql\n│   ├── 070_test_rls_policy.sql\n│   ├── check_users_table.sql\n│   ├── create_content_table.sql\n│   ├── diagnose_practice_config.sql\n│   └── verify_practice_modes.sql\n├── old-migrations/\n│   ├── 078_add_multilingual_vocab_support.sql\n│   └── 078_create_multilingual_vocabulary.sql\n└── 2026-02/\n    ├── agent-handoffs/\n    ├── completed-tasks/\n    ├── configuration-docs/\n    ├── debug-reports/\n    ├── dev-logs/\n    ├── implementation-docs/\n    ├── planning-docs/\n    ├── session-logs/\n    ├── session-reports/\n    ├── test-results/\n    └── workflows-templates/\n```\n\n---\n\n## PRODUCTION READINESS\n\n### Migration Script Features\n- Error handling \\(exits on first failure\\)\n- Clear console output\n- Sequential execution\n- Database URL validation\n- Informational messages\n\n### Migration Quality\n- No TODO/FIXME/XXX comments\n- No placeholders\n- All syntax valid\n- Proper SQL formatting\n- Comprehensive comments\n\n### Documentation\n- Archive README explains all archived files\n- Migration script includes usage notes\n- Commit message explains changes\n- This report provides full context\n\n---\n\n## NEXT STEPS\n\n### Immediate Actions\n1. Review migration script before production run\n2. Backup production database\n3. Test migrations on staging environment\n4. Verify migration order\n\n### Production Deployment\n```bash\n# 1. Backup database\npg_dump $DATABASE_URL > backup_$\\(date +%Y%m%d_%H%M%S\\).sql\n\n# 2. Run migrations\nexport DATABASE_URL=\"postgresql://...\"\n./scripts/run-migrations.sh\n\n# 3. Verify tables\npsql $DATABASE_URL -c \"\\\\dt vocabulary.*\"\n```\n\n### Post-Deployment\n1. Verify vocabulary table structure\n2. Test FSRS RPC functions\n3. Check student progress RLS policies\n4. Validate audio storage setup\n\n---\n\n## RISK ASSESSMENT\n\n### Low Risk\n- All migrations already tested in development\n- Archive preserves all diagnostic files\n- Git history maintained for all files\n- Migrations can be rolled back if needed\n\n### Medium Risk\n- Gap in migration numbers \\(061-066, 069-070\\)\n- Requires verification that earlier migrations are in production\n- May need to check production database for existing schema\n\n### Mitigation\n- Created comprehensive archive\n- Documented all changes\n- Script includes error handling\n- Can restore from archive if needed\n\n---\n\n## PERFORMANCE IMPACT\n\n### Migration Execution Time\n- 078_cleanup_vocabulary.sql: ~1-2 seconds \\(DROP operations\\)\n- 079_create_vocabulary.sql: ~2-3 seconds \\(CREATE operations\\)\n- Total estimated time: **3-5 seconds**\n\n### Database Impact\n- Minimal downtime expected\n- No data loss \\(cleanup first, then create\\)\n- Indexes will be rebuilt automatically\n- RLS policies applied during creation\n\n---\n\n## VALIDATION CHECKLIST\n\n- ✅ All diagnostic files moved to archive\n- ✅ Old migrations archived\n- ✅ No duplicate migration numbers\n- ✅ Migration sequence verified\n- ✅ No TODO/FIXME comments\n- ✅ Execution script created\n- ✅ Archive documentation added\n- ✅ Git commit created\n- ✅ File renames tracked by git\n- ✅ Production migrations verified\n\n---\n\n## DELIVERABLES\n\n1. ✅ Clean migration directory \\(13 production files\\)\n2. ✅ Archive structure with documentation\n3. ✅ Migration execution script\n4. ✅ Git commit \\(bba26eb\\)\n5. ✅ This completion report\n6. ✅ Archive README\n7. ✅ Verified migration sequence\n8. ✅ Zero duplicates\n\n---\n\n## TIME REPORT\n\n**Estimated:** 30-45 minutes  \n**Actual:** 35 minutes  \n**Efficiency:** 100%\n\n### Breakdown\n- File organization: 10 minutes\n- Archive creation: 8 minutes\n- Script development: 7 minutes\n- Documentation: 5 minutes\n- Git operations: 3 minutes\n- Verification: 2 minutes\n\n---\n\n## AGENT HANDOFF\n\n**From:** Agent 15 \\(Database Migration Specialist\\)  \n**Status:** All tasks complete  \n**Next Agent:** Agent 16 \\(Production Deployment\\) or User\n\n**What's Ready:**\n- Clean migration sequence\n- Production-ready scripts\n- Comprehensive documentation\n- Archived diagnostics\n- Verified file structure\n\n**What's Needed:**\n- Production database access\n- Backup strategy confirmation\n- Staging environment testing\n- Deployment approval\n\n---\n\n## CONCLUSION\n\nDatabase migration cleanup completed successfully. All diagnostic files archived, duplicate migrations resolved, and production migrations verified. The migration sequence is clean, documented, and ready for deployment.\n\n**Repository is now production-ready for database migration.**\n\n---\n\n**Agent 15 Sign-off**  \nDate: February 18, 2026  \nTime: Completed in 35 minutes  \nStatus: COMPLETE ✅\nEOF)",
+./.claude/settings.local.json:90:      "Bash(/Users/SWS/DEVELOP/HellenicHorizons-GreekLingua-Dashboard/AGENT15-COMPLETION-SUMMARY.md << 'EOF'\n# AGENT 15: MIGRATION CLEANUP - COMPLETION SUMMARY\n\n**Agent:** Database Migration Specialist  \n**Date:** February 18, 2026  \n**Duration:** 35 minutes  \n**Status:** ✅ COMPLETE  \n**Branch:** agent-2-admin-daily-phrases  \n**Commit:** bba26eb\n\n---\n\n## MISSION ACCOMPLISHED\n\nSuccessfully cleaned up all database migrations and prepared the repository for production deployment. The migration directory is now organized, documented, and ready for production use.\n\n---\n\n## WHAT WAS DONE\n\n### 1. File Organization\n- Moved 12 diagnostic SQL files to `/archive/diagnostics/`\n- Moved 2 old vocabulary migrations to `/archive/old-migrations/`\n- Cleaned up 14 files from production migration path \\(48% reduction\\)\n\n### 2. Migration Sequence\n- Verified clean sequence: 060 → 079 + audio storage\n- Eliminated all duplicate migration numbers\n- Confirmed no gaps in critical migrations\n\n### 3. Quality Assurance\n- Verified no TODO/FIXME/XXX comments in production migrations\n- Confirmed all SQL syntax is valid\n- Validated proper formatting and documentation\n\n### 4. Production Scripts\n- Created `/scripts/run-migrations.sh` with error handling\n- Added clear console output and status indicators\n- Included usage documentation in script\n\n### 5. Documentation\n- Created comprehensive `/archive/README.md`\n- Generated detailed `MIGRATION-CLEANUP-REPORT.md`\n- Added quick reference guide `MIGRATION-QUICK-REFERENCE.md`\n\n### 6. Git Operations\n- Committed all changes with proper tracking\n- Git detected file renames \\(preserving history\\)\n- Clean commit message with context\n\n---\n\n## DELIVERABLES CHECKLIST\n\n- ✅ Clean migration directory \\(13 production files\\)\n- ✅ Organized archive structure\n- ✅ Migration execution script\n- ✅ Comprehensive documentation \\(3 files\\)\n- ✅ Git commit \\(bba26eb\\)\n- ✅ Zero duplicates\n- ✅ Verified sequence\n- ✅ Quality validation\n\n---\n\n## KEY METRICS\n\n### Before Cleanup\n- Total files: 27 migrations\n- Diagnostic files: 12\n- Duplicate migrations: 2\n- Unnumbered files: 4\n\n### After Cleanup\n- Production migrations: 13\n- Archived diagnostics: 12\n- Archived old migrations: 2\n- Zero duplicates: ✅\n- Zero TODOs: ✅\n\n### Improvement\n- 48% reduction in migration directory clutter\n- 100% elimination of duplicates\n- 100% documentation coverage\n\n---\n\n## FILE LOCATIONS\n\n```\nProduction Migrations:\n→ /supabase/migrations/*.sql \\(13 files\\)\n\nArchive:\n→ /archive/diagnostics/ \\(12 diagnostic files\\)\n→ /archive/old-migrations/ \\(2 superseded migrations\\)\n→ /archive/README.md \\(documentation\\)\n\nScripts:\n→ /scripts/run-migrations.sh \\(execution script\\)\n\nDocumentation:\n→ /MIGRATION-CLEANUP-REPORT.md \\(full report\\)\n→ /MIGRATION-QUICK-REFERENCE.md \\(quick guide\\)\n→ /AGENT15-COMPLETION-SUMMARY.md \\(this file\\)\n```\n\n---\n\n## PRODUCTION READINESS\n\n### Migration Script Features\n- ✅ Error handling \\(set -e\\)\n- ✅ Clear console output\n- ✅ Sequential execution\n- ✅ Status indicators\n- ✅ Usage documentation\n\n### Migration Quality\n- ✅ No placeholder comments\n- ✅ Valid SQL syntax\n- ✅ Proper formatting\n- ✅ Comprehensive comments\n- ✅ Production-tested\n\n### Documentation\n- ✅ Archive README\n- ✅ Full cleanup report\n- ✅ Quick reference guide\n- ✅ Execution instructions\n- ✅ Rollback procedures\n\n---\n\n## NEXT STEPS FOR PRODUCTION\n\n### 1. Pre-Deployment\n```bash\n# Backup production database\npg_dump $DATABASE_URL > backup_$\\(date +%Y%m%d_%H%M%S\\).sql\n```\n\n### 2. Run Migrations\n```bash\nexport DATABASE_URL=\"postgresql://...\"\n./scripts/run-migrations.sh\n```\n\n### 3. Verify Deployment\n```bash\n# Check tables\npsql $DATABASE_URL -c \"\\\\dt vocabulary.*\"\n\n# Check functions\npsql $DATABASE_URL -c \"\\\\df vocabulary.*\"\n```\n\n---\n\n## RISK ASSESSMENT\n\n**Overall Risk:** LOW\n\n**Mitigations in Place:**\n- All diagnostic files preserved in archive\n- Git history maintained for all files\n- Comprehensive backup procedures documented\n- Rollback instructions provided\n- Error handling in execution script\n\n---\n\n## TIME EFFICIENCY\n\n**Estimated:** 30-45 minutes  \n**Actual:** 35 minutes  \n**Efficiency:** 100%\n\nAll tasks completed within estimated timeframe with full documentation and quality assurance.\n\n---\n\n## HANDOFF NOTES\n\n### For Next Agent/User\n\n**What's Ready:**\n1. Clean migration sequence \\(060-079\\)\n2. Production-ready execution script\n3. Comprehensive documentation\n4. Organized archive structure\n5. Git commit with full history\n\n**What's Needed:**\n1. Production database credentials\n2. Backup confirmation\n3. Staging environment test\n4. Deployment approval\n\n**Critical Files:**\n- `/scripts/run-migrations.sh` - Run this for production deployment\n- `/MIGRATION-QUICK-REFERENCE.md` - Quick reference for operations\n- `/archive/README.md` - Archive documentation\n\n---\n\n## VALIDATION RESULTS\n\n### File Organization\n- ✅ 12 diagnostic files moved to archive\n- ✅ 2 old migrations archived\n- ✅ 13 production migrations remain\n- ✅ Clean directory structure\n\n### Quality Checks\n- ✅ No duplicate migration numbers\n- ✅ No TODO/FIXME/XXX comments\n- ✅ All SQL syntax valid\n- ✅ Proper migration sequence\n\n### Documentation\n- ✅ Archive README created\n- ✅ Full report generated\n- ✅ Quick reference added\n- ✅ Script documentation complete\n\n### Git Operations\n- ✅ All changes committed\n- ✅ File renames tracked\n- ✅ History preserved\n- ✅ Clean commit message\n\n---\n\n## CONCLUSION\n\nDatabase migration cleanup completed successfully. The repository is now production-ready with:\n\n- Clean, organized migration directory\n- Comprehensive documentation\n- Production-ready execution scripts\n- Preserved historical files in archive\n- Full git history maintained\n\n**Repository status: PRODUCTION READY ✅**\n\n---\n\n## AGENT 15 SIGN-OFF\n\n**Status:** All tasks complete  \n**Quality:** 100%  \n**Documentation:** Complete  \n**Testing:** Verified  \n**Handoff:** Ready\n\n**Next Agent:** Production Deployment or User Approval\n\n---\n\n**End of Report**\n\n---\n\n## APPENDIX: PRODUCTION MIGRATION LIST\n\n```\n1.  060_add_spanish_translations.sql\n2.  067_add_practice_modes.sql\n3.  068_enable_practice_test_data.sql\n4.  071_practice_modes_implementation.sql\n5.  072_vocabulary_fsrs_rpc.sql\n6.  073_vocabulary_stats_rpc.sql\n7.  074_fix_student_progress_rls.sql\n8.  075_fix_student_progress_rls_custom_auth.sql\n9.  076_fix_rls_anon_role.sql\n10. 077_add_daily_phrases_scheduling.sql\n11. 078_cleanup_vocabulary.sql\n12. 079_create_vocabulary.sql\n13. 20260218_add_audio_storage.sql\n```\n\n**Total:** 13 production migrations  \n**Status:** Verified and ready  \n**Estimated execution time:** 3-5 seconds\nEOF)",
+./docs/DASHBOARD-BUGS-FIX-GUIDE.md:289:1. ✅ **Aktualisiere TODO-Audit-Und-Optimierungen-2026-02-16.md**
+./docs/AUTHORIZATION.md:214:- [Security Audit TODO](../TODO-Audit-Und-Optimierungen-2026-02-16.md)
+./docs/security/login-pin-security.md:366:- [ ] Rate Limiting (TODO)
+./docs/security/login-pin-security.md:367:- [ ] Account Lockout (TODO)
+./docs/security/login-pin-security.md:368:- [ ] Progressive Delays (TODO)
+./docs/security/login-pin-security.md:370:- [ ] Admin MFA (TODO)
+./docs/security/login-pin-security.md:372:- [ ] Audit-Log (TODO)
+./docs/security/AUDIT-REPORT.md:74:- **Action:** TODO - Clarify with user what "Week Words" means
+./docs/security/AUDIT-REPORT.md:84:- **Action:** TODO - Request file or create based on CLAUDE.md
+./docs/security/AUDIT-REPORT.md:105:- **Action:** TODO - Implement 3-per-day logic or clarify if changed
+./docs/security/AUDIT-REPORT.md:118:1. [ ] **TODO:** naming-convention.md missing - create or request?
+./docs/security/AUDIT-REPORT.md:119:2. [ ] **TODO:** FSRS-6 vs SM-2 - which algorithm is approved?
+./docs/security/AUDIT-REPORT.md:120:3. [ ] **TODO:** Daily Phrases 3-per-day limit - enforce or remove?
+./docs/security/AUDIT-REPORT.md:121:4. [ ] **TODO:** "Week Words" - what does this refer to?
+./docs/security/AUDIT-REPORT.md:122:5. [ ] **TODO:** Mobile Grammar/Comprehension/Listening - create or desktop-only?
+./docs/security/AUDIT-REPORT.md:127:3. Create comprehensive TODO list for user review
+./docs/security/SECURITY-STATUS.md:58:  - **TODO:** Integration in Admin-Login-Flow
+./docs/security/SECURITY-STATUS.md:118:14. **🔴 `add_device_fingerprint.sql`** ← TODO
+./docs/security/SECURITY-STATUS.md:119:15. **🔴 `add_admin_mfa.sql`** ← TODO
+./docs/security/SECURITY-STATUS.md:120:16. **🔴 `create_audit_log.sql`** ← TODO
+./docs/security/SECURITY-STATUS.md:133:   - TODO-Kommentar in `login/page.tsx` (Zeile 254) umsetzen
+./docs/security/FINDINGS.md:58:**Action:** TODO - Confirm with user before deletion
+./docs/security/FINDINGS.md:76:**TODO:** Implement time-based 3-phrase rotation or clarify if rule changed
+./docs/security/FINDINGS.md:84:**TODO:** Port Short Stories to React (like Daily Phrases)
+./docs/features/SUPABASE-SETUP.md:386:            greek_word: '', // TODO: Add from shared-data.js
+./docs/PROJECT-OVERVIEW-2026-02.md:154:- **Aktueller Stand (laut TODO):**
+./docs/PROJECT-OVERVIEW-2026-02.md:392:**Quelle:** `TODO-Audit-Und-Optimierungen-2026-02-16.md`
+./docs/PROJECT-OVERVIEW-2026-02.md:618:**Quelle:** `TODO-Audit-Und-Optimierungen-2026-02-16.md`
+./docs/PROJECT-OVERVIEW-2026-02.md:637:**Phase 3: Kritische Sicherheits-Refactorings (siehe TODO.md)**
+./docs/PROJECT-OVERVIEW-2026-02.md:683:4. `TODO-Audit-Und-Optimierungen-2026-02-16.md` → Offene Tasks
+./docs/COOKIE-AUTH-MIGRATION.md:262:### Auth-Context (TODO)
+./docs/COOKIE-AUTH-MIGRATION.md:302:### Login-Seiten (TODO)
+./docs/MIGRATION-082-README.md:267:### 📝 TODO NACH MIGRATION:
+./docs/DESIGN-AUDIT-170225.md:470:## 📸 SCREENSHOTS (TODO)
+./docs/DESIGN-AUDIT-170225.md:514:| Matching Game | ?/10 | 🔍 TODO | UI-Check im Browser |
+./docs/DESIGN-AUDIT-170225.md:515:| Multiple Choice Quiz | ?/10 | 🔍 TODO | UI-Check im Browser |
+./docs/DESIGN-AUDIT-170225.md:516:| Write Input Practice | ?/10 | 🔍 TODO | UI-Check im Browser |
+./docs/DESIGN-AUDIT-170225.md:529:- [ ] Screenshots gemacht (TODO)
+./TROUBLESHOOTING-Practice-Modes.md:5:**Related:** IMPROVMENT-16-02-25.md, TODO-Audit-Und-Optimierungen-2026-02-16.md
+./TROUBLESHOOTING-Practice-Modes.md:430:3. Check `TODO-Audit-Und-Optimierungen-2026-02-16.md` for related issues
+./_Agent3_Tests_Mobile.md:343:**TODO (After Blockers Resolved):**
+./_Agent3_Tests_Mobile.md:528:**TODO (Not Implemented):**
+./MIGRATION-CLEANUP-REPORT.md:82:- TODO comments: None found ✅
+./MIGRATION-CLEANUP-REPORT.md:83:- FIXME comments: None found ✅
+./MIGRATION-CLEANUP-REPORT.md:201:- No TODO/FIXME/XXX comments
+./MIGRATION-CLEANUP-REPORT.md:286:- ✅ No TODO/FIXME comments
+./active-deploy/mobile-app-abspaltung-todos.md:104:- [ ] **TODO:** User-Unlock-Funktion implementieren (siehe unten)
+./active-deploy/mobile-app-abspaltung-todos.md:246:- [x] **Feedback-Mechanismus:** User-Feedback-Popup nach Release (siehe TODO)
+./active-deploy/MODULE_DIALOGE_ALLGEMEIN.md:1203:- [ ] **Zentrale TODO.md aktualisieren** (Cross-Reference)
+./active-deploy/MODULE_DIALOGE_ALLGEMEIN.md:1212:- [ ] **Production-Tests** (siehe Aufgabe 3 in TODO.md)
+./active-deploy/MODULE_DIALOGE_ALLGEMEIN.md:1271:- 📄 `TODO.md` (Root) - Zentrale TODO-Liste
+./active-deploy/_archive/ARCHIVE_README.md:16:- `/TODO.md` (Root) - Zentrale TODO-Liste
+./active-deploy/_archive/ARCHIVE_README.md:37:- `/TODO.md` (Root) - Zentrale TODO-Liste
+./active-deploy/_archive/todo-login-system-complete.md:1:# 🔐 TODO: Login-System - Komplette Übersicht
+./active-deploy/_archive/todo-login-system-complete.md:1390:- [ ] `docs/TODO-LOGIN-SYSTEM-COMPLETE.md` (dieses Dokument)
+./AGENT15-COMPLETION-SUMMARY.md:31:- Verified no TODO/FIXME/XXX comments in production migrations
+./AGENT15-COMPLETION-SUMMARY.md:216:- ✅ No TODO/FIXME/XXX comments
+./_Agent8_Admin_Desktop.md:475:   - [ ] Update main TODO.md
+./start.md:26:- **[TODO.md](./TODO.md)**  
+./modules/grammar/grammar-todo.md:1:# Grammar Module – TODO
+./modules/grammar/grammar-todo.md:113:- [x] Module-Dokumentation (README.md, TODO.md)
+./modules/grammar/grammar-database-schema.md:137:**Status:** ❌ **NICHT IMPLEMENTIERT** (siehe TODO)
+./modules/grammar/grammar-database-schema.md:240:**Lösung (TODO):**
+./modules/grammar/README.md:125:- **TODO:** `modules/grammar/grammar-todo.md`
+./modules/short-stories/todo.md:1:# 📋 TODO: Short Stories Modul
+./modules/short-stories/todo.md:86:→ Archivieren (`_archive/`) und aus TODO-Liste entfernen
+./modules/short-stories/todo.md:270:- [ ] **TODO-Listen aktualisieren:**
+./modules/short-stories/todo.md:271:  - [ ] Zentrale `TODO.md` (Root)
+./modules/short-stories/todo.md:297:- 📄 `modules/due-cards-today/todo.md` - Ähnliche Modul-TODO
+./modules/short-stories/todo.md:298:- 📄 `TODO.md` (Root) - Zentrale TODO-Liste
+./modules/daily-phrases/daily-phrases-dev-log.md:11:Entwicklung des Daily Phrases Moduls mit schrittweiser Abarbeitung der TODO-Liste.
+./modules/daily-phrases/daily-phrases-dev-log.md:22:Die Datei `daily-phrases-todo.md` enthält aktuell eine **FSRS-6 Vocabulary Learning System** Roadmap (92 Tasks über 8 Phasen). Dies scheint nicht die korrekte TODO-Liste für das **Daily Phrases** Modul zu sein.
+./modules/daily-phrases/daily-phrases-dev-log.md:33:Soll ich die FSRS-6 Roadmap (aktuell in daily-phrases-todo.md) abarbeiten, oder soll ich eine neue, spezifische TODO-Liste für Daily Phrases erstellen?
+./modules/daily-phrases/daily-phrases-dev-log.md:1130:- 🎯 **Noch TODO: 4.4 accessibility (2 tasks), 4.5 Speed Toggle (4 tasks)**
+./modules/daily-phrases/daily-phrases-dev-log.md:1146:- ⚠️ 4.4: Audio Button (3/5) - 2 TODO accessibility
+./modules/daily-phrases/daily-phrases-dev-log.md:1309:- ⚠️ 4.4: Audio Button (3/5) - 2 accessibility TODO
+./modules/daily-phrases/daily-phrases-dev-log.md:1315:- 4.4.5: Accessibility → TODO (aria-live, bessere keyboard support)
+./modules/daily-phrases/integration-test-results.md:133:**Fix:** Set to 0 with TODO comment
+./modules/daily-phrases/integration-test-results.md:217:1. **streak_days** property not tracked (TODO)
+./modules/daily-phrases/integration-test-results.md:218:2. **Session time** tracking not implemented (TODO)
+./modules/due-cards-today/todo.md:1:# 📋 TODO: Due Cards Today Modul
+./modules/due-cards-today/todo.md:28:- [ ] **SQL-Migrationen ausführen** (siehe `TODO.md` Root, Aufgabe 1)
+./modules/due-cards-today/todo.md:31:- [ ] **ENV-Variablen konfigurieren** (siehe `TODO.md` Root, Aufgabe 2)
+./modules/due-cards-today/todo.md:413:### C) **Zentrale TODO.md aktualisieren**
+./modules/due-cards-today/todo.md:414:- [ ] **Root `TODO.md`** - Modul-Status aktualisieren
+./modules/due-cards-today/todo.md:499:- 📄 `TODO.md` (Root) - Zentrale TODO-Liste
+./TODO-Audit-Und-Optimierungen-2026-02-16.md:25:Bevor mit TODO-Audit fortgefahren wird, muss IMPROVMENT-16-02-25.md komplett abgeschlossen sein:
+./TODO-Audit-Und-Optimierungen-2026-02-16.md:46:"Sag mir bitte zuerst: 'Ich habe die TODO-Datei gelesen.'
+./TODO-Audit-Und-Optimierungen-2026-02-16.md:49: Falls JA: Dann mit TODO-Audit fortfahren."
+./TODO-Audit-Und-Optimierungen-2026-02-16.md:237:- ✅ Alle 19 TODO-Punkte abgeschlossen
+./TODO-Audit-Und-Optimierungen-2026-02-16.md:294:# TODO - Audit & Optimierungen
+./TODO-Audit-Und-Optimierungen-2026-02-16.md:708:- `TODO-Audit-Und-Optimierungen-2026-02-16.md` (diese Datei)
+./TODO-Audit-Und-Optimierungen-2026-02-16.md:739:#### 🎯 TODO-Liste (Priorität)
+./CLAUDE.md:50:**WICHTIG:** Erst mit dem TODO-Audit weitermachen, wenn:
+./CLAUDE.md:58:- Nächster Schritt: IMPROVMENT-16-02-25.md abschließen → Dann TODO-Audit
+./CLAUDE.md:64:4. **NUR DANN** mit TODO-Audit-Und-Optimierungen-2026-02-16.md weitermachen
+./CLAUDE.md:103:TODO-Audit-Und-Optimierungen-2026-02-16.md
+./SESSION_TRACKING_SUMMARY.md:92:- `TODO-Audit-Und-Optimierungen-2026-02-16.md` (updated)
+./SESSION_TRACKING_SUMMARY.md:418:4. **TODO-Audit** - Frontend integration (Cookie Auth, CSRF)
+./SESSION_TRACKING_SUMMARY.md:453:4. Complete TODO-Audit items (Cookie Auth frontend)
+./SESSION_TRACKING_SUMMARY.md:470:- `TODO-Audit-Und-Optimierungen-2026-02-16.md` - Security & optimizations
+./src/components/admin/ContentModal.tsx:98:            // TODO: Implement duplicate check API call for multilingual_content table
+./src/hooks/use-stats-data.ts:7: * TODO: Neue Datenfelder werden später hinzugefügt, wenn die Anforderungen klar sind.
+./src/hooks/use-stats-data.ts:181:      // Streak berechnen (TODO: Aus DB berechnen statt Hardcoded)
