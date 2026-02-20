@@ -99,6 +99,25 @@ Alte TODO-Kommentare im Code werden nach Migration entfernt oder mit Datum + [DO
 3. Gibt es schon Content (Geschichten in Supabase/JSON)?
 4. Verständnisfragen + Audio geplant?
 
+### Mobile Playwright E2E-Tests (e2e.spec.ts)
+**Status:** ⚠️ skizziert – viele Tests noch zu schreiben  
+**Priorität:** 🟡 Mittel (sichert Mobile-Qualität, aber nicht Blocker)  
+**Aufwand:** 3–6 Stunden (je nach Abdeckung)  
+**Letzte Notiz:** 20.02.2026
+
+**Offene Punkte (aus e2e.spec.ts):**
+- [ ] Practice Modes Mobile Tests implementieren (nach /m/practice-modes existiert)  
+  → Item-Klick → Bottom Sheet  
+  → Matching-Game-Interaktion
+- [ ] Vocabulary Mobile Tests implementieren (nach /m/vocabulary existiert)  
+  → Card visibility, flip, rating buttons
+
+**Empfohlener nächster Schritt:**
+- [ ] Tests für existierende Routes priorisieren (Dashboard, Login, Vocabulary)  
+- [ ] Agent 1 & 2 abwarten → dann Tests erweitern
+
+**Referenz:** tests/mobile/e2e.spec.ts (Zeilen 404–443)
+
 **Referenz:** modules/short-stories/todo.md (detaillierter Plan – wird nach Migration gelöscht/archiviert)
 
 ### 🌱 Prio 3 – Kann warten (Low)
