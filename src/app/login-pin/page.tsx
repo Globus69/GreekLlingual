@@ -20,7 +20,7 @@ export default function PinLoginPage() {
         difficulty: '',
         success: false,
     });
-    const { setUser, user } = useAuth();
+    const { setUser, user, loading } = useAuth();
     const router = useRouter();
     const { locale, setLocale, syncLocaleFromUser } = useLanguage();
     const { t } = useTranslation();
@@ -29,10 +29,10 @@ export default function PinLoginPage() {
 
     // If already logged in, redirect to mobile dashboard
     useEffect(() => {
-        if (user) {
+        if (!loading && user) {
             router.push('/m');
         }
-    }, [user, router]);
+    }, [loading, user, router]);
 
     // Animated background particles
     useEffect(() => {

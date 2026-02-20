@@ -37,7 +37,7 @@ interface VocabularyItem {
     fsrs_state: 'new' | 'learning' | 'review' | 'relearning';
 }
 
-export default function MobileVocabularyPage() {
+export default function MobileVocabularyReviewPage() {
     const { user, isAuthenticated, loading: authLoading } = useAuth();
     const router = useRouter();
     const { t, locale } = useTranslation();
@@ -61,16 +61,16 @@ export default function MobileVocabularyPage() {
     const STUDENT_ID = user?.id || '';
 
     /**
-     * Fetcher function for vocabulary cards
+     * Fetcher function for REVIEW vocabulary cards
      */
-    const fetchVocabularyCards = useCallback(async (): Promise<VocabularyItem[]> => {
+    const fetchReviewCards = useCallback(async (): Promise<VocabularyItem[]> => {
         if (!STUDENT_ID) {
             console.error('No user ID found');
             return [];
         }
 
-        // Call RPC function to get due vocabulary cards with FSRS data
-        const { data, error: rpcError } = await supabase.rpc('get_due_vocabulary_cards', {
+        // Call RPC function to get review vocabulary cards (last rating 1 or 2)
+        const { data, error: rpcError } = await supabase.rpc('get_review_vocabulary_cards', {
             p_user_id: STUDENT_ID,
             p_limit: 20 // Mobile: Small batches!
         });
@@ -80,12 +80,12 @@ export default function MobileVocabularyPage() {
             throw rpcError;
         }
 
-        console.log(`✅ Loaded ${data?.length || 0} due vocabulary cards (FSRS)`);
+        console.log(`✅ Loaded ${data?.length || 0} review vocabulary cards (Again + Hard)`);
         return (data || []) as VocabularyItem[];
     }, [STUDENT_ID]);
 
     /**
-     * Use cache for vocabulary cards
+     * Use cache for review vocabulary cards
      */
     const {
         data: cards,
@@ -94,15 +94,15 @@ export default function MobileVocabularyPage() {
         refresh,
     } = useMobileCache<VocabularyItem[]>({
         storeName: 'vocabulary_cards',
-        key: `vocabulary-due-${STUDENT_ID}`,
-        fetcher: fetchVocabularyCards,
+        key: `vocabulary-review-${STUDENT_ID}`,
+        fetcher: fetchReviewCards,
         ttl: CACHE_TTL.VOCABULARY_CARDS, // 30 minutes
         enabled: !!STUDENT_ID,
         onCacheHit: (data) => {
-            console.log('✅ [Vocabulary] Using cached cards');
+            console.log('✅ [Vocabulary Review] Using cached cards');
         },
         onCacheMiss: () => {
-            console.log('❌ [Vocabulary] Cache miss - fetching fresh cards');
+            console.log('❌ [Vocabulary Review] Cache miss - fetching fresh cards');
         },
     });
 
@@ -111,9 +111,9 @@ export default function MobileVocabularyPage() {
      */
     usePrefetch(
         'vocabulary_cards',
-        `vocabulary-due-${STUDENT_ID}-next`,
+        `vocabulary-review-${STUDENT_ID}-next`,
         async () => {
-            const { data } = await supabase.rpc('get_due_vocabulary_cards', {
+            const { data } = await supabase.rpc('get_review_vocabulary_cards', {
                 p_user_id: STUDENT_ID,
                 p_limit: 20,
             });
@@ -231,8 +231,6 @@ export default function MobileVocabularyPage() {
             }));
 
             // Remove card from queue
-            // Note: We can't use setCards here anymore since cards come from cache
-            // Instead, we'll refresh the cache which will trigger a re-fetch
             if (cards.length === 1) {
                 // Last card - show summary
                 setShowSummary(true);
@@ -337,7 +335,7 @@ export default function MobileVocabularyPage() {
                             color: 'white',
                             margin: 0
                         }}>
-                            📚 Vocabulary
+                            🔄 Review Vocab
                         </h1>
                         {cached && <CacheIndicator cached={cached} />}
                     </div>
@@ -387,7 +385,7 @@ export default function MobileVocabularyPage() {
                         color: 'white'
                     }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
-                        <p>Loading vocabulary...</p>
+                        <p>Loading review cards...</p>
                     </div>
                 ) : showSummary || !cards || cards.length === 0 ? (
                     <div style={{
@@ -396,95 +394,43 @@ export default function MobileVocabularyPage() {
                         color: 'white'
                     }}>
                         <div style={{ fontSize: '64px', marginBottom: '16px' }}>🎉</div>
-                        <h3 style={{ fontSize: '24px', marginBottom: '24px' }}>Session Complete!</h3>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(2, 1fr)',
-                            gap: '12px',
-                            maxWidth: '400px',
-                            margin: '0 auto 32px'
-                        }}>
-                            <div style={{
-                                textAlign: 'center',
-                                padding: '16px',
-                                background: 'rgba(255, 107, 107, 0.1)',
-                                borderRadius: '12px',
-                                border: '1px solid rgba(255, 107, 107, 0.3)'
-                            }}>
-                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FF6B6B' }}>
-                                    {sessionStats.again}
-                                </div>
+                        <h3 style={{ fontSize: '24px', marginBottom: '16px' }}>No cards to review!</h3>
+                        <p style={{ fontSize: '14px', color: '#8E8E93', marginBottom: '32px' }}>
+                            All cards are Good or Easy. Keep practicing!
+                        </p>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', maxWidth: '400px', margin: '0 auto 32px' }}>
+                            <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(255, 107, 107, 0.1)', borderRadius: '12px', border: '1px solid rgba(255, 107, 107, 0.3)' }}>
+                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FF6B6B' }}>{sessionStats.again}</div>
                                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Again ❌</div>
                             </div>
-                            <div style={{
-                                textAlign: 'center',
-                                padding: '16px',
-                                background: 'rgba(255, 169, 77, 0.1)',
-                                borderRadius: '12px',
-                                border: '1px solid rgba(255, 169, 77, 0.3)'
-                            }}>
-                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FFA94D' }}>
-                                    {sessionStats.hard}
-                                </div>
+                            <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(255, 169, 77, 0.1)', borderRadius: '12px', border: '1px solid rgba(255, 169, 77, 0.3)' }}>
+                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FFA94D' }}>{sessionStats.hard}</div>
                                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Hard 🟠</div>
                             </div>
-                            <div style={{
-                                textAlign: 'center',
-                                padding: '16px',
-                                background: 'rgba(81, 207, 102, 0.1)',
-                                borderRadius: '12px',
-                                border: '1px solid rgba(81, 207, 102, 0.3)'
-                            }}>
-                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#51CF66' }}>
-                                    {sessionStats.good}
-                                </div>
+                            <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(81, 207, 102, 0.1)', borderRadius: '12px', border: '1px solid rgba(81, 207, 102, 0.3)' }}>
+                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#51CF66' }}>{sessionStats.good}</div>
                                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Good ✅</div>
                             </div>
-                            <div style={{
-                                textAlign: 'center',
-                                padding: '16px',
-                                background: 'rgba(51, 154, 240, 0.1)',
-                                borderRadius: '12px',
-                                border: '1px solid rgba(51, 154, 240, 0.3)'
-                            }}>
-                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#339AF0' }}>
-                                    {sessionStats.easy}
-                                </div>
+                            <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(51, 154, 240, 0.1)', borderRadius: '12px', border: '1px solid rgba(51, 154, 240, 0.3)' }}>
+                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#339AF0' }}>{sessionStats.easy}</div>
                                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Easy 🎯</div>
                             </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                            <button
-                                onClick={handleRestart}
-                                style={{
-                                    padding: '14px 28px',
-                                    borderRadius: '12px',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    background: 'rgba(255, 255, 255, 0.1)',
-                                    color: 'white',
-                                    fontSize: '16px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Practice More
-                            </button>
-                            <button
-                                onClick={() => router.push('/m')}
-                                style={{
-                                    padding: '14px 28px',
-                                    borderRadius: '12px',
-                                    border: 'none',
-                                    background: 'rgba(0, 122, 255, 0.3)',
-                                    color: '#007AFF',
-                                    fontSize: '16px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Close
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => router.push('/m/vocabulary')}
+                            style={{
+                                padding: '14px 28px',
+                                borderRadius: '12px',
+                                border: 'none',
+                                background: 'rgba(0, 122, 255, 0.3)',
+                                color: '#007AFF',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Back to Due Cards
+                        </button>
                     </div>
                 ) : currentItem ? (
                     <>
