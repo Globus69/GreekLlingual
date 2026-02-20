@@ -102,6 +102,27 @@ Alte TODO-Kommentare im Code werden nach Migration entfernt oder mit Datum + [DO
 **Referenz:** modules/short-stories/todo.md (detaillierter Plan – wird nach Migration gelöscht/archiviert)
 
 ### 🌱 Prio 3 – Kann warten (Low)
+
+### Mobile E2E-Tests (Playwright)
+**Status:** ⚠️ Platzhalter – Tests teilweise skizziert, viele noch zu implementieren  
+**Priorität:** 🟡 Mittel bis Hoch (sichert Mobile-First-Qualität langfristig)  
+**Geschätzter Aufwand:** 2–5 Stunden (je nach Abdeckung)  
+**Letzte Notiz:** 18.02.2026
+
+**Wichtigste offene Punkte (aus e2e.spec.ts):**
+- [ ] Practice Modes Mobile Tests schreiben (9 Zeilen)  
+  → z. B. Item-Klick → Bottom Sheet öffnet  
+  → Matching-Game-Interaktion testen  
+  → Implement after /m/practice-modes existiert
+- [ ] Vocabulary Mobile Tests schreiben (5 Zeilen)  
+  → Card visibility, flip, rating buttons  
+  → Implement after /m/vocabulary existiert
+
+**Empfohlener nächster Schritt:**
+- [ ] Tests für bereits existierende Routes priorisieren (z. B. Dashboard, Vocabulary)  
+- [ ] Agent 1 & 2 abwarten → dann Playwright-Skripte erweitern
+
+**Referenz:** tests/mobile/e2e.spec.ts (Zeilen 404–443)
 - [ ] Daily-Phrases Dev-Log bereinigen (modules/daily-phrases/daily-phrases-dev-log.md – 7 Treffer)
 - [ ] Security-Audit nachholen (docs/security/AUDIT-REPORT.md – 9 Treffer)
 - [ ] Design-Audit finalisieren (docs/DESIGN-AUDIT-170225.md – 6 Treffer)
@@ -115,5 +136,8 @@ Alte TODO-Kommentare im Code werden nach Migration entfernt oder mit Datum + [DO
 2. Wichtige Einträge hierher kopieren (mit Dateipfad + Zeile)  
 3. Im Code [DONE] oder entfernen  
 4. Dezentrale todo.md → löschen oder archivieren
+
+
+
 
 Aktuelle Gesamtzahl: 325 Treffer (Stand heute)
