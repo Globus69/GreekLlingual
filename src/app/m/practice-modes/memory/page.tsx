@@ -42,6 +42,7 @@ export default function MobileMemoryGamePage() {
   const [mistakes, setMistakes] = useState(0);
   const [startTime] = useState(Date.now());
   const [gameComplete, setGameComplete] = useState(false);
+  const [dataSource, setDataSource] = useState<'due_cards' | 'review_vocab' | 'weak_words'>('due_cards');
 
   /**
    * Auth check
@@ -53,15 +54,47 @@ export default function MobileMemoryGamePage() {
   }, [isAuthenticated, router]);
 
   /**
-   * Fetcher function for practice items
-   * 🔧 FIX: Use cache instead of direct Supabase call
+   * Fetcher function for practice items based on data source
+   * 🔧 UPDATED: Support multiple data sources (Due Cards, Review Vocab, Weak Words)
    */
   const fetchPracticeItems = useCallback(async (): Promise<PracticeItem[]> => {
     if (!user?.id) return [];
 
-    console.log('🃏 [Memory Game] Fetching practice items');
+    console.log('🃏 [Memory Game] Fetching practice items from:', dataSource);
 
-    const { data, error } = await supabase.rpc('get_practice_enabled_items');
+    let data, error;
+
+    // Fetch based on selected data source
+    if (dataSource === 'due_cards') {
+      // Fetch due cards
+      const result = await supabase
+        .from('vocabulary')
+        .select('id, english, greek')
+        .lte('next_review', new Date().toISOString())
+        .eq('user_id', user.id)
+        .limit(8);
+      data = result.data;
+      error = result.error;
+    } else if (dataSource === 'review_vocab') {
+      // Fetch all vocabulary for review
+      const result = await supabase
+        .from('vocabulary')
+        .select('id, english, greek')
+        .eq('user_id', user.id)
+        .limit(8);
+      data = result.data;
+      error = result.error;
+    } else if (dataSource === 'weak_words') {
+      // Fetch weak words (difficulty >= 0.5 or low ease_factor)
+      const result = await supabase
+        .from('vocabulary')
+        .select('id, english, greek')
+        .eq('user_id', user.id)
+        .lte('ease_factor', 2.0)
+        .limit(8);
+      data = result.data;
+      error = result.error;
+    }
 
     if (error) {
       console.error('Error fetching practice items:', error);
@@ -69,13 +102,13 @@ export default function MobileMemoryGamePage() {
     }
 
     if (!data || data.length === 0) {
-      console.warn('No practice items found');
+      console.warn('No practice items found for:', dataSource);
       return [];
     }
 
-    console.log('🃏 [Memory Game] Items loaded:', data.length);
-    return data.slice(0, 8) as PracticeItem[];
-  }, [user?.id]);
+    console.log('🃏 [Memory Game] Items loaded:', data.length, 'from', dataSource);
+    return data as PracticeItem[];
+  }, [user?.id, dataSource]);
 
   /**
    * Create card pairs from practice items
@@ -146,6 +179,22 @@ export default function MobileMemoryGamePage() {
       setCards(createCardPairs(practiceItems));
     }
   }, [practiceItems, cached, createCardPairs]);
+
+  /**
+   * Reload data when data source changes
+   * 🔧 NEW: Refresh cache when user changes dropdown
+   */
+  useEffect(() => {
+    if (user?.id) {
+      // Reset game state
+      setFlippedCards([]);
+      setMatchedCards([]);
+      setMistakes(0);
+      setGameComplete(false);
+      // Refresh data
+      refresh();
+    }
+  }, [dataSource, user?.id, refresh]);
 
   /**
    * Set loading state from cache hook
@@ -359,9 +408,9 @@ export default function MobileMemoryGamePage() {
             borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           }}
         >
-          {/* Back Button */}
+          {/* Back Button - Navigate to Dashboard */}
           <button
-            onClick={() => router.push('/m/practice-modes')}
+            onClick={() => router.push('/m')}
             style={{
               background: 'none',
               border: 'none',
@@ -412,6 +461,66 @@ export default function MobileMemoryGamePage() {
           >
             {showGreek ? '🇬🇷' : '🇺🇸'}
           </button>
+        </div>
+
+        {/* Data Source Dropdown */}
+        <div
+          style={{
+            padding: '12px 16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <div style={{ maxWidth: '448px', margin: '0 auto' }}>
+            <label
+              htmlFor="dataSource"
+              style={{
+                display: 'block',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: '#8E8E93',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+              }}
+            >
+              Card Source
+            </label>
+            <select
+              id="dataSource"
+              value={dataSource}
+              onChange={(e) => setDataSource(e.target.value as 'due_cards' | 'review_vocab' | 'weak_words')}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                color: 'white',
+                fontSize: '15px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                outline: 'none',
+                appearance: 'none',
+                backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e")',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 12px center',
+                backgroundSize: '20px',
+                paddingRight: '40px',
+              }}
+            >
+              <option value="due_cards" style={{ backgroundColor: '#1C1C1E', color: 'white' }}>
+                📅 Due Cards
+              </option>
+              <option value="review_vocab" style={{ backgroundColor: '#1C1C1E', color: 'white' }}>
+                📖 Review Vocabulary
+              </option>
+              <option value="weak_words" style={{ backgroundColor: '#1C1C1E', color: 'white' }}>
+                💪 Weak Words
+              </option>
+            </select>
+          </div>
         </div>
 
         {/* Stats Bar */}
