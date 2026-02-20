@@ -63,4 +63,8 @@ src/components/learning/practice-modes/**/*.tsx
 #  Sonstiges
 # ════════════════════════════════════════════════════════════════
 *.min.js
-*.min.css
+*.min.css.vercel/
+test-results/
+next-env.d.ts
+tsconfig.tsbuildinfo
+.vercel/

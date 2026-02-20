@@ -1,3 +1,37 @@
+# ════════════════════════════════════════════════════════════════
+#  🔐  Secrets & Environment Variables  (niemals committen!)
+# ════════════════════════════════════════════════════════════════
+
+.env
+.env.local
+.env.development
+.env.production
+.env.development.local
+.env.production.local
+.env.test
+.env.test.local
+
+# Supabase-spezifisch (falls du lokale CLI-Konfigs hast)
+supabase/.env
+supabase/config.toml   # ← nur wenn echte Keys drin stehen – ansonsten ok
+
+# Andere mögliche Secret-Dateien
+*.pem
+*.key
+credentials.json
+service-account.json
+
+# Temporäre Editor-Dateien & OS-Müll (nice to have)
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+
+
+
 # Practice Modes - Custom Glassmorphism Styling
 # These files contain carefully crafted inline styles and custom formatting
 # that should NOT be auto-formatted by Prettier to preserve design decisions

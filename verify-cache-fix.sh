@@ -85,3 +85,6 @@ else
   echo "Please review the implementation."
   exit 1
 fi
+
+echo "Root-Verzeichnis-Inhalt (nur Top-Level):"
+ls -la . | grep -v "^\.\." | grep -v "node_modules" | grep -v ".git" > "$REPORT_DIR/root_overview.txt"
