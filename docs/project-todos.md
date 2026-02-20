@@ -30,7 +30,24 @@ Alte TODO-Kommentare im Code werden nach Migration entfernt oder mit Datum + [DO
 4. Multi-Language: Welche 4 Locales zuerst? (EN, EL, RU, DE?)
 
 **Referenz:** modules/due-cards-today/todo.md (detaillierter Plan – wird nach Migration archiviert/gelöscht)
-- [ ]  
+
+### Stats & Admin-Content
+**Status:** ⚠️ offen (kleine, aber wichtige Verbesserungen)  
+**Priorität:** 🟡 Mittel bis Hoch (Stats beeinflussen User-Experience, Duplikat-Check verhindert Datenmüll)  
+**Geschätzter Aufwand:** 1–2 Stunden insgesamt  
+**Letzte Notiz:** 20.02.2026
+
+**Offene Punkte:**
+- [ ] Streak-Berechnung aus DB holen statt hardcoded (src/hooks/use-stats-data.ts Zeile 181)  
+  → Aktuell: Hardcoded Logik → Ziel: Supabase-Query mit next_review / last_review  
+- [ ] Duplicate-Check für multilingual_content implementieren (src/components/admin/ContentModal.tsx Zeile 98)  
+  → API-Call vor Insert: SELECT COUNT(*) WHERE content = ? AND lang = ?
+
+**Empfohlener nächster Schritt:**
+- [ ] Zuerst Streak-DB-Query bauen (1 h) – beeinflusst User-Dashboard direkt
+- [ ] Dann Duplikat-Check (30–60 min) – verhindert Admin-Fehler
+
+**Referenz:** src/hooks/use-stats-data.ts + src/components/admin/ContentModal.tsx
 
 ### ⚡ Prio 2 – Bald machen (Medium)
 ### Daily Phrases Modul
