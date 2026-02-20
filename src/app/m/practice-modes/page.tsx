@@ -239,7 +239,7 @@ export default function MobilePracticeModesPage() {
               color: 'white',
               margin: 0,
             }}>
-              🎮 Practice Modes
+              🎮 Spiele
             </h1>
             {cached && <CacheIndicator cached={cached} />}
           </div>

@@ -36,6 +36,10 @@ Du arbeitest IMMER in diesem Projekt. Lies diese Datei + die verlinkten Dokument
    - Jede Änderung → eigene `_AgentXX_*.md` Datei
    - Zusammenfassung → `MASTER-SESSION-STATUS.md`
 
+7. **Dokumentation on screen**
+  - gib nur kurze Anweisungen an mich aus.
+  - gib mir immer nur die .sql Datei mit pfad und Namen, ich deploye selbst in supabase.  
+
 **Ziel:** Mobile App fertigstellen, DANN Desktop portieren.
 
 **Referenz:** `MOBILE-FIRST-STRATEGY.md`
