@@ -33,11 +33,11 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabaseAdmin = supabaseServiceKey
     ? createClient(supabaseUrl, supabaseServiceKey, {
-          auth: {
-              autoRefreshToken: false,
-              persistSession: false,
-          },
-      })
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+        },
+    })
     : null;
 
 export async function POST(request: NextRequest) {
@@ -97,7 +97,9 @@ export async function POST(request: NextRequest) {
                     return mapping[header] || header;
                 },
                 complete: (results) => resolve(results),
-                error: (error) => reject(error),
+                error: (err: unknown) => {
+                    reject(err instanceof Error ? err : new Error(String(err)));
+                },
             });
         });
 
