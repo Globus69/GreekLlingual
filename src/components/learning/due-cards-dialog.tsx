@@ -614,7 +614,7 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
                         }}>
                             <div style={{ fontSize: '32px', marginBottom: '4px' }}>🎯</div>
                             <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', lineHeight: 1.2 }}>{accuracy}<span style={{ fontSize: '16px', color: 'rgba(255,255,255,0.8)' }}>%</span></div>
-                            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.9)', marginTop: '4px', fontWeight: '500' }}>Accuracy</div>
+                            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.9)', marginTop: '4px', fontWeight: '500' }}>{t('vocab.accuracy') || 'Genauigkeit'}</div>
                         </div>
                     </div>
 
@@ -627,19 +627,19 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
                         boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>❌ Again</span>
+                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>❌ {t('btn.again') || 'Again'}</span>
                             <span style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>{ratings.again}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>🟠 Hard</span>
+                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>🟠 {t('btn.hard') || 'Hard'}</span>
                             <span style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>{ratings.hard}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>✅ Good</span>
+                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>✅ {t('btn.good') || 'Good'}</span>
                             <span style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>{ratings.good}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
-                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>🎯 Easy</span>
+                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>🎯 {t('btn.easy') || 'Easy'}</span>
                             <span style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>{ratings.easy}</span>
                         </div>
                     </div>
@@ -669,11 +669,11 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
                     )}
 
                     <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
-                        <button onClick={handleRestart} className="btn-secondary" style={{ width: '100%', padding: '16px', borderRadius: '14px', fontSize: '16px' }}>
-                            🔄 {t('btn.restart')}
+                        <button onClick={handleRestart} className="btn-secondary" style={{ width: '100%', padding: '18px', borderRadius: '14px', fontSize: '18px', fontWeight: '600' }}>
+                            🔄 {t('btn.restart') || 'Neu starten'}
                         </button>
-                        <button onClick={handleCancel} className="btn-primary" style={{ width: '100%', padding: '16px', borderRadius: '14px', fontSize: '16px', background: 'linear-gradient(135deg, #007AFF 0%, #0056b3 100%)', border: 'none' }}>
-                            🏠 {t('vocab.back_to_dashboard')}
+                        <button onClick={handleCancel} className="btn-primary" style={{ width: '100%', padding: '18px', borderRadius: '14px', fontSize: '18px', fontWeight: '600', background: 'linear-gradient(135deg, #007AFF 0%, #0056b3 100%)', border: 'none' }}>
+                            🏠 {t('vocab.back_to_dashboard') || 'Zum Dashboard'}
                         </button>
                     </div>
                 </div>
