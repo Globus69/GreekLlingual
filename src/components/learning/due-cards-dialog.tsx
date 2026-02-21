@@ -249,14 +249,13 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
         }
 
         try {
-            const { data, error: rpcError } = await supabase.rpc('get_due_cards_fsrs', {
+            const { data, error: rpcError } = await supabase.rpc('get_due_cards_today', {
                 p_user_id: STUDENT_ID,
-                p_level: user?.level || 'A1',
                 p_limit: 100
             });
 
             if (rpcError) {
-                console.error('❌ FSRS RPC error (get_due_cards_fsrs):', {
+                console.error('❌ FSRS RPC error (get_due_cards_today):', {
                     message: rpcError.message,
                     details: rpcError.details,
                     hint: rpcError.hint,
@@ -265,7 +264,7 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                 });
 
                 if (rpcError.code === '42883' || rpcError.message?.includes('does not exist')) {
-                    console.warn('⚠️ RPC function get_due_cards_fsrs does not exist.');
+                    console.warn('⚠️ RPC function get_due_cards_today does not exist.');
                 }
 
                 setLoadError(rpcError.message || 'Failed to load cards');
@@ -365,9 +364,8 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
             if (!navigator.onLine) {
                 warning('Offline - changes will not be saved');
             } else {
-                // Call RPC to update card in database
-                const { data: rpcData, error: rpcError } = await supabase.rpc('update_card_fsrs', {
-                    p_card_id: item.id,
+                let rpcName = 'update_card_fsrs';
+                let rpcParams: any = {
                     p_user_id: STUDENT_ID,
                     p_rating: rating,
                     p_new_difficulty: updatedCard.difficulty,
@@ -379,10 +377,21 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     p_interval_days: intervalDays,
                     p_old_difficulty: currentCard.difficulty,
                     p_old_stability: currentCard.stability,
-                });
+                };
+
+                if (item.type === 'vocabulary') {
+                    rpcName = 'update_card_fsrs';
+                    rpcParams.p_card_id = item.id;
+                } else if (item.type === 'daily_phrase') {
+                    rpcName = 'update_phrase_fsrs';
+                    rpcParams.p_phrase_id = item.id;
+                }
+
+                // Call RPC to update card in database
+                const { data: rpcData, error: rpcError } = await supabase.rpc(rpcName as any, rpcParams);
 
                 if (rpcError) {
-                    console.error('❌ Update RPC error (update_card_fsrs):', {
+                    console.error(`❌ Update RPC error (${rpcName}):`, {
                         message: rpcError.message,
                         details: rpcError.details,
                         hint: rpcError.hint,
@@ -391,7 +400,7 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     });
 
                     if (rpcError.code === '42883' || rpcError.message?.includes('does not exist')) {
-                        console.warn('⚠️ RPC function update_card_fsrs does not exist.');
+                        console.warn(`⚠️ RPC function ${rpcName} does not exist.`);
                     }
 
                     warning('Failed to save progress. Continuing anyway...');
