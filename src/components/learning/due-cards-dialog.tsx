@@ -570,8 +570,8 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
                                 </div>
                             )}
 
-                            <button onClick={handleCancel} className="btn-primary" style={{ marginTop: '24px', width: '100%', padding: '14px', borderRadius: '12px' }}>
-                                {t('vocab.back_to_dashboard')}
+                            <button onClick={handleCancel} className="btn-primary" style={{ marginTop: '24px', width: '100%', padding: '20px', borderRadius: '12px', fontSize: '24px', fontWeight: 'bold' }}>
+                                {t('vocab.back_to_dashboard') || 'Zum Dashboard'}
                             </button>
                         </>
                     )}
@@ -672,7 +672,7 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
                         <button onClick={handleRestart} className="btn-secondary" style={{ width: '100%', padding: '18px', borderRadius: '14px', fontSize: '18px', fontWeight: '600' }}>
                             🔄 {t('btn.restart') || 'Neu starten'}
                         </button>
-                        <button onClick={handleCancel} className="btn-primary" style={{ width: '100%', padding: '18px', borderRadius: '14px', fontSize: '18px', fontWeight: '600', background: 'linear-gradient(135deg, #007AFF 0%, #0056b3 100%)', border: 'none' }}>
+                        <button onClick={handleCancel} className="btn-primary" style={{ width: '100%', padding: '20px', borderRadius: '14px', fontSize: '24px', fontWeight: 'bold', background: 'linear-gradient(135deg, #007AFF 0%, #0056b3 100%)', border: 'none' }}>
                             🏠 {t('vocab.back_to_dashboard') || 'Zum Dashboard'}
                         </button>
                     </div>
