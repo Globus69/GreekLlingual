@@ -257,7 +257,7 @@ export default function MobileDashboardPage() {
             subtitle="Practice rules"
             color="orange"
             disabled={true}
-            onClick={() => {}}
+            onClick={() => { }}
           />
 
           {/* Brain Gym - NEW (Memory Training) */}
@@ -276,7 +276,7 @@ export default function MobileDashboardPage() {
             subtitle="Games & Practice"
             color="purple"
             disabled={true}
-            onClick={() => {}}
+            onClick={() => { }}
           />
         </div>
 
@@ -321,6 +321,8 @@ export default function MobileDashboardPage() {
         <DueCardsDialog
           isOpen={showDueCardsSheet}
           onClose={() => setShowDueCardsSheet(false)}
+          onOpenReview={() => setShowReviewDialog(true)}
+          onOpenWeakWords={() => setShowWeakWordsDialog(true)}
         />
       )}
 

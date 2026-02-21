@@ -40,9 +40,11 @@ interface FSRSLearningItem {
 interface DueCardsDialogProps {
     isOpen: boolean;
     onClose: () => void;
+    onOpenReview?: () => void;
+    onOpenWeakWords?: () => void;
 }
 
-export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps) {
+export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWeakWords }: DueCardsDialogProps) {
     const mode = 'due'; // Fixed mode: only show due cards
     const { user } = useAuth();
     const { t, locale } = useTranslation();
@@ -511,110 +513,168 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
 
     if (!isOpen) return null;
 
+    let dialogContent;
+
     // Loading state
     if (loading) {
-        return (
-            <div className="dialog-overlay">
-                <div className="dialog-content">
-                    <div className="loading-state">
-                        <div className="spinner"></div>
-                        <h2>{t('vocab.loading')}</h2>
-                        <p>{t('vocab.loading_subtitle')}</p>
-                    </div>
+        dialogContent = (
+            <div className="dialog-content">
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <h2>{t('vocab.loading')}</h2>
+                    <p>{t('vocab.loading_subtitle')}</p>
                 </div>
             </div>
         );
     }
 
     // No cards available (differentiate between error and empty)
-    if (vocabulary.length === 0) {
-        return (
-            <div className="dialog-overlay">
-                <div className="dialog-content">
-                    <div className="empty-state">
-                        {loadError ? (
-                            <>
-                                <h2>❌ Error Loading Cards</h2>
-                                <p className="error-message">{loadError}</p>
-                                <div className="empty-actions">
-                                    <button onClick={() => loadDueCards()} className="btn-primary">
-                                        🔄 Retry
-                                    </button>
-                                    <button onClick={handleCancel} className="btn-secondary">
-                                        {t('vocab.back_to_dashboard')}
-                                    </button>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <h2>🎉 {t('vocab.no_items')}</h2>
-                                <p>{t('vocab.no_items_msg')}</p>
-                                <p className="empty-hint">All caught up! No cards are due for review right now.</p>
-                                <button onClick={handleCancel} className="btn-primary">
+    else if (vocabulary.length === 0) {
+        dialogContent = (
+            <div className="dialog-content">
+                <div className="empty-state">
+                    {loadError ? (
+                        <>
+                            <h2>❌ Error Loading Cards</h2>
+                            <p className="error-message">{loadError}</p>
+                            <div className="empty-actions">
+                                <button onClick={() => loadDueCards()} className="btn-primary">
+                                    🔄 Retry
+                                </button>
+                                <button onClick={handleCancel} className="btn-secondary">
                                     {t('vocab.back_to_dashboard')}
                                 </button>
-                            </>
-                        )}
-                    </div>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <h2>🎉 {t('vocab.no_items')}</h2>
+                            <p>{t('vocab.no_items_msg')}</p>
+                            <p className="empty-hint">{t('vocab.caught_up') || 'Alles erledigt! Keine Karten zur Wiederholung ausstehend.'}</p>
+
+                            {(onOpenReview || onOpenWeakWords) && (
+                                <div style={{ marginTop: '24px', padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '16px', textAlign: 'left' }}>
+                                    <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'white', textAlign: 'center' }}>{t('vocab.what_next') || 'Was möchtest du als Nächstes tun?'}</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {onOpenReview && (
+                                            <button onClick={() => { onClose(); onOpenReview(); }} className="btn-secondary" style={{ width: '100%', padding: '16px 12px', borderRadius: '12px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '18px', whiteSpace: 'nowrap' }}>
+                                                <span style={{ fontSize: '24px' }}>📖</span> <span style={{ flex: 1 }}>{t('vocab.continue_review') || 'Review Vocab'}</span>
+                                            </button>
+                                        )}
+                                        {onOpenWeakWords && (
+                                            <button onClick={() => { onClose(); onOpenWeakWords(); }} className="btn-secondary" style={{ width: '100%', padding: '16px 12px', borderRadius: '12px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '18px', whiteSpace: 'nowrap' }}>
+                                                <span style={{ fontSize: '24px' }}>💪</span> <span style={{ flex: 1 }}>{t('vocab.train_weak_words') || 'Weak Words trainieren'}</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            <button onClick={handleCancel} className="btn-primary" style={{ marginTop: '24px', width: '100%', padding: '14px', borderRadius: '12px' }}>
+                                {t('vocab.back_to_dashboard')}
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         );
     }
 
     // Session complete summary
-    if (showSummary) {
+    else if (showSummary) {
         const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-        return (
-            <div className="dialog-overlay">
-                <div className="dialog-content">
-                    <div className="summary-content">
-                        <h2>✅ {t('vocab.session_complete')}</h2>
+        dialogContent = (
+            <div className="dialog-content" style={{ padding: '32px 24px', maxWidth: '400px' }}>
+                <div className="summary-content">
+                    <h2 style={{ textAlign: 'center', marginBottom: '24px', fontSize: '24px', fontWeight: 'bold' }}>✅ {t('vocab.session_complete') || 'Sitzung abgeschlossen!'}</h2>
 
-                        <div className="summary-stats">
-                            <div className="stat-item">
-                                <span className="stat-label">{t('vocab.correct')}:</span>
-                                <span className="stat-value">{correct}/{total}</span>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">Accuracy:</span>
-                                <span className="stat-value">{accuracy}%</span>
-                            </div>
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                        gap: '12px',
+                        marginBottom: '20px',
+                    }}>
+                        <div style={{
+                            background: 'linear-gradient(135deg, #22C55E 0%, #10B981 100%)',
+                            borderRadius: '16px', padding: '16px 8px',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.2)'
+                        }}>
+                            <div style={{ fontSize: '32px', marginBottom: '4px' }}>✅</div>
+                            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', lineHeight: 1.2 }}>{correct}/{total}</div>
+                            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.9)', marginTop: '4px', fontWeight: '500' }}>{t('vocab.correct') || 'Richtig'}</div>
                         </div>
 
-                        <div className="rating-breakdown">
-                            <div className="rating-item">
-                                <span>❌ Again:</span>
-                                <span>{ratings.again}</span>
-                            </div>
-                            <div className="rating-item">
-                                <span>🟠 Hard:</span>
-                                <span>{ratings.hard}</span>
-                            </div>
-                            <div className="rating-item">
-                                <span>✅ Good:</span>
-                                <span>{ratings.good}</span>
-                            </div>
-                            <div className="rating-item">
-                                <span>🎯 Easy:</span>
-                                <span>{ratings.easy}</span>
+                        <div style={{
+                            background: 'linear-gradient(135deg, #3B82F6 0%, #A855F7 100%)',
+                            borderRadius: '16px', padding: '16px 8px',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.2)'
+                        }}>
+                            <div style={{ fontSize: '32px', marginBottom: '4px' }}>🎯</div>
+                            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', lineHeight: 1.2 }}>{accuracy}<span style={{ fontSize: '16px', color: 'rgba(255,255,255,0.8)' }}>%</span></div>
+                            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.9)', marginTop: '4px', fontWeight: '500' }}>Accuracy</div>
+                        </div>
+                    </div>
+
+                    <div style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        borderRadius: '16px',
+                        padding: '8px 20px',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        marginBottom: '28px',
+                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>❌ Again</span>
+                            <span style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>{ratings.again}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>🟠 Hard</span>
+                            <span style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>{ratings.hard}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>✅ Good</span>
+                            <span style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>{ratings.good}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
+                            <span style={{ color: '#93C5FD', fontSize: '15px' }}>🎯 Easy</span>
+                            <span style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>{ratings.easy}</span>
+                        </div>
+                    </div>
+
+                    {perfMessage && (
+                        <div className="perf-message" style={{ textAlign: 'center', marginBottom: '20px', color: '#10B981', fontWeight: '500' }}>
+                            {perfMessage}
+                        </div>
+                    )}
+
+                    {(onOpenReview || onOpenWeakWords) && (
+                        <div style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '16px', marginBottom: '20px' }}>
+                            <h3 style={{ fontSize: '15px', marginBottom: '16px', color: 'white', textAlign: 'center' }}>{t('vocab.what_next') || 'Was möchtest du als Nächstes tun?'}</h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {onOpenReview && (
+                                    <button onClick={() => { onClose(); onOpenReview(); }} className="btn-secondary" style={{ width: '100%', padding: '12px', borderRadius: '12px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <span style={{ fontSize: '20px' }}>📖</span> <span>{t('vocab.continue_review') || 'Review Vocab weiterlernen'}</span>
+                                    </button>
+                                )}
+                                {onOpenWeakWords && (
+                                    <button onClick={() => { onClose(); onOpenWeakWords(); }} className="btn-secondary" style={{ width: '100%', padding: '12px', borderRadius: '12px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <span style={{ fontSize: '20px' }}>💪</span> <span>{t('vocab.train_weak_words') || 'Schwache Wörter trainieren'}</span>
+                                    </button>
+                                )}
                             </div>
                         </div>
+                    )}
 
-                        {perfMessage && (
-                            <div className="perf-message">
-                                {perfMessage}
-                            </div>
-                        )}
-
-                        <div className="summary-actions">
-                            <button onClick={handleRestart} className="btn-secondary">
-                                {t('btn.restart')}
-                            </button>
-                            <button onClick={handleCancel} className="btn-primary">
-                                {t('vocab.back_to_dashboard')}
-                            </button>
-                        </div>
+                    <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
+                        <button onClick={handleRestart} className="btn-secondary" style={{ width: '100%', padding: '16px', borderRadius: '14px', fontSize: '16px' }}>
+                            🔄 {t('btn.restart')}
+                        </button>
+                        <button onClick={handleCancel} className="btn-primary" style={{ width: '100%', padding: '16px', borderRadius: '14px', fontSize: '16px', background: 'linear-gradient(135deg, #007AFF 0%, #0056b3 100%)', border: 'none' }}>
+                            🏠 {t('vocab.back_to_dashboard')}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -622,19 +682,22 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
     }
 
     // Main vocabulary review interface
-    const currentVocab = vocabulary[currentIndex];
-    const progress = `${currentIndex + 1} / ${vocabulary.length}`;
-    const progressPercentage = vocabulary.length > 0 ? ((currentIndex + 1) / vocabulary.length) * 100 : 0;
-    const totalRatings = ratings.again + ratings.hard + ratings.good + ratings.easy;
+    else {
+        const currentVocab = vocabulary[currentIndex];
+        const progress = `${currentIndex + 1} / ${vocabulary.length}`;
+        const progressPercentage = vocabulary.length > 0 ? ((currentIndex + 1) / vocabulary.length) * 100 : 0;
+        const totalRatings = ratings.again + ratings.hard + ratings.good + ratings.easy;
 
-    return (
-        <div className="dialog-overlay">
+        dialogContent = (
             <div className="dialog-content vocabulary-dialog">
                 <div className="dialog-header">
                     <h2>🎯 Due Cards Today</h2>
                     {!loading && vocabulary.length > 0 && (
                         <div className="progress-info" style={{ marginTop: '16px' }}>
-                            <span>Card {currentIndex + 1} of {vocabulary.length}</span>
+                            <span>{t('vocab.card_of', { current: currentIndex + 1, total: vocabulary.length })
+                                .replace('{current}', String(currentIndex + 1))
+                                .replace('{total}', String(vocabulary.length))
+                                || `Karte ${currentIndex + 1} von ${vocabulary.length}`}</span>
                             {correct > 0 && <span style={{ marginLeft: '12px', color: '#4CAF50' }}>✅ {correct}</span>}
                             {(total - correct) > 0 && <span style={{ marginLeft: '12px', color: '#f44336' }}>❌ {total - correct}</span>}
                         </div>
@@ -653,6 +716,7 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                         onRating={handleRating}
                         onBackClick={playAudio}
                         useFSRS={true}
+                        itemType={currentVocab.type as 'vocabulary' | 'daily_phrase'}
                     />
                 </div>
 
@@ -687,6 +751,12 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     <button onClick={handleCancel} className="btn-cancel">× Close</button>
                 </div>
             </div>
+        );
+    }
+
+    return (
+        <div className="dialog-overlay">
+            {dialogContent}
 
             <style jsx>{`
                 .dialog-overlay {
@@ -706,6 +776,8 @@ export default function DueCardsDialog({ isOpen, onClose }: DueCardsDialogProps)
                     padding: 32px;
                     max-width: 600px;
                     width: 90vw;
+                    max-height: 90vh;
+                    overflow-y: auto;
                     border: 1px solid rgba(255, 255, 255, 0.1);
                     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
                 }

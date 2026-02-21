@@ -1,0 +1,16 @@
+Hallo! Du hast vermutlich den "Activity"-Bereich (die Weekly Activity) gemeint, richtig?
+
+Ich habe witzigerweise exakt in der Minute, in der du diesen Punkt geschrieben hast, bereits ein **Balkendiagramm (Bar Chart)** für den Activity-Dialog implementiert! 
+
+Die zugrunde liegenden Daten in diesem Dialog sind:
+1. Gelernte Minuten (`study_minutes`)
+2. Durchgeführte Reviews (`reviews_count`)
+3. Ein errechneter Activity-Score (für die Darstellung in der Heatmap)
+
+Das Diagramm zeigt auf mobilen Geräten die Übersicht der **letzten 7 Tage** und auf Desktop-Displays die **letzten 14 Tage**.
+
+Lade bitte einmal die Seite neu (`npm run dev` eventuell neustarten oder einfach im Browser refreshen). Das Diagramm sollte nun direkt unter der Heatmap im aufklappbaren "Activity"-Fenster erscheinen. 
+
+Solltest du jedoch den anderen, detaillierten Bereich (**Detailed Stats**) gemeint haben, der unter anderem Daten wie *Total Reviews*, *Accuracy*, *Consistency*, und *Improvement Rate* enthält: Diese Daten ließen sich wunderbar in z.B. einem Radar-Diagramm (Spinnennetz-Diagramm) oder verschiedenen Donut/Tacho-Ansichten darstellen! 
+
+Sag mir einfach Bescheid, ob das Balkendiagramm im "Activity"-Dialog genau das war, was du wolltest!

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/db/supabase';
 
 // Types matching multilingual_content table
 export type ContentType = 'vocabulary' | 'phrase' | 'grammar';
@@ -95,14 +96,20 @@ export function ContentModal({
 
     const checkForDuplicate = async () => {
         try {
-            // TODO: Implement duplicate check API call for multilingual_content table
-            // const isDuplicate = await checkDuplicate(
-            //     formData.greek_transcription,
-            //     formData.level,
-            //     entry?.id
-            // );
-            // setDuplicateWarning(isDuplicate);
-            setDuplicateWarning(false);
+            // Check for duplicates
+            const { count, error } = await supabase
+                .from('multilingual_content')
+                .select('*', { count: 'exact', head: true })
+                .eq('greek_transcription', formData.greek_transcription)
+                .eq('level', formData.level)
+                .neq('id', entry?.id || '00000000-0000-0000-0000-000000000000'); // If creating, compare against dummy UUID
+
+            if (error) {
+                console.error('Duplicate check query error:', error);
+                return;
+            }
+
+            setDuplicateWarning((count || 0) > 0);
         } catch (error) {
             console.error('Duplicate check error:', error);
         }

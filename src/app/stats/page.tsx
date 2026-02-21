@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/use-translation';
 import { useStatsData, formatStudyTime } from '@/hooks/use-stats-data';
 import WeeklyActivityChart from '@/components/weekly-activity-chart';
+import DetailedStatsRadar from '@/components/detailed-stats-radar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function StatsPage() {
@@ -159,6 +160,10 @@ export default function StatsPage() {
             <h2 style={{ fontSize: '22px', fontWeight: 'bold', color: 'white', marginBottom: '20px', marginTop: 0 }}>
               📈 Detailed Statistics
             </h2>
+
+            {/* Radar Chart Component */}
+            <DetailedStatsRadar stats={stats} />
+            <div style={{ marginTop: '24px' }} />
 
             <StatRow
               label="Total Reviews"

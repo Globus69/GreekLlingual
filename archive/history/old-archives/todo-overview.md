@@ -81,7 +81,7 @@
 ## 🟣 PENDING (Ready to Integrate)
 
 ### Coordination & Content Tracking
-- [ ] Implement SRS logic integration for `DueCardsToday.md`
+- [x] Implement SRS logic integration for `DueCardsToday.md`
 - [ ] Populate `A1_CONTEND.md` with existing A1 vocabulary
 - [ ] Populate `A2_CONTEND.md` with existing A2 vocabulary
 - [ ] Integrate instructions from `LERNDIALOGE_ALLGEMEIN.md` into AI workflow
@@ -161,14 +161,7 @@
 
 ---
 
-### 2. Content Management UI
-- CRUD für learning_items
-- Bulk-Upload (CSV)
-- Audio-Upload
 
-**Aufwand:** 4-6 Stunden
-
----
 
 ### 3. Settings-Seite
 - System-Einstellungen

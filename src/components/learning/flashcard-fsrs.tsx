@@ -16,6 +16,7 @@ interface FlashcardFSRSProps {
     showRatingButtons?: boolean; // Show buttons only when flipped
     onBackClick?: () => void; // Click on card back to play audio
     useFSRS?: boolean; // If false, show simple "Wrong/Correct" buttons instead of 4-button FSRS
+    itemType?: 'vocabulary' | 'daily_phrase'; // Differentiate visually
 }
 
 const RATING_BUTTONS_FSRS = [
@@ -40,7 +41,8 @@ export default function FlashcardFSRS({
     onRating,
     showRatingButtons = true,
     onBackClick,
-    useFSRS = false
+    useFSRS = false,
+    itemType
 }: FlashcardFSRSProps) {
     const { t } = useTranslation();
     const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | 'up' | 'down' | null>(null);
@@ -124,6 +126,11 @@ export default function FlashcardFSRS({
             >
                 {/* Front Face */}
                 <div className="flashcard-face flashcard-front">
+                    {itemType === 'daily_phrase' ? (
+                        <div className="type-badge phrase-badge">💬 Daily Phrase</div>
+                    ) : itemType === 'vocabulary' ? (
+                        <div className="type-badge vocab-badge">📚 Vocabulary</div>
+                    ) : null}
                     <span className="lang-label">{t('flashcard.label_source')}</span>
                     <div className="main-word">{front}</div>
                     <div className="flip-hint">{t('flashcard.tap_hint')}</div>
@@ -244,6 +251,31 @@ export default function FlashcardFSRS({
                     text-transform: uppercase;
                     letter-spacing: 1px;
                     color: rgba(255, 255, 255, 0.4);
+                }
+
+                .type-badge {
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    font-size: 11px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    padding: 4px 10px;
+                    border-radius: 12px;
+                    backdrop-filter: blur(4px);
+                }
+
+                .phrase-badge {
+                    background: rgba(16, 185, 129, 0.2);
+                    color: #10B981;
+                    border: 1px solid rgba(16, 185, 129, 0.3);
+                }
+
+                .vocab-badge {
+                    background: rgba(59, 130, 246, 0.2);
+                    color: #3B82F6;
+                    border: 1px solid rgba(59, 130, 246, 0.3);
                 }
 
                 .main-word {

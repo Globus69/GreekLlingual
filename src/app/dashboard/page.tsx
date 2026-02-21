@@ -445,6 +445,8 @@ export default function DashboardPage() {
             <DueCardsDialog
                 isOpen={isDueCardsDialogOpen}
                 onClose={() => setIsDueCardsDialogOpen(false)}
+                onOpenReview={() => { setIsVocabDialogOpen(true); setVocabDialogMode('all'); }}
+                onOpenWeakWords={() => setIsWeakWordsDialogOpen(true)}
             />
 
             {/* Weak Words Dialog - Specialized Dialog from Mobile */}

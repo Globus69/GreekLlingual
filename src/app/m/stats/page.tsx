@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/use-translation';
 import { useStatsData, formatStudyTime } from '@/hooks/use-stats-data';
 import WeeklyActivityChart from '@/components/weekly-activity-chart';
+import DetailedStatsRadar from '@/components/detailed-stats-radar';
+import LearningCurveChart from '@/components/learning-curve-chart';
 import MobileBottomNav from '@/components/mobile/MobileBottomNav';
 
 export default function MobileStatsPage() {
@@ -14,7 +16,7 @@ export default function MobileStatsPage() {
   const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const { stats, loading } = useStatsData(mounted ? user?.id : undefined);
-  const [focusedSection, setFocusedSection] = useState<'detailed' | 'weekly' | null>(null);
+  const [focusedSection, setFocusedSection] = useState<'detailed' | 'weekly' | 'curve' | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -164,151 +166,171 @@ export default function MobileStatsPage() {
         />
       </div>
 
-      {/* Focused Section Backdrop */}
+
+
+      {/* Navigation Buttons for Charts */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+        gap: '12px',
+        marginBottom: '24px',
+      }}>
+        {/* Detailed Stats Button */}
+        <div
+          onClick={() => setFocusedSection('detailed')}
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '12px',
+            padding: '16px 8px',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '100px',
+            textAlign: 'center',
+            touchAction: 'manipulation'
+          }}
+        >
+          <h2 style={{ fontSize: 'clamp(13px, 3.5vw, 16px)', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>📈 Stats</h2>
+          <span style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#93C5FD' }}>Tap to view</span>
+        </div>
+
+        {/* Weekly Activity Button */}
+        <div
+          onClick={() => setFocusedSection('weekly')}
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '12px',
+            padding: '16px 8px',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '100px',
+            textAlign: 'center',
+            touchAction: 'manipulation'
+          }}
+        >
+          <h2 style={{ fontSize: 'clamp(13px, 3.5vw, 16px)', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>📊 Activity</h2>
+          <span style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#93C5FD' }}>Tap to view</span>
+        </div>
+
+        {/* Learning Curve Button */}
+        <div
+          onClick={() => setFocusedSection('curve')}
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '12px',
+            padding: '16px 8px',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '100px',
+            textAlign: 'center',
+            touchAction: 'manipulation'
+          }}
+        >
+          <h2 style={{ fontSize: 'clamp(13px, 3.5vw, 16px)', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>📈 Curve</h2>
+          <span style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#93C5FD' }}>Tap to view</span>
+        </div>
+      </div>
+
+      {/* Centered Modal Overlay for Charts */}
       {focusedSection && (
         <div
           onClick={() => setFocusedSection(null)}
           style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            zIndex: 60,
-            backdropFilter: 'blur(4px)',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(5px)',
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
             animation: 'fadeIn 0.2s ease-out'
           }}
-        />
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: '#1C1C1E',
+              borderRadius: '20px',
+              padding: '24px 20px',
+              width: '100%',
+              maxWidth: '400px',
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', margin: 0 }}>
+                {focusedSection === 'detailed' && 'Detailed Stats'}
+                {focusedSection === 'weekly' && 'Weekly Activity'}
+                {focusedSection === 'curve' && 'Performance Trends'}
+              </h2>
+              <button
+                onClick={() => setFocusedSection(null)}
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '18px',
+                  cursor: 'pointer'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            {focusedSection === 'detailed' && (
+              <div style={{ animation: 'fadeIn 0.3s ease-out', textAlign: 'left' }}>
+                <DetailedStatsRadar stats={stats} />
+                <div style={{ marginTop: '16px' }} />
+                <StatRow label="Total Reviews" value={stats.progressOverview?.total_reviews || 0} />
+                <StatRow label="Total Sessions" value={stats.progressOverview?.total_sessions || 0} />
+                <StatRow label="Study Time" value={formatStudyTime(stats.totalStudyTime || 0)} />
+                <StatRow label="Avg Session" value={formatStudyTime(stats.avgSessionTime || 0)} />
+                <StatRow label="Consistency" value={`${Math.round(stats.consistencyScore || 0)}%`} />
+                <StatRow label="Improvement Rate" value={`${(stats.progressOverview?.improvement_rate || 0) > 0 ? '+' : ''}${Math.round(stats.progressOverview?.improvement_rate || 0)}%`} />
+                <StatRow label="Level" value={stats.level} />
+              </div>
+            )}
+
+            {focusedSection === 'weekly' && (
+              <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                <WeeklyActivityChart data={stats.weeklyActivity || []} hideHeatmap={true} />
+              </div>
+            )}
+
+            {focusedSection === 'curve' && (
+              <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                <LearningCurveChart data={stats.learningTrends || []} />
+              </div>
+            )}
+          </div>
+        </div>
       )}
-
-      {/* Side-by-Side Stats Container */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-        gap: '8px',
-        marginBottom: '12px',
-      }}>
-        {/* Detailed Stats */}
-        <div
-          onClick={() => setFocusedSection(focusedSection === 'detailed' ? null : 'detailed')}
-          style={focusedSection === 'detailed' ? {
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '90%',
-            maxWidth: '380px',
-            maxHeight: '80vh',
-            zIndex: 70,
-            backgroundColor: '#1C1C1E',
-            borderRadius: '16px',
-            padding: '20px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            overflowY: 'auto',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            touchAction: 'manipulation'
-          } : {
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '12px',
-            padding: '16px 12px',
-            cursor: 'pointer',
-            transition: 'transform 0.2s ease',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            minHeight: '110px',
-            touchAction: 'manipulation'
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
-            <h2 style={{ fontSize: 'clamp(14px, 4vw, 16px)', fontWeight: 'bold', color: 'white', margin: 0 }}>📈 Stats</h2>
-            <span style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#93C5FD' }}>
-              {focusedSection === 'detailed' ? 'Tap to close' : 'Tap to view'}
-            </span>
-          </div>
-
-          {focusedSection === 'detailed' && (
-            <div style={{ animation: 'fadeIn 0.3s ease-out', marginTop: '16px', textAlign: 'left' }}>
-              <h2 style={{ fontSize: 'clamp(16px, 4.5vw, 18px)', fontWeight: 'bold', color: 'white', marginBottom: '12px', marginTop: 0 }}>Detailed Stats</h2>
-              <StatRow
-                label="Total Reviews"
-                value={stats.progressOverview?.total_reviews || 0}
-              />
-              <StatRow
-                label="Total Sessions"
-                value={stats.progressOverview?.total_sessions || 0}
-              />
-              <StatRow
-                label="Study Time"
-                value={formatStudyTime(stats.totalStudyTime || 0)}
-              />
-              <StatRow
-                label="Avg Session"
-                value={formatStudyTime(stats.avgSessionTime || 0)}
-              />
-              <StatRow
-                label="Consistency"
-                value={`${Math.round(stats.consistencyScore || 0)}%`}
-              />
-              <StatRow
-                label="Improvement Rate"
-                value={`${(stats.progressOverview?.improvement_rate || 0) > 0 ? '+' : ''}${Math.round(stats.progressOverview?.improvement_rate || 0)}%`}
-              />
-              <StatRow label="Level" value={stats.level} />
-            </div>
-          )}
-        </div>
-
-        {/* Weekly Activity Chart */}
-        <div
-          onClick={() => setFocusedSection(focusedSection === 'weekly' ? null : 'weekly')}
-          style={focusedSection === 'weekly' ? {
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '90%',
-            maxWidth: '380px',
-            zIndex: 70,
-            backgroundColor: '#1C1C1E',
-            borderRadius: '16px',
-            padding: '20px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            touchAction: 'manipulation'
-          } : {
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '12px',
-            padding: '16px 12px',
-            cursor: 'pointer',
-            transition: 'transform 0.2s ease',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            minHeight: '110px',
-            touchAction: 'manipulation'
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '4px' }}>
-            <h2 style={{ fontSize: 'clamp(14px, 4vw, 16px)', fontWeight: 'bold', color: 'white', margin: 0 }}>📊 Activity</h2>
-            <span style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#93C5FD' }}>
-              {focusedSection === 'weekly' ? 'Tap to close' : 'Tap to view'}
-            </span>
-          </div>
-
-          {focusedSection === 'weekly' && (
-            <div style={{ animation: 'fadeIn 0.3s ease-out', marginTop: '16px' }}>
-              <h2 style={{ fontSize: 'clamp(16px, 4.5vw, 18px)', fontWeight: 'bold', color: 'white', marginBottom: '12px', marginTop: 0 }}>Weekly Activity</h2>
-              <WeeklyActivityChart data={stats.weeklyActivity || []} />
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />

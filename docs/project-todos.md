@@ -15,6 +15,29 @@ Alte TODO-Kommentare im Code werden nach Migration entfernt oder mit Datum + [DO
 **Letzte Notiz:** 14.02.2026
 
 **Wichtigster nächster Schritt:**
+### Due Cards Today Modul – Kern-Feature Mobile
+**Status:** ⚠️ in Planung (nur Platzhalter vorhanden)  
+**Priorität:** 🔥 Prio 1 – Jetzt oder bald (tägliches Review, sehr hohe User-Relevanz)  
+**Geschätzter Aufwand:** 8–13 Stunden (ohne Tests)  
+**Ziel:** Tägliche fällige Karten mit FSRS-6, Swipe, TTS & Mobile-First UX
+
+**Wichtigste nächste Schritte (Prio 1):**
+- [ ] Phase 2: RPC-Funktion `get_due_cards_today` erstellen & testen (1–2 h)  
+  → Filter: next_review < NOW()  
+  → Test-Query: SELECT * FROM get_due_cards_today('<user-id>', 10);
+- [ ] Phase 3: DueCardsDialog.tsx bauen (3–5 h)  
+  → Basis: VocabularyDialogFSRS.tsx kopieren & anpassen  
+  → State: items, currentIndex, sessionStats  
+  → UI: Loading, Empty-State, Flashcard, 4 Rating-Buttons (Hard/Good/Easy/Again)
+- [ ] SRS-Logik integrieren (SM2 aus lib/sm2.ts) & Progress speichern (1–2 h)  
+  → handleScore → scheduler.rate() → RPC update_card_fsrs
+
+**Offene Fragen (schnell klären):**
+- Wie viele Karten pro Session maximal? (z. B. 10–20)  
+- Auto-Play TTS standardmäßig an?  
+- Swipe-Gesten von Anfang an oder erst später?
+
+**Referenz:** modules/due-cards-today/todo.md (detaillierter Plan – nach Migration archivieren)
 - [ ] Phase 2: Datenbank – RPC-Funktion `get_due_cards_today` erstellen & testen (1–2 h)  
   → Filter: next_review < NOW()  
   → Test-Query in Supabase: SELECT * FROM get_due_cards_today('<user-id>', 10);

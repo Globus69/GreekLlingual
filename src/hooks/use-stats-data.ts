@@ -113,6 +113,7 @@ export function useStatsData(userId?: string): UseStatsDataResult {
         progressOverviewResult,
         learningTrendsResult,
         weeklyActivityResult,
+        userStreakResult,
       ] = await Promise.all([
         // Due Count: Vokabeln die heute fällig sind
         supabase
@@ -153,6 +154,11 @@ export function useStatsData(userId?: string): UseStatsDataResult {
           p_user_id: userId,
           p_weeks: 4,
         }),
+
+        // User Streak (Migration 058)
+        supabase.rpc('get_user_streak', {
+          p_user_id: userId,
+        }),
       ]);
 
       // Fehlerbehandlung
@@ -174,12 +180,15 @@ export function useStatsData(userId?: string): UseStatsDataResult {
       if (weeklyActivityResult.error) {
         console.warn('Error fetching weekly activity:', weeklyActivityResult.error);
       }
+      if (userStreakResult.error) {
+        console.warn('Error fetching user streak:', userStreakResult.error);
+      }
 
       // Progress Overview auswerten (nimmt ersten Eintrag, da RPC nur 1 Row zurückgibt)
       const progressOverview = progressOverviewResult.data?.[0];
 
-      // Streak berechnen (TODO: Aus DB berechnen statt Hardcoded)
-      const streak = 5;
+      // Streak berechnen (aus DB statt Hardcoded)
+      const streak = userStreakResult.data?.[0]?.current_streak || 0;
 
       // Statistiken setzen
       setStats({
