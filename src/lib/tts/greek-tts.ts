@@ -115,6 +115,16 @@ export function speakGreek(
         };
 
         utterance.onerror = (event) => {
+            if (event.error === 'canceled') {
+                // This is expected when we call window.speechSynthesis.cancel() before starting a new speech
+                resolve({
+                    success: false,
+                    message: undefined, // Don't trigger error messages for user
+                    speaking: false
+                });
+                return;
+            }
+
             console.error('TTS error:', event);
             resolve({
                 success: false,
