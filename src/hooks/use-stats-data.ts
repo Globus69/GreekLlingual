@@ -7,7 +7,7 @@
  * TODO: Neue Datenfelder werden später hinzugefügt, wenn die Anforderungen klar sind.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/db/supabase';
 
 // Progress Overview from RPC function
@@ -94,16 +94,36 @@ export function useStatsData(userId?: string): UseStatsDataResult {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const isFetchingRef = useRef(false);
+  const lastFetchTimeRef = useRef(0);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     if (!userId) {
       setLoading(false);
       return;
     }
 
+    // Protection against network flood:
+    // 1. Don't fetch if already fetching
+    // 2. Rate limit: Wait at least 1 second between fetches
+    const now = Date.now();
+    if (isFetchingRef.current) {
+      console.warn('📡 [useStatsData] Fetch already in progress, skipping.');
+      return;
+    }
+
+    if (now - lastFetchTimeRef.current < 1000) {
+      console.log('📡 [useStatsData] Rate limit: Skipping frequent fetch.');
+      return;
+    }
+
     try {
+      isFetchingRef.current = true;
+      lastFetchTimeRef.current = now;
       setLoading(true);
       setError(null);
+
+      console.log(`📡 [useStatsData] Fetching stats for user: ${userId}`);
 
       // Parallele Anfragen für bessere Performance
       const [
@@ -224,8 +244,9 @@ export function useStatsData(userId?: string): UseStatsDataResult {
       });
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     fetchStats();

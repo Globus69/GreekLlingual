@@ -176,7 +176,7 @@ export default function MobileDashboardPage() {
             onClick={() => router.push('/m/admin/unlock')}
             style={{
               width: '100%',
-              minHeight: '73px',  // Changed from 56px (30% increase: 56 * 1.3 = 72.8px)
+              minHeight: '56px',
               padding: '10px 14px',
               borderRadius: '14px',
               backgroundColor: 'rgba(255, 204, 0, 0.2)',
@@ -224,7 +224,7 @@ export default function MobileDashboardPage() {
           {/* Main Learning Tiles */}
           <ModuleTile
             icon="📅"
-            title="Due Cards"
+            title="Due Cards Today"
             subtitle={`${stats.dueCount} waiting`}
             color="blue"
             onClick={() => setShowDueCardsSheet(true)}
@@ -366,7 +366,7 @@ function ModuleTile({ debugId, icon, title, subtitle, color, disabled, onClick }
       disabled={disabled}
       style={{
         width: '100%',
-        minHeight: '62px',  // Changed from 48px (30% increase: 48 * 1.3 = 62.4px)
+        minHeight: '48px',
         padding: '8px 10px',
         borderRadius: '12px',
         backgroundColor: c.bg,

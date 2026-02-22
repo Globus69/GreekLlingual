@@ -183,7 +183,6 @@ export default function FlashcardFSRS({
                         >
                             <span className="rating-emoji">{btn.emoji}</span>
                             <span className="rating-label">{btn.label}</span>
-                            <span className="rating-key">{btn.key}</span>
                         </button>
                     ))}
                 </div>
@@ -504,7 +503,7 @@ export default function FlashcardFSRS({
                         font-size: 18px;
                     }
 
-                    .rating-buttons {
+                    .rating-buttons.fsrs-mode, .rating-buttons.simple-mode {
                         grid-template-columns: repeat(2, 1fr);
                         gap: 8px;
                     }

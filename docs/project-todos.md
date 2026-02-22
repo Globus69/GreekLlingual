@@ -22,14 +22,14 @@ Alte TODO-Kommentare im Code werden nach Migration entfernt oder mit Datum + [DO
 **Ziel:** Tägliche fällige Karten mit FSRS-6, Swipe, TTS & Mobile-First UX
 
 **Wichtigste nächste Schritte (Prio 1):**
-- [ ] Phase 2: RPC-Funktion `get_due_cards_today` erstellen & testen (1–2 h)  
+- [x] Phase 2: RPC-Funktion `get_due_cards_today` erstellen & testen (1–2 h)  
   → Filter: next_review < NOW()  
   → Test-Query: SELECT * FROM get_due_cards_today('<user-id>', 10);
-- [ ] Phase 3: DueCardsDialog.tsx bauen (3–5 h)  
+- [x] Phase 3: DueCardsDialog.tsx bauen (3–5 h)  
   → Basis: VocabularyDialogFSRS.tsx kopieren & anpassen  
   → State: items, currentIndex, sessionStats  
   → UI: Loading, Empty-State, Flashcard, 4 Rating-Buttons (Hard/Good/Easy/Again)
-- [ ] SRS-Logik integrieren (SM2 aus lib/sm2.ts) & Progress speichern (1–2 h)  
+- [x] SRS-Logik integrieren (SM2 aus lib/sm2.ts) & Progress speichern (1–2 h)  
   → handleScore → scheduler.rate() → RPC update_card_fsrs
 
 **Offene Fragen (schnell klären):**
@@ -38,13 +38,13 @@ Alte TODO-Kommentare im Code werden nach Migration entfernt oder mit Datum + [DO
 - Swipe-Gesten von Anfang an oder erst später?
 
 **Referenz:** modules/due-cards-today/todo.md (detaillierter Plan – nach Migration archivieren)
-- [ ] Phase 2: Datenbank – RPC-Funktion `get_due_cards_today` erstellen & testen (1–2 h)  
+- [x] Phase 2: Datenbank – RPC-Funktion `get_due_cards_today` erstellen & testen (1–2 h)  
   → Filter: next_review < NOW()  
   → Test-Query in Supabase: SELECT * FROM get_due_cards_today('<user-id>', 10);
 
 **Danach (nach RPC):**
-- [ ] Phase 3: DueCardsDialog.tsx bauen (3–5 h) – Basis: VocabularyDialog.tsx kopieren  
-- [ ] SRS-Integration (SM2 aus lib/sm2.ts) & Progress-Speichern
+- [x] Phase 3: DueCardsDialog.tsx bauen (3–5 h) – Basis: VocabularyDialog.tsx kopieren  
+- [x] SRS-Integration (SM2 aus lib/sm2.ts) & Progress-Speichern
 
 **Offene Fragen (bitte beantworte, wenn du magst):**
 1. Ist Due Cards Today wirklich MVP-kritisch (tägliches Review)?
@@ -86,12 +86,13 @@ Alte TODO-Kommentare im Code werden nach Migration entfernt oder mit Datum + [DO
 - Auto-Play, Speed-Control (🐢 0.6x / ▶️ 0.9x / 🐇 1.2x), localStorage-Persistence  
 
 **Wichtigste offene Schritte (Rest von Phase 4):**
-- [ ] Accessibility final verbessern (aria-live, keyboard, screen-reader) – 30–60 min  
+- [x] Accessibility final verbessern (aria-live, keyboard, screen-reader) – 30–60 min  
 - [ ] Integration-Testing (alle Features zusammen) – 1–2 h  
 - [ ] Mobile-PWA-Optimierung (falls nötig)  
 
 **Offene Fragen (bitte beantworte, wenn du magst):**
 1. Ist Daily Phrases für dich aktuell höher priorisiert als Short Stories?  
+   **→ Antwort:** Ja, ich priorisiere die Daily Phrases.
 2. TTS-Speed-Toggle reicht so (0.6/0.9/1.2) oder weitere Stufen?  
 3. Auto-Play standardmäßig an oder aus?  
 4. Möchtest du Analytics für Daily Phrases (z. B. Retention-Rate im Dashboard)?

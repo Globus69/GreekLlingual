@@ -109,6 +109,8 @@ const FALLBACK_EN: Record<string, string> = {
     'vocab.mode.due_subtitle': 'Your daily reviews',
     'vocab.mode.review_title': 'Review Vocabulary',
     'vocab.mode.review_subtitle': 'Refresh your knowledge',
+    'vocab.new_vocabs': 'New Cards',
+    'vocab.all_learned_wink': "GREAT, you've learned your vocabulary for today 🎉",
     'vocab.what_next': 'What do you want to do next?',
     'vocab.continue_review': 'Continue Reviewing Vocab',
     'vocab.train_weak_words': 'Train Weak Words',
@@ -316,6 +318,41 @@ const FALLBACK_EN: Record<string, string> = {
     'admin.practice_config.threshold': 'Activation Threshold (Reviews)',
     'admin.practice_config.modes': 'Available Modes',
     'admin.practice_config.saved': 'Practice configuration saved!',
+    // Brain Gym
+    'brain_gym.title': 'Matching Game',
+    'brain_gym.card_source': 'Card Source',
+    'brain_gym.due_cards': '📅 Due Cards',
+    'brain_gym.review_vocab': '📖 Review Vocabulary',
+    'brain_gym.weak_words': '💪 Weak Words',
+    'brain_gym.no_items_in_rubric': 'No cards in this category:',
+    'brain_gym.select_another_source': 'select another source',
+    'brain_gym.loading': 'Loading game...',
+    'brain_gym.complete': 'Game Complete!',
+    'brain_gym.score': 'Score',
+    'brain_gym.pairs': 'Pairs',
+    'brain_gym.mistakes': 'Mistakes',
+    'brain_gym.time': 'Time',
+    'brain_gym.saving': 'Saving results...',
+    'brain_gym.play_again': 'Play Again',
+    'brain_gym.close': 'Close',
+    'brain_gym.instructions': 'Match the corresponding pairs',
+    'brain_gym.greek': 'Greek',
+    'brain_gym.translation': 'Translation',
+};
+
+// Fallback Russian translations
+const FALLBACK_RU: Record<string, string> = {
+    'header.logout': 'Выйти',
+    'login.title': 'GreekLingua',
+    'login.submit': 'Войти',
+    'dashboard.welcome': 'Добро пожаловать, {name}!',
+    'vocab.new_vocabs': 'Новые карты',
+    'vocab.all_learned_wink': 'ОТЛИЧНО, ты выучил слова на сегодня 🎉',
+    'brain_gym.title': 'Игра на соответствие',
+    'brain_gym.card_source': 'Источник карт',
+    'brain_gym.due_cards': '📅 Ожидающие карты',
+    'brain_gym.review_vocab': '📖 Повторить слова',
+    'brain_gym.weak_words': '💪 Слабые слова',
 };
 
 // Fallback Greek translations (hardcoded subset for offline/error scenarios)
@@ -405,6 +442,8 @@ const FALLBACK_EL: Record<string, string> = {
     'vocab.mode.due_subtitle': '\u039f\u03b9 \u03ba\u03b1\u03b8\u03b7\u03bc\u03b5\u03c1\u03b9\u03bd\u03ad\u03c2 \u03c3\u03bf\u03c5 \u03b5\u03c0\u03b1\u03bd\u03b1\u03bb\u03ae\u03c8\u03b5\u03b9\u03c2',
     'vocab.mode.review_title': '\u0395\u03c0\u03b1\u03bd\u03ac\u03bb\u03b7\u03c8\u03b7 \u03bb\u03b5\u03be\u03b9\u03bb\u03bf\u03b3\u03af\u03bf\u03c5',
     'vocab.mode.review_subtitle': '\u0391\u03bd\u03b1\u03bd\u03b5\u03ce\u03c3\u03c4\u03b5 \u03c4\u03b9\u03c2 \u03b3\u03bd\u03ce\u03c3\u03b5\u03b9\u03c2 \u03c3\u03b1\u03c2',
+    'vocab.new_vocabs': '\u039d\u03ad\u03b5\u03c2 \u03ba\u03ac\u03c1\u03c4\u03b5\u03c2',
+    'vocab.all_learned_wink': '\u039c\u03a0\u03a1\u0391\u0392\u039f, \u03ad\u03bc\u03b1\u03b8\u03b5\u03c2 \u03c4\u03bf \u03bb\u03b5\u03be\u03b9\u03bb\u03cc\u03b3\u03b9\u03bf \u03b3\u03b9\u03b1 \u03c3\u03ae\u03bc\u03b5\u03c1\u03b1 \ud83c\udf89',
     'vocab.what_next': '\u03a4\u03b9 \u03b8\u03ad\u03bb\u03b5\u03c4\u03b5 \u03bd\u03b1 \u03ba\u03ac\u03bd\u03b5\u03c4\u03b5 \u03c3\u03c4\u03b7 \u03c3\u03c5\u03bd\u03ad\u03c7\u03b5\u03b9\u03b1;',
     'vocab.continue_review': '\u03a3\u03c5\u03bd\u03ad\u03c7\u03b5\u03b9\u03b1 \u03b5\u03c0\u03b1\u03bd\u03ac\u03bb\u03b7\u03c8\u03b7\u03c2 \u03bb\u03b5\u03be\u03b9\u03bb\u03bf\u03b3\u03af\u03bf\u03c5',
     'vocab.train_weak_words': '\u0395\u03be\u03ac\u03c3\u03ba\u03b7\u03c3\u03b7 \u03b1\u03b4\u03cd\u03bd\u03b1\u03bc\u03c9\u03bd \u03bb\u03ad\u03be\u03b5\u03c9\u03bd',
@@ -577,6 +616,26 @@ const FALLBACK_EL: Record<string, string> = {
     'lesson.no_vocabulary': '\u0394\u03b5\u03bd \u03c5\u03c0\u03ac\u03c1\u03c7\u03b5\u03b9 \u03bb\u03b5\u03be\u03b9\u03bb\u03cc\u03b3\u03b9\u03bf \u03b3\u03b9\u03b1 \u03b1\u03c5\u03c4\u03cc \u03c4\u03bf \u03bc\u03ac\u03b8\u03b7\u03bc\u03b1.',
     'lesson.words': '\u03bb\u03ad\u03be\u03b5\u03b9\u03c2',
     'lesson.words_total': '\u03bb\u03ad\u03be\u03b5\u03b9\u03c2 \u03c3\u03c5\u03bd\u03bf\u03bb\u03b9\u03ba\u03ac',
+    // Brain Gym
+    'brain_gym.title': '\u03a0\u03b1\u03b9\u03c7\u03bd\u03af\u03b4\u03b9 \u0391\u03bd\u03c4\u03b9\u03c3\u03c4\u03bf\u03af\u03c7\u03b9\u03c3\u03b7\u03c2',
+    'brain_gym.card_source': '\u03a0\u03b7\u03b3\u03ae \u039a\u03b1\u03c1\u03c4\u03ce\u03bd',
+    'brain_gym.due_cards': '\u1f4d \u039a\u03ac\u03c1\u03c4\u03b5\u03c2 \u03b3\u03b9\u03b1 \u0395\u03c0\u03b1\u03bd\u03ac\u03bb\u03b7\u03c8\u03b7',
+    'brain_gym.review_vocab': '\u1f44 \u0395\u03c0\u03b1\u03bd\u03ac\u03bb\u03b7\u03c8\u03b7 \u039b\u03b5\u03be\u03b9\u03bb\u03bf\u03b3\u03af\u03bf\u03c5',
+    'brain_gym.weak_words': '\u1f4a \u0391\u03b4\u03cd\u03bd\u03b1\u03bc\u03b5\u03c2 \u039b\u03ad\u03be\u03b5\u03b9\u03c2',
+    'brain_gym.no_items_in_rubric': '\u0394\u03b5\u03bd \u03c5\u03c0\u03ac\u03c1\u03c7\u03bf\u03c5\u03bd \u03ba\u03ac\u03c1\u03c4\u03b5\u03c2 \u03c3\u03c4\u03b7\u03bd \u03b5\u03bd\u03cc\u03c4\u03b7\u03c4\u03b1:',
+    'brain_gym.select_another_source': '\u03b5\u03c0\u03b9\u03bb\u03ad\u03be\u03c4\u03b5 \u03bc\u03b9\u03b1 \u03ac\u03bb\u03bb\u03b7 \u03c0\u03b7\u03b3\u03ae',
+    'brain_gym.loading': '\u03a6\u03cc\u03c1\u03c4\u03c9\u03c3\u03b7 \u03c0\u03b1\u03b9\u03c7\u03bd\u03b9\u03b4\u03b9\u03bf\u03cd...',
+    'brain_gym.complete': '\u03a4\u03bf \u03c0\u03b1\u03b9\u03c7\u03bd\u03af\u03b4\u03b9 \u03bf\u03bb\u03bf\u03ba\u03bb\u03b7\u03c1\u03ce\u03b8\u03b7\u03ba\u03b5!',
+    'brain_gym.score': '\u0392\u03b1\u03b8\u03bc\u03bf\u03bb\u03bf\u03b3\u03af\u03b1',
+    'brain_gym.pairs': '\u0396\u03b5\u03cd\u03b3\u03b7',
+    'brain_gym.mistakes': '\u039b\u03ac\u03b8\u03b7',
+    'brain_gym.time': '\u03a7\u03c1\u03cc\u03bd\u03bf\u03c2',
+    'brain_gym.saving': '\u0391\u03c0\u03bf\u03b8\u03ae\u03ba\u03b5\u03c5\u03c3\u03b7 \u03b1\u03c0\u03bf\u03c4\u03b5\u03bb\u03b5\u03c3\u03bc\u03ac\u03c4\u03c9\u03bd...',
+    'brain_gym.play_again': '\u03a0\u03b1\u03af\u03be\u03c4\u03b5 \u03be\u03b1\u03bd\u03ac',
+    'brain_gym.close': '\u039a\u03bb\u03b5\u03af\u03c3\u03b9\u03bc\u03bf',
+    'brain_gym.instructions': '\u0391\u03bd\u03c4\u03b9\u03c3\u03c4\u03bf\u03b9\u03c7\u03af\u03c3\u03c4\u03b5 \u03c4\u03b1 \u03ba\u03b1\u03c4\u03ac\u03bb\u03bb\u03b7\u03bb\u03b1 \u03b6\u03b5\u03cd\u03b3\u03b7',
+    'brain_gym.greek': '\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac',
+    'brain_gym.translation': '\u039c\u03b5\u03c4\u03ac\u03c6\u03c1\u03b1\u03c3\u03b7',
 };
 
 // Fallback German translations (hardcoded subset for offline/error scenarios)
@@ -663,6 +722,8 @@ const FALLBACK_DE: Record<string, string> = {
     'vocab.mode.due_subtitle': 'Deine täglichen Wiederholungen',
     'vocab.mode.review_title': 'Vokabeln wiederholen',
     'vocab.mode.review_subtitle': 'Wissen auffrischen',
+    'vocab.new_vocabs': 'Neue Karten',
+    'vocab.all_learned_wink': 'PRIMA, du hast die Vokabel f\u00fcr heute Gelernt \ud83c\udf89',
     'vocab.caught_up': 'Alles erledigt! Keine Karten zur Wiederholung ausstehend.',
     'vocab.accuracy': 'Genauigkeit',
     'vocab.card_of': 'Karte {current} von {total}',
@@ -872,6 +933,26 @@ const FALLBACK_DE: Record<string, string> = {
     'admin.practice_config.threshold': 'Aktivierungsschwelle (Wiederholungen)',
     'admin.practice_config.modes': 'Verfügbare Modi',
     'admin.practice_config.saved': 'Übungskonfiguration gespeichert!',
+    // Brain Gym
+    'brain_gym.title': 'Zuordnung',
+    'brain_gym.card_source': 'Kartenquelle',
+    'brain_gym.due_cards': '📅 Fällige Karten',
+    'brain_gym.review_vocab': '📖 Vokabeln wiederholen',
+    'brain_gym.weak_words': '💪 Schwache Wörter',
+    'brain_gym.no_items_in_rubric': 'Keine Karten in der Rubrik:',
+    'brain_gym.select_another_source': 'wähle eine andere Quelle',
+    'brain_gym.loading': 'Spiel wird geladen...',
+    'brain_gym.complete': 'Spiel abgeschlossen!',
+    'brain_gym.score': 'Punkte',
+    'brain_gym.pairs': 'Paare',
+    'brain_gym.mistakes': 'Fehler',
+    'brain_gym.time': 'Zeit',
+    'brain_gym.saving': 'Ergebnisse werden gespeichert...',
+    'brain_gym.play_again': 'Nochmal spielen',
+    'brain_gym.close': 'Schließen',
+    'brain_gym.instructions': 'Finde die passenden Paare',
+    'brain_gym.greek': 'Griechisch',
+    'brain_gym.translation': 'Übersetzung',
 };
 
 // Get locale-specific fallback
@@ -959,6 +1040,8 @@ const FALLBACK_ES: Record<string, string> = {
     'vocab.mode.due_subtitle': 'Tus revisiones diarias',
     'vocab.mode.review_title': 'Revisar vocabulario',
     'vocab.mode.review_subtitle': 'Refresca tu conocimiento',
+    'vocab.new_vocabs': 'Nuevas Cartas',
+    'vocab.all_learned_wink': '\u00a1GENIAL, has aprendido tu vocabulario de hoy \ud83c\udf89!',
     'vocab.what_next': '¿Qué quieres hacer a continuación?',
     'vocab.continue_review': 'Continuar repasando vocabulario',
     'vocab.train_weak_words': 'Entrenar palabras débiles',
@@ -1164,11 +1247,32 @@ const FALLBACK_ES: Record<string, string> = {
     'admin.practice_config.threshold': 'Umbral de activación (repasos)',
     'admin.practice_config.modes': 'Modos disponibles',
     'admin.practice_config.saved': '¡Configuración de práctica guardada!',
+    // Brain Gym
+    'brain_gym.title': 'Juego de Emparejar',
+    'brain_gym.card_source': 'Fuente de Tarjetas',
+    'brain_gym.due_cards': '📅 Tarjetas Pendientes',
+    'brain_gym.review_vocab': '📖 Repasar Vocabulario',
+    'brain_gym.weak_words': '💪 Palabras Débiles',
+    'brain_gym.no_items_in_rubric': 'No hay tarjetas en esta categoría:',
+    'brain_gym.select_another_source': 'elija otra fuente',
+    'brain_gym.loading': 'Cargando juego...',
+    'brain_gym.complete': '¡Juego Completado!',
+    'brain_gym.score': 'Puntuación',
+    'brain_gym.pairs': 'Parejas',
+    'brain_gym.mistakes': 'Errores',
+    'brain_gym.time': 'Tiempo',
+    'brain_gym.saving': 'Guardando resultados...',
+    'brain_gym.play_again': 'Jugar de nuevo',
+    'brain_gym.close': 'Cerrar',
+    'brain_gym.instructions': 'Empareja los pares correspondientes',
+    'brain_gym.greek': 'Griego',
+    'brain_gym.translation': 'Traducción',
 };
 
-const FALLBACKS: Record<Locale, Record<string, string>> = { en: FALLBACK_EN, ru: FALLBACK_EN, el: FALLBACK_EL, de: FALLBACK_DE, es: FALLBACK_ES };
+const FALLBACKS: Record<Locale, Record<string, string>> = { en: FALLBACK_EN, ru: FALLBACK_RU, el: FALLBACK_EL, de: FALLBACK_DE, es: FALLBACK_ES };
+
 function getFallback(locale: Locale): Record<string, string> {
-    return locale === 'el' ? FALLBACK_EL : locale === 'de' ? FALLBACK_DE : locale === 'es' ? FALLBACK_ES : FALLBACK_EN;
+    return locale === 'el' ? FALLBACK_EL : locale === 'de' ? FALLBACK_DE : locale === 'es' ? FALLBACK_ES : locale === 'ru' ? FALLBACK_RU : FALLBACK_EN;
 }
 
 async function fetchTranslations(locale: Locale): Promise<Record<string, string>> {

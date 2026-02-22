@@ -50,7 +50,7 @@ export default function MobileBrainGymPage() {
   const [startTime] = useState(Date.now());
   const [gameComplete, setGameComplete] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [dataSource, setDataSource] = useState<'due_cards' | 'review_vocab' | 'weak_words'>('due_cards');
+  const [dataSource, setDataSource] = useState<'due_cards' | 'review_vocab' | 'weak_words'>('review_vocab');
   const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([]);
 
   /**
@@ -238,10 +238,11 @@ export default function MobileBrainGymPage() {
       setMistakes(0);
       setGameComplete(false);
       setSaving(false);
-      // Refresh data
-      refresh();
+      // NOTE: We don't need to call refresh() here manually.
+      // Changing the dataSource changes the cache key, which
+      // automatically triggers a reload in useMobileCache.
     }
-  }, [dataSource, user?.id, refresh]);
+  }, [dataSource, user?.id]);
 
   /**
    * Set loading state from cache hook
@@ -436,13 +437,13 @@ export default function MobileBrainGymPage() {
           border: isSelected
             ? '3px solid #FFD60A'
             : isMatched
-            ? '2px solid #34C759'
-            : '1px solid rgba(255, 255, 255, 0.2)',
+              ? '2px solid #34C759'
+              : '1px solid rgba(255, 255, 255, 0.2)',
           backgroundColor: isMatched
             ? 'rgba(52, 199, 89, 0.15)'
             : isSelected
-            ? 'rgba(255, 214, 10, 0.2)'
-            : 'rgba(255, 255, 255, 0.08)',
+              ? 'rgba(255, 214, 10, 0.2)'
+              : 'rgba(255, 255, 255, 0.08)',
           backdropFilter: 'blur(10px)',
           display: 'flex',
           alignItems: 'center',
@@ -622,7 +623,9 @@ export default function MobileBrainGymPage() {
                 width: '100%',
                 padding: '12px 16px',
                 borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                border: greekCards.length === 0
+                  ? '2px solid rgba(255, 59, 48, 0.8)'
+                  : '1px solid rgba(255, 255, 255, 0.2)',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)',
                 color: 'white',
@@ -636,16 +639,17 @@ export default function MobileBrainGymPage() {
                 backgroundPosition: 'right 12px center',
                 backgroundSize: '20px',
                 paddingRight: '40px',
+                animation: greekCards.length === 0 ? 'blink-red 1s infinite' : 'none',
               }}
             >
-              <option value="due_cards" style={{ backgroundColor: '#1C1C1E', color: 'white' }}>
-                📅 {t('brain_gym.due_cards')}
-              </option>
               <option value="review_vocab" style={{ backgroundColor: '#1C1C1E', color: 'white' }}>
                 📖 {t('brain_gym.review_vocab')}
               </option>
               <option value="weak_words" style={{ backgroundColor: '#1C1C1E', color: 'white' }}>
                 💪 {t('brain_gym.weak_words')}
+              </option>
+              <option value="due_cards" style={{ backgroundColor: '#1C1C1E', color: 'white' }}>
+                📅 {t('brain_gym.due_cards')}
               </option>
             </select>
           </div>
@@ -687,19 +691,22 @@ export default function MobileBrainGymPage() {
                 border: '1px solid rgba(255, 255, 255, 0.1)',
               }}
             >
-              <div style={{ fontSize: '64px', marginBottom: '16px' }}>🎮</div>
+              <div style={{ fontSize: '64px', marginBottom: '16px' }}>🧠</div>
               <h3
                 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
+                  fontSize: '22px',
+                  fontWeight: '700',
                   color: 'white',
-                  marginBottom: '8px',
+                  marginBottom: '12px',
                 }}
               >
-                {t('brain_gym.no_items')}
+                {t('brain_gym.no_items_in_rubric')}
               </h3>
-              <p style={{ fontSize: '14px', color: '#8E8E93', margin: 0 }}>
-                {t('brain_gym.no_items_desc')}
+              <p style={{ fontSize: '30px', color: '#93C5FD', margin: '0 0 12px 0', fontWeight: '700' }}>
+                {dataSource === 'due_cards' ? t('brain_gym.due_cards') : dataSource === 'review_vocab' ? t('brain_gym.review_vocab') : t('brain_gym.weak_words')}
+              </p>
+              <p style={{ fontSize: '28px', color: '#8E8E93', margin: 0, fontWeight: '600' }}>
+                {t('brain_gym.select_another_source')}
               </p>
             </div>
           ) : gameComplete ? (
@@ -894,6 +901,13 @@ export default function MobileBrainGymPage() {
 
       {/* Bottom Navigation */}
       <MobileBottomNav />
+      <style>{`
+        @keyframes blink-red {
+          0% { background-color: rgba(255, 255, 255, 0.1); }
+          50% { background-color: rgba(255, 59, 48, 0.3); }
+          100% { background-color: rgba(255, 255, 255, 0.1); }
+        }
+      `}</style>
     </>
   );
 }

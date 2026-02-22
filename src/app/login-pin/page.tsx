@@ -391,77 +391,110 @@ export default function PinLoginPage() {
                     style={{ position: 'absolute', inset: 0, zIndex: 0 }}
                 />
 
-                {/* Language Selector – Top Right */}
+                {/* Header Area – Top Bar with Role Switch and Language Selector */}
                 <div style={{
                     position: 'absolute',
-                    top: '24px',
+                    top: '40px', // Increased spacing from edge
+                    left: '24px',
                     right: '24px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
-                    background: 'rgba(28, 28, 30, 0.7)',
-                    backdropFilter: 'blur(30px)',
-                    WebkitBackdropFilter: 'blur(30px)',
-                    borderRadius: '14px',
-                    padding: '6px 8px 6px 14px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    justifyContent: 'space-between',
                     zIndex: 10,
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
                 }}>
-                    <span style={{ fontSize: '14px' }}>🌐</span>
+                    {/* Role Switch – Compact Version (Steps 2-3) */}
                     <div style={{
                         display: 'flex',
-                        gap: '4px',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        borderRadius: '10px',
-                        padding: '3px',
+                        background: 'rgba(28, 28, 30, 0.7)',
+                        backdropFilter: 'blur(30px)',
+                        WebkitBackdropFilter: 'blur(30px)',
+                        borderRadius: '12px',
+                        padding: '4px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
                     }}>
-                        {(['en', 'ru', 'de', 'es'] as Locale[]).map((lang) => {
-                            const langGradient: Record<Locale, string> = {
-                                en: 'linear-gradient(135deg, #007AFF, #5856D6)',
-                                ru: 'linear-gradient(135deg, #E05555, #C0392B)',
-                                el: 'linear-gradient(135deg, #0D6EFD, #0A58CA)',
-                                de: 'linear-gradient(135deg, #DAA520, #B8860B)',
-                                es: 'linear-gradient(135deg, #DC3C28, #B22A1A)',
-                            };
-                            const langShadow: Record<Locale, string> = {
-                                en: '0 2px 8px rgba(0, 122, 255, 0.3)',
-                                ru: '0 2px 8px rgba(224, 85, 85, 0.3)',
-                                el: '0 2px 8px rgba(13, 110, 253, 0.3)',
-                                de: '0 2px 8px rgba(218, 165, 32, 0.3)',
-                                es: '0 2px 8px rgba(220, 60, 40, 0.3)',
-                            };
-                            const langLabel: Record<Locale, string> = {
-                                en: 'EN',
-                                ru: 'RU',
-                                el: 'EL',
-                                de: 'DE',
-                                es: 'ES',
-                            };
-                            return (
-                                <button
-                                    key={lang}
-                                    type="button"
-                                    onClick={() => handleLanguageChange(lang)}
-                                    style={{
-                                        padding: '8px 14px',
-                                        borderRadius: '8px',
-                                        border: 'none',
-                                        background: locale === lang ? langGradient[lang] : 'transparent',
-                                        color: locale === lang ? '#fff' : '#8E8E93',
-                                        fontSize: '13px',
-                                        fontWeight: 700,
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                                        letterSpacing: '1px',
-                                        textTransform: 'uppercase',
-                                        boxShadow: locale === lang ? langShadow[lang] : 'none',
-                                    }}
-                                >
-                                    {langLabel[lang]}
-                                </button>
-                            );
-                        })}
+                        <button
+                            type="button"
+                            onClick={() => router.push('/login')}
+                            style={{
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                background: 'transparent',
+                                color: '#8E8E93',
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            👨‍💼 Admin
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setDeviceType('mobile')}
+                            style={{
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                background: deviceType === 'mobile'
+                                    ? 'linear-gradient(135deg, #007AFF, #5856D6)'
+                                    : 'transparent',
+                                color: deviceType === 'mobile' ? '#fff' : '#8E8E93',
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                boxShadow: deviceType === 'mobile' ? '0 2px 8px rgba(0, 122, 255, 0.3)' : 'none',
+                            }}
+                        >
+                            👤 User
+                        </button>
+                    </div>
+
+                    {/* Language Selector (Step 4) */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        background: 'rgba(28, 28, 30, 0.7)',
+                        backdropFilter: 'blur(30px)',
+                        WebkitBackdropFilter: 'blur(30px)',
+                        borderRadius: '14px',
+                        padding: '4px 6px 4px 12px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+                    }}>
+                        <span style={{ fontSize: '12px' }}>🌐</span>
+                        <div style={{
+                            display: 'flex',
+                            gap: '2px',
+                        }}>
+                            {(['en', 'ru', 'de', 'es'] as Locale[]).map((lang) => {
+                                const isSelected = locale === lang;
+                                return (
+                                    <button
+                                        key={lang}
+                                        type="button"
+                                        onClick={() => handleLanguageChange(lang)}
+                                        style={{
+                                            padding: '6px 10px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            background: isSelected ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                                            color: isSelected ? '#fff' : '#8E8E93',
+                                            fontSize: '11px',
+                                            fontWeight: 700,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                            textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {lang}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 
@@ -485,6 +518,26 @@ export default function PinLoginPage() {
                     pointerEvents: 'none',
                     transition: 'background 0.6s ease',
                 }} />
+                <div style={{
+                    position: 'absolute',
+                    width: '400px',
+                    height: '400px',
+                    borderRadius: '50%',
+                    background: locale === 'ru'
+                        ? 'radial-gradient(circle, rgba(180, 60, 60, 0.15) 0%, transparent 70%)'
+                        : locale === 'el'
+                            ? 'radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%)'
+                            : locale === 'de'
+                                ? 'radial-gradient(circle, rgba(180, 140, 20, 0.15) 0%, transparent 70%)'
+                                : locale === 'es'
+                                    ? 'radial-gradient(circle, rgba(180, 60, 40, 0.15) 0%, transparent 70%)'
+                                    : 'radial-gradient(circle, rgba(88, 86, 214, 0.15) 0%, transparent 70%)',
+                    bottom: '-80px',
+                    left: '-80px',
+                    animation: 'orbFloat2 15s ease-in-out infinite',
+                    pointerEvents: 'none',
+                    transition: 'background 0.6s ease',
+                }} />
 
                 {/* Login Card */}
                 <div
@@ -493,13 +546,13 @@ export default function PinLoginPage() {
                         zIndex: 5,
                         width: '420px',
                         maxWidth: '92vw',
-                        background: 'rgba(42, 42, 48, 0.85)', // Aufgehellt von rgba(22, 22, 26, 0.75)
+                        background: 'rgba(22, 22, 26, 0.75)',
                         backdropFilter: 'blur(60px) saturate(1.5)',
                         WebkitBackdropFilter: 'blur(60px) saturate(1.5)',
                         borderRadius: '32px',
                         padding: '48px 40px 40px',
-                        border: '1px solid rgba(255, 255, 255, 0.12)', // Aufgehellt von 0.08
-                        boxShadow: '0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06) inset', // Aufgehellt
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        boxShadow: '0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03) inset',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
@@ -536,84 +589,7 @@ export default function PinLoginPage() {
                         {t('login_pin.subtitle')}
                     </p>
 
-                    {/* Login Type Selection */}
-                    <div style={{
-                        display: 'flex',
-                        gap: '12px',
-                        marginBottom: '24px',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        borderRadius: '16px',
-                        padding: '6px',
-                    }}>
-                        <button
-                            type="button"
-                            onClick={() => router.push('/login')}
-                            style={{
-                                flex: 1,
-                                padding: '10px 20px',
-                                borderRadius: '12px',
-                                border: 'none',
-                                background: 'transparent',
-                                color: '#8E8E93',
-                                fontSize: '13px',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '6px',
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'transparent';
-                            }}
-                        >
-                            <span style={{ fontSize: '16px' }}>👨‍💼</span>
-                            {t('login_pin.admin_button')}
-                        </button>
 
-                        <button
-                            type="button"
-                            onClick={() => setDeviceType('mobile')}
-                            style={{
-                                flex: 1,
-                                padding: '10px 20px',
-                                borderRadius: '12px',
-                                border: 'none',
-                                background: deviceType === 'mobile'
-                                    ? 'linear-gradient(135deg, #007AFF 0%, #5856D6 100%)'
-                                    : 'transparent',
-                                color: deviceType === 'mobile' ? '#fff' : '#8E8E93',
-                                fontSize: '13px',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '6px',
-                                boxShadow: deviceType === 'mobile'
-                                    ? '0 2px 8px rgba(0, 122, 255, 0.3)'
-                                    : 'none',
-                            }}
-                            onMouseEnter={(e) => {
-                                if (deviceType !== 'mobile') {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (deviceType !== 'mobile') {
-                                    e.currentTarget.style.background = 'transparent';
-                                }
-                            }}
-                        >
-                            <span style={{ fontSize: '16px' }}>👤</span>
-                            {t('login_pin.user_button')}
-                        </button>
-                    </div>
 
                     {/* PIN Display Fields - Read-only, no native keyboard */}
                     <div style={{
@@ -774,46 +750,41 @@ export default function PinLoginPage() {
                             0
                         </button>
 
-                        {/* Empty space for symmetry */}
-                        <div style={{ visibility: 'hidden' }} />
-                    </div>
-
-                    {/* Clear Button */}
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        marginBottom: '24px',
-                    }}>
+                        {/* Clear Button moved here */}
                         <button
                             type="button"
                             onClick={handleClear}
                             disabled={pinDigits.every(d => !d) || isSubmitting}
                             style={{
-                                background: 'rgba(255, 255, 255, 0.06)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '12px',
-                                padding: '10px 24px',
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                borderRadius: '16px',
+                                padding: '10px',
                                 fontSize: '14px',
-                                fontWeight: 600,
+                                fontWeight: 700,
                                 color: '#fff',
                                 cursor: (pinDigits.every(d => !d) || isSubmitting) ? 'not-allowed' : 'pointer',
                                 transition: 'all 0.2s',
                                 opacity: (pinDigits.every(d => !d) || isSubmitting) ? 0.4 : 1,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
                             }}
-                            onMouseEnter={(e) => {
-                                if (!pinDigits.every(d => !d) && !isSubmitting) {
-                                    e.currentTarget.style.background = 'rgba(255, 69, 58, 0.15)';
-                                    e.currentTarget.style.transform = 'scale(1.05)';
+                            onTouchStart={(e) => {
+                                if (!isSubmitting && !pinDigits.every(d => !d)) {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                                    e.currentTarget.style.transform = 'scale(0.95)';
                                 }
                             }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                            onTouchEnd={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
                                 e.currentTarget.style.transform = 'scale(1)';
                             }}
                         >
                             Clear
                         </button>
                     </div>
+
+
 
                     {/* Action Buttons */}
                     <div style={{

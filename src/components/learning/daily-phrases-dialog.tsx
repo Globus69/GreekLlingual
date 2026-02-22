@@ -44,6 +44,7 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
     const [isPlaying, setIsPlaying] = useState(false);
     const [speechRate, setSpeechRate] = useState<number>(0.9);
     const [currentTimeSlot, setCurrentTimeSlot] = useState<'morning' | 'noon' | 'evening'>('morning');
+    const [announceMessage, setAnnounceMessage] = useState('');
 
     // Load preferences
     useEffect(() => {
@@ -142,7 +143,6 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
         }
     };
 
-    // TTS Audio
     const playAudio = async () => {
         if (!phrase) return;
 
@@ -150,12 +150,14 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
         if (!text) return;
 
         setIsPlaying(true);
+        setAnnounceMessage(`Playing pronunciation`);
         await speakGreek(text, { rate: speechRate });
 
         const baseDuration = text.length * 100;
         const adjustedDuration = baseDuration / speechRate;
         setTimeout(() => {
             setIsPlaying(false);
+            setAnnounceMessage('Playback complete');
         }, adjustedDuration);
     };
 
@@ -178,8 +180,10 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
 
         if (rating === 3) {
             success('Correct! 🎉');
+            setAnnounceMessage('Correct! Well done.');
         } else {
             info('Study this phrase again later');
+            setAnnounceMessage('Study this phrase again later');
         }
     };
 
@@ -269,9 +273,15 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
 
     return (
         <div className="dialog-overlay">
-            <div className="dialog-content vocabulary-dialog" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="dialog-content vocabulary-dialog"
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="daily-phrase-dialog-title"
+            >
                 <div className="dialog-header">
-                    <h2>💬 Daily Phrase</h2>
+                    <h2 id="daily-phrase-dialog-title">💬 Daily Phrase</h2>
                     <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '8px' }}>
                         {getTimeSlotEmoji(currentTimeSlot)} {currentTimeSlot} • 1 phrase per time slot
                     </p>
@@ -321,6 +331,7 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
                                 onClick={cycleSpeed}
                                 className="btn-speed"
                                 title={`Speed: ${getSpeedLabel(speechRate).label}`}
+                                aria-label={`Change playback speed. Current speed is ${getSpeedLabel(speechRate).label}`}
                             >
                                 {getSpeedLabel(speechRate).emoji}
                             </button>
@@ -328,6 +339,7 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
                                 onClick={toggleAutoPlay}
                                 className={`btn-autoplay ${autoPlay ? 'active' : ''}`}
                                 title={`Auto-play: ${autoPlay ? 'ON' : 'OFF'}`}
+                                aria-label={`Toggle auto-play. Auto-play is currently ${autoPlay ? 'ON' : 'OFF'}`}
                             >
                                 {autoPlay ? '🔊' : '🔇'} Auto
                             </button>
@@ -349,6 +361,26 @@ export default function DailyPhrasesDialog({ isOpen, onClose }: DailyPhrasesDial
             </div>
 
             <ToastContainer toasts={toasts} onRemove={removeToast} />
+
+            {/* Screen Reader Announcements */}
+            <div
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                style={{
+                    position: 'absolute',
+                    width: '1px',
+                    height: '1px',
+                    padding: 0,
+                    margin: '-1px',
+                    overflow: 'hidden',
+                    clip: 'rect(0, 0, 0, 0)',
+                    whiteSpace: 'nowrap',
+                    borderWidth: 0
+                }}
+            >
+                {announceMessage}
+            </div>
 
             <style jsx>{`
                 .dialog-overlay {

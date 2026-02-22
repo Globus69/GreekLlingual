@@ -14,7 +14,7 @@
  * @module use-mobile-cache
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   getCached,
   setCached,
@@ -54,6 +54,11 @@ interface UseMobileCacheOptions<T> {
    * Cache version for invalidation (default: 1)
    */
   version?: number;
+
+  /**
+   * Disable automatic fetching on mount (default: false)
+   */
+  skipMountFetch?: boolean;
 
   /**
    * Callback when cache hit occurs
@@ -137,20 +142,32 @@ export function useMobileCache<T>({
   onCacheHit,
   onCacheMiss,
   onError,
+  skipMountFetch = false,
 }: UseMobileCacheOptions<T>): UseMobileCacheResult<T> {
   const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(enabled && !skipMountFetch);
   const [error, setError] = useState<Error | null>(null);
   const [cached, setIsCached] = useState<boolean>(false);
   const [hasCached, setHasCached] = useState<boolean>(false);
+
+  // Use a ref to track the last fetched key to prevent redundant loads
+  const lastFetchedKeyRef = useRef<string | null>(null);
+  const dataRef = useRef<T | null>(null);
+  const isInitialMount = useRef(true);
 
   /**
    * Load data from cache or fetch
    */
   const loadData = useCallback(
     async (forceRefresh: boolean = false) => {
+      // Prevents multiple concurrent loads for the same key
       if (!enabled) {
         setLoading(false);
+        return;
+      }
+
+      // If we're not forcing a refresh and we already have data for this key, skip
+      if (!forceRefresh && lastFetchedKeyRef.current === key && dataRef.current !== null) {
         return;
       }
 
@@ -158,39 +175,24 @@ export function useMobileCache<T>({
       setError(null);
 
       try {
-        // 🐛 DEBUG: Log cache key details
-        console.log('🔑 [DEBUG] Cache Key Details:', {
-          storeName,
-          key,
-          enabled,
-          forceRefresh,
-          ttl,
-          timestamp: new Date().toISOString(),
-        });
-
+        // ... omitted debug logs for brevity in this replace ...
         // Try cache first (unless forcing refresh)
         if (!forceRefresh) {
-          console.log(`🔍 [useMobileCache] Checking cache: ${storeName}/${key}`);
           const cachedData = await getCached<T>(storeName, key);
 
           if (cachedData !== null) {
-            console.log(`✅ [useMobileCache] Cache hit: ${storeName}/${key}`);
             setData(cachedData);
+            dataRef.current = cachedData;
             setIsCached(true);
             setHasCached(true);
             setLoading(false);
             onCacheHit?.(cachedData);
             return;
           }
-
-          console.log(`❌ [useMobileCache] Cache miss: ${storeName}/${key}`);
           onCacheMiss?.();
-        } else {
-          console.log(`🔄 [useMobileCache] Force refresh: ${storeName}/${key}`);
         }
 
         // Fetch fresh data
-        console.log(`📡 [useMobileCache] Fetching: ${storeName}/${key}`);
         const freshData = await fetcher();
 
         // Cache the fetched data
@@ -201,19 +203,14 @@ export function useMobileCache<T>({
         });
 
         setData(freshData);
+        dataRef.current = freshData;
         setIsCached(false);
         setHasCached(true);
-        console.log(`💾 [useMobileCache] Cached fresh data: ${storeName}/${key}`);
+        lastFetchedKeyRef.current = key;
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        console.error(`❌ [useMobileCache] Error: ${storeName}/${key}`, error);
         setError(error);
         onError?.(error);
-
-        // If offline and no cached data, keep loading state
-        if (!navigator.onLine && data === null) {
-          console.warn('⚠️ [useMobileCache] Offline and no cached data available');
-        }
       } finally {
         setLoading(false);
       }
@@ -241,10 +238,17 @@ export function useMobileCache<T>({
     }
   }, [storeName, key]);
 
-  // Load data on mount or when dependencies change
+  // Load data on mount or when key/enabled changes
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (skipMountFetch) {
+        setLoading(false);
+        return;
+      }
+    }
     loadData(false);
-  }, [loadData]);
+  }, [key, enabled, loadData, skipMountFetch]);
 
   return {
     data,

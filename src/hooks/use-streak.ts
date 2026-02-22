@@ -176,20 +176,20 @@ export function useStreak() {
 
     // Check if streak needs attention today
     const needsAttention = streakInfo?.streak_status === 'at_risk' ||
-                          streakInfo?.streak_status === 'broken';
+        streakInfo?.streak_status === 'broken';
 
     // Get streak emoji based on length
-    const getStreakEmoji = (streak: number): string => {
+    const getStreakEmoji = useCallback((streak: number): string => {
         if (streak === 0) return '💤';
         if (streak < 3) return '🔥';
         if (streak < 7) return '🔥🔥';
         if (streak < 14) return '🔥🔥🔥';
         if (streak < 30) return '🔥🔥🔥🔥';
         return '🔥🔥🔥🔥🔥';
-    };
+    }, []);
 
     // Get milestone message
-    const getMilestoneMessage = (streak: number): string | null => {
+    const getMilestoneMessage = useCallback((streak: number): string | null => {
         const milestones: Record<number, string> = {
             3: '3-Tage-Streak! Du bist auf dem richtigen Weg! 🎯',
             7: '1 Woche Streak! Fantastisch! 🌟',
@@ -199,7 +199,7 @@ export function useStreak() {
             100: '100 TAGE! Du bist ein Meister! 💎',
         };
         return milestones[streak] || null;
-    };
+    }, []);
 
     useEffect(() => {
         fetchStreakInfo();

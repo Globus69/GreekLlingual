@@ -316,6 +316,55 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
     };
 
     /**
+     * Load 15 new vocabs (items not yet studied)
+     */
+    const handleLoadNewVocabs = async () => {
+        setLoading(true);
+        setLoadError(null);
+        console.log(`🔄 Loading 15 NEW vocabulary cards for user: ${STUDENT_ID}`);
+
+        if (!navigator.onLine) {
+            setLoadError('No internet connection');
+            error('Unable to load cards. Please check your internet connection.');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { data, error: rpcError } = await supabase.rpc('get_new_vocabs', {
+                p_user_id: STUDENT_ID,
+                p_limit: 15
+            });
+
+            if (rpcError) {
+                console.error('❌ RPC error (get_new_vocabs):', rpcError);
+                setLoadError(rpcError.message || 'Failed to load new cards');
+                error('Failed to load new cards. Please try again.');
+                setLoading(false);
+                return;
+            }
+
+            if (data && data.length > 0) {
+                console.log(`✅ Loaded ${data.length} new vocabulary cards`);
+                setVocabulary(data as FSRSLearningItem[]);
+                setCurrentIndex(0);
+                setFlipped(false);
+                setTotal(data.length);
+                setCorrect(0);
+                setRatings({ again: 0, hard: 0, good: 0, easy: 0 });
+                setShowSummary(false);
+            } else {
+                info('No more new vocabulary available right now.');
+            }
+        } catch (err) {
+            console.error('❌ Load error:', err);
+            setLoadError('An error occurred while loading new cards.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    /**
      * Handle rating (FSRS-6 algorithm)
      * @param rating 1=Again, 2=Hard, 3=Good, 4=Easy
      */
@@ -532,7 +581,7 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
     else if (vocabulary.length === 0) {
         dialogContent = (
             <div className="dialog-content">
-                <div className="empty-state">
+                <div className="empty-state" style={{ textAlign: 'center', padding: '40px 20px' }}>
                     {loadError ? (
                         <>
                             <h2>❌ Error Loading Cards</h2>
@@ -548,31 +597,43 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
                         </>
                     ) : (
                         <>
-                            <h2>🎉 {t('vocab.no_items')}</h2>
-                            <p>{t('vocab.no_items_msg')}</p>
-                            <p className="empty-hint">{t('vocab.caught_up') || 'Alles erledigt! Keine Karten zur Wiederholung ausstehend.'}</p>
+                            <div style={{ fontSize: '80px', marginBottom: '24px' }}>🎉</div>
+                            <h2 style={{
+                                fontSize: '24px',
+                                fontWeight: 'bold',
+                                color: '#fff',
+                                marginBottom: '16px',
+                                lineHeight: '1.2',
+                                textAlign: 'center'
+                            }}>
+                                {t('vocab.all_learned_wink') || 'PRIMA, du hast die Vokabeln für heute gelernt 🎉'}
+                            </h2>
+                            <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '32px', textAlign: 'center' }}>
+                                {t('vocab.caught_up') || 'Alles erledigt! Keine Karten zur Wiederholung ausstehend.'}
+                            </p>
 
-                            {(onOpenReview || onOpenWeakWords) && (
-                                <div style={{ marginTop: '24px', padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '16px', textAlign: 'left' }}>
-                                    <h3 style={{ fontSize: '16px', marginBottom: '16px', color: 'white', textAlign: 'center' }}>{t('vocab.what_next') || 'Was möchtest du als Nächstes tun?'}</h3>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div className="empty-actions">
+                                {(onOpenReview || onOpenWeakWords || true) && (
+                                    <>
+                                        <button onClick={handleLoadNewVocabs} className="btn-primary">
+                                            ✨ {t('vocab.new_vocabs') || 'Neue Karten'} (+15)
+                                        </button>
                                         {onOpenReview && (
-                                            <button onClick={() => { onClose(); onOpenReview(); }} className="btn-secondary" style={{ width: '100%', padding: '16px 12px', borderRadius: '12px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '18px', whiteSpace: 'nowrap' }}>
-                                                <span style={{ fontSize: '24px' }}>📖</span> <span style={{ flex: 1 }}>{t('vocab.continue_review') || 'Review Vocab'}</span>
+                                            <button onClick={() => { onClose(); onOpenReview(); }} className="btn-secondary">
+                                                📖 {t('vocab.continue_review') || 'Review Vocab'}
                                             </button>
                                         )}
                                         {onOpenWeakWords && (
-                                            <button onClick={() => { onClose(); onOpenWeakWords(); }} className="btn-secondary" style={{ width: '100%', padding: '16px 12px', borderRadius: '12px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '18px', whiteSpace: 'nowrap' }}>
-                                                <span style={{ fontSize: '24px' }}>💪</span> <span style={{ flex: 1 }}>{t('vocab.train_weak_words') || 'Weak Words trainieren'}</span>
+                                            <button onClick={() => { onClose(); onOpenWeakWords(); }} className="btn-secondary">
+                                                💪 {t('vocab.train_weak_words') || 'Weak Words'}
                                             </button>
                                         )}
-                                    </div>
-                                </div>
-                            )}
-
-                            <button onClick={handleCancel} className="btn-primary" style={{ marginTop: '24px', width: '100%', padding: '20px', borderRadius: '12px', fontSize: '24px', fontWeight: 'bold' }}>
-                                {t('vocab.back_to_dashboard') || 'Zum Dashboard'}
-                            </button>
+                                    </>
+                                )}
+                                <button onClick={handleCancel} className="btn-secondary">
+                                    🏠 {t('vocab.back_to_dashboard') || 'Zum Dashboard'}
+                                </button>
+                            </div>
                         </>
                     )}
                 </div>
@@ -650,29 +711,25 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
                         </div>
                     )}
 
-                    {(onOpenReview || onOpenWeakWords) && (
-                        <div style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '16px', marginBottom: '20px' }}>
-                            <h3 style={{ fontSize: '15px', marginBottom: '16px', color: 'white', textAlign: 'center' }}>{t('vocab.what_next') || 'Was möchtest du als Nächstes tun?'}</h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div className="summary-actions">
+                        {(onOpenReview || onOpenWeakWords) && (
+                            <>
                                 {onOpenReview && (
-                                    <button onClick={() => { onClose(); onOpenReview(); }} className="btn-secondary" style={{ width: '100%', padding: '12px', borderRadius: '12px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                        <span style={{ fontSize: '20px' }}>📖</span> <span>{t('vocab.continue_review') || 'Review Vocab weiterlernen'}</span>
+                                    <button onClick={() => { onClose(); onOpenReview(); }} className="btn-secondary">
+                                        📖 {t('vocab.continue_review') || 'Review Vocab'}
                                     </button>
                                 )}
                                 {onOpenWeakWords && (
-                                    <button onClick={() => { onClose(); onOpenWeakWords(); }} className="btn-secondary" style={{ width: '100%', padding: '12px', borderRadius: '12px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                        <span style={{ fontSize: '20px' }}>💪</span> <span>{t('vocab.train_weak_words') || 'Schwache Wörter trainieren'}</span>
+                                    <button onClick={() => { onClose(); onOpenWeakWords(); }} className="btn-secondary">
+                                        💪 {t('vocab.train_weak_words') || 'Weak Words'}
                                     </button>
                                 )}
-                            </div>
-                        </div>
-                    )}
-
-                    <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
-                        <button onClick={handleRestart} className="btn-secondary" style={{ width: '100%', padding: '18px', borderRadius: '14px', fontSize: '18px', fontWeight: '600' }}>
+                            </>
+                        )}
+                        <button onClick={handleRestart} className="btn-secondary">
                             🔄 {t('btn.restart') || 'Neu starten'}
                         </button>
-                        <button onClick={handleCancel} className="btn-primary" style={{ width: '100%', padding: '20px', borderRadius: '14px', fontSize: '24px', fontWeight: 'bold', background: 'linear-gradient(135deg, #007AFF 0%, #0056b3 100%)', border: 'none' }}>
+                        <button onClick={handleCancel} className="btn-primary">
                             🏠 {t('vocab.back_to_dashboard') || 'Zum Dashboard'}
                         </button>
                     </div>
@@ -758,156 +815,154 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
         <div className="dialog-overlay">
             {dialogContent}
 
-            <style jsx>{`
+            <style jsx global>{`
                 .dialog-overlay {
                     position: fixed;
-                    inset: 0;
-                    background: rgba(0, 0, 0, 0.7);
-                    backdrop-filter: blur(8px);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 9999;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(8px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
                 }
 
                 .dialog-content {
                     background: rgba(20, 20, 24, 0.95);
-                    border-radius: 24px;
-                    padding: 32px;
-                    max-width: 600px;
-                    width: 90vw;
-                    max-height: 90vh;
-                    overflow-y: auto;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+                border-radius: 24px;
+                padding: 32px;
+                max-width: 600px;
+                width: 90vw;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
                 }
 
                 .dialog-header {
-                    text-align: center;
-                    margin-bottom: 24px;
+                    text - align: center;
+                margin-bottom: 24px;
                 }
 
                 .dialog-header h2 {
-                    font-size: 24px;
-                    font-weight: bold;
-                    color: #fff;
-                    margin: 0;
+                    font - size: 24px;
+                font-weight: bold;
+                color: #fff;
+                margin: 0;
                 }
 
                 .dialog-footer {
                     display: flex;
-                    gap: 12px;
-                    justify-content: center;
-                    margin-top: 24px;
+                gap: 12px;
+                justify-content: center;
+                margin-top: 24px;
                 }
 
                 .empty-state {
-                    text-align: center;
-                    padding: 40px 20px;
+                    text - align: center;
+                padding: 40px 20px;
                 }
 
                 .empty-state h3 {
-                    font-size: 24px;
-                    margin-bottom: 16px;
-                    color: #fff;
+                    font - size: 24px;
+                margin-bottom: 16px;
+                color: #fff;
                 }
 
                 .empty-state p {
                     color: rgba(255, 255, 255, 0.7);
-                    margin-bottom: 12px;
-                    line-height: 1.5;
+                margin-bottom: 12px;
+                line-height: 1.5;
                 }
 
                 .empty-actions {
                     display: flex;
-                    gap: 12px;
-                    justify-content: center;
-                    margin-top: 24px;
+                gap: 12px;
+                justify-content: center;
+                margin-top: 24px;
                 }
 
                 .btn-primary {
                     padding: 12px 24px;
-                    border-radius: 12px;
-                    border: none;
-                    cursor: pointer;
-                    font-weight: 600;
-                    transition: all 0.2s;
-                    background: rgba(0, 122, 255, 0.3);
-                    color: #007AFF;
-                    border: 1px solid rgba(0, 122, 255, 0.5);
+                border-radius: 12px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.2s;
+                background: rgba(0, 122, 255, 0.3);
+                color: #007AFF;
+                border: 1px solid rgba(0, 122, 255, 0.5);
                 }
 
                 .btn-primary:hover {
                     background: rgba(0, 122, 255, 0.4);
-                    transform: translateY(-1px);
+                transform: translateY(-1px);
                 }
 
                 .btn-audio, .btn-speed, .btn-autoplay, .btn-cancel {
                     padding: 10px 16px;
-                    border-radius: 10px;
-                    border: 1px solid rgba(255, 255, 255, 0.15);
-                    background: rgba(255, 255, 255, 0.05);
-                    color: #fff;
-                    cursor: pointer;
-                    font-weight: 500;
-                    transition: all 0.2s;
-                    font-size: 14px;
+                border-radius: 10px;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                background: rgba(255, 255, 255, 0.05);
+                color: #fff;
+                cursor: pointer;
+                font-weight: 500;
+                transition: all 0.2s;
+                font-size: 14px;
                 }
 
                 .btn-audio:hover, .btn-speed:hover, .btn-autoplay:hover, .btn-cancel:hover {
                     background: rgba(255, 255, 255, 0.1);
-                    transform: translateY(-1px);
+                transform: translateY(-1px);
                 }
 
                 .btn-audio:disabled {
                     opacity: 0.5;
-                    cursor: not-allowed;
+                cursor: not-allowed;
                 }
 
                 .btn-autoplay.active {
                     background: rgba(0, 122, 255, 0.2);
-                    border-color: rgba(0, 122, 255, 0.4);
-                    color: #007AFF;
+                border-color: rgba(0, 122, 255, 0.4);
+                color: #007AFF;
                 }
 
                 .icon-btn {
                     width: 40px;
-                    height: 40px;
-                    border-radius: 12px;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    background: rgba(255, 255, 255, 0.05);
-                    color: #fff;
-                    font-size: 18px;
-                    cursor: pointer;
-                    transition: all 0.2s;
+                height: 40px;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                background: rgba(255, 255, 255, 0.05);
+                color: #fff;
+                font-size: 18px;
+                cursor: pointer;
+                transition: all 0.2s;
                 }
 
                 .icon-btn:hover {
                     background: rgba(255, 255, 255, 0.1);
-                    transform: scale(1.05);
+                transform: scale(1.05);
                 }
 
                 .btn-primary {
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    border: none;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.3s;
+                color: white;
+                border: none;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
                 }
 
                 .btn-primary:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
                 }
 
                 .btn-secondary {
                     background: rgba(255, 255, 255, 0.1);
-                    color: white;
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.2s;
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
                 }
 
                 .btn-secondary:hover {
@@ -916,81 +971,81 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
 
                 .btn-secondary:disabled {
                     opacity: 0.5;
-                    cursor: not-allowed;
+                cursor: not-allowed;
                 }
 
                 /* Loading State */
                 .loading-state {
-                    text-align: center;
-                    padding: 60px 20px;
+                    text - align: center;
+                padding: 60px 20px;
                 }
 
                 .spinner {
                     width: 48px;
-                    height: 48px;
-                    border: 4px solid rgba(255, 255, 255, 0.1);
-                    border-top-color: #007AFF;
-                    border-radius: 50%;
-                    animation: spin 1s linear infinite;
-                    margin: 0 auto 24px;
+                height: 48px;
+                border: 4px solid rgba(255, 255, 255, 0.1);
+                border-top-color: #007AFF;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 24px;
                 }
 
                 @keyframes spin {
-                    to { transform: rotate(360deg); }
+                    to {transform: rotate(360deg); }
                 }
 
                 .progress-text {
                     color: #888;
-                    font-size: 14px;
-                    margin-top: 8px;
+                font-size: 14px;
+                margin-top: 8px;
                 }
 
                 .empty-state h2 {
-                    font-size: 24px;
-                    margin-bottom: 16px;
-                    color: #fff;
+                    font - size: 24px;
+                margin-bottom: 16px;
+                color: #fff;
                 }
 
                 .empty-hint {
-                    font-size: 14px;
-                    color: rgba(255, 255, 255, 0.5);
-                    margin-top: 8px;
-                    font-style: italic;
+                    font - size: 14px;
+                color: rgba(255, 255, 255, 0.5);
+                margin-top: 8px;
+                font-style: italic;
                 }
 
                 .error-message {
                     color: #FF453A !important;
-                    background: rgba(255, 69, 58, 0.1);
-                    padding: 12px 16px;
-                    border-radius: 8px;
-                    border: 1px solid rgba(255, 69, 58, 0.3);
-                    margin: 16px 0;
-                    font-family: monospace;
-                    font-size: 13px;
+                background: rgba(255, 69, 58, 0.1);
+                padding: 12px 16px;
+                border-radius: 8px;
+                border: 1px solid rgba(255, 69, 58, 0.3);
+                margin: 16px 0;
+                font-family: monospace;
+                font-size: 13px;
                 }
 
                 .summary-content {
-                    text-align: center;
+                    text - align: center;
                 }
 
                 .summary-stats, .rating-breakdown {
                     margin: 24px 0;
-                    padding: 16px;
-                    background: rgba(255, 255, 255, 0.05);
-                    border-radius: 12px;
+                padding: 16px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
                 }
 
                 .stat-item, .rating-item {
                     display: flex;
-                    justify-content: space-between;
-                    margin: 8px 0;
+                justify-content: space-between;
+                margin: 8px 0;
                 }
 
                 .summary-actions {
                     display: flex;
-                    gap: 12px;
-                    justify-content: center;
-                    margin-top: 24px;
+                gap: 12px;
+                justify-content: center;
+                margin-top: 24px;
                 }
             `}</style>
 
@@ -1002,24 +1057,20 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
                 role="status"
                 aria-live="polite"
                 aria-atomic="true"
-                className="sr-only"
+                style={{
+                    position: 'absolute',
+                    width: '1px',
+                    height: '1px',
+                    padding: 0,
+                    margin: '-1px',
+                    overflow: 'hidden',
+                    clip: 'rect(0, 0, 0, 0)',
+                    whiteSpace: 'nowrap',
+                    borderWidth: 0
+                }}
             >
                 {announceMessage}
             </div>
-
-            <style jsx>{`
-                .sr-only {
-                    position: absolute;
-                    width: 1px;
-                    height: 1px;
-                    padding: 0;
-                    margin: -1px;
-                    overflow: hidden;
-                    clip: rect(0, 0, 0, 0);
-                    white-space: nowrap;
-                    border-width: 0;
-                }
-            `}</style>
         </div>
     );
 }
