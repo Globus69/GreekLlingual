@@ -1,11 +1,11 @@
 {
-  "name": "GreekLingua - Master Greek with FSRS",
-  "short_name": "GreekLingua",
+  "name": "Hellenic Horizon",
+  "short_name": "Hellenic",
   "description": "Learn Greek vocabulary with spaced repetition (FSRS-6). Track your progress, practice flashcards, and achieve fluency.",
-  "start_url": "/dashboard",
+  "start_url": "/m",
   "display": "standalone",
-  "background_color": "#1a1a1e",
-  "theme_color": "#667eea",
+  "background_color": "#f5f5f5",
+  "theme_color": "#0077b6",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en-US",
@@ -52,7 +52,7 @@
       "name": "Practice Vocabulary",
       "short_name": "Vocabulary",
       "description": "Start vocabulary practice session",
-      "url": "/dashboard?action=vocabulary",
+      "url": "/m/vocabulary",
       "icons": [
         {
           "src": "/icon-192.png",
@@ -64,7 +64,7 @@
       "name": "Due Cards",
       "short_name": "Due Cards",
       "description": "Review cards due today",
-      "url": "/dashboard?action=due",
+      "url": "/m/vocabulary/review",
       "icons": [
         {
           "src": "/icon-192.png",

@@ -60,6 +60,20 @@ src/app/practice-modes/page.tsx
 src/components/learning/practice-modes/**/*.tsx
 
 # ════════════════════════════════════════════════════════════════
+#  PWA – Auto-generated Service Worker Files
+# ════════════════════════════════════════════════════════════════
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map
+public/worker-*.js
+public/worker-*.js.map
+public/fallback-*.js
+**/sw.js
+**/workbox-*.js
+**/worker-*.js
+
+# ════════════════════════════════════════════════════════════════
 #  Sonstiges
 # ════════════════════════════════════════════════════════════════
 *.min.js

@@ -8,9 +8,25 @@ export default function MobileLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen pb-16 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Content Area with padding for Bottom Nav */}
-      <main className="pb-safe">
+    <div
+      className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
+      style={{
+        height: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Content Area - Scrollable */}
+      <main
+        className="flex-1 scrollable"
+        style={{
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          WebkitOverflowScrolling: 'touch',
+          paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))',
+        }}
+      >
         {children}
       </main>
 
