@@ -24,7 +24,7 @@ const NAV_STYLE: CSSProperties = {
   backgroundColor: 'rgba(28, 28, 30, 0.95)',
   backdropFilter: 'blur(20px)',
   borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-  padding: '8px 16px 12px',
+  padding: '8px 16px calc(12px + env(safe-area-inset-bottom))',
 };
 
 const CONTAINER_STYLE: CSSProperties = {

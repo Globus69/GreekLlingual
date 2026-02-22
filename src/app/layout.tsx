@@ -22,13 +22,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GreekLingua Dashboard",
+  title: "Hellenic Horizon",
   description: "Master Greek with Spaced Repetition",
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'GreekLingua',
+    title: 'Hellenic Horizon',
+    startupImage: [
+      { url: '/icon-512.png', media: '(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)' },
+    ],
+  },
+  applicationName: 'Hellenic Horizon',
+  formatDetection: {
+    telephone: false,
   },
   icons: {
     icon: [
@@ -46,9 +53,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
+  viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0F0F11' },
+    { media: '(prefers-color-scheme: light)', color: '#0077b6' },
+    { media: '(prefers-color-scheme: dark)', color: '#0077b6' },
   ],
 };
 
