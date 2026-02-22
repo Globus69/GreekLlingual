@@ -1,7 +1,8 @@
+import type { NextConfig } from 'next';
 import withPWA from 'next-pwa';
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   reactStrictMode: true,
 
   // Nur das Nötigste – App Router in src/app/ wird automatisch erkannt
@@ -10,7 +11,7 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
+        protocol: 'https' as const,
         hostname: '**',
       },
     ],

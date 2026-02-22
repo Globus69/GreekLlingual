@@ -3,9 +3,9 @@
   "version": "0.7.6",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "dev:static": "npx serve web -l 3000",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "lighthouse": "lhci autorun",
