@@ -287,7 +287,8 @@ export default function MobileDashboardPage() {
             title="Cloze Test"
             subtitle="Fill in the blanks"
             color="blue"
-            onClick={() => router.push('/m/practice-modes/cloze-text')}
+            disabled={true}
+            onClick={() => { }}
           />
 
           {/* Spiele - DISABLED (grau, kein Action) */}
