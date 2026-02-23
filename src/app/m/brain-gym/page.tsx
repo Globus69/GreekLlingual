@@ -76,7 +76,7 @@ export default function MobileBrainGymPage() {
       if (dataSource === 'due_cards') {
         const result = await supabase.rpc('get_due_vocabulary_cards', {
           p_user_id: user.id,
-          p_limit: 6
+          p_limit: 5
         });
         data = result.data;
         error = result.error;
@@ -86,7 +86,7 @@ export default function MobileBrainGymPage() {
       else if (dataSource === 'review_vocab') {
         const result = await supabase.rpc('get_all_vocabulary_cards', {
           p_user_id: user.id,
-          p_limit: 6
+          p_limit: 5
         });
         data = result.data;
         error = result.error;
@@ -96,7 +96,7 @@ export default function MobileBrainGymPage() {
       else if (dataSource === 'weak_words') {
         const result = await supabase.rpc('get_weak_vocabulary_cards', {
           p_user_id: user.id,
-          p_limit: 6
+          p_limit: 5
         });
         data = result.data;
         error = result.error;
@@ -510,7 +510,8 @@ export default function MobileBrainGymPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '16px',
+            padding: '11px',
+            paddingTop: 'calc(11px + env(safe-area-inset-top))',
             position: 'sticky',
             top: 0,
             zIndex: 50,
@@ -607,10 +608,11 @@ export default function MobileBrainGymPage() {
                 display: 'block',
                 fontSize: '12px',
                 fontWeight: '600',
-                color: '#8E8E93',
+                color: '#FFD60A',
                 marginBottom: '8px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.5px',
+                letterSpacing: '0.8px',
+                textShadow: '0 0 12px rgba(255, 214, 10, 0.4)',
               }}
             >
               {t('brain_gym.card_source')}
@@ -625,12 +627,12 @@ export default function MobileBrainGymPage() {
                 borderRadius: '12px',
                 border: greekCards.length === 0
                   ? '2px solid rgba(255, 59, 48, 0.8)'
-                  : '1px solid rgba(255, 255, 255, 0.2)',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
+                  : '1px solid rgba(255, 214, 10, 0.3)',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(15px)',
                 color: 'white',
                 fontSize: '15px',
-                fontWeight: '500',
+                fontWeight: '600',
                 cursor: 'pointer',
                 outline: 'none',
                 appearance: 'none',
@@ -639,7 +641,9 @@ export default function MobileBrainGymPage() {
                 backgroundPosition: 'right 12px center',
                 backgroundSize: '20px',
                 paddingRight: '40px',
-                animation: greekCards.length === 0 ? 'blink-red 1s infinite' : 'none',
+                animation: greekCards.length === 0
+                  ? 'blink-red 1s infinite'
+                  : 'glow-yellow 4s infinite ease-in-out',
               }}
             >
               <option value="review_vocab" style={{ backgroundColor: '#1C1C1E', color: 'white' }}>
@@ -906,6 +910,11 @@ export default function MobileBrainGymPage() {
           0% { background-color: rgba(255, 255, 255, 0.1); }
           50% { background-color: rgba(255, 59, 48, 0.3); }
           100% { background-color: rgba(255, 255, 255, 0.1); }
+        }
+        @keyframes glow-yellow {
+          0% { background-color: rgba(255, 255, 255, 0.05); border-color: rgba(255, 214, 10, 0.1); }
+          50% { background-color: rgba(255, 214, 10, 0.15); border-color: rgba(255, 214, 10, 0.4); }
+          100% { background-color: rgba(255, 255, 255, 0.05); border-color: rgba(255, 214, 10, 0.1); }
         }
       `}</style>
     </>
