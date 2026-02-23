@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Migration 112: Align Brain Gym get_weak_vocabulary_cards to use
 --                user_vocabulary_progress (same source as the weak count)
--- Date: 2026-02-23
+-- Date: 2026-02-23 (v2 - fixed ease_factor/interval_days/next_review columns)
 -- ============================================================================
 -- Root Cause Found:
 --   - get_weak_vocabulary_count uses: user_vocabulary_progress (uvp.fsrs_lapses >= 2)
@@ -9,6 +9,8 @@
 --   - Result: The counter shows 11, but the Brain Gym finds 0 cards.
 --
 -- Fix: Both functions must use the same table: user_vocabulary_progress
+-- Note: user_vocabulary_progress does NOT have ease_factor/interval_days/next_review
+--       -> use fsrs_due as next_review, hardcode defaults for the rest.
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS get_weak_vocabulary_cards(UUID, INT);
@@ -60,16 +62,18 @@ BEGIN
         mv.es_translation      AS spanish,
         mv.greek_transcription AS greek,
         mv.greek_phonetic      AS phonetic,
-        uvp.fsrs_difficulty::REAL,
-        uvp.fsrs_stability::REAL,
+        COALESCE(uvp.fsrs_difficulty, 0.3)::REAL   AS fsrs_difficulty,
+        COALESCE(uvp.fsrs_stability, 0.0)::REAL    AS fsrs_stability,
         uvp.fsrs_last_review,
         uvp.fsrs_due,
-        uvp.fsrs_reps::INT,
-        uvp.fsrs_lapses::INT,
-        uvp.fsrs_state::TEXT,
-        COALESCE(uvp.ease_factor, 2.5)::REAL   AS ease_factor,
-        COALESCE(uvp.interval_days, 1)::INT    AS interval_days,
-        uvp.next_review,
+        COALESCE(uvp.fsrs_reps, 0)::INT            AS fsrs_reps,
+        COALESCE(uvp.fsrs_lapses, 0)::INT          AS fsrs_lapses,
+        COALESCE(uvp.fsrs_state, 'review')::TEXT   AS fsrs_state,
+        -- ease_factor, interval_days, next_review don't exist in user_vocabulary_progress
+        -- -> use safe defaults
+        2.5::REAL                                   AS ease_factor,
+        1::INT                                      AS interval_days,
+        uvp.fsrs_due                                AS next_review,
         mv.level,
         mv.difficulty
     FROM multilingual_vocabulary mv
@@ -95,9 +99,9 @@ GRANT EXECUTE ON FUNCTION get_weak_vocabulary_cards(UUID, INT) TO anon, authenti
 DO $$
 BEGIN
     RAISE NOTICE '══════════════════════════════════════════════';
-    RAISE NOTICE '✅ Migration 112 completed';
-    RAISE NOTICE '   get_weak_vocabulary_cards now uses user_vocabulary_progress';
-    RAISE NOTICE '   Same source as get_weak_vocabulary_count (the counter)';
-    RAISE NOTICE '   Brain Gym Schwache Wörter should now match the count';
+    RAISE NOTICE '✅ Migration 112 (v2) completed';
+    RAISE NOTICE '   Fixed: removed non-existent uvp.ease_factor, uvp.interval_days, uvp.next_review';
+    RAISE NOTICE '   Source: user_vocabulary_progress (fsrs_lapses >= 2)';
+    RAISE NOTICE '   Brain Gym Schwache Wörter should now match the counter';
     RAISE NOTICE '══════════════════════════════════════════════';
 END $$;
