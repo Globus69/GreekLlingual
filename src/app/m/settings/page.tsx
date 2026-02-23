@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
+import { APP_VERSION } from '@/lib/appVersion';
 
 export default function MobileSettingsPage() {
   const router = useRouter();
@@ -134,7 +135,7 @@ export default function MobileSettingsPage() {
         {/* App Info */}
         <div style={{ textAlign: 'center', marginTop: '32px', color: '#8E8E93', fontSize: '12px' }}>
           <div>GreekLingua Dashboard</div>
-          <div style={{ marginTop: '4px' }}>Version 1.0.0 • Made with ❤️</div>
+          <div style={{ marginTop: '4px' }}>{APP_VERSION} • Made with ❤️</div>
         </div>
       </div>
 

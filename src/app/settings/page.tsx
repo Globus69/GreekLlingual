@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
+import { APP_VERSION } from '@/lib/appVersion';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 export default function SettingsPage() {
@@ -105,7 +106,7 @@ export default function SettingsPage() {
               GreekLingua Dashboard
             </div>
             <div style={{ fontSize: '16px', color: '#8E8E93', marginBottom: '4px' }}>
-              Version 1.0.0
+              {APP_VERSION}
             </div>
             <div style={{ fontSize: '14px', color: '#8E8E93' }}>
               Made with ❤️ for Greek language learners
