@@ -124,55 +124,57 @@ export function useStreak() {
             return null;
         }
 
+        // ⚡ CLIENT-SIDE GUARD: If streak is already active today, skip the DB call entirely
+        // The optimized RPC also has this guard, but skipping the network round-trip is faster
+        if (streakInfo?.streak_status === 'active_today') {
+            console.log('⚡ [useStreak] Already active today, skipping DB update');
+            return null;
+        }
+
         setUpdating(true);
         try {
             const { data, error } = await supabase
                 .rpc('update_user_streak', { p_user_id: user.id });
 
             if (error) {
-                // Increment retry counter
                 updateRetryCount.current += 1;
-
-                // Only log first attempt
                 if (updateRetryCount.current === 1) {
                     console.warn('⚠️ Streak update RPC not available. Skipping.');
                 }
-
-                // Check if RPC function doesn't exist or network error
                 if (error.code === '42883' || error.message?.includes('does not exist') || error.message?.includes('Failed to fetch')) {
-                    updateRetryCount.current = MAX_RETRIES; // Prevent further retries
+                    updateRetryCount.current = MAX_RETRIES;
                 }
                 return null;
             }
 
-            // Success - reset retry counter
             updateRetryCount.current = 0;
 
             if (data && data.length > 0) {
                 const result = data[0];
 
-                // Refresh streak info
-                await fetchStreakInfo();
+                // ⚡ Update local state directly from RPC result (avoids extra fetchStreakInfo() round-trip)
+                setStreakInfo(prev => prev ? {
+                    ...prev,
+                    current_streak: result.new_streak,
+                    longest_streak: result.is_new_record ? result.new_streak : (prev.longest_streak ?? 0),
+                    last_activity: new Date().toISOString().split('T')[0],
+                    streak_status: 'active_today',
+                } : prev);
 
                 return result;
             }
             return null;
         } catch (error) {
-            // Increment retry counter
             updateRetryCount.current += 1;
-
-            // Only log once
             if (updateRetryCount.current === 1) {
                 console.warn('⚠️ Streak update failed. Skipping.');
             }
-
-            // Max out retries
             updateRetryCount.current = MAX_RETRIES;
             return null;
         } finally {
             setUpdating(false);
         }
-    }, [user?.id, fetchStreakInfo]);
+    }, [user?.id, streakInfo?.streak_status]);
 
     // Check if streak needs attention today
     const needsAttention = streakInfo?.streak_status === 'at_risk' ||
