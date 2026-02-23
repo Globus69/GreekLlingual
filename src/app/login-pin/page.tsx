@@ -186,16 +186,41 @@ export default function PinLoginPage() {
                 // Ignorieren, IP ist optional (Timeout oder Netzwerkfehler)
             }
 
-            // RPC-Funktion aufrufen (mit 10 Sekunden Timeout)
-            const rpcPromise = supabase.rpc('verify_user_4digit_pin', {
-                p_pin: pin,
-                p_ip_address: clientIp,
-                p_user_agent: navigator.userAgent
-            });
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('RPC timeout')), 10000)
-            );
-            const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
+            // RPC-Funktion aufrufen (mit Retry bei Cold-Start)
+            // Supabase Free-Tier schläft ein und braucht bis zu 15s zum Aufwachen
+            let data = null;
+            let error = null;
+            const maxLoginRetries = 3;
+
+            for (let attempt = 1; attempt <= maxLoginRetries; attempt++) {
+                const rpcPromise = supabase.rpc('verify_user_4digit_pin', {
+                    p_pin: pin,
+                    p_ip_address: clientIp,
+                    p_user_agent: navigator.userAgent
+                });
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('RPC timeout')), 30000)
+                );
+
+                try {
+                    const result = await Promise.race([rpcPromise, timeoutPromise]) as any;
+                    data = result.data;
+                    error = result.error;
+                    break;
+                } catch (err: any) {
+                    if (attempt < maxLoginRetries && err?.message === 'RPC timeout') {
+                        console.warn(`⏳ Login attempt ${attempt} timed out, retrying...`);
+                        setWelcomePopup({
+                            show: true,
+                            isError: true,
+                            message: `Datenbank wacht auf... (Versuch ${attempt + 1}/${maxLoginRetries})`
+                        });
+                        await new Promise(r => setTimeout(r, 3000));
+                        continue;
+                    }
+                    throw err;
+                }
+            }
 
             if (error) {
                 console.error('RPC error:', error);
