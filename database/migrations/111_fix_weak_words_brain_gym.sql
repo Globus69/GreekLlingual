@@ -17,6 +17,9 @@
 --   - Use UNION to cover both sources, DISTINCT to prevent duplicates
 -- ============================================================================
 
+-- Drop first to allow return type change
+DROP FUNCTION IF EXISTS get_weak_vocabulary_cards(UUID, INT);
+
 CREATE OR REPLACE FUNCTION get_weak_vocabulary_cards(
     p_user_id UUID,
     p_limit INT DEFAULT 100
