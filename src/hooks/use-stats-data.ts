@@ -54,6 +54,8 @@ export interface StatsData {
   dueCount: number;
   level: string;
   totalWords: number;
+  reviewCount: number;
+  weakCount: number;
 
   // Erweiterte Progress Statistics (Migration 060)
   progressOverview?: ProgressOverview;
@@ -91,6 +93,8 @@ export function useStatsData(userId?: string): UseStatsDataResult {
     dueCount: 0,
     level: 'A1',
     totalWords: 0,
+    reviewCount: 0,
+    weakCount: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -184,6 +188,16 @@ export function useStatsData(userId?: string): UseStatsDataResult {
         supabase.rpc('get_user_streak', {
           p_user_id: userId,
         }),
+
+        // Review Count (Migration 092)
+        supabase.rpc('get_review_vocabulary_count', {
+          p_user_id: userId,
+        }),
+
+        // Weak Count (Migration 092/101)
+        supabase.rpc('get_weak_vocabulary_count', {
+          p_user_id: userId,
+        }),
       ] as any[]);
 
       const [
@@ -196,6 +210,8 @@ export function useStatsData(userId?: string): UseStatsDataResult {
         learningTrendsResult,
         weeklyActivityResult,
         userStreakResult,
+        reviewCountResult,
+        weakCountResult,
       ] = results as any[];
 
       // Progress Overview auswerten (nimmt ersten Eintrag, da RPC nur 1 Row zurückgibt)
@@ -211,6 +227,8 @@ export function useStatsData(userId?: string): UseStatsDataResult {
         level: studentDataResult.data?.level || 'A1',
         totalWords: progressOverview?.cards_learned ||
           ((totalPhrasesResult.data?.length || 0) + (totalVocabResult.data?.length || 0)),
+        reviewCount: reviewCountResult.data || 0,
+        weakCount: weakCountResult.data || 0,
 
         // Progress Statistics (Migration 060)
         progressOverview: progressOverview || undefined,
@@ -232,6 +250,8 @@ export function useStatsData(userId?: string): UseStatsDataResult {
         dueCount: 0,
         level: 'A1',
         totalWords: 0,
+        reviewCount: 0,
+        weakCount: 0,
         correctRate: 0,
         totalStudyTime: 0,
         avgSessionTime: 0,

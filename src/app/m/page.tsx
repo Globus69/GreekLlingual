@@ -94,7 +94,8 @@ export default function MobileDashboardPage() {
           backgroundColor: 'rgba(28, 28, 30, 0.95)',
           backdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '8px 16px'
+          padding: '6px 16px',
+          paddingTop: 'calc(6px + env(safe-area-inset-top))'
         }}
         onClick={() => setShowDetailedStats(!showDetailedStats)}
       >
@@ -159,10 +160,10 @@ export default function MobileDashboardPage() {
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: '448px', margin: '0 auto', padding: '16px 16px 24px' }}>
+      <div style={{ maxWidth: '448px', margin: '0 auto', padding: '24px 24px 36px' }}>
         {/* Welcome - COMPACT VERSION */}
-        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-          <h1 style={{ fontSize: '22px', fontWeight: 'bold', color: 'white', marginBottom: '0' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <h1 style={{ fontSize: '33px', fontWeight: 'bold', color: 'white', marginBottom: '0' }}>
             Welcome, {(() => {
               const name = user?.name;
               return name ? name.split(' ')[0] : 'Student';
@@ -176,16 +177,16 @@ export default function MobileDashboardPage() {
             onClick={() => router.push('/m/admin/unlock')}
             style={{
               width: '100%',
-              minHeight: '56px',
-              padding: '10px 14px',
-              borderRadius: '14px',
+              minHeight: '84px',
+              padding: '15px 21px',
+              borderRadius: '21px',
               backgroundColor: 'rgba(255, 204, 0, 0.2)',
               border: '1px solid rgba(255, 204, 0, 0.4)',
               backdropFilter: 'blur(10px)',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
-              marginBottom: '12px',
+              gap: '18px',
+              marginBottom: '18px',
               cursor: 'pointer',
               position: 'relative'
             }}
@@ -205,10 +206,10 @@ export default function MobileDashboardPage() {
             }}>
               #A1
             </span>
-            <span style={{ fontSize: '28px' }}>🔓</span>
+            <span style={{ fontSize: '42px' }}>🔓</span>
             <div style={{ flex: 1, textAlign: 'left' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#FFCC00' }}>Admin Panel</div>
-              <div style={{ fontSize: '11px', color: 'rgba(255, 204, 0, 0.7)' }}>Manage users</div>
+              <div style={{ fontWeight: 'bold', fontSize: '23px', color: '#FFCC00' }}>Admin Panel</div>
+              <div style={{ fontSize: '17px', color: 'rgba(255, 204, 0, 0.7)' }}>Manage users</div>
             </div>
             <span style={{ fontSize: '18px', color: '#FFCC00', opacity: 0.5 }}>→</span>
           </button>
@@ -218,8 +219,8 @@ export default function MobileDashboardPage() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr',
-          gap: '8px',
-          marginBottom: '16px'
+          gap: '12px',
+          marginBottom: '24px'
         }}>
           {/* Main Learning Tiles */}
           <ModuleTile
@@ -232,15 +233,15 @@ export default function MobileDashboardPage() {
           <ModuleTile
             icon="📖"
             title="Review Vocab"
-            subtitle="Practice words"
-            color="green"
+            subtitle={stats.reviewCount > 0 ? `${stats.reviewCount} to review` : "All caught up!"}
+            color={stats.reviewCount > 0 ? 'light-orange' : 'weak-green'}
             onClick={() => setShowReviewDialog(true)}
           />
           <ModuleTile
             icon="💪"
             title="Weak Words"
-            subtitle="Train difficult"
-            color="orange"
+            subtitle={stats.weakCount > 0 ? `${stats.weakCount} difficult words` : "No weak words!"}
+            color={stats.weakCount > 0 ? 'light-red' : 'weak-green'}
             onClick={() => setShowWeakWordsDialog(true)}
           />
           <ModuleTile
@@ -342,7 +343,7 @@ interface ModuleTileProps {
   icon: string;
   title: string;
   subtitle: string;
-  color: 'blue' | 'green' | 'orange' | 'purple';
+  color: 'blue' | 'green' | 'orange' | 'purple' | 'weak-green' | 'light-orange' | 'light-red';
   disabled?: boolean;
   onClick: () => void;
 }
@@ -353,6 +354,9 @@ function ModuleTile({ debugId, icon, title, subtitle, color, disabled, onClick }
     green: { bg: 'rgba(52, 199, 89, 0.25)', border: 'rgba(52, 199, 89, 0.5)', text: '#34C759' },
     orange: { bg: 'rgba(255, 159, 10, 0.25)', border: 'rgba(255, 159, 10, 0.5)', text: '#FF9F0A' },
     purple: { bg: 'rgba(191, 90, 242, 0.25)', border: 'rgba(191, 90, 242, 0.5)', text: '#BF5AF2' },
+    'weak-green': { bg: 'rgba(52, 199, 89, 0.1)', border: 'rgba(52, 199, 89, 0.25)', text: 'rgba(52, 199, 89, 0.6)' },
+    'light-orange': { bg: 'rgba(255, 159, 10, 0.3)', border: 'rgba(255, 159, 10, 0.6)', text: '#FF9F0A' },
+    'light-red': { bg: 'rgba(255, 69, 58, 0.3)', border: 'rgba(255, 69, 58, 0.6)', text: '#FF453A' },
   };
 
   // If disabled, override with gray colors
@@ -366,15 +370,15 @@ function ModuleTile({ debugId, icon, title, subtitle, color, disabled, onClick }
       disabled={disabled}
       style={{
         width: '100%',
-        minHeight: '48px',
-        padding: '8px 10px',
-        borderRadius: '12px',
+        minHeight: '72px',
+        padding: '12px 15px',
+        borderRadius: '18px',
         backgroundColor: c.bg,
         border: `1px solid ${c.border}`,
         backdropFilter: 'blur(10px)',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        gap: '12px',
         opacity: disabled ? 0.4 : 1,
         cursor: disabled ? 'not-allowed' : 'pointer',
         transition: 'transform 0.2s ease, opacity 0.2s ease',
@@ -409,13 +413,13 @@ function ModuleTile({ debugId, icon, title, subtitle, color, disabled, onClick }
           #{debugId}
         </span>
       )}
-      <span style={{ fontSize: '24px' }}>{icon}</span>
+      <span style={{ fontSize: '36px' }}>{icon}</span>
       <div style={{ flex: 1, textAlign: 'left' }}>
-        <div style={{ fontWeight: 'bold', fontSize: '13px', color: 'white', lineHeight: '1.2' }}>{title}</div>
-        <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.65)', marginTop: '1px' }}>{subtitle}</div>
+        <div style={{ fontWeight: 'bold', fontSize: '20px', color: 'white', lineHeight: '1.2' }}>{title}</div>
+        <div style={{ fontSize: '15px', color: 'rgba(255, 255, 255, 0.65)', marginTop: '2px' }}>{subtitle}</div>
       </div>
       {!disabled && (
-        <span style={{ fontSize: '16px', color: c.text, opacity: 0.7 }}>→</span>
+        <span style={{ fontSize: '24px', color: c.text, opacity: 0.7 }}>→</span>
       )}
     </button>
   );
