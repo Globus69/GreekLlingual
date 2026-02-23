@@ -34,6 +34,21 @@ export default function PinLoginPage() {
         }
     }, [loading, user, router]);
 
+    // 🔥 DB WARM-UP: Ping Supabase immediately on page load
+    // This wakes up the DB before the user even types their PIN
+    useEffect(() => {
+        const warmUpDB = async () => {
+            try {
+                // Lightweight ping - just checks DB is alive
+                await supabase.from('users').select('id').limit(1).maybeSingle();
+                console.log('✅ [Login] DB warm-up complete');
+            } catch {
+                // Ignore - warm-up is best-effort only
+            }
+        };
+        warmUpDB();
+    }, []);
+
     // Animated background particles
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -209,12 +224,7 @@ export default function PinLoginPage() {
                     break;
                 } catch (err: any) {
                     if (attempt < maxLoginRetries && err?.message === 'RPC timeout') {
-                        console.warn(`⏳ Login attempt ${attempt} timed out, retrying...`);
-                        setWelcomePopup({
-                            show: true,
-                            isError: true,
-                            message: `Datenbank wacht auf... (Versuch ${attempt + 1}/${maxLoginRetries})`
-                        });
+                        console.warn(`⏳ [Login] DB timeout (attempt ${attempt}/${maxLoginRetries}), retrying in 3s...`);
                         await new Promise(r => setTimeout(r, 3000));
                         continue;
                     }
