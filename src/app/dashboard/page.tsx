@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -15,7 +15,7 @@ import LessonDialog from '@/components/learning/lesson-dialog';
 import DailyPhrasesDialog from '@/components/learning/daily-phrases-dialog';
 import DueCardsDialog from '@/components/learning/due-cards-dialog';
 import WeakWordsDialog from '@/components/learning/weak-words-dialog';
-import { supabase } from '@/db/supabase';
+// supabase client not needed directly; data is fetched via hooks
 import { useTranslation } from '@/lib/use-translation';
 import Link from 'next/link';
 import { StreakDisplay } from '@/components/dashboard/streak-display';
@@ -63,101 +63,26 @@ export default function DashboardPage() {
     const [isDailyPhrasesDialogOpen, setIsDailyPhrasesDialogOpen] = useState(false);
     const [isDueCardsDialogOpen, setIsDueCardsDialogOpen] = useState(false);
     const [isWeakWordsDialogOpen, setIsWeakWordsDialogOpen] = useState(false);
-    const [masteryProgress, setMasteryProgress] = useState(38);
-    const [stats, setStats] = useState({ streak: 0, words: 47, weak: 'Verbs' });
     const { t } = useTranslation();
 
-    // Retry limiting for fetchStats to prevent infinite loops (use ref to avoid re-renders)
-    const statsRetryCount = useRef(0);
-    const MAX_STATS_RETRIES = 3;
-
-    // Streak tracking
-    const { updateStreak, getMilestoneMessage } = useStreak();
+    // Streak tracking (for milestone toast system)
+    const { getMilestoneMessage } = useStreak();
     const [milestoneToast, setMilestoneToast] = useState<{
         streak: number;
         isNewRecord: boolean;
         message: string;
     } | null>(null);
 
-    const fetchStats = useCallback(async () => {
-        try {
-            if (!user?.id) return;
-
-            // Check retry limit
-            if (statsRetryCount.current >= MAX_STATS_RETRIES) {
-                console.warn(`⚠️ Max retries (${MAX_STATS_RETRIES}) reached for fetchStats, using fallback values`);
-                setMasteryProgress(38);
-                setStats(prev => ({
-                    ...prev,
-                    streak: user?.streak_days || 0
-                }));
-                return;
-            }
-
-            const { data: progressData, error } = await supabase
-                .from('student_progress')
-                .select('correct_count, attempts')
-                .eq('student_id', user.id);
-
-            // Log error but don't block dashboard
-            if (error) {
-                // Increment retry counter
-                statsRetryCount.current += 1;
-                console.warn(`student_progress query failed (attempt ${statsRetryCount.current}/${MAX_STATS_RETRIES}):`, error.message);
-                // Set default values
-                setMasteryProgress(38);
-                return;
-            }
-
-            // Success - reset retry counter
-            statsRetryCount.current = 0;
-
-            if (progressData && progressData.length > 0) {
-                const totalCorrect = progressData.reduce((sum: number, p: any) => sum + (p.correct_count || 0), 0);
-                const totalItems = 120; // Assume target is 120 words
-                const calculatedProgress = Math.min(100, Math.round((totalCorrect / totalItems) * 100));
-                setMasteryProgress(calculatedProgress || 38);
-                setStats(prev => ({
-                    ...prev,
-                    words: totalCorrect,
-                    streak: user?.streak_days || 0
-                }));
-            } else {
-                // No data found, use defaults
-                setMasteryProgress(38);
-                setStats(prev => ({
-                    ...prev,
-                    streak: user?.streak_days || 0
-                }));
-            }
-        } catch (err) {
-            // Increment retry counter
-            statsRetryCount.current += 1;
-            console.error(`Stats fetching error (attempt ${statsRetryCount.current}/${MAX_STATS_RETRIES}):`, err);
-            // Set defaults on error
-            setMasteryProgress(38);
-            setStats(prev => ({
-                ...prev,
-                streak: user?.streak_days || 0
-            }));
-        }
-    }, [user?.id]);
-
     useEffect(() => {
         if (!authLoading) {
             if (!user) {
-                // Not logged in – redirect to login page
                 router.push('/login');
                 return;
             }
-            fetchStats();
-
-            const timer = setTimeout(() => {
-                setLoading(false);
-            }, 800);
+            const timer = setTimeout(() => setLoading(false), 800);
             return () => clearTimeout(timer);
         }
-    }, [user, authLoading, router, updateStreak, getMilestoneMessage, fetchStats]);
+    }, [user, authLoading, router]);
 
     if (authLoading || loading) {
         return (

@@ -1,16 +1,19 @@
 /**
- * useStatsData Hook
+ * useStatsData Hook — Optimized v2 (Migration 114)
  *
- * Zentrale Hook für alle Statistik-Daten in der App.
- * Bietet eine erweiterbare Struktur für zukünftige Statistik-Anforderungen.
+ * ⚡ Performance: Single RPC call to get_all_stats()
+ *    BEFORE: 11 parallel DB calls (incl. 4 zombie + 1 duplicate streak call)
+ *    AFTER:  1 consolidated RPC round-trip → all data in one response
  *
- * TODO: Neue Datenfelder werden später hinzugefügt, wenn die Anforderungen klar sind.
+ * Provides a stable, extensible structure for all stats in the app.
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/db/supabase';
 
-// Progress Overview from RPC function
+// ── Interfaces ────────────────────────────────────────────────────────────────
+
+/** Progress Overview returned by get_progress_overview RPC (unchanged) */
 export interface ProgressOverview {
   total_reviews: number;
   total_correct: number;
@@ -25,7 +28,7 @@ export interface ProgressOverview {
   consistency_score: number;
 }
 
-// Learning Trend data point
+/** Single data point from get_learning_trends RPC (unchanged) */
 export interface LearningTrendPoint {
   date: string;
   reviews_count: number;
@@ -36,7 +39,7 @@ export interface LearningTrendPoint {
   avg_rating: number;
 }
 
-// Weekly Activity data point
+/** Single data point from get_weekly_activity RPC (unchanged) */
 export interface WeeklyActivityPoint {
   week_start: string;
   week_number: number;
@@ -48,27 +51,28 @@ export interface WeeklyActivityPoint {
   is_today: boolean;
 }
 
+/** Central stats shape — same public API as before, now reliably populated */
 export interface StatsData {
-  // Bestehende Felder
   streak: number;
   dueCount: number;
   level: string;
   totalWords: number;
   reviewCount: number;
   weakCount: number;
+  masteryProgress: number;           // 0-100 %, computed server-side
 
-  // Erweiterte Progress Statistics (Migration 060)
+  // Extended Progress Statistics (Migration 060, served via get_all_stats)
   progressOverview?: ProgressOverview;
   learningTrends?: LearningTrendPoint[];
   weeklyActivity?: WeeklyActivityPoint[];
 
-  // Convenience fields (aus progressOverview extrahiert)
+  // Convenience aliases (extracted from progressOverview)
   correctRate?: number;
   totalStudyTime?: number;
   avgSessionTime?: number;
   consistencyScore?: number;
 
-  [key: string]: any; // Flexibel für zukünftige Erweiterungen
+  [key: string]: any;
 }
 
 interface UseStatsDataResult {
@@ -78,26 +82,39 @@ interface UseStatsDataResult {
   refetch: () => Promise<void>;
 }
 
+// ── Default / fallback stats object ──────────────────────────────────────────
+
+const DEFAULT_STATS: StatsData = {
+  streak: 0,
+  dueCount: 0,
+  level: 'A1',
+  totalWords: 0,
+  reviewCount: 0,
+  weakCount: 0,
+  masteryProgress: 38,
+  correctRate: 0,
+  totalStudyTime: 0,
+  avgSessionTime: 0,
+  consistencyScore: 0,
+};
+
+// ── Hook ──────────────────────────────────────────────────────────────────────
+
 /**
- * Hook zum Abrufen von Benutzerstatistiken
+ * Fetches all user statistics via a single `get_all_stats` RPC call.
  *
- * @param userId - Die ID des Benutzers
- * @returns Statistikdaten, Ladezustand und Fehler
+ * @param userId - UUID of the authenticated user
+ * @returns stats, loading state, error, and a refetch function
  *
  * @example
  * const { stats, loading, error, refetch } = useStatsData(user?.id);
  */
 export function useStatsData(userId?: string): UseStatsDataResult {
-  const [stats, setStats] = useState<StatsData>({
-    streak: 0,
-    dueCount: 0,
-    level: 'A1',
-    totalWords: 0,
-    reviewCount: 0,
-    weakCount: 0,
-  });
+  const [stats, setStats] = useState<StatsData>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  // Guard refs — prevent concurrent fetches and network floods
   const isFetchingRef = useRef(false);
   const lastFetchTimeRef = useRef(0);
   const isFirstLoadRef = useRef(true);
@@ -108,161 +125,81 @@ export function useStatsData(userId?: string): UseStatsDataResult {
       return;
     }
 
-    // Protection against network flood:
-    // 1. Don't fetch if already fetching
-    // 2. Rate limit: Wait at least 1 second between fetches
+    // ── Rate-limit guard ────────────────────────────────────────────────────
     const now = Date.now();
     if (isFetchingRef.current) {
       console.debug('📡 [useStatsData] Fetch already in progress, skipping.');
       return;
     }
-
     if (now - lastFetchTimeRef.current < 1000) {
-      console.log('📡 [useStatsData] Rate limit: Skipping frequent fetch.');
+      console.debug('📡 [useStatsData] Rate limit: skipping frequent fetch.');
       return;
     }
 
+    // ── Start fetch ─────────────────────────────────────────────────────────
+    isFetchingRef.current = true;
+    lastFetchTimeRef.current = now;
+
+    // Only show spinner on first load — background refreshes stay silent
+    if (isFirstLoadRef.current) setLoading(true);
+    setError(null);
+
+    console.log(
+      `📡 [useStatsData] get_all_stats for ${userId} ` +
+      `(${isFirstLoadRef.current ? 'initial' : 'refresh'})`
+    );
+
     try {
-      isFetchingRef.current = true;
-      lastFetchTimeRef.current = now;
-
-      // Only set loading(true) for initial load to prevent UI flickering/remounting on background refreshes
-      if (isFirstLoadRef.current) {
-        setLoading(true);
-      }
-
-      setError(null);
-
-      console.log(`📡 [useStatsData] Fetching stats for user: ${userId} (${isFirstLoadRef.current ? 'Initial' : 'Background Refresh'})`);
-
-      // Parallele Anfragen für bessere Performance
-      const results = await Promise.all([
-        // Due Count: Phrasen die heute fällig sind
-        supabase
-          .from('student_progress')
-          .select('id')
-          .eq('student_id', userId)
-          .lte('next_review', new Date().toISOString()),
-
-        // Due Count: Vokabeln (Vocabulary)
-        supabase
-          .from('user_vocabulary_progress')
-          .select('id')
-          .eq('user_id', userId)
-          .lte('fsrs_due', new Date().toISOString()),
-
-        // Total Words (gelernt in student_progress)
-        supabase
-          .from('student_progress')
-          .select('id')
-          .eq('student_id', userId)
-          .gt('fsrs_reps', 0),
-
-        // Total Words (gelernt in vocabulary)
-        supabase
-          .from('user_vocabulary_progress')
-          .select('id')
-          .eq('user_id', userId)
-          .gt('fsrs_reps', 0),
-
-        // Level (aus users Tabelle)
-        supabase
-          .from('users')
-          .select('level')
-          .eq('id', userId)
-          .single(),
-
-        // Progress Overview (Migration 060, updated in 093)
-        supabase.rpc('get_progress_overview', {
-          p_user_id: userId,
-          p_days: 30,
-        }),
-
-        // Learning Trends (Migration 060)
-        supabase.rpc('get_learning_trends', {
-          p_user_id: userId,
-          p_days: 7,
-        }),
-
-        // Weekly Activity (Migration 060)
-        supabase.rpc('get_weekly_activity', {
-          p_user_id: userId,
-          p_weeks: 4,
-        }),
-
-        // User Streak (Migration 058)
-        supabase.rpc('get_user_streak', {
-          p_user_id: userId,
-        }),
-
-        // Review Count (Migration 092)
-        supabase.rpc('get_review_vocabulary_count', {
-          p_user_id: userId,
-        }),
-
-        // Weak Count (Migration 092/101)
-        supabase.rpc('get_weak_vocabulary_count', {
-          p_user_id: userId,
-        }),
-      ] as any[]);
-
-      const [
-        duePhrasesResult,
-        dueVocabResult,
-        totalPhrasesResult,
-        totalVocabResult,
-        studentDataResult,
-        progressOverviewResult,
-        learningTrendsResult,
-        weeklyActivityResult,
-        userStreakResult,
-        reviewCountResult,
-        weakCountResult,
-      ] = results as any[];
-
-      // Progress Overview auswerten (nimmt ersten Eintrag, da RPC nur 1 Row zurückgibt)
-      const progressOverview = progressOverviewResult.data?.[0];
-
-      // Streak berechnen (aus DB statt Hardcoded)
-      const streak = userStreakResult.data?.[0]?.current_streak || 0;
-
-      // Statistiken setzen
-      setStats({
-        streak,
-        dueCount: (duePhrasesResult.data?.length || 0) + (dueVocabResult.data?.length || 0),
-        level: studentDataResult.data?.level || 'A1',
-        totalWords: progressOverview?.cards_learned ||
-          ((totalPhrasesResult.data?.length || 0) + (totalVocabResult.data?.length || 0)),
-        reviewCount: reviewCountResult.data || 0,
-        weakCount: weakCountResult.data || 0,
-
-        // Progress Statistics (Migration 060)
-        progressOverview: progressOverview || undefined,
-        learningTrends: learningTrendsResult.data || undefined,
-        weeklyActivity: weeklyActivityResult.data || undefined,
-
-        // Convenience fields
-        correctRate: progressOverview?.avg_accuracy || 0,
-        totalStudyTime: progressOverview?.total_study_minutes || 0,
-        avgSessionTime: progressOverview?.avg_session_minutes || 0,
-        consistencyScore: progressOverview?.consistency_score || 0,
+      // ⚡ Single consolidated RPC — replaces 11 parallel calls
+      const { data: raw, error: rpcError } = await supabase.rpc('get_all_stats', {
+        p_user_id: userId,
+        p_days: 30,
+        p_weeks: 4,
       });
+
+      if (rpcError) throw rpcError;
+
+      // `raw` is the JSONB object returned by Postgres
+      const d = raw as {
+        streak: number;
+        level: string;
+        due_count: number;
+        total_words: number;
+        total_correct: number;
+        mastery_progress: number;
+        weak_count: number;
+        review_count: number;
+        progress: ProgressOverview | null;
+        trends: LearningTrendPoint[] | null;
+        weekly: WeeklyActivityPoint[] | null;
+      };
+
+      setStats({
+        // Core stats
+        streak: d.streak ?? 0,
+        level: d.level ?? 'A1',
+        dueCount: d.due_count ?? 0,
+        totalWords: d.progress?.cards_learned ?? d.total_words ?? 0,
+        reviewCount: d.review_count ?? 0,
+        weakCount: d.weak_count ?? 0,
+        masteryProgress: d.mastery_progress ?? 38,
+
+        // Rich stats (from existing sub-RPCs via get_all_stats)
+        progressOverview: d.progress ?? undefined,
+        learningTrends: d.trends ?? undefined,
+        weeklyActivity: d.weekly ?? undefined,
+
+        // Convenience aliases
+        correctRate: d.progress?.avg_accuracy ?? 0,
+        totalStudyTime: d.progress?.total_study_minutes ?? 0,
+        avgSessionTime: d.progress?.avg_session_minutes ?? 0,
+        consistencyScore: d.progress?.consistency_score ?? 0,
+      });
+
     } catch (err) {
-      console.error('Error fetching stats:', err);
+      console.error('❌ [useStatsData] Error fetching stats:', err);
       setError(err as Error);
-      // Setze Default-Werte auch bei Fehler
-      setStats({
-        streak: 0,
-        dueCount: 0,
-        level: 'A1',
-        totalWords: 0,
-        reviewCount: 0,
-        weakCount: 0,
-        correctRate: 0,
-        totalStudyTime: 0,
-        avgSessionTime: 0,
-        consistencyScore: 0,
-      });
+      setStats(DEFAULT_STATS);
     } finally {
       setLoading(false);
       isFetchingRef.current = false;
@@ -272,34 +209,25 @@ export function useStatsData(userId?: string): UseStatsDataResult {
 
   useEffect(() => {
     fetchStats();
-  }, [userId]);
+  }, [fetchStats]);
 
-  return {
-    stats,
-    loading,
-    error,
-    refetch: fetchStats,
-  };
+  return { stats, loading, error, refetch: fetchStats };
 }
 
-/**
- * Helper-Funktionen für Statistik-Berechnungen
- */
+// ── Utility helpers (unchanged public API) ────────────────────────────────────
 
 /**
- * Formatiert Minuten in lesbare Zeit (z.B. "2h 30min")
+ * Formats minutes → human-readable string  e.g. "2h 30min"
  */
 export function formatStudyTime(minutes: number): string {
-  if (minutes < 60) {
-    return `${Math.round(minutes)}min`;
-  }
+  if (minutes < 60) return `${Math.round(minutes)}min`;
   const hours = Math.floor(minutes / 60);
   const mins = Math.round(minutes % 60);
   return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
 }
 
 /**
- * Berechnet Trend (Anstieg/Abfall) zwischen zwei Werten
+ * Calculates percentage trend between two values.
  */
 export function calculateTrend(current: number, previous: number): number {
   if (previous === 0) return 0;
