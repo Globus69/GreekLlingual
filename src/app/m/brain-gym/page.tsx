@@ -196,11 +196,7 @@ export default function MobileBrainGymPage() {
    */
   const handleCacheHit = useCallback((data: PracticeItem[]) => {
     console.log('✅ [Brain Gym] Using cached data');
-    const { greek, translations } = createMatchingCards(data);
-    setGreekCards(greek);
-    setTranslationCards(translations);
-    setPracticeItems(data);
-  }, [createMatchingCards]);
+  }, []);
 
   const handleCacheMiss = useCallback(() => {
     console.log('❌ [Brain Gym] Cache miss - fetching fresh data');
@@ -221,25 +217,22 @@ export default function MobileBrainGymPage() {
     fetcher: fetchPracticeItems,
     ttl: CACHE_TTL.PRACTICE_ITEMS, // 1 hour
     enabled: !!user?.id,
-    version: 2, // Bump to bust stale empty-result caches from RPC errors
+    version: 3, // Bump to bust stale empty-result or 1-card caches from old bugs
     onCacheHit: handleCacheHit,
     onCacheMiss: handleCacheMiss,
   });
 
   /**
-   * Create cards when fresh data is fetched (cache miss)
-   * 🔧 FIX: Only create cards for fresh data, not cached data
+   * Create cards when data is updated (cache hit or miss)
    */
   useEffect(() => {
-    if (cachedPracticeItems && cachedPracticeItems.length > 0 && !cached) {
-      // Only create cards for fresh data (cache miss)
-      // For cached data, handleCacheHit already creates them
+    if (cachedPracticeItems) {
       const { greek, translations } = createMatchingCards(cachedPracticeItems);
       setGreekCards(greek);
       setTranslationCards(translations);
       setPracticeItems(cachedPracticeItems);
     }
-  }, [cachedPracticeItems, cached, createMatchingCards]);
+  }, [cachedPracticeItems, createMatchingCards]);
 
   /**
    * Reload data when data source changes

@@ -32,11 +32,19 @@ AS $$
 DECLARE
     v_streak         INTEGER := 0;
     v_level          TEXT    := 'A1';
-    v_due_count      BIGINT  := 0;
-    v_total_words    BIGINT  := 0;
-    v_total_correct  BIGINT  := 0;
-    v_weak_count     BIGINT  := 0;
-    v_review_count   BIGINT  := 0;
+    -- Total variables (student_progress + user_vocabulary_progress)
+    v_total_words   INTEGER := 0;
+    v_sp_words      INTEGER := 0;
+    v_uvp_words     INTEGER := 0;
+
+    v_total_correct INTEGER := 0;
+
+    v_due_count     INTEGER := 0;
+    v_sp_due        INTEGER := 0;
+    v_uvp_due       INTEGER := 0;
+
+    v_weak_count    INTEGER := 0;
+    v_review_count  INTEGER := 0;
     v_mastery_pct    INTEGER := 0;
     v_progress       JSONB;
     v_trends         JSONB;
@@ -50,22 +58,35 @@ BEGIN
     FROM public.users
     WHERE id = p_user_id;
 
-    -- ── 2. student_progress aggregates (all in one pass) ─────────────────────
+    -- ── 2a. student_progress aggregates (Phrases & Lessons) ───────────────
     SELECT
         COUNT(*) FILTER (WHERE next_review IS NOT NULL AND next_review <= NOW()),
         COUNT(*) FILTER (WHERE correct_count > 0),
-        COALESCE(SUM(correct_count) FILTER (WHERE correct_count > 0), 0),
-        COUNT(*) FILTER (WHERE attempts > 0
-                           AND (correct_count::FLOAT / NULLIF(attempts, 0)) < 0.6),
-        COUNT(*) FILTER (WHERE next_review IS NOT NULL)
+        COALESCE(SUM(correct_count) FILTER (WHERE correct_count > 0), 0)
     INTO
-        v_due_count,
-        v_total_words,
-        v_total_correct,
-        v_weak_count,
-        v_review_count
+        v_sp_due,
+        v_sp_words,
+        v_total_correct
     FROM public.student_progress
     WHERE student_id = p_user_id;
+
+    -- ── 2b. user_vocabulary_progress aggregates (Vocabulary) ───────────────
+    SELECT
+        COUNT(*) FILTER (WHERE fsrs_due IS NOT NULL AND fsrs_due <= NOW()),
+        COUNT(*) FILTER (WHERE fsrs_reps > 0)
+    INTO
+        v_uvp_due,
+        v_uvp_words
+    FROM public.user_vocabulary_progress
+    WHERE user_id = p_user_id;
+
+    -- Combine the counts
+    v_due_count := v_sp_due + v_uvp_due;
+    v_total_words := v_sp_words + v_uvp_words;
+
+    -- ── 2c. Fetch Weak and Review counts exactly as the UI previously did ──
+    v_weak_count := public.get_weak_vocabulary_count(p_user_id);
+    v_review_count := public.get_review_vocabulary_count(p_user_id);
 
     -- Mastery progress: correct answers out of 120-word target (capped at 100%)
     v_mastery_pct := LEAST(100, ROUND(v_total_correct * 100.0 / 120)::INTEGER);

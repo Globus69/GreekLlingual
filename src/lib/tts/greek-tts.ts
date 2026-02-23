@@ -115,8 +115,9 @@ export function speakGreek(
         };
 
         utterance.onerror = (event) => {
-            if (event.error === 'canceled') {
+            if (event.error === 'canceled' || event.error === 'interrupted') {
                 // This is expected when we call window.speechSynthesis.cancel() before starting a new speech
+                // 'interrupted' also happens in some browsers when a new speech overrides the old one before it starts.
                 resolve({
                     success: false,
                     message: undefined, // Don't trigger error messages for user
