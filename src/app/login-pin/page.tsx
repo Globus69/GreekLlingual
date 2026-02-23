@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useLanguage, Locale } from '@/context/language-context';
 import { useTranslation } from '@/lib/use-translation';
 import { supabase } from '@/db/supabase';
+import { reportError, reportSecurity } from '@/lib/monitor';
 
 export default function PinLoginPage() {
     const [pinDigits, setPinDigits] = useState<string[]>(['', '', '', '']);
@@ -228,12 +229,23 @@ export default function PinLoginPage() {
                         await new Promise(r => setTimeout(r, 3000));
                         continue;
                     }
+                    // All retries exhausted or non-timeout error → alert
+                    reportError('Login RPC timeout – alle Versuche erschöpft', {
+                        type: 'error',
+                        details: { error: err?.message, attempt },
+                        page: '/login-pin'
+                    });
                     throw err;
                 }
             }
 
             if (error) {
                 console.error('RPC error:', error);
+                reportError('Login RPC Fehler', {
+                    type: 'error',
+                    details: { code: error.code, message: error.message },
+                    page: '/login-pin'
+                });
                 throw error;
             }
 
@@ -242,14 +254,22 @@ export default function PinLoginPage() {
 
                 // Check: Fehler von RPC (IP banned, Honeypot, Account locked, etc.)
                 if (userData.error) {
-                    setAttemptCount(prev => prev + 1); // Increment on failure
+                    setAttemptCount(prev => prev + 1);
 
                     // Spezielle Fehlerbehandlung für verschiedene Fälle
                     let errorLevel = t('error.pin_not_found');
                     if (userData.error === 'IP banned') {
                         errorLevel = t('error.ip_banned');
+                        reportSecurity('🚨 Login: IP wurde gesperrt', {
+                            details: { error: userData.error },
+                            page: '/login-pin'
+                        });
                     } else if (userData.error === 'Account locked. Try again later.') {
                         errorLevel = t('error.account_locked');
+                        reportSecurity('🔒 Login: Account gesperrt (zu viele Versuche)', {
+                            details: { error: userData.error },
+                            page: '/login-pin'
+                        });
                     }
 
                     setWelcomePopup({
