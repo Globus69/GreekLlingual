@@ -281,6 +281,15 @@ export default function MobileDashboardPage() {
             onClick={() => router.push('/m/brain-gym')}
           />
 
+          {/* Cloze Test - NEW */}
+          <ModuleTile
+            icon="📝"
+            title="Cloze Test"
+            subtitle="Fill in the blanks"
+            color="blue"
+            onClick={() => router.push('/m/practice-modes/cloze-text')}
+          />
+
           {/* Spiele - DISABLED (grau, kein Action) */}
           <ModuleTile
             icon="🎮"
