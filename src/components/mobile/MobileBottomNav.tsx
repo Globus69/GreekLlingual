@@ -24,7 +24,7 @@ const NAV_STYLE: CSSProperties = {
   backgroundColor: 'rgba(28, 28, 30, 0.95)',
   backdropFilter: 'blur(20px)',
   borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-  padding: '8px 16px calc(12px + env(safe-area-inset-bottom))',
+  padding: '6px 16px calc(8px + env(safe-area-inset-bottom))',
 };
 
 const CONTAINER_STYLE: CSSProperties = {
@@ -40,14 +40,14 @@ const LINK_BASE_STYLE: CSSProperties = {
   flexDirection: 'column',
   alignItems: 'center',
   gap: '4px',
-  padding: '8px 16px',
+  padding: '5px 12px',
   minWidth: '60px',
   textDecoration: 'none',
   transition: 'transform 0.2s ease',
 };
 
 const ICON_STYLE: CSSProperties = {
-  fontSize: '24px',
+  fontSize: '20px',
   lineHeight: 1,
 };
 
@@ -84,7 +84,7 @@ function MobileBottomNav() {
   // Memoized style generator for labels
   const getLabelStyle = useCallback((active: boolean): CSSProperties => {
     return {
-      fontSize: '11px',
+      fontSize: '10px',
       fontWeight: active ? '600' : '500',
       color: active ? '#007AFF' : '#8E8E93',
       whiteSpace: 'nowrap',

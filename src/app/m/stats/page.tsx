@@ -65,7 +65,7 @@ export default function MobileStatsPage() {
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '24px',
+            fontSize: '34px',
             color: 'white',
             cursor: 'pointer',
             padding: 0,
@@ -193,8 +193,8 @@ export default function MobileStatsPage() {
             touchAction: 'manipulation'
           }}
         >
-          <h2 style={{ fontSize: 'clamp(13px, 3.5vw, 16px)', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>📈 Stats</h2>
-          <span style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#93C5FD' }}>Tap to view</span>
+          <h2 style={{ fontSize: 'clamp(18px, 5vw, 22px)', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>📈 Stats</h2>
+          <span style={{ fontSize: 'clamp(14px, 3.5vw, 15px)', color: '#93C5FD' }}>Tap to view</span>
         </div>
 
         {/* Weekly Activity Button */}
@@ -215,8 +215,8 @@ export default function MobileStatsPage() {
             touchAction: 'manipulation'
           }}
         >
-          <h2 style={{ fontSize: 'clamp(13px, 3.5vw, 16px)', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>📊 Activity</h2>
-          <span style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#93C5FD' }}>Tap to view</span>
+          <h2 style={{ fontSize: 'clamp(18px, 5vw, 22px)', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>📊 Activity</h2>
+          <span style={{ fontSize: 'clamp(14px, 3.5vw, 15px)', color: '#93C5FD' }}>Tap to view</span>
         </div>
 
         {/* Learning Curve Button */}
@@ -237,8 +237,8 @@ export default function MobileStatsPage() {
             touchAction: 'manipulation'
           }}
         >
-          <h2 style={{ fontSize: 'clamp(13px, 3.5vw, 16px)', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>📈 Curve</h2>
-          <span style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', color: '#93C5FD' }}>Tap to view</span>
+          <h2 style={{ fontSize: 'clamp(18px, 5vw, 22px)', fontWeight: 'bold', color: 'white', margin: 0, marginBottom: '4px' }}>📈 Curve</h2>
+          <span style={{ fontSize: 'clamp(14px, 3.5vw, 15px)', color: '#93C5FD' }}>Tap to view</span>
         </div>
       </div>
 
@@ -294,7 +294,7 @@ export default function MobileStatsPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  fontSize: '18px',
+                  fontSize: '25px',
                   cursor: 'pointer'
                 }}
               >
@@ -370,27 +370,27 @@ function StatCard({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '110px',
+        minHeight: '160px',
         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
         transition: 'transform 0.2s ease',
         touchAction: 'manipulation',
       }}
     >
-      <div style={{ fontSize: 'clamp(24px, 6vw, 32px)', marginBottom: '4px' }}>{icon}</div>
+      <div style={{ fontSize: 'clamp(34px, 8.4vw, 45px)', marginBottom: '8px' }}>{icon}</div>
       <div style={{
-        fontSize: 'clamp(22px, 5vw, 28px)',
+        fontSize: 'clamp(31px, 7vw, 39px)',
         fontWeight: 'bold',
         color: 'white',
         marginBottom: '2px',
         lineHeight: 1.2
       }}>{value}</div>
       {suffix && <div style={{
-        fontSize: 'clamp(11px, 2.5vw, 13px)',
+        fontSize: 'clamp(15px, 3.5vw, 18px)',
         color: 'rgba(255, 255, 255, 0.8)',
         whiteSpace: 'nowrap'
       }}>{suffix}</div>}
       <div style={{
-        fontSize: 'clamp(10px, 2.5vw, 12px)',
+        fontSize: 'clamp(14px, 3.5vw, 17px)',
         color: 'rgba(255, 255, 255, 0.9)',
         marginTop: '2px',
         fontWeight: '500',

@@ -126,29 +126,34 @@ export function useStatsData(userId?: string): UseStatsDataResult {
       console.log(`📡 [useStatsData] Fetching stats for user: ${userId}`);
 
       // Parallele Anfragen für bessere Performance
-      const [
-        dueItemsResult,
-        totalItemsResult,
-        studentDataResult,
-        progressOverviewResult,
-        learningTrendsResult,
-        weeklyActivityResult,
-        userStreakResult,
-      ] = await Promise.all([
-        // Due Count: Vokabeln die heute fällig sind
+      const results = await Promise.all([
+        // Due Count: Phrasen die heute fällig sind
         supabase
           .from('student_progress')
           .select('id')
           .eq('student_id', userId)
-          .lte('next_review', new Date().toISOString())
-          .limit(100),
+          .lte('next_review', new Date().toISOString()),
 
-        // Total Words (gelernt)
+        // Due Count: Vokabeln (Vocabulary)
+        supabase
+          .from('user_vocabulary_progress')
+          .select('id')
+          .eq('user_id', userId)
+          .lte('fsrs_due', new Date().toISOString()),
+
+        // Total Words (gelernt in student_progress)
         supabase
           .from('student_progress')
           .select('id')
           .eq('student_id', userId)
-          .gte('correct_count', 1),
+          .gt('fsrs_reps', 0),
+
+        // Total Words (gelernt in vocabulary)
+        supabase
+          .from('user_vocabulary_progress')
+          .select('id')
+          .eq('user_id', userId)
+          .gt('fsrs_reps', 0),
 
         // Level (aus users Tabelle)
         supabase
@@ -157,7 +162,7 @@ export function useStatsData(userId?: string): UseStatsDataResult {
           .eq('id', userId)
           .single(),
 
-        // Progress Overview (Migration 060)
+        // Progress Overview (Migration 060, updated in 093)
         supabase.rpc('get_progress_overview', {
           p_user_id: userId,
           p_days: 30,
@@ -179,30 +184,19 @@ export function useStatsData(userId?: string): UseStatsDataResult {
         supabase.rpc('get_user_streak', {
           p_user_id: userId,
         }),
-      ]);
+      ] as any[]);
 
-      // Fehlerbehandlung
-      if (dueItemsResult.error) {
-        console.warn('Error fetching due items:', dueItemsResult.error);
-      }
-      if (totalItemsResult.error) {
-        console.warn('Error fetching total items:', totalItemsResult.error);
-      }
-      if (studentDataResult.error && studentDataResult.error.code !== 'PGRST116') {
-        console.warn('Error fetching student level:', studentDataResult.error);
-      }
-      if (progressOverviewResult.error) {
-        console.warn('Error fetching progress overview:', progressOverviewResult.error);
-      }
-      if (learningTrendsResult.error) {
-        console.warn('Error fetching learning trends:', learningTrendsResult.error);
-      }
-      if (weeklyActivityResult.error) {
-        console.warn('Error fetching weekly activity:', weeklyActivityResult.error);
-      }
-      if (userStreakResult.error) {
-        console.warn('Error fetching user streak:', userStreakResult.error);
-      }
+      const [
+        duePhrasesResult,
+        dueVocabResult,
+        totalPhrasesResult,
+        totalVocabResult,
+        studentDataResult,
+        progressOverviewResult,
+        learningTrendsResult,
+        weeklyActivityResult,
+        userStreakResult,
+      ] = results as any[];
 
       // Progress Overview auswerten (nimmt ersten Eintrag, da RPC nur 1 Row zurückgibt)
       const progressOverview = progressOverviewResult.data?.[0];
@@ -213,9 +207,10 @@ export function useStatsData(userId?: string): UseStatsDataResult {
       // Statistiken setzen
       setStats({
         streak,
-        dueCount: dueItemsResult.data?.length || 0,
+        dueCount: (duePhrasesResult.data?.length || 0) + (dueVocabResult.data?.length || 0),
         level: studentDataResult.data?.level || 'A1',
-        totalWords: totalItemsResult.data?.length || 0,
+        totalWords: progressOverview?.cards_learned ||
+          ((totalPhrasesResult.data?.length || 0) + (totalVocabResult.data?.length || 0)),
 
         // Progress Statistics (Migration 060)
         progressOverview: progressOverview || undefined,

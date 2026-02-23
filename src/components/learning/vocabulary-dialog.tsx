@@ -100,10 +100,10 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
                 return;
             }
 
-            // Call RPC function to get due vocabulary cards with FSRS data
-            const { data, error: rpcError } = await supabase.rpc('get_due_vocabulary_cards', {
+            // Call RPC function to get learning/due vocabulary cards
+            const { data, error: rpcError } = await supabase.rpc('get_learning_vocabulary_cards', {
                 p_user_id: STUDENT_ID,
-                p_limit: 20
+                p_limit: 50
             });
 
             if (rpcError) {
@@ -216,28 +216,35 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
 
             console.log(`✅ Card updated: Rating ${rating}, Next review in ${interval.toFixed(1)} days`);
 
-            // Update session stats
-            setSessionStats(prev => ({
-                ...prev,
-                again: prev.again + (rating === 1 ? 1 : 0),
-                hard: prev.hard + (rating === 2 ? 1 : 0),
-                good: prev.good + (rating === 3 ? 1 : 0),
-                easy: prev.easy + (rating === 4 ? 1 : 0)
-            }));
+            // MASTERY LOOP LOGIC
+            // If rating is "Good" (3) or "Easy" (4), remove it from the current session queue
+            // Otherwise, move it to the end of the queue for another round
+            if (rating >= 3) {
+                // Update session stats ONLY when a card is successfully completed
+                // We count both "Good" and "Easy" as "Good" to represent "Mastered"
+                setSessionStats(prev => ({
+                    ...prev,
+                    good: prev.good + 1
+                }));
 
-            // Remove card from queue (all ratings remove the card)
-            const newQueue = queue.filter((_, index) => index !== currentIndex);
-            setQueue(newQueue);
+                const newQueue = queue.filter((_, index) => index !== currentIndex);
+                setQueue(newQueue);
 
-            if (newQueue.length === 0) {
-                // Session complete
-                setShowSummary(true);
-                const totalCards = sessionStats.again + sessionStats.hard + sessionStats.good + sessionStats.easy + 1;
-                success(`Session complete! ${totalCards} cards reviewed 🎉`);
+                if (newQueue.length === 0) {
+                    setShowSummary(true);
+                    success(`Mastery complete! ${sessionStats.good + 1} cards mastered. 🎯`);
+                } else if (currentIndex >= newQueue.length) {
+                    setCurrentIndex(0);
+                }
             } else {
-                // Stay at same index (next card moves into this position)
-                if (currentIndex >= newQueue.length) {
-                    setCurrentIndex(newQueue.length - 1);
+                // Not "Good" yet? Move to back of the line
+                const currentItem = queue[currentIndex];
+                const otherItems = queue.filter((_, index) => index !== currentIndex);
+                setQueue([...otherItems, currentItem]);
+
+                // If we reach the end of the current order, the "refining" continues
+                if (currentIndex >= otherItems.length) {
+                    setCurrentIndex(0);
                 }
             }
 

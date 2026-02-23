@@ -349,7 +349,7 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
                 setVocabulary(data as FSRSLearningItem[]);
                 setCurrentIndex(0);
                 setFlipped(false);
-                setTotal(data.length);
+                setTotal(0);
                 setCorrect(0);
                 setRatings({ again: 0, hard: 0, good: 0, easy: 0 });
                 setShowSummary(false);
