@@ -25,21 +25,32 @@ export default function SwipeTutorialDialog({ isOpen, onClose }: SwipeTutorialDi
         onClose();
 
         if (markAsSeen && user?.id) {
-            try {
-                console.log('📡 [SwipeTutorialDialog] Updating metadata in DB...');
-                const { error } = await supabase.rpc('update_user_metadata', {
-                    p_user_id: user.id,
-                    p_swipe_version: APP_VERSION
-                });
+            const maxRetries = 3;
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`📡 [SwipeTutorialDialog] Updating metadata... (attempt ${attempt}/${maxRetries})`);
+                    const { error } = await supabase.rpc('update_user_metadata', {
+                        p_user_id: user.id,
+                        p_swipe_version: APP_VERSION
+                    });
 
-                if (error) {
-                    console.error('❌ [SwipeTutorialDialog] Error updating swipe tutorial version:', error);
-                } else {
-                    console.log('✅ [SwipeTutorialDialog] Metadata updated, refreshing user state...');
-                    await refreshUser();
+                    if (error) {
+                        console.error(`❌ [SwipeTutorialDialog] Error (attempt ${attempt}):`, error);
+                        if (attempt < maxRetries) {
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            continue;
+                        }
+                    } else {
+                        console.log('✅ [SwipeTutorialDialog] Metadata updated, refreshing user state...');
+                        await refreshUser();
+                        break;
+                    }
+                } catch (err) {
+                    console.error(`❌ [SwipeTutorialDialog] Network error (attempt ${attempt}):`, err);
+                    if (attempt < maxRetries) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
                 }
-            } catch (err) {
-                console.error('❌ [SwipeTutorialDialog] Failed to save swipe tutorial acknowledgment:', err);
             }
         }
     };

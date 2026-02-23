@@ -57,22 +57,34 @@ export default function UserManualDialog() {
         setHasBeenClosedForSession(true);
 
         if (markAsSeen && user?.id) {
-            try {
-                console.log('📡 [UserManualDialog] Updating metadata in DB...');
-                const { data: rpcData, error } = await supabase.rpc('update_user_metadata', {
-                    p_user_id: user.id,
-                    p_manual_version: APP_VERSION
-                });
+            // Retry logic: Supabase Free-Tier can be slow to wake up
+            const maxRetries = 3;
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`📡 [UserManualDialog] Updating metadata in DB... (attempt ${attempt}/${maxRetries})`);
+                    const { data: rpcData, error } = await supabase.rpc('update_user_metadata', {
+                        p_user_id: user.id,
+                        p_manual_version: APP_VERSION
+                    });
 
-                if (error) {
-                    console.error('❌ [UserManualDialog] Error updating manual version:', error);
-                } else {
-                    console.log('✅ [UserManualDialog] Metadata updated successfully, refreshing user state...', rpcData);
-                    await refreshUser();
-                    console.log('🔄 [UserManualDialog] User state refresh complete');
+                    if (error) {
+                        console.error(`❌ [UserManualDialog] Error (attempt ${attempt}):`, error);
+                        if (attempt < maxRetries) {
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            continue;
+                        }
+                    } else {
+                        console.log('✅ [UserManualDialog] Metadata updated successfully', rpcData);
+                        await refreshUser();
+                        console.log('🔄 [UserManualDialog] User state refresh complete');
+                        break;
+                    }
+                } catch (err) {
+                    console.error(`❌ [UserManualDialog] Network error (attempt ${attempt}):`, err);
+                    if (attempt < maxRetries) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
                 }
-            } catch (err) {
-                console.error('❌ [UserManualDialog] Failed to save manual acknowledgment:', err);
             }
         }
     };
