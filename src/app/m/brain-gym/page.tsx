@@ -47,11 +47,24 @@ export default function MobileBrainGymPage() {
   const [matchedPairIds, setMatchedPairIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [mistakes, setMistakes] = useState(0);
-  const [startTime] = useState(Date.now());
+  const [seconds, setSeconds] = useState(0);
   const [gameComplete, setGameComplete] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dataSource, setDataSource] = useState<'due_cards' | 'review_vocab' | 'weak_words'>('review_vocab');
   const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([]);
+
+  /**
+   * Real-time timer effect
+   */
+  useEffect(() => {
+    if (gameComplete || loading) return;
+
+    const interval = setInterval(() => {
+      setSeconds(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [gameComplete, loading]);
 
   /**
    * Auth check
@@ -238,6 +251,7 @@ export default function MobileBrainGymPage() {
       setMistakes(0);
       setGameComplete(false);
       setSaving(false);
+      setSeconds(0);
       // NOTE: We don't need to call refresh() here manually.
       // Changing the dataSource changes the cache key, which
       // automatically triggers a reload in useMobileCache.
@@ -331,7 +345,7 @@ export default function MobileBrainGymPage() {
     setSaving(true);
 
     try {
-      const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+      const elapsedTime = seconds;
       const totalPairs = greekCards.length;
       const score = Math.max(0, 100 - (mistakes * 10));
 
@@ -391,6 +405,7 @@ export default function MobileBrainGymPage() {
     setMistakes(0);
     setGameComplete(false);
     setSaving(false);
+    setSeconds(0);
 
     // Reshuffle translation cards only
     if (practiceItems && practiceItems.length > 0) {
@@ -404,7 +419,7 @@ export default function MobileBrainGymPage() {
    * Calculate elapsed time
    */
   const getElapsedTime = (): string => {
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const elapsed = seconds;
     const mins = Math.floor(elapsed / 60);
     const secs = elapsed % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
