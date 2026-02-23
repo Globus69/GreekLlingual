@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 // Keep-alive: Pings DB to prevent Supabase Free-Tier from sleeping
-// Call this endpoint every 4-5 days via cron / external scheduler
-// e.g. cron-job.org → POST https://yourapp.vercel.app/api/keepalive
+// Call via cron-job.org every 4-5 days:
+// GET https://yourapp.vercel.app/api/keepalive
 
 export async function GET() {
     const start = Date.now();
@@ -17,26 +16,25 @@ export async function GET() {
             return NextResponse.json({ ok: false, error: 'Missing env vars' }, { status: 500 });
         }
 
-        const supabase = createClient(supabaseUrl, supabaseKey);
-
-        // Lightweight ping – just SELECT 1 row from users to wake up DB
-        const { error } = await supabase
-            .from('users')
-            .select('id')
-            .limit(1)
-            .maybeSingle();
+        // Direct REST call – no client instance needed on server side
+        const res = await fetch(`${supabaseUrl}/rest/v1/users?select=id&limit=1`, {
+            headers: {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`,
+            },
+        });
 
         const elapsed = Date.now() - start;
 
-        if (error) {
-            console.error('❌ [keepalive] DB ping failed:', error.message);
+        if (!res.ok) {
+            const errText = await res.text();
+            console.error('❌ [keepalive] DB ping failed:', errText);
 
-            // Notify via Telegram if DB is unreachable
-            await sendTelegramAlert(supabaseUrl,
-                `🔴 <b>DB OFFLINE</b>\n\nSupabase antwortet nicht!\n\nFehler: ${error.message}\nZeit: ${new Date().toISOString()}\n\n⚠️ Das Projekt könnte pausiert sein.`
+            await sendTelegramAlert(supabaseUrl, supabaseKey,
+                `🔴 <b>DB OFFLINE</b>\n\nSupabase antwortet nicht!\n\nStatus: ${res.status}\nZeit: ${new Date().toISOString()}\n\n⚠️ Das Projekt könnte pausiert sein.`
             );
 
-            return NextResponse.json({ ok: false, error: error.message, ms: elapsed }, { status: 503 });
+            return NextResponse.json({ ok: false, status: res.status, ms: elapsed }, { status: 503 });
         }
 
         console.log(`✅ [keepalive] DB ping OK in ${elapsed}ms`);
@@ -49,7 +47,7 @@ export async function GET() {
     }
 }
 
-async function sendTelegramAlert(supabaseUrl: string, message: string) {
+async function sendTelegramAlert(supabaseUrl: string, supabaseKey: string, message: string) {
     try {
         await fetch(`${supabaseUrl}/functions/v1/send-telegram`, {
             method: 'POST',

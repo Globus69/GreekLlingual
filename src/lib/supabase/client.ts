@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// ⚠️ SINGLETON REDIRECT
+// All imports must use the same Supabase client instance to avoid
+// "Multiple GoTrueClient instances" warnings.
+// The canonical Singleton lives in @/db/supabase.
+// This file is kept for backward-compatibility.
+export { supabase } from '@/db/supabase';
