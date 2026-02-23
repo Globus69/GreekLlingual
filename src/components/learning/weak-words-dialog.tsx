@@ -13,16 +13,24 @@ import '@/styles/liquid-glass.css';
 
 interface WeakWord {
     id: string;
-    greek_transcription: string;
-    greek_phonetic?: string;
+    type: string;
+    english: string;
+    russian?: string;
+    greek: string;
+    greek_word: string;
+    phonetic?: string;
+    example_en?: string;
+    example_gr?: string;
     audio_url?: string;
-    en_translation?: string;
-    ru_translation?: string;
-    de_translation?: string;
-    es_translation?: string;
     level: string;
     difficulty: string;
-    frequency: number;
+    fsrs_difficulty: number;
+    fsrs_stability: number;
+    fsrs_last_review: string | null;
+    fsrs_due: string;
+    fsrs_reps: number;
+    fsrs_lapses: number;
+    fsrs_state: string;
 }
 
 interface WeakWordsDialogProps {
@@ -76,16 +84,14 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
     const loadWeakWords = async () => {
         setLoading(true);
         try {
-            // Load vocabulary items with higher difficulty first
-            const { data, error: dbError } = await supabase
-                .from('multilingual_vocabulary')
-                .select('*')
-                .eq('level', user?.level || 'A1')
-                .order('difficulty', { ascending: false }) // Most difficult first
-                .limit(15);
+            // Call RPC function to get weak vocabulary cards
+            const { data, error: rpcError } = await supabase.rpc('get_weak_vocabulary_cards', {
+                p_user_id: STUDENT_ID,
+                p_limit: 15
+            });
 
-            if (dbError) {
-                console.error('❌ DB error:', dbError);
+            if (rpcError) {
+                console.error('❌ RPC error:', rpcError);
                 error('Failed to load weak words');
                 setQueue([]);
                 return;
@@ -117,7 +123,7 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
         const currentItem = queue[currentIndex];
         if (!currentItem) return;
 
-        const text = currentItem.greek_transcription;
+        const text = currentItem.greek_word || currentItem.greek;
         if (!text) return;
 
         setIsPlaying(true);
@@ -141,34 +147,60 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
     }, [flipped, currentIndex, autoPlay, queue.length]);
 
     // Handle answer: 1 = Wrong (push to end), 3 = Correct (remove from queue)
-    const handleRating = (rating: Rating) => {
+    const handleRating = async (rating: Rating) => {
         if (queue.length === 0 || currentIndex >= queue.length) return;
 
-        if (rating === 3) {
-            // Correct: Remove from queue
-            setCorrect(prev => prev + 1);
-            const newQueue = queue.filter((_, index) => index !== currentIndex);
-            setQueue(newQueue);
+        const currentItem = queue[currentIndex] as any;
 
-            if (newQueue.length === 0) {
-                setShowSummary(true);
-                success(`All weak words reviewed! ${correct + 1} mastered, ${wrong} to practice`);
+        try {
+            // Update database progress (FSRS)
+            // Note: Even in "Weak Words" mode, we should update FSRS to reflect learning
+            const { error: rpcError } = await supabase.rpc('update_vocabulary_progress', {
+                p_card_id: currentItem.id,
+                p_user_id: STUDENT_ID,
+                p_rating: rating,
+                // We use defaults for FSRS params here if they are missing, 
+                // but the RPC handle_card_fsrs should manage the algorithm
+                p_new_difficulty: currentItem.fsrs_difficulty || 0.3,
+                p_new_stability: currentItem.fsrs_stability || 0.1,
+                p_new_due: new Date(Date.now() + 86400000).toISOString(),
+                p_new_reps: (currentItem.fsrs_reps || 0) + 1,
+                p_new_lapses: currentItem.fsrs_lapses || 0,
+                p_new_state: 'review',
+                p_interval_days: 1,
+                p_old_difficulty: currentItem.fsrs_difficulty,
+                p_old_stability: currentItem.fsrs_stability
+            });
+
+            if (rpcError) throw rpcError;
+
+            if (rating >= 3) {
+                // Correct: Remove from queue
+                setCorrect(prev => prev + 1);
+                const newQueue = queue.filter((_, index) => index !== currentIndex);
+                setQueue(newQueue);
+
+                if (newQueue.length === 0) {
+                    setShowSummary(true);
+                    success(`All weak words reviewed! ${correct + 1} cards mastered! 🎯`);
+                } else {
+                    if (currentIndex >= newQueue.length) {
+                        setCurrentIndex(0);
+                    }
+                }
             } else {
-                if (currentIndex >= newQueue.length) {
-                    setCurrentIndex(newQueue.length - 1);
+                // Wrong: Move to end of queue (practice again)
+                const current = queue[currentIndex];
+                const otherItems = queue.filter((_, index) => index !== currentIndex);
+                setQueue([...otherItems, current]);
+
+                if (currentIndex >= otherItems.length) {
+                    setCurrentIndex(0);
                 }
             }
-        } else {
-            // Wrong: Move to end of queue (practice again)
-            setWrong(prev => prev + 1);
-            const newQueue = [...queue];
-            const [item] = newQueue.splice(currentIndex, 1);
-            newQueue.push(item);
-            setQueue(newQueue);
-
-            if (currentIndex >= newQueue.length) {
-                setCurrentIndex(0);
-            }
+        } catch (err) {
+            console.error('❌ Update error:', err);
+            error('Failed to save progress');
         }
 
         setFlipped(false);
@@ -292,12 +324,12 @@ export default function WeakWordsDialog({ isOpen, onClose }: WeakWordsDialogProp
                         <div className="card-container">
                             <FlashcardFSRS
                                 front={
-                                    locale === 'ru' && currentItem.ru_translation
-                                        ? currentItem.ru_translation
-                                        : currentItem.en_translation || currentItem.de_translation || currentItem.es_translation || ''
+                                    locale === 'ru' && currentItem.russian
+                                        ? currentItem.russian
+                                        : currentItem.english || ''
                                 }
-                                back={currentItem.greek_transcription}
-                                phonetic={currentItem.greek_phonetic}
+                                back={currentItem.greek_word || currentItem.greek || ''}
+                                phonetic={currentItem.phonetic || ''}
                                 example={undefined}
                                 onFlip={() => setFlipped(!flipped)}
                                 flipped={flipped}
