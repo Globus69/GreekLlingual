@@ -117,7 +117,8 @@ export default function MobileBrainGymPage() {
 
       if (error) {
         console.error(`Error fetching ${dataSource}:`, error);
-        return [];
+        // IMPORTANT: throw instead of returning [] so the error is NOT cached
+        throw new Error(error.message || `RPC error for ${dataSource}`);
       }
 
       // Map RPC result to PracticeItem interface
@@ -220,6 +221,7 @@ export default function MobileBrainGymPage() {
     fetcher: fetchPracticeItems,
     ttl: CACHE_TTL.PRACTICE_ITEMS, // 1 hour
     enabled: !!user?.id,
+    version: 2, // Bump to bust stale empty-result caches from RPC errors
     onCacheHit: handleCacheHit,
     onCacheMiss: handleCacheMiss,
   });
