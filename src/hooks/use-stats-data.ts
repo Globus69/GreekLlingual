@@ -113,7 +113,7 @@ export function useStatsData(userId?: string): UseStatsDataResult {
     // 2. Rate limit: Wait at least 1 second between fetches
     const now = Date.now();
     if (isFetchingRef.current) {
-      console.warn('📡 [useStatsData] Fetch already in progress, skipping.');
+      console.debug('📡 [useStatsData] Fetch already in progress, skipping.');
       return;
     }
 
