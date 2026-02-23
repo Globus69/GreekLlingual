@@ -299,345 +299,346 @@ export default function MobileVocabularyWeakPage() {
                 paddingBottom: '80px'
             }}>
                 {/* Header */}
-            <div style={{
-                position: 'sticky',
-                top: 0,
-                zIndex: 50,
-                backgroundColor: 'rgba(28, 28, 30, 0.95)',
-                backdropFilter: 'blur(20px)',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                padding: '16px'
-            }}>
                 <div style={{
-                    maxWidth: '448px',
-                    margin: '0 auto',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 50,
+                    backgroundColor: 'rgba(28, 28, 30, 0.95)',
+                    backdropFilter: 'blur(20px)',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                    padding: '11px',
+                    paddingTop: 'calc(11px + env(safe-area-inset-top))',
                 }}>
-                    <button
-                        onClick={() => router.push('/m')}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#007AFF',
-                            fontSize: '16px',
-                            cursor: 'pointer',
-                            padding: '8px'
-                        }}
-                    >
-                        ← Back
-                    </button>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <h1 style={{
-                            fontSize: '20px',
-                            fontWeight: 'bold',
-                            color: 'white',
-                            margin: 0
-                        }}>
-                            ⚠️ Weak Words
-                        </h1>
-                        {cached && <CacheIndicator cached={cached} />}
-                    </div>
-                    <button
-                        onClick={refresh}
-                        style={{
-                            background: 'rgba(0, 122, 255, 0.2)',
-                            border: '1px solid rgba(0, 122, 255, 0.3)',
-                            borderRadius: '8px',
-                            padding: '8px',
-                            color: '#007AFF',
-                            fontSize: '16px',
-                            cursor: 'pointer',
-                            minWidth: '44px',
-                            minHeight: '44px',
-                        }}
-                    >
-                        🔄
-                    </button>
-                </div>
-                {!loading && !showSummary && cards && cards.length > 0 && (
                     <div style={{
                         maxWidth: '448px',
-                        margin: '12px auto 0',
+                        margin: '0 auto',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '12px',
-                        fontSize: '14px',
-                        color: '#8E8E93'
+                        justifyContent: 'space-between'
                     }}>
-                        <span style={{ color: 'white' }}>Card {currentIndex + 1} / {cards.length}</span>
-                        {sessionStats.again > 0 && <span style={{ color: '#FF6B6B' }}>❌ {sessionStats.again}</span>}
-                        {sessionStats.hard > 0 && <span style={{ color: '#FFA94D' }}>🟠 {sessionStats.hard}</span>}
-                        {sessionStats.good > 0 && <span style={{ color: '#51CF66' }}>✅ {sessionStats.good}</span>}
-                        {sessionStats.easy > 0 && <span style={{ color: '#339AF0' }}>🎯 {sessionStats.easy}</span>}
-                    </div>
-                )}
-            </div>
-
-            {/* Content */}
-            <div style={{ padding: '24px' }}>
-                {loading ? (
-                    <div style={{
-                        textAlign: 'center',
-                        padding: '80px 20px',
-                        color: 'white'
-                    }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
-                        <p>Loading weak words...</p>
-                    </div>
-                ) : showSummary || !cards || cards.length === 0 ? (
-                    <div style={{
-                        textAlign: 'center',
-                        padding: '80px 20px',
-                        color: 'white'
-                    }}>
-                        <div style={{ fontSize: '64px', marginBottom: '16px' }}>💪</div>
-                        <h3 style={{ fontSize: '24px', marginBottom: '16px' }}>No weak words!</h3>
-                        <p style={{ fontSize: '14px', color: '#8E8E93', marginBottom: '32px' }}>
-                            You're doing great! All words are mastered.
-                        </p>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', maxWidth: '400px', margin: '0 auto 32px' }}>
-                            <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(255, 107, 107, 0.1)', borderRadius: '12px', border: '1px solid rgba(255, 107, 107, 0.3)' }}>
-                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FF6B6B' }}>{sessionStats.again}</div>
-                                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Again ❌</div>
-                            </div>
-                            <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(255, 169, 77, 0.1)', borderRadius: '12px', border: '1px solid rgba(255, 169, 77, 0.3)' }}>
-                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FFA94D' }}>{sessionStats.hard}</div>
-                                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Hard 🟠</div>
-                            </div>
-                            <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(81, 207, 102, 0.1)', borderRadius: '12px', border: '1px solid rgba(81, 207, 102, 0.3)' }}>
-                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#51CF66' }}>{sessionStats.good}</div>
-                                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Good ✅</div>
-                            </div>
-                            <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(51, 154, 240, 0.1)', borderRadius: '12px', border: '1px solid rgba(51, 154, 240, 0.3)' }}>
-                                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#339AF0' }}>{sessionStats.easy}</div>
-                                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Easy 🎯</div>
-                            </div>
-                        </div>
                         <button
-                            onClick={() => router.push('/m/vocabulary')}
+                            onClick={() => router.push('/m')}
                             style={{
-                                padding: '14px 28px',
-                                borderRadius: '12px',
+                                background: 'none',
                                 border: 'none',
-                                background: 'rgba(0, 122, 255, 0.3)',
                                 color: '#007AFF',
                                 fontSize: '16px',
-                                fontWeight: '600',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                padding: '8px'
                             }}
                         >
-                            Back to Due Cards
+                            ← Back
+                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <h1 style={{
+                                fontSize: '20px',
+                                fontWeight: 'bold',
+                                color: 'white',
+                                margin: 0
+                            }}>
+                                ⚠️ Weak Words
+                            </h1>
+                            {cached && <CacheIndicator cached={cached} />}
+                        </div>
+                        <button
+                            onClick={refresh}
+                            style={{
+                                background: 'rgba(0, 122, 255, 0.2)',
+                                border: '1px solid rgba(0, 122, 255, 0.3)',
+                                borderRadius: '8px',
+                                padding: '8px',
+                                color: '#007AFF',
+                                fontSize: '16px',
+                                cursor: 'pointer',
+                                minWidth: '44px',
+                                minHeight: '44px',
+                            }}
+                        >
+                            🔄
                         </button>
                     </div>
-                ) : currentItem ? (
-                    <>
-                        {/* Card Interface */}
+                    {!loading && !showSummary && cards && cards.length > 0 && (
                         <div style={{
                             maxWidth: '448px',
-                            margin: '0 auto',
+                            margin: '12px auto 0',
                             display: 'flex',
-                            flexDirection: 'column',
                             alignItems: 'center',
-                            minHeight: 'calc(100vh - 300px)'
+                            justifyContent: 'center',
+                            gap: '12px',
+                            fontSize: '14px',
+                            color: '#8E8E93'
                         }}>
-                            {/* Card */}
-                            <div
-                                onClick={() => !isFlipped && setIsFlipped(true)}
+                            <span style={{ color: 'white' }}>Card {currentIndex + 1} / {cards.length}</span>
+                            {sessionStats.again > 0 && <span style={{ color: '#FF6B6B' }}>❌ {sessionStats.again}</span>}
+                            {sessionStats.hard > 0 && <span style={{ color: '#FFA94D' }}>🟠 {sessionStats.hard}</span>}
+                            {sessionStats.good > 0 && <span style={{ color: '#51CF66' }}>✅ {sessionStats.good}</span>}
+                            {sessionStats.easy > 0 && <span style={{ color: '#339AF0' }}>🎯 {sessionStats.easy}</span>}
+                        </div>
+                    )}
+                </div>
+
+                {/* Content */}
+                <div style={{ padding: '24px' }}>
+                    {loading ? (
+                        <div style={{
+                            textAlign: 'center',
+                            padding: '80px 20px',
+                            color: 'white'
+                        }}>
+                            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+                            <p>Loading weak words...</p>
+                        </div>
+                    ) : showSummary || !cards || cards.length === 0 ? (
+                        <div style={{
+                            textAlign: 'center',
+                            padding: '80px 20px',
+                            color: 'white'
+                        }}>
+                            <div style={{ fontSize: '64px', marginBottom: '16px' }}>💪</div>
+                            <h3 style={{ fontSize: '24px', marginBottom: '16px' }}>No weak words!</h3>
+                            <p style={{ fontSize: '14px', color: '#8E8E93', marginBottom: '32px' }}>
+                                You're doing great! All words are mastered.
+                            </p>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', maxWidth: '400px', margin: '0 auto 32px' }}>
+                                <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(255, 107, 107, 0.1)', borderRadius: '12px', border: '1px solid rgba(255, 107, 107, 0.3)' }}>
+                                    <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FF6B6B' }}>{sessionStats.again}</div>
+                                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Again ❌</div>
+                                </div>
+                                <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(255, 169, 77, 0.1)', borderRadius: '12px', border: '1px solid rgba(255, 169, 77, 0.3)' }}>
+                                    <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FFA94D' }}>{sessionStats.hard}</div>
+                                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Hard 🟠</div>
+                                </div>
+                                <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(81, 207, 102, 0.1)', borderRadius: '12px', border: '1px solid rgba(81, 207, 102, 0.3)' }}>
+                                    <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#51CF66' }}>{sessionStats.good}</div>
+                                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Good ✅</div>
+                                </div>
+                                <div style={{ textAlign: 'center', padding: '16px', background: 'rgba(51, 154, 240, 0.1)', borderRadius: '12px', border: '1px solid rgba(51, 154, 240, 0.3)' }}>
+                                    <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#339AF0' }}>{sessionStats.easy}</div>
+                                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Easy 🎯</div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => router.push('/m/vocabulary')}
                                 style={{
-                                    width: '100%',
-                                    minHeight: '360px',
-                                    backgroundColor: 'rgba(28, 28, 32, 0.95)',
-                                    backdropFilter: 'blur(10px)',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                    borderRadius: '20px',
-                                    padding: '40px 24px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: !isFlipped ? 'pointer' : 'default',
-                                    transition: 'all 0.3s ease',
-                                    marginBottom: '24px',
-                                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)'
+                                    padding: '14px 28px',
+                                    borderRadius: '12px',
+                                    border: 'none',
+                                    background: 'rgba(0, 122, 255, 0.3)',
+                                    color: '#007AFF',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
                                 }}
                             >
-                                {/* Front: English/Russian Word */}
-                                {!isFlipped ? (
-                                    <>
-                                        <div style={{
-                                            fontSize: '11px',
-                                            color: 'rgba(255, 255, 255, 0.4)',
-                                            marginBottom: '16px',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '1px',
-                                            fontWeight: '600'
-                                        }}>
-                                            {locale === 'ru' && currentItem.russian ? 'Russian' : 'English'}
-                                        </div>
-                                        <div style={{
-                                            fontSize: '36px',
-                                            fontWeight: 'bold',
-                                            color: 'white',
-                                            textAlign: 'center',
-                                            marginBottom: '24px'
-                                        }}>
-                                            {locale === 'ru' && currentItem.russian ? currentItem.russian : currentItem.english}
-                                        </div>
-                                        <div style={{
-                                            fontSize: '12px',
-                                            color: 'rgba(255, 255, 255, 0.3)',
-                                            fontWeight: '500'
-                                        }}>
-                                            Tap to reveal answer
-                                        </div>
-                                    </>
-                                ) : (
-                                    /* Back: Greek Word */
-                                    <>
-                                        <div style={{
-                                            fontSize: '11px',
-                                            color: 'rgba(255, 255, 255, 0.4)',
-                                            marginBottom: '16px',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '1px',
-                                            fontWeight: '600'
-                                        }}>
-                                            Greek
-                                        </div>
-                                        <div style={{
-                                            fontSize: '40px',
-                                            fontWeight: 'bold',
-                                            color: 'white',
-                                            textAlign: 'center',
-                                            marginBottom: '12px'
-                                        }}>
-                                            {currentItem.greek_word || currentItem.greek}
-                                        </div>
-                                        {currentItem.phonetic && (
+                                Back to Due Cards
+                            </button>
+                        </div>
+                    ) : currentItem ? (
+                        <>
+                            {/* Card Interface */}
+                            <div style={{
+                                maxWidth: '448px',
+                                margin: '0 auto',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                minHeight: 'calc(100vh - 300px)'
+                            }}>
+                                {/* Card */}
+                                <div
+                                    onClick={() => !isFlipped && setIsFlipped(true)}
+                                    style={{
+                                        width: '100%',
+                                        minHeight: '360px',
+                                        backgroundColor: 'rgba(28, 28, 32, 0.95)',
+                                        backdropFilter: 'blur(10px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        borderRadius: '20px',
+                                        padding: '40px 24px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: !isFlipped ? 'pointer' : 'default',
+                                        transition: 'all 0.3s ease',
+                                        marginBottom: '24px',
+                                        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)'
+                                    }}
+                                >
+                                    {/* Front: English/Russian Word */}
+                                    {!isFlipped ? (
+                                        <>
                                             <div style={{
-                                                fontSize: '16px',
-                                                color: '#A8A8AD',
-                                                fontStyle: 'italic',
-                                                marginBottom: '20px'
+                                                fontSize: '11px',
+                                                color: 'rgba(255, 255, 255, 0.4)',
+                                                marginBottom: '16px',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '1px',
+                                                fontWeight: '600'
                                             }}>
-                                                /{currentItem.phonetic}/
+                                                {locale === 'ru' && currentItem.russian ? 'Russian' : 'English'}
                                             </div>
-                                        )}
-                                        {currentItem.example_gr && (
                                             <div style={{
-                                                fontSize: '14px',
-                                                color: 'rgba(255, 255, 255, 0.6)',
+                                                fontSize: '36px',
+                                                fontWeight: 'bold',
+                                                color: 'white',
                                                 textAlign: 'center',
-                                                fontStyle: 'italic',
-                                                lineHeight: '1.6'
+                                                marginBottom: '24px'
                                             }}>
-                                                "{currentItem.example_gr}"
+                                                {locale === 'ru' && currentItem.russian ? currentItem.russian : currentItem.english}
                                             </div>
-                                        )}
-                                    </>
+                                            <div style={{
+                                                fontSize: '12px',
+                                                color: 'rgba(255, 255, 255, 0.3)',
+                                                fontWeight: '500'
+                                            }}>
+                                                Tap to reveal answer
+                                            </div>
+                                        </>
+                                    ) : (
+                                        /* Back: Greek Word */
+                                        <>
+                                            <div style={{
+                                                fontSize: '11px',
+                                                color: 'rgba(255, 255, 255, 0.4)',
+                                                marginBottom: '16px',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '1px',
+                                                fontWeight: '600'
+                                            }}>
+                                                Greek
+                                            </div>
+                                            <div style={{
+                                                fontSize: '40px',
+                                                fontWeight: 'bold',
+                                                color: 'white',
+                                                textAlign: 'center',
+                                                marginBottom: '12px'
+                                            }}>
+                                                {currentItem.greek_word || currentItem.greek}
+                                            </div>
+                                            {currentItem.phonetic && (
+                                                <div style={{
+                                                    fontSize: '16px',
+                                                    color: '#A8A8AD',
+                                                    fontStyle: 'italic',
+                                                    marginBottom: '20px'
+                                                }}>
+                                                    /{currentItem.phonetic}/
+                                                </div>
+                                            )}
+                                            {currentItem.example_gr && (
+                                                <div style={{
+                                                    fontSize: '14px',
+                                                    color: 'rgba(255, 255, 255, 0.6)',
+                                                    textAlign: 'center',
+                                                    fontStyle: 'italic',
+                                                    lineHeight: '1.6'
+                                                }}>
+                                                    "{currentItem.example_gr}"
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* TTS Controls */}
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '8px',
+                                    marginBottom: '20px',
+                                    width: '100%',
+                                    justifyContent: 'center'
+                                }}>
+                                    <button
+                                        onClick={playAudio}
+                                        disabled={isPlaying}
+                                        style={{
+                                            padding: '10px 16px',
+                                            borderRadius: '10px',
+                                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                                            background: 'rgba(255, 255, 255, 0.05)',
+                                            color: 'white',
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            cursor: isPlaying ? 'not-allowed' : 'pointer',
+                                            opacity: isPlaying ? 0.5 : 1
+                                        }}
+                                    >
+                                        {isPlaying ? '🔊 Playing...' : '🔊 Play'}
+                                    </button>
+                                    <button
+                                        onClick={cycleSpeed}
+                                        style={{
+                                            padding: '10px 16px',
+                                            borderRadius: '10px',
+                                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                                            background: 'rgba(255, 255, 255, 0.05)',
+                                            color: 'white',
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            cursor: 'pointer'
+                                        }}
+                                        title={`Speed: ${speedInfo.label}`}
+                                    >
+                                        {speedInfo.emoji}
+                                    </button>
+                                    <button
+                                        onClick={toggleAutoPlay}
+                                        style={{
+                                            padding: '10px 16px',
+                                            borderRadius: '10px',
+                                            border: `1px solid ${autoPlay ? 'rgba(0, 122, 255, 0.4)' : 'rgba(255, 255, 255, 0.15)'}`,
+                                            background: autoPlay ? 'rgba(0, 122, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                                            color: autoPlay ? '#007AFF' : 'white',
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            cursor: 'pointer'
+                                        }}
+                                        title={`Auto-play: ${autoPlay ? 'ON' : 'OFF'}`}
+                                    >
+                                        {autoPlay ? '🔊' : '🔇'} Auto
+                                    </button>
+                                </div>
+
+                                {/* Rating Buttons (only when flipped) */}
+                                {isFlipped && (
+                                    <div style={{
+                                        width: '100%',
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(2, 1fr)',
+                                        gap: '12px'
+                                    }}>
+                                        <RatingButton
+                                            label="Again"
+                                            emoji="❌"
+                                            color="#FF6B6B"
+                                            onClick={() => handleRating(1)}
+                                        />
+                                        <RatingButton
+                                            label="Hard"
+                                            emoji="🟠"
+                                            color="#FFA94D"
+                                            onClick={() => handleRating(2)}
+                                        />
+                                        <RatingButton
+                                            label="Good"
+                                            emoji="✅"
+                                            color="#51CF66"
+                                            onClick={() => handleRating(3)}
+                                        />
+                                        <RatingButton
+                                            label="Easy"
+                                            emoji="🎯"
+                                            color="#339AF0"
+                                            onClick={() => handleRating(4)}
+                                        />
+                                    </div>
                                 )}
                             </div>
-
-                            {/* TTS Controls */}
-                            <div style={{
-                                display: 'flex',
-                                gap: '8px',
-                                marginBottom: '20px',
-                                width: '100%',
-                                justifyContent: 'center'
-                            }}>
-                                <button
-                                    onClick={playAudio}
-                                    disabled={isPlaying}
-                                    style={{
-                                        padding: '10px 16px',
-                                        borderRadius: '10px',
-                                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                                        background: 'rgba(255, 255, 255, 0.05)',
-                                        color: 'white',
-                                        fontSize: '14px',
-                                        fontWeight: '500',
-                                        cursor: isPlaying ? 'not-allowed' : 'pointer',
-                                        opacity: isPlaying ? 0.5 : 1
-                                    }}
-                                >
-                                    {isPlaying ? '🔊 Playing...' : '🔊 Play'}
-                                </button>
-                                <button
-                                    onClick={cycleSpeed}
-                                    style={{
-                                        padding: '10px 16px',
-                                        borderRadius: '10px',
-                                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                                        background: 'rgba(255, 255, 255, 0.05)',
-                                        color: 'white',
-                                        fontSize: '14px',
-                                        fontWeight: '500',
-                                        cursor: 'pointer'
-                                    }}
-                                    title={`Speed: ${speedInfo.label}`}
-                                >
-                                    {speedInfo.emoji}
-                                </button>
-                                <button
-                                    onClick={toggleAutoPlay}
-                                    style={{
-                                        padding: '10px 16px',
-                                        borderRadius: '10px',
-                                        border: `1px solid ${autoPlay ? 'rgba(0, 122, 255, 0.4)' : 'rgba(255, 255, 255, 0.15)'}`,
-                                        background: autoPlay ? 'rgba(0, 122, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                                        color: autoPlay ? '#007AFF' : 'white',
-                                        fontSize: '14px',
-                                        fontWeight: '500',
-                                        cursor: 'pointer'
-                                    }}
-                                    title={`Auto-play: ${autoPlay ? 'ON' : 'OFF'}`}
-                                >
-                                    {autoPlay ? '🔊' : '🔇'} Auto
-                                </button>
-                            </div>
-
-                            {/* Rating Buttons (only when flipped) */}
-                            {isFlipped && (
-                                <div style={{
-                                    width: '100%',
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(2, 1fr)',
-                                    gap: '12px'
-                                }}>
-                                    <RatingButton
-                                        label="Again"
-                                        emoji="❌"
-                                        color="#FF6B6B"
-                                        onClick={() => handleRating(1)}
-                                    />
-                                    <RatingButton
-                                        label="Hard"
-                                        emoji="🟠"
-                                        color="#FFA94D"
-                                        onClick={() => handleRating(2)}
-                                    />
-                                    <RatingButton
-                                        label="Good"
-                                        emoji="✅"
-                                        color="#51CF66"
-                                        onClick={() => handleRating(3)}
-                                    />
-                                    <RatingButton
-                                        label="Easy"
-                                        emoji="🎯"
-                                        color="#339AF0"
-                                        onClick={() => handleRating(4)}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </>
-                ) : null}
-            </div>
+                        </>
+                    ) : null}
+                </div>
 
                 {/* Bottom Navigation */}
                 <MobileBottomNav />

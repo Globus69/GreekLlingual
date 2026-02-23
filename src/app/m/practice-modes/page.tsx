@@ -201,381 +201,382 @@ export default function MobilePracticeModesPage() {
         paddingBottom: '80px'
       }}>
         {/* Header */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '24px 16px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        backgroundColor: 'rgba(28, 28, 30, 0.95)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-      }}>
-        <button
-          onClick={() => router.push('/m')}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '24px',
-            color: 'white',
-            cursor: 'pointer',
-            padding: 0,
-            minWidth: '44px',
-            minHeight: '44px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          ←
-        </button>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <h1 style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: 'white',
-              margin: 0,
-            }}>
-              🎮 Spiele
-            </h1>
-            {cached && <CacheIndicator cached={cached} />}
-          </div>
-          <p style={{
-            fontSize: '14px',
-            color: '#93C5FD',
-            margin: 0
-          }}>
-            {user?.name || 'Student'}
-          </p>
-        </div>
-        <button
-          onClick={refresh}
-          style={{
-            background: 'rgba(0, 122, 255, 0.2)',
-            border: '1px solid rgba(0, 122, 255, 0.3)',
-            borderRadius: '8px',
-            padding: '8px 12px',
-            color: '#007AFF',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            minWidth: '44px',
-            minHeight: '44px',
-          }}
-        >
-          🔄
-        </button>
-      </div>
-
-      {/* Memory Games Section */}
-      <div style={{ padding: '16px', paddingBottom: '8px' }}>
-        <h2 style={{
-          fontSize: '16px',
-          fontWeight: '600',
-          color: 'white',
-          marginBottom: '12px',
-          paddingLeft: '4px'
-        }}>
-          Memory Games
-        </h2>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* Memory Game - Classic */}
-          <button
-            onClick={() => router.push('/m/practice-modes/memory')}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(219, 39, 119, 0.2) 100%)',
-              backdropFilter: 'blur(10px)',
-              border: '2px solid rgba(147, 51, 234, 0.3)',
-              borderRadius: '16px',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              minHeight: '88px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ fontSize: '40px' }}>🎮</div>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  marginBottom: '4px'
-                }}>
-                  Memory Classic
-                </div>
-                <div style={{
-                  fontSize: '13px',
-                  color: 'rgba(255, 255, 255, 0.7)'
-                }}>
-                  Match pairs • 4×4 Grid
-                </div>
-              </div>
-            </div>
-            <div style={{
-              fontSize: '24px',
-              color: 'rgba(147, 51, 234, 0.8)'
-            }}>
-              →
-            </div>
-          </button>
-
-          {/* Memory Split - NEW! */}
-          <button
-            onClick={() => router.push('/m/practice-modes/memory-split')}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%)',
-              backdropFilter: 'blur(10px)',
-              border: '2px solid rgba(59, 130, 246, 0.3)',
-              borderRadius: '16px',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              minHeight: '88px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ fontSize: '40px' }}>🎴</div>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  marginBottom: '4px'
-                }}>
-                  Memory Split
-                </div>
-                <div style={{
-                  fontSize: '13px',
-                  color: 'rgba(255, 255, 255, 0.7)'
-                }}>
-                  Two grids • Solution help
-                </div>
-              </div>
-            </div>
-            <div style={{
-              fontSize: '24px',
-              color: 'rgba(59, 130, 246, 0.8)'
-            }}>
-              →
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* Text Practice Section */}
-      <div style={{ padding: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
-        <h2 style={{
-          fontSize: '16px',
-          fontWeight: '600',
-          color: 'white',
-          marginBottom: '12px',
-          paddingLeft: '4px'
-        }}>
-          Text Practice
-        </h2>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* Cloze Text */}
-          <button
-            onClick={() => router.push('/m/practice-modes/cloze-text')}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.2) 100%)',
-              backdropFilter: 'blur(10px)',
-              border: '2px solid rgba(249, 115, 22, 0.3)',
-              borderRadius: '16px',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              minHeight: '88px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ fontSize: '40px' }}>📝</div>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  marginBottom: '4px'
-                }}>
-                  Cloze Text
-                </div>
-                <div style={{
-                  fontSize: '13px',
-                  color: 'rgba(255, 255, 255, 0.7)'
-                }}>
-                  Fill in blanks • 5 Sentences
-                </div>
-              </div>
-            </div>
-            <div style={{
-              fontSize: '24px',
-              color: 'rgba(249, 115, 22, 0.8)'
-            }}>
-              →
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* Practice Items List */}
-      <div style={{ padding: '16px' }}>
-        {!practiceItems || practiceItems.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '48px 24px',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '16px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-          }}>
-            <div style={{ fontSize: '64px', marginBottom: '16px' }}>🎮</div>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: 'white',
-              marginBottom: '8px'
-            }}>
-              No Practice Modes Available
-            </h3>
-            <p style={{
-              fontSize: '14px',
-              color: '#8E8E93',
-              margin: 0
-            }}>
-              Practice modes will appear here once content is available.
-            </p>
-          </div>
-        ) : (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px'
-          }}>
-            {practiceItems.map(item => {
-              const itemUnlockStatuses = unlockStatuses[item.id] || {};
-              const anyUnlocked = Object.values(itemUnlockStatuses).some(s => s.unlocked);
-              const allUnlocked = item.practice_modes_config.available_modes.every(
-                mode => itemUnlockStatuses[mode]?.unlocked
-              );
-
-              return (
-                <PracticeItemCard
-                  key={item.id}
-                  item={item}
-                  anyUnlocked={anyUnlocked}
-                  allUnlocked={allUnlocked}
-                  unlockStatuses={itemUnlockStatuses}
-                  onClick={() => handleItemClick(item)}
-                />
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Bottom Navigation */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '17px 11px',
+          paddingTop: 'calc(17px + env(safe-area-inset-top))',
+          position: 'sticky',
+          top: 0,
           zIndex: 50,
           backgroundColor: 'rgba(28, 28, 30, 0.95)',
           backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '8px 16px 12px',
-        }}
-      >
-        <div style={{
-          maxWidth: '448px',
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-around'
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         }}>
           <button
             onClick={() => router.push('/m')}
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '8px 16px',
               background: 'none',
               border: 'none',
+              fontSize: '24px',
+              color: 'white',
               cursor: 'pointer',
-              minWidth: '60px',
-              minHeight: '60px',
+              padding: 0,
+              minWidth: '44px',
+              minHeight: '44px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            <span style={{ fontSize: '24px' }}>🏠</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Home</span>
+            ←
           </button>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <h1 style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: 'white',
+                margin: 0,
+              }}>
+                🎮 Spiele
+              </h1>
+              {cached && <CacheIndicator cached={cached} />}
+            </div>
+            <p style={{
+              fontSize: '14px',
+              color: '#93C5FD',
+              margin: 0
+            }}>
+              {user?.name || 'Student'}
+            </p>
+          </div>
           <button
-            onClick={() => router.push('/m/stats')}
+            onClick={refresh}
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '8px 16px',
-              background: 'none',
-              border: 'none',
+              background: 'rgba(0, 122, 255, 0.2)',
+              border: '1px solid rgba(0, 122, 255, 0.3)',
+              borderRadius: '8px',
+              padding: '8px 12px',
+              color: '#007AFF',
+              fontSize: '14px',
+              fontWeight: '600',
               cursor: 'pointer',
-              minWidth: '60px',
-              minHeight: '60px',
+              minWidth: '44px',
+              minHeight: '44px',
             }}
           >
-            <span style={{ fontSize: '24px' }}>📊</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Stats</span>
-          </button>
-          <button
-            onClick={() => router.push('/m/settings')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '8px 16px',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              minWidth: '60px',
-              minHeight: '60px',
-            }}
-          >
-            <span style={{ fontSize: '24px' }}>⚙️</span>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Settings</span>
+            🔄
           </button>
         </div>
-      </div>
 
-      {/* Mode Selection Bottom Sheet */}
-      {selectedItem && (
-        <PracticeModesSheet
-          isOpen={sheetOpen}
-          onClose={handleSheetClose}
-          item={selectedItem}
-          unlockStatuses={unlockStatuses[selectedItem.id] || {}}
-        />
-      )}
+        {/* Memory Games Section */}
+        <div style={{ padding: '16px', paddingBottom: '8px' }}>
+          <h2 style={{
+            fontSize: '16px',
+            fontWeight: '600',
+            color: 'white',
+            marginBottom: '12px',
+            paddingLeft: '4px'
+          }}>
+            Memory Games
+          </h2>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* Memory Game - Classic */}
+            <button
+              onClick={() => router.push('/m/practice-modes/memory')}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(219, 39, 119, 0.2) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '2px solid rgba(147, 51, 234, 0.3)',
+                borderRadius: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                minHeight: '88px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ fontSize: '40px' }}>🎮</div>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                    marginBottom: '4px'
+                  }}>
+                    Memory Classic
+                  </div>
+                  <div style={{
+                    fontSize: '13px',
+                    color: 'rgba(255, 255, 255, 0.7)'
+                  }}>
+                    Match pairs • 4×4 Grid
+                  </div>
+                </div>
+              </div>
+              <div style={{
+                fontSize: '24px',
+                color: 'rgba(147, 51, 234, 0.8)'
+              }}>
+                →
+              </div>
+            </button>
+
+            {/* Memory Split - NEW! */}
+            <button
+              onClick={() => router.push('/m/practice-modes/memory-split')}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '2px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                minHeight: '88px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ fontSize: '40px' }}>🎴</div>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                    marginBottom: '4px'
+                  }}>
+                    Memory Split
+                  </div>
+                  <div style={{
+                    fontSize: '13px',
+                    color: 'rgba(255, 255, 255, 0.7)'
+                  }}>
+                    Two grids • Solution help
+                  </div>
+                </div>
+              </div>
+              <div style={{
+                fontSize: '24px',
+                color: 'rgba(59, 130, 246, 0.8)'
+              }}>
+                →
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Text Practice Section */}
+        <div style={{ padding: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
+          <h2 style={{
+            fontSize: '16px',
+            fontWeight: '600',
+            color: 'white',
+            marginBottom: '12px',
+            paddingLeft: '4px'
+          }}>
+            Text Practice
+          </h2>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* Cloze Text */}
+            <button
+              onClick={() => router.push('/m/practice-modes/cloze-text')}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.2) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '2px solid rgba(249, 115, 22, 0.3)',
+                borderRadius: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                minHeight: '88px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ fontSize: '40px' }}>📝</div>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                    marginBottom: '4px'
+                  }}>
+                    Cloze Text
+                  </div>
+                  <div style={{
+                    fontSize: '13px',
+                    color: 'rgba(255, 255, 255, 0.7)'
+                  }}>
+                    Fill in blanks • 5 Sentences
+                  </div>
+                </div>
+              </div>
+              <div style={{
+                fontSize: '24px',
+                color: 'rgba(249, 115, 22, 0.8)'
+              }}>
+                →
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Practice Items List */}
+        <div style={{ padding: '16px' }}>
+          {!practiceItems || practiceItems.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '48px 24px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '16px',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+            }}>
+              <div style={{ fontSize: '64px', marginBottom: '16px' }}>🎮</div>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: 'white',
+                marginBottom: '8px'
+              }}>
+                No Practice Modes Available
+              </h3>
+              <p style={{
+                fontSize: '14px',
+                color: '#8E8E93',
+                margin: 0
+              }}>
+                Practice modes will appear here once content is available.
+              </p>
+            </div>
+          ) : (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}>
+              {practiceItems.map(item => {
+                const itemUnlockStatuses = unlockStatuses[item.id] || {};
+                const anyUnlocked = Object.values(itemUnlockStatuses).some(s => s.unlocked);
+                const allUnlocked = item.practice_modes_config.available_modes.every(
+                  mode => itemUnlockStatuses[mode]?.unlocked
+                );
+
+                return (
+                  <PracticeItemCard
+                    key={item.id}
+                    item={item}
+                    anyUnlocked={anyUnlocked}
+                    allUnlocked={allUnlocked}
+                    unlockStatuses={itemUnlockStatuses}
+                    onClick={() => handleItemClick(item)}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Navigation */}
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 50,
+            backgroundColor: 'rgba(28, 28, 30, 0.95)',
+            backdropFilter: 'blur(20px)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            padding: '8px 16px 12px',
+          }}
+        >
+          <div style={{
+            maxWidth: '448px',
+            margin: '0 auto',
+            display: 'flex',
+            justifyContent: 'space-around'
+          }}>
+            <button
+              onClick={() => router.push('/m')}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '8px 16px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                minWidth: '60px',
+                minHeight: '60px',
+              }}
+            >
+              <span style={{ fontSize: '24px' }}>🏠</span>
+              <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Home</span>
+            </button>
+            <button
+              onClick={() => router.push('/m/stats')}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '8px 16px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                minWidth: '60px',
+                minHeight: '60px',
+              }}
+            >
+              <span style={{ fontSize: '24px' }}>📊</span>
+              <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Stats</span>
+            </button>
+            <button
+              onClick={() => router.push('/m/settings')}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '8px 16px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                minWidth: '60px',
+                minHeight: '60px',
+              }}
+            >
+              <span style={{ fontSize: '24px' }}>⚙️</span>
+              <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93' }}>Settings</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Mode Selection Bottom Sheet */}
+        {selectedItem && (
+          <PracticeModesSheet
+            isOpen={sheetOpen}
+            onClose={handleSheetClose}
+            item={selectedItem}
+            unlockStatuses={unlockStatuses[selectedItem.id] || {}}
+          />
+        )}
       </div>
     </>
   );

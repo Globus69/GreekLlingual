@@ -37,7 +37,7 @@ const pwaConfig = withPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: false, // Force PWA in development for testing
   // Offline fallback für die mobile Route
   fallbacks: {
     document: '/m',

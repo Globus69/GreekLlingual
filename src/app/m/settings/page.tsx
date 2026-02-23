@@ -25,7 +25,8 @@ export default function MobileSettingsPage() {
           backgroundColor: 'rgba(28, 28, 30, 0.95)',
           backdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '16px',
+          padding: '11px',
+          paddingTop: 'calc(11px + env(safe-area-inset-top))',
         }}
       >
         <div style={{ maxWidth: '448px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '12px' }}>

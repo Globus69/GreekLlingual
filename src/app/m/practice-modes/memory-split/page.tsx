@@ -438,13 +438,13 @@ export default function MobileMemorySplitPage() {
           border: isSelected
             ? '3px solid #007AFF'
             : isMatched
-            ? '2px solid #34C759'
-            : '1px solid rgba(255, 255, 255, 0.2)',
+              ? '2px solid #34C759'
+              : '1px solid rgba(255, 255, 255, 0.2)',
           backgroundColor: isMatched
             ? 'rgba(52, 199, 89, 0.2)'
             : isSelected
-            ? 'rgba(0, 122, 255, 0.3)'
-            : 'rgba(255, 255, 255, 0.1)',
+              ? 'rgba(0, 122, 255, 0.3)'
+              : 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
           display: 'flex',
           alignItems: 'center',
@@ -513,13 +513,14 @@ export default function MobileMemorySplitPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '12px 16px',
             position: 'sticky',
             top: 0,
             zIndex: 50,
             backgroundColor: 'rgba(28, 28, 30, 0.95)',
             backdropFilter: 'blur(20px)',
             borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            padding: '9px 11px',
+            paddingTop: 'calc(9px + env(safe-area-inset-top))',
           }}
         >
           {/* Back Button */}

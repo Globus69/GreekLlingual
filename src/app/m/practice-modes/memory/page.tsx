@@ -399,13 +399,14 @@ export default function MobileMemoryGamePage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '16px',
             position: 'sticky',
             top: 0,
             zIndex: 50,
             backgroundColor: 'rgba(28, 28, 30, 0.95)',
             backdropFilter: 'blur(20px)',
             borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            padding: '9px 11px',
+            paddingTop: 'calc(9px + env(safe-area-inset-top))',
           }}
         >
           {/* Back Button - Navigate to Dashboard */}
