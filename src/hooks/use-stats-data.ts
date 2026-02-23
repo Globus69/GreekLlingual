@@ -100,6 +100,7 @@ export function useStatsData(userId?: string): UseStatsDataResult {
   const [error, setError] = useState<Error | null>(null);
   const isFetchingRef = useRef(false);
   const lastFetchTimeRef = useRef(0);
+  const isFirstLoadRef = useRef(true);
 
   const fetchStats = useCallback(async () => {
     if (!userId) {
@@ -124,10 +125,15 @@ export function useStatsData(userId?: string): UseStatsDataResult {
     try {
       isFetchingRef.current = true;
       lastFetchTimeRef.current = now;
-      setLoading(true);
+
+      // Only set loading(true) for initial load to prevent UI flickering/remounting on background refreshes
+      if (isFirstLoadRef.current) {
+        setLoading(true);
+      }
+
       setError(null);
 
-      console.log(`📡 [useStatsData] Fetching stats for user: ${userId}`);
+      console.log(`📡 [useStatsData] Fetching stats for user: ${userId} (${isFirstLoadRef.current ? 'Initial' : 'Background Refresh'})`);
 
       // Parallele Anfragen für bessere Performance
       const results = await Promise.all([
@@ -260,6 +266,7 @@ export function useStatsData(userId?: string): UseStatsDataResult {
     } finally {
       setLoading(false);
       isFetchingRef.current = false;
+      isFirstLoadRef.current = false;
     }
   }, [userId]);
 

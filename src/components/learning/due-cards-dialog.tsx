@@ -10,6 +10,8 @@ import { FSRSScheduler } from '@/lib/fsrs/fsrs-scheduler';
 import type { Card, Rating } from '@/lib/fsrs/fsrs-types';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import { speakGreek, isSpeaking, stopSpeaking } from '@/lib/tts/greek-tts';
+import SwipeTutorialDialog from '@/components/ui/swipe-tutorial-dialog';
+import { APP_VERSION } from '@/lib/appVersion';
 import '@/styles/liquid-glass.css';
 
 // Extended LearningItem with FSRS fields
@@ -46,7 +48,7 @@ interface DueCardsDialogProps {
 
 export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWeakWords }: DueCardsDialogProps) {
     const mode = 'due'; // Fixed mode: only show due cards
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { t, locale } = useTranslation();
     const { evaluate } = usePerformanceEvaluation();
     const { toasts, showToast, removeToast, error, warning, success, info } = useToast();
@@ -70,6 +72,7 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
     const [speechRate, setSpeechRate] = useState<number>(0.9); // 0.6 = slow, 0.9 = normal, 1.2 = fast
     const [announceMessage, setAnnounceMessage] = useState<string>(''); // Screen reader announcements
     const [sessionId, setSessionId] = useState<string | null>(null); // Track current session
+    const [showSwipeTutorial, setShowSwipeTutorial] = useState(false);
 
     const STUDENT_ID = user?.id || '';
 
@@ -109,6 +112,21 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
             window.removeEventListener('offline', handleOffline);
         };
     }, []);
+
+    // Show swipe tutorial if not seen before
+    useEffect(() => {
+        if (isOpen && !loading && !authLoading && vocabulary.length > 0 && !showSummary && user) {
+            const seenVersion = (user as any).acknowledged_swipe_tutorial_version || '0.0.0';
+            const isLatest = seenVersion === APP_VERSION;
+
+            if (!isLatest) {
+                const timer = setTimeout(() => {
+                    setShowSwipeTutorial(true);
+                }, 1000);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [isOpen, loading, authLoading, vocabulary.length, showSummary, user]);
 
     // Load due cards on open
     useEffect(() => {
@@ -1048,6 +1066,12 @@ export default function DueCardsDialog({ isOpen, onClose, onOpenReview, onOpenWe
                 margin-top: 24px;
                 }
             `}</style>
+
+            {/* Swipe Tutorial Popup */}
+            <SwipeTutorialDialog
+                isOpen={showSwipeTutorial}
+                onClose={() => setShowSwipeTutorial(false)}
+            />
 
             {/* Toast Notifications */}
             <ToastContainer toasts={toasts} onRemove={removeToast} />

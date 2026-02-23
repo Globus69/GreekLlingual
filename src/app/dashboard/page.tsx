@@ -23,6 +23,7 @@ import { StreakMilestoneToast } from '@/components/dashboard/streak-milestone-to
 import { useStreak } from '@/hooks/use-streak';
 import { useDeviceDetection } from '@/hooks/use-device-detection';
 import VocabularyStatsWidget from '@/components/dashboard/vocabulary-stats-widget';
+import UserManualDialog from '@/components/ui/user-manual-dialog';
 
 interface ActionTileProps {
     icon: string;
@@ -151,22 +152,6 @@ export default function DashboardPage() {
             }
             fetchStats();
 
-            // TEMPORARILY DISABLED: Auto-update streak (blocking dashboard load)
-            // const checkStreak = async () => {
-            //     const result = await updateStreak();
-            //     if (result) {
-            //         const milestone = getMilestoneMessage(result.new_streak);
-            //         if (milestone || result.is_new_record) {
-            //             setMilestoneToast({
-            //                 streak: result.new_streak,
-            //                 isNewRecord: result.is_new_record,
-            //                 message: milestone || result.message,
-            //             });
-            //         }
-            //     }
-            // };
-            // checkStreak();
-
             const timer = setTimeout(() => {
                 setLoading(false);
             }, 800);
@@ -199,30 +184,12 @@ export default function DashboardPage() {
             <main className="dashboard-content">
                 <div className="hero-section" style={{ height: 'auto', flex: '0 0 auto' }}>
                     <StatsCard />
-                    {/* Hero Right Side (Welcome / quick info) can go here if needed,
-                        or we can keep it cleaner as per new design focus on footer */}
                     <div className="action-area" style={{ alignItems: 'flex-start', paddingLeft: '20px' }}>
                         <h2 style={{ fontSize: '28px', margin: '0 0 8px 0', color: '#fff' }}>{t('dashboard.welcome', { name: user?.name || 'SWS' })} 🏛️</h2>
                         <p style={{ fontSize: '15px', color: '#8E8E93', maxWidth: '500px', lineHeight: '1.5' }}
                             dangerouslySetInnerHTML={{ __html: t('dashboard.welcome_subtitle', { count: '12' }) }} />
-
-                        {/* TEMPORARILY DISABLED: Streak Display (focusing on Practice Modes only) */}
-                        {/* <div style={{ marginTop: '20px', maxWidth: '350px' }}>
-                            <StreakDisplay />
-                        </div> */}
                     </div>
                 </div>
-
-                {/* TEMPORARILY DISABLED: Vocabulary Stats Widget (focusing on Practice Modes only) */}
-                {/* <div className="stats-widgets-row" style={{
-                    display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
-                    gap: '20px',
-                    marginBottom: '32px',
-                    padding: '0 20px'
-                }}>
-                    <VocabularyStatsWidget onOpenDialog={() => setIsVocabDialogOpen(true)} />
-                </div> */}
 
                 <div className="dashboard-footer-area">
                     {/* LEFT: MASTERY BOX (PIMPED) */}
@@ -285,7 +252,6 @@ export default function DashboardPage() {
 
                     {/* RIGHT: 4x4 QUICK ACTIONS GRID */}
                     <div className="quick-actions-grid">
-                        {/* Row 1 - Reordered: 7, 2, 3, 6 */}
                         <ActionTile
                             icon="📅"
                             label={`7. ${t('action.due_cards')}`}
@@ -310,7 +276,6 @@ export default function DashboardPage() {
                             }}
                         />
 
-                        {/* Row 2 - Reordered: 4, 5, 1 */}
                         <ActionTile
                             icon="📚"
                             label={`4. ${t('action.short_stories')}`}
@@ -341,7 +306,6 @@ export default function DashboardPage() {
                             }}
                         />
 
-                        {/* Row 3 */}
                         <ActionTile
                             icon="👂"
                             label={`9. ${t('action.listening')}`}
@@ -369,7 +333,6 @@ export default function DashboardPage() {
                             onClick={() => console.log('🔥 Button 12: Audio Immersion clicked')}
                         />
 
-                        {/* Row 4 */}
                         <ActionTile
                             icon="🎮"
                             label="13. Practice Modes"
@@ -391,7 +354,6 @@ export default function DashboardPage() {
                             onClick={() => router.push('/stats')}
                         />
 
-                        {/* Row 5 - Memory Game */}
                         <ActionTile
                             icon="🎮"
                             label="17. Memory Game"
@@ -402,46 +364,39 @@ export default function DashboardPage() {
                 </div>
             </main>
 
-            {/* Vocabulary Dialog - NEW FSRS Version */}
             <VocabularyDialog
                 isOpen={isVocabDialogOpen}
                 onClose={() => setIsVocabDialogOpen(false)}
                 mode={vocabDialogMode}
             />
 
-            {/* Grammar Dialog - FSRS Version */}
             <GrammarDialog
                 isOpen={isGrammarDialogOpen}
                 onClose={() => setIsGrammarDialogOpen(false)}
             />
 
-            {/* Comprehension Dialog */}
             <ComprehensionDialog
                 isOpen={isComprehensionDialogOpen}
                 onClose={() => setIsComprehensionDialogOpen(false)}
                 mode={comprehensionDialogMode}
             />
 
-            {/* Listening Dialog */}
             <ListeningDialog
                 isOpen={isListeningDialogOpen}
                 onClose={() => setIsListeningDialogOpen(false)}
                 mode={listeningDialogMode}
             />
 
-            {/* Lesson Dialog (Dein Unterricht) */}
             <LessonDialog
                 isOpen={isLessonDialogOpen}
                 onClose={() => setIsLessonDialogOpen(false)}
             />
 
-            {/* Daily Phrases Dialog - FSRS Version */}
             <DailyPhrasesDialog
                 isOpen={isDailyPhrasesDialogOpen}
                 onClose={() => setIsDailyPhrasesDialogOpen(false)}
             />
 
-            {/* Due Cards Dialog - Specialized Dialog from Mobile */}
             <DueCardsDialog
                 isOpen={isDueCardsDialogOpen}
                 onClose={() => setIsDueCardsDialogOpen(false)}
@@ -449,11 +404,12 @@ export default function DashboardPage() {
                 onOpenWeakWords={() => setIsWeakWordsDialogOpen(true)}
             />
 
-            {/* Weak Words Dialog - Specialized Dialog from Mobile */}
             <WeakWordsDialog
                 isOpen={isWeakWordsDialogOpen}
                 onClose={() => setIsWeakWordsDialogOpen(false)}
             />
+
+            <UserManualDialog />
         </div>
     );
 }

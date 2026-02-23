@@ -81,6 +81,7 @@ const FALLBACK_EN: Record<string, string> = {
     'btn.audio': 'Audio',
     'btn.restart': 'Restart',
     'btn.cancel': 'Cancel',
+    'btn.close': 'Close',
     'btn.audio_tooltip': 'Listen to Greek pronunciation',
     'flashcard.label_source': 'ENGLISH',
     'flashcard.label_target': 'ΕΛΛΗΝΙΚΑ',
@@ -338,6 +339,15 @@ const FALLBACK_EN: Record<string, string> = {
     'brain_gym.instructions': 'Match the corresponding pairs',
     'brain_gym.greek': 'Greek',
     'brain_gym.translation': 'Translation',
+    'manual.title': 'User Manual',
+    'manual.app_name': 'Hellenic Horizons - GreekLingua',
+    'manual.content_by': 'Content: Neya',
+    'manual.developed_by': 'Develop: Stefan',
+    'manual.version': 'Version',
+    'manual.dont_show_again': "Don't show this again",
+    'manual.content': 'Mobile-first app for learning Modern Greek in a playful way  \n**Still in Beta phase**\n\n## What the app does – at a glance\nYou learn Greek vocabulary and everyday phrases with the most modern, scientifically based system:\n\n- Smart repetitions at exactly the right moment (Spaced Repetition)  \n- Difficult words appear more often, easy ones less often → maximum retention effect  \n- Daily new phrases + targeted exercises for weak spots  \n- Short Brain-Gym units for better concentration\n\n## The clever logic – explained simply\nEach card gets an individual schedule based on the FSRS algorithm (currently one of the best):\n\n- You rate "correct" or "wrong"  \n- Correct → longer break until the next repetition  \n- Wrong → repeat earlier  \n→ The app automatically adapts to you and saves you time\n\n## Modules at a glance\n- **Due Today**  \n  All due cards – just swipe & rate  \n\n- **Review**  \n  Targeted review by level or topic  \n\n- **Weak Words**  \n  Your problem words with extra focus and shorter intervals  \n\n- **Daily Phrases**  \n  3 fresh everyday sentences + audio every day  \n\n- **Brain Gym**  \n  Short, motivating mini-exercises for your brain  \n\nHave fun testing!  \n**Always Happy Learning with Neya** 💙\n\n## Beta Note / Disclaimer\n- App is in **Beta phase**  \n- All content is pure **test data** – not suitable for serious learning  \n- **No personal data** is stored  \n- Access only during the ongoing course with Neya  \n- Distribution or further dissemination **not permitted**',
+    'tutorial.swipe.title': 'Just swipe – the best way to learn',
+    'tutorial.swipe.content': '**How it works (briefly):**\n\n- Swipe card **to the right** → "I got this!" (correct / solved)  \n- Swipe card **to the left** → "Not sure yet" (wrong / not solved)\n\n**What happens next?**\n\n- **Correct** → The card won\'t reappear until much later → you save time  \n- **Wrong** → The card reappears soon → you practice exactly what you need\n\n**Mobile usage:**\n\n1. Place finger on the card  \n2. Drag to the right or left (at least about half screen width)  \n3. Let go → Card flies away + short vibration or sound feedback  \n4. Next card appears automatically\n\n**Tip:**  \nSwipe decisively – minor wobbles don\'t count.  \nYou cannot accidentally rate "wrong".\n\nHave fun swiping! 💙',
 };
 
 // Fallback Russian translations
@@ -353,6 +363,15 @@ const FALLBACK_RU: Record<string, string> = {
     'brain_gym.due_cards': '📅 Ожидающие карты',
     'brain_gym.review_vocab': '📖 Повторить слова',
     'brain_gym.weak_words': '💪 Слабые слова',
+    'manual.version': 'Версия',
+    'manual.app_name': 'Hellenic Horizons - GreekLingua',
+    'manual.content_by': 'Контент: Нея',
+    'manual.developed_by': 'Разработка: Стефан',
+    'manual.title': 'Инструкция',
+    'manual.dont_show_again': 'Больше не показывать',
+    'manual.content': 'Мобильное приложение для игрового обучения новогреческому языку  \n**Все еще в стадии бета-тестирования**\n\n## Что делает приложение — вкратце\nВы учите греческую лексику и повседневные фразы с помощью самой современной, научно обоснованной системы:\n\n- Умные повторения именно в нужный момент (Spaced Repetition)  \n- Трудные слова появляются чаще, легкие — реже → максимальный эффект запоминания  \n- Ежедневные новые фразы + целевые упражнения для слабых мест  \n- Короткие занятия Brain-Gym для лучшей концентрации\n\n## Умная логика — объясняем просто\nДля каждой карточки составляется индивидуальный график на основе алгоритма FSRS (один из лучших на данный момент):\n\n- Вы оцениваете ответ как «правильный» или «неправильный»  \n- Правильно → более длительная пауза до следующего повторения  \n- Неправильно → повторить раньше  \n→ Приложение автоматически подстраивается под вас и экономит ваше время\n\n## Обзор модулей\n- **Due Today**  \n  Все карточки, требующие повторения — просто свайпайте и оценивайте  \n\n- **Review**  \n  Целевое повторение по уровню или теме  \n\n- **Weak Words**  \n  Ваши проблемные слова с особым вниманием и короткими интервалами  \n\n- **Daily Phrases**  \n  Каждый день 3 новые повседневные фразы + аудио  \n\n- **Brain Gym**  \n  Короткие, мотивирующие мини-упражнения для вашего мозга  \n\nПриятного тестирования!  \n**Always Happy Learning with Neya** 💙\n\n## Примечание к бета-версии / Отказ от ответственности\n- Приложение находится в **бета-стадии**  \n- Весь контент — это чисто **тестовые данные**, не подходящие для серьезного обучения  \n- **Личные данные не сохраняются**  \n- Доступ только во время текущего курса с Неей  \n- Распространение или дальнейшая передача контента **не допускается**',
+    'tutorial.swipe.title': 'Просто свайпайте — так учиться лучше всего',
+    'tutorial.swipe.content': '**Как это работает (вкратце):**\n\n- Свайп карточки **вправо** → «Я это знаю!» (правильно / решено)  \n- Свайп карточки **влево** → «Пока не уверен» (неправильно / не решено)\n\n**Что происходит потом?**\n\n- **Правильно** → Карточка появится снова только через долгое время → вы экономите время  \n- **Неправильно** → Карточка появится скоро → вы тренируете именно то, что вам нужно\n\n**Работа на телефоне:**\n\n1. Положите палец на карточку  \n2. Потяните вправо или влево (минимум на половину ширины экрана)  \n3. Отпустите → Карточка улетает + короткая вибрация или звуковой сигнал  \n4. Следующая карточка появляется автоматически\n\n**Совет:**  \nСвайпайте решительно — легкие колебания не считаются.  \nВы не можете случайно поставить «неправильно».\n\nПриятного свайпинга! 💙',
 };
 
 // Fallback Greek translations (hardcoded subset for offline/error scenarios)
@@ -634,8 +653,17 @@ const FALLBACK_EL: Record<string, string> = {
     'brain_gym.play_again': '\u03a0\u03b1\u03af\u03be\u03c4\u03b5 \u03be\u03b1\u03bd\u03ac',
     'brain_gym.close': '\u039a\u03bb\u03b5\u03af\u03c3\u03b9\u03bc\u03bf',
     'brain_gym.instructions': '\u0391\u03bd\u03c4\u03b9\u03c3\u03c4\u03bf\u03b9\u03c7\u03af\u03c3\u03c4\u03b5 \u03c4\u03b1 \u03ba\u03b1\u03c4\u03ac\u03bb\u03bb\u03b7\u03bb\u03b1 \u03b6\u03b5\u03cd\u03b3\u03b7',
-    'brain_gym.greek': '\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac',
-    'brain_gym.translation': '\u039c\u03b5\u03c4\u03ac\u03c6\u03c1\u03b1\u03c3\u03b7',
+    'brain_gym.greek': 'Ελληνικά',
+    'brain_gym.translation': 'Μετάφραση',
+    'manual.version': 'Έκδοση',
+    'manual.app_name': 'Hellenic Horizons - GreekLingua',
+    'manual.content_by': 'Περιεχόμενο: Neya',
+    'manual.developed_by': 'Ανάπτυξη: Stefan',
+    'manual.title': 'Εγχειρίδιο χρήσης',
+    'manual.dont_show_again': 'Να μην εμφανιστεί ξανά',
+    'manual.content': 'Mobile-first εφαρμογή για παιχνιδιάρικη εκμάθηση Νέων Ελληνικών  \n**Ακόμα σε φάση Beta**\n\n## Τι κάνει η εφαρμογή – με μια ματιά\nΜαθαίνετε ελληνικό λεξιλόγιο και καθημερινές φράσεις με το πιο σύγχρονο, επιστημονικά τεκμηριωμένο σύστημα:\n\n- Έξυπνες επαναλήψεις ακριβώς τη σωστή στιγμή (Spaced Repetition)  \n- Οι δύσκολες λέξεις εμφανίζονται πιο συχνά, οι εύκολες λιγότερο → μέγιστο αποτέλεσμα απομνημόνευσης  \n- Καθημερινές νέες φράσεις + στοχευμένες ασκήσεις για τα αδύναμα σημεία  \n- Σύντομες ενότητες Brain-Gym για καλύτερη συγκέντρωση\n\n## Η έξυπνη λογική – με απλά λόγια\nΚάθε κάρτα αποκτά ένα ατομικό χρονοδιάγραμμα βασισμένο στον αλγόριθμο FSRS (αυτή τη στιγμή ένας από τους καλύτερους):\n\n- Αξιολογείτε ως «σωστό» ή «λάθος»  \n- Σωστό → μεγαλύτερο διάλειμμα μέχρι την επόμενη επανάληψη  \n- Λάθος → επανάληψη νωρίτερα  \n→ Η εφαρμογή προσαρμόζεται αυτόματα σε εσάς και σας εξοικονομεί χρόνο\n\n## Σύνοψη ενοτήτων\n- **Due Today**  \n  Όλες οι ληξιπρόθεσμες κάρτες – απλώς σύρετε (swipe) & αξιολογήστε  \n\n- **Review**  \n  Στοχευμένη επανάληψη ανά επίπεδο ή θέμα  \n\n- **Weak Words**  \n  Οι δυσκολίες σας με έξτρα εστίαση και συντομότερα διαστήματα  \n\n- **Daily Phrases**  \n  Κάθε μέρα 3 φρέσκες καθημερινές προτάσεις + ήχος  \n\n- **Brain Gym**  \n  Σύντομες, παρακινητικές μίνι ασκήσεις για τον εγκέφαλό σας  \n\nΚαλή διασκέδαση στη δοκιμή!  \n**Always Happy Learning with Neya** 💙\n\n## Σημείωση Beta / Αποποίηση ευθύνης\n- Η εφαρμογή είναι σε **φάση Beta**  \n- Όλο το περιεχόμενο είναι καθαρά **δεδομένα δοκιμής** – ακατάλληλο για σοβαρή εκμάθηση  \n- **Δεν αποθηκεύονται προσωπικά δεδομένα**  \n- Πρόσβαση μόνο κατά τη διάρκεια του τρέχοντος μαθήματος με τη Neya  \n- Η διανομή ή περαιτέρω διάδοση **δεν επιτρέπεται**',
+    'tutorial.swipe.title': 'Απλώς σύρετε – ο καλύτερος τρόπος για να μάθετε',
+    'tutorial.swipe.content': '**Πώς λειτουργεί (εν συντομία):**\n\n- Σύρετε την κάρτα **προς τα δεξιά** → «Το έχω!» (σωστό / λύθηκε)  \n- Σύρετε την κάρτα **προς τα αριστερά** → «Δεν είμαι σίγουρος ακόμα» (λάθος / δεν λύθηκε)\n\n**Τι συμβαίνει μετά;**\n\n- **Σωστό** → Η κάρτα δεν θα επανεμφανιστεί παρά πολύ αργότερα → εξοικονομείτε χρόνο  \n- **Λάθος** → Η κάρτα επανεμφανίζεται σύντομα → εξασκείστε ακριβώς σε αυτό που χρειάζεστε\n\n**Χρήση στο κινητό:**\n\n1. Τοποθετήστε το δάχτυλο στην κάρτα  \n2. Σύρετε προς τα δεξιά ή προς τα αριστερά (τουλάχιστον περίπου στο μισό πλάτος της οθόνης)  \n3. Αφήστε το δάχτυλο → Η κάρτα «πετάει» μακριά + σύντομη δόνηση ή ηχητική ενημέρωση  \n4. Η επόμενη κάρτα εμφανίζεται αυτόματα\n\n**Συμβουλή:**  \nΣύρετε αποφασιστικά – μικρές κινήσεις δεν μετρούν.  \nΔεν μπορείτε να αξιολογήσετε κατά λάθος ως «λάθος». \n\nΚαλή διασκέδαση με το swipe! 💙',
 };
 
 // Fallback German translations (hardcoded subset for offline/error scenarios)
@@ -697,6 +725,7 @@ const FALLBACK_DE: Record<string, string> = {
     'btn.audio': 'Audio',
     'btn.restart': 'Neustart',
     'btn.cancel': 'Abbrechen',
+    'btn.close': 'Schließen',
     'btn.audio_tooltip': 'Griechische Aussprache anhören',
     'flashcard.label_source': 'DEUTSCH',
     'flashcard.label_target': 'ΕΛΛΗΝΙΚΑ',
@@ -953,6 +982,15 @@ const FALLBACK_DE: Record<string, string> = {
     'brain_gym.instructions': 'Finde die passenden Paare',
     'brain_gym.greek': 'Griechisch',
     'brain_gym.translation': 'Übersetzung',
+    'manual.title': 'Handbuch',
+    'manual.app_name': 'Hellenic Horizons - GreekLingua',
+    'manual.content_by': 'Content: Neya',
+    'manual.developed_by': 'Develop: Stefan',
+    'manual.version': 'Version',
+    'manual.dont_show_again': 'Nicht mehr anzeigen',
+    'manual.content': 'Mobile-first App zum spielerischen Lernen von Neugriechisch  \n**Noch in der Beta-Phase**\n\n## Was die App macht – auf einen Blick\nDu lernst griechische Vokabeln und Alltagsphrasen mit dem modernsten, wissenschaftlich fundierten System:\n\n- Smarte Wiederholungen genau im richtigen Moment (Spaced Repetition)  \n- Schwierige Wörter kommen öfter, leichte seltener → maximaler Behaltens-Effekt  \n- Tägliche neue Phrasen + gezielte Übungen für schwache Stellen  \n- Kurze Brain-Gym-Einheiten für bessere Konzentration\n\n## Die clevere Logik – ganz einfach erklärt\nJede Karte bekommt einen individuellen Zeitplan basierend auf dem FSRS-Algorithmus (aktuell einer der besten):\n\n- Du bewertest „richtig“ oder „falsch“  \n- Richtig → längere Pause bis zur nächsten Wiederholung  \n- Falsch → früher wiederholen  \n→ Die App passt sich automatisch an dich an und spart dir Zeit\n\n## Module im Überblick\n- **Due Today**  \n  Alle fälligen Karten – einfach swipen & bewerten  \n\n- **Review**  \n  Gezieltes Wiederholen nach Level oder Thema  \n\n- **Weak Words**  \n  Deine Problemwörter mit extra Fokus und kürzeren Intervallen  \n\n- **Daily Phrases**  \n  Jeden Tag 3 frische Alltagssätze + Audio  \n\n- **Brain Gym**  \n  Kurze, motivierende Mini-Übungen fürs Gehirn  \n\nViel Spaß beim Testen!  \n**Always Happy Learning with Neya** 💙\n\n## Beta-Hinweis / Disclaimer\n- App ist in der **Beta-Phase**  \n- Alle Inhalte sind reine **Testdaten** – nicht zum ernsthaften Lernen geeignet  \n- Es werden **keine personenbezogenen Daten** gespeichert  \n- Zugang nur während des laufenden Kurses mit Neya  \n- Weitergabe oder Weiterverbreitung **nicht gestattet**',
+    'tutorial.swipe.title': 'Swipe einfach – so lernst du am besten',
+    'tutorial.swipe.content': '**So funktioniert’s (ganz kurz):**\n\n- Karte nach **rechts swipen** → „Ich kann das!“ (richtig / gelöst)  \n- Karte nach **links swipen** → „Noch nicht sicher“ (falsch / nicht gelöst)\n\n**Was passiert danach?**\n\n- **Richtig** → Die Karte kommt erst viel später wieder → du sparst Zeit  \n- **Falsch** → Die Karte kommt bald wieder → du übst genau das, was du brauchst\n\n**Bedienung auf dem Handy:**\n\n1. Finger auf die Karte legen  \n2. Nach rechts oder links ziehen (mind. ca. halbe Bildschirmbreite)  \n3. Loslassen → Karte fliegt weg + kurzer Vibrations- oder Sound-Feedback  \n4. Nächste Karte erscheint automatisch\n\n**Tipp:**  \nSwippe entschlossen – kleine Wackler zählen nicht.  \nDu kannst nicht versehentlich falsch bewerten.\n\nViel Spaß beim Swipen! 💙',
 };
 
 // Get locale-specific fallback
@@ -1015,6 +1053,7 @@ const FALLBACK_ES: Record<string, string> = {
     'btn.audio': 'Audio',
     'btn.restart': 'Reiniciar',
     'btn.cancel': 'Cancelar',
+    'btn.close': 'Cerrar',
     'btn.audio_tooltip': 'Escuchar pronunciación griega',
     'flashcard.label_source': 'ESPAÑOL',
     'flashcard.label_target': 'ΕΛΛΗΝΙΚΑ',
@@ -1143,11 +1182,11 @@ const FALLBACK_ES: Record<string, string> = {
     'admin.go_to_dashboard': 'Ir al panel',
     'admin.students_desc': 'Gestionar estudiantes, niveles y seguimiento de rendimiento.',
     'admin.content_desc': 'Gestionar elementos de aprendizaje, vocabulario, gramática y ejercicios.',
-    'admin.settings_desc': 'Configuración y ajustes de la aplicación.',
-    'students.title': 'Gestión de estudiantes',
-    'students.subtitle': 'Crear, editar y gestionar estudiantes',
-    'students.add_new': 'Nuevo estudiante',
-    'students.back_to_list': 'Volver a la lista',
+    'manual.version': 'Versión',
+    'manual.app_name': 'Hellenic Horizons - GreekLingua',
+    'manual.content_by': 'Contenido: Neya',
+    'manual.developed_by': 'Desarrollo: Stefan',
+    'manual.title': 'Manual de usuario',
     'students.search_placeholder': 'Buscar por nombre, correo o teléfono...',
     'students.loading': 'Cargando estudiantes...',
     'students.no_students': 'No se encontraron estudiantes. Haga clic en "Nuevo estudiante" para agregar uno.',
@@ -1266,7 +1305,10 @@ const FALLBACK_ES: Record<string, string> = {
     'brain_gym.close': 'Cerrar',
     'brain_gym.instructions': 'Empareja los pares correspondientes',
     'brain_gym.greek': 'Griego',
-    'brain_gym.translation': 'Traducción',
+    'manual.dont_show_again': 'No mostrar de nuevo',
+    'manual.content': 'Aplicación móvil para aprender griego moderno de forma lúdica  \n**Aún en fase Beta**\n\n## Qué hace la aplicación – de un vistazo\nAprendes vocabulario griego y frases cotidianas con el sistema más moderno y con base científica:\n\n- Repeticiones inteligentes en el momento justo (Spaced Repetition)  \n- Las palabras difíciles aparecen más a menudo, las fáciles menos → máximo efecto de retención  \n- Nuevas frases diarias + ejercicios específicos para puntos débiles  \n- Breves unidades de Brain-Gym para una mejor concentración\n\n## La lógica ingeniosa – explicada de forma sencilla\nCada tarjeta recibe un horario individual basado en el algoritmo FSRS (actulamente uno de los mejores):\n\n- Evalúas como "correcto" o "incorrecto"  \n- Correcto → pausa más larga hasta la próxima repetición  \n- Incorrecto → repetir antes  \n→ La aplicación se adapta automáticamente a ti y te ahorra tiempo\n\n## Resumen de módulos\n- **Due Today**  \n  Todas las tarjetas pendientes – simplemente desliza (swipe) y evalúa  \n\n- **Review**  \n  Repaso específico por nivel o tema  \n\n- **Weak Words**  \n  Tus palabras problemáticas con enfoque extra e intervalos más cortos  \n\n- **Daily Phrases**  \n  3 frases cotidianas frescas + audio cada día  \n\n- **Brain Gym**  \n  Mini-ejercicios cortos y motivadores para tu cerebro  \n\n¡Diviértete probando!  \n**Always Happy Learning with Neya** 💙\n\n## Nota Beta / Descargo de responsabilidad\n- La aplicación está en **fase Beta**  \n- Todo el contenido son puramente **datos de prueba**, no aptos para un aprendizaje serio  \n- **No se almacenan datos personales**  \n- Acceso solo durante el curso presencial con Neya  \n- **No se permite** la distribución o difusión posterior',
+    'tutorial.swipe.title': 'Simplemente desliza – la mejor forma de aprender',
+    'tutorial.swipe.content': '**Cómo funciona (brevemente):**\n\n- Desliza la tarjeta **a la derecha** → "¡Lo sé!" (correcto / resuelto)  \n- Desliza la tarjeta **a la izquierda** → "Aún no estoy seguro" (incorrecto / no resuelto)\n\n**¿Qué pasa después?**\n\n- **Correcto** → La tarjeta no volverá a aparecer hasta mucho después → ahorras tiempo  \n- **Incorrecto** → La tarjeta reaparece pronto → practicas exactamente lo que necesitas\n\n**Uso en el móvil:**\n\n1. Coloca el dedo sobre la tarjeta  \n2. Desliza a la derecha o izquierda (al menos media pantalla)  \n3. Suelta → La tarjeta sale volando + vibración corta o sonido de respuesta  \n4. La siguiente tarjeta aparece automáticamente\n\n**Consejo:**  \nDesliza con decisión – los movimientos leves no cuentan.  \nNo puedes evaluar "incorrecto" por accidente.\n\n¡Diviértete deslizando! 💙',
 };
 
 const FALLBACKS: Record<Locale, Record<string, string>> = { en: FALLBACK_EN, ru: FALLBACK_RU, el: FALLBACK_EL, de: FALLBACK_DE, es: FALLBACK_ES };

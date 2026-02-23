@@ -16,6 +16,8 @@ interface User {
     streak_days?: number;
     last_activity_date?: string;
     longest_streak?: number;
+    acknowledged_manual_version?: string;
+    acknowledged_swipe_tutorial_version?: string;
 }
 
 interface AuthContextType {
@@ -26,6 +28,8 @@ interface AuthContextType {
     isAuthenticated: boolean;
     isAdmin: boolean;
     loading: boolean;
+    syncing: boolean; // Neu: Zeigt an ob gerade mit DB abgeglichen wird
+    refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,6 +41,7 @@ const STUDENT_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 Stunden
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -66,8 +71,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
 
                 if (parsedUser && parsedUser.id) {
+                    // Sofort setzen für schnellen UI-Load
                     setUser(parsedUser);
-                    setLoading(false);
+
+                    // ABER: Wir bleiben im "loading" Zustand bis der erste DB-Sync fertig ist!
+                    // So verhindern wir, dass Popups basierend auf alten localStorage-Daten aufblitzen.
+                    refreshUserFromId(parsedUser.id, parsedUser).then(() => {
+                        setLoading(false);
+                    });
                     return;
                 }
             } catch (err) {
@@ -76,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 localStorage.removeItem('greeklingua_session_ts');
             }
         }
-        
+
         // Kein gespeicherter User – Login erforderlich
         setUser(null);
         setLoading(false);
@@ -142,6 +153,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     difficulty: dbUser.user_difficulty,
                     performance_index: dbUser.user_performance_index,
                     preferred_locale: (dbUser.user_preferred_locale as 'en' | 'ru' | 'el' | 'de' | 'es') || 'en',
+                    acknowledged_manual_version: dbUser.user_acknowledged_manual_version,
+                    acknowledged_swipe_tutorial_version: dbUser.user_acknowledged_swipe_tutorial_version,
                 };
                 setUser(userData);
                 localStorage.setItem('greeklingua_user', JSON.stringify(userData));
@@ -157,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             const { data, error } = await supabase
                 .from('users')
-                .select('id, email, name, role, level, difficulty, performance_index, preferred_locale')
+                .select('id, email, name, role, level, difficulty, performance_index, preferred_locale, acknowledged_manual_version, acknowledged_swipe_tutorial_version')
                 .ilike('name', username)
                 .eq('pin', pin)
                 .single();
@@ -172,6 +185,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     difficulty: data.difficulty,
                     performance_index: data.performance_index,
                     preferred_locale: (data.preferred_locale as 'en' | 'ru' | 'el' | 'de' | 'es') || 'en',
+                    acknowledged_manual_version: data.acknowledged_manual_version,
+                    acknowledged_swipe_tutorial_version: data.acknowledged_swipe_tutorial_version,
                 };
                 setUser(userData);
                 localStorage.setItem('greeklingua_user', JSON.stringify(userData));
@@ -195,8 +210,95 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         router.push('/login');
     };
 
+    const refreshUser = async () => {
+        if (!user?.id) return;
+        await refreshUserFromId(user.id, user);
+    };
+
+    const refreshUserFromId = async (userId: string, currentUser?: User | null) => {
+        setSyncing(true);
+        console.log(`🔄 [AuthContext] Syncing user data for: ${userId}`);
+
+        try {
+            // Use RPC to bypass RLS restrictions for anon students
+            const { data, error } = await supabase.rpc('get_user_data', {
+                p_user_id: userId
+            });
+
+            if (error) {
+                console.error('❌ [AuthContext] Error fetching user data via RPC:', error);
+
+                // Fallback to direct query if RPC doesn't exist yet (migration not applied)
+                if (error.code === 'PGRST202') {
+                    console.log('⚠️ [AuthContext] RPC not found, falling back to direct SELECT');
+                    const { data: directData, error: directError } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('id', userId)
+                        .single();
+
+                    if (directError) {
+                        console.error('❌ [AuthContext] Direct SELECT also failed:', directError);
+                        return;
+                    }
+
+                    if (directData) {
+                        updateUserData(directData, currentUser);
+                    }
+                }
+                return;
+            }
+
+            if (data && data.length > 0) {
+                const fetchedUser = data[0];
+                console.log('✅ [AuthContext] User data received:', fetchedUser);
+                updateUserData(fetchedUser, currentUser);
+            } else {
+                console.warn('⚠️ [AuthContext] No user data found for ID:', userId);
+            }
+        } catch (err) {
+            console.warn('❌ [AuthContext] Exception during user refresh:', err);
+        } finally {
+            setSyncing(false);
+        }
+    };
+
+    const updateUserData = (data: any, currentUser?: User | null) => {
+        const userData: User = {
+            ...currentUser,
+            ...data,
+            id: data.id,
+            email: data.email,
+            name: data.name,
+            role: (data.role as 'admin' | 'student') || 'student',
+            level: data.level,
+            difficulty: data.difficulty,
+            performance_index: data.performance_index,
+            preferred_locale: (data.preferred_locale as 'en' | 'ru' | 'el' | 'de' | 'es') || 'en',
+            acknowledged_manual_version: data.acknowledged_manual_version || '0.0.0',
+            acknowledged_swipe_tutorial_version: data.acknowledged_swipe_tutorial_version || '0.0.0',
+            streak_days: data.streak_days || 0,
+            longest_streak: data.longest_streak || 0,
+            last_activity_date: data.last_activity_date
+        };
+
+        console.log('💾 [AuthContext] Updating state with:', userData);
+        setUser(userData);
+        localStorage.setItem('greeklingua_user', JSON.stringify(userData));
+    };
+
     return (
-        <AuthContext.Provider value={{ user, setUser, login, logout, isAuthenticated: !!user, isAdmin: user?.role === 'admin', loading }}>
+        <AuthContext.Provider value={{
+            user,
+            setUser,
+            login,
+            logout,
+            isAuthenticated: !!user,
+            isAdmin: user?.role === 'admin',
+            loading,
+            syncing,
+            refreshUser
+        }}>
             {children}
         </AuthContext.Provider>
     );

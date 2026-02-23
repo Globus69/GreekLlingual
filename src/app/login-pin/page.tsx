@@ -259,9 +259,10 @@ export default function PinLoginPage() {
 
                 // Fingerprint speichern (falls neu oder geändert)
                 if (fingerprint) {
-                    supabase.from('users').update({
-                        device_fingerprint: fingerprint
-                    }).eq('id', userData.user_id).then(({ error }) => {
+                    supabase.rpc('update_user_metadata', {
+                        p_user_id: userData.user_id,
+                        p_fingerprint: fingerprint
+                    }).then(({ error }) => {
                         if (error) console.warn('Fingerprint update failed:', error);
                     });
                 }
@@ -276,6 +277,8 @@ export default function PinLoginPage() {
                     difficulty: userData.user_difficulty,
                     performance_index: userData.user_performance_index,
                     preferred_locale: userData.user_preferred_locale,
+                    acknowledged_manual_version: userData.user_acknowledged_manual_version,
+                    acknowledged_swipe_tutorial_version: userData.user_acknowledged_swipe_tutorial_version,
                 };
 
                 localStorage.setItem('greeklingua_user', JSON.stringify(userObject));

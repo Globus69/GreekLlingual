@@ -7,6 +7,7 @@ import { useTranslation } from '@/lib/use-translation';
 import { useStatsData } from '@/hooks/use-stats-data';
 import { TrainWeakWordsSheet } from '@/components/mobile/TrainWeakWordsSheet';
 import MobileBottomNav from '@/components/mobile/MobileBottomNav';
+import UserManualDialog from '@/components/ui/user-manual-dialog';
 import VocabularyDialog from '@/components/learning/vocabulary-dialog';
 import DailyPhrasesDialog from '@/components/learning/daily-phrases-dialog';
 import DueCardsDialog from '@/components/learning/due-cards-dialog';
@@ -367,6 +368,8 @@ export default function MobileDashboardPage() {
           onClose={() => setShowGrammarDialog(false)}
         />
       )}
+
+      <UserManualDialog />
     </div>
   );
 }
