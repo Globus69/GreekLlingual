@@ -100,8 +100,8 @@ export default function VocabularyDialog({ isOpen, onClose }: VocabularyDialogPr
                 return;
             }
 
-            // Call RPC function to get learning/due vocabulary cards
-            const { data, error: rpcError } = await supabase.rpc('get_learning_vocabulary_cards', {
+            // Call RPC function to get specifically "Review" vocabulary cards (Rating 2)
+            const { data, error: rpcError } = await supabase.rpc('get_review_vocabulary_cards', {
                 p_user_id: STUDENT_ID,
                 p_limit: 50
             });
