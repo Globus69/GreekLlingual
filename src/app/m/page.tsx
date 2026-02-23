@@ -44,12 +44,21 @@ export default function MobileDashboardPage() {
   const user = authUser || localUser;
 
   // Verwende den zentralen Stats Hook
-  const { stats, loading: statsLoading } = useStatsData(user?.id);
+  const { stats, loading: statsLoading, refetch } = useStatsData(user?.id);
+
+  // Zentrale Refresh-Funktion für das Dashboard
+  const handleRefresh = async () => {
+    console.log('🔄 Refreshing dashboard stats...');
+    await refetch();
+  };
 
   useEffect(() => {
+    // Refresh stats when window gets focus (user returns to tab)
+    const handleFocus = () => handleRefresh();
+    window.addEventListener('focus', handleFocus);
+
     if (!authLoading) {
       const storedUser = localStorage.getItem('greeklingua_user');
-
       // Lade User aus localStorage, falls AuthContext keinen hat
       if (!authUser && storedUser && !localUser) {
         try {
@@ -62,11 +71,12 @@ export default function MobileDashboardPage() {
       }
 
       console.log('🔍 Debug User:', { authUser, localUser, storedUser: storedUser ? JSON.parse(storedUser) : null });
-
       if (!authUser && !storedUser) {
         router.push('/login-pin');
       }
     }
+
+    return () => window.removeEventListener('focus', handleFocus);
   }, [authUser, authLoading, router, localUser]);
 
   if (statsLoading || authLoading) {
@@ -296,7 +306,10 @@ export default function MobileDashboardPage() {
       {showReviewDialog && user?.id && (
         <VocabularyDialog
           isOpen={showReviewDialog}
-          onClose={() => setShowReviewDialog(false)}
+          onClose={() => {
+            setShowReviewDialog(false);
+            handleRefresh();
+          }}
           mode="all"
         />
       )}
@@ -305,7 +318,10 @@ export default function MobileDashboardPage() {
       {showWeakWordsDialog && (
         <WeakWordsDialog
           isOpen={showWeakWordsDialog}
-          onClose={() => setShowWeakWordsDialog(false)}
+          onClose={() => {
+            setShowWeakWordsDialog(false);
+            handleRefresh();
+          }}
         />
       )}
 
@@ -313,7 +329,10 @@ export default function MobileDashboardPage() {
       {showDailyPhrasesDialog && (
         <DailyPhrasesDialog
           isOpen={showDailyPhrasesDialog}
-          onClose={() => setShowDailyPhrasesDialog(false)}
+          onClose={() => {
+            setShowDailyPhrasesDialog(false);
+            handleRefresh();
+          }}
         />
       )}
 
@@ -321,7 +340,10 @@ export default function MobileDashboardPage() {
       {showDueCardsSheet && (
         <DueCardsDialog
           isOpen={showDueCardsSheet}
-          onClose={() => setShowDueCardsSheet(false)}
+          onClose={() => {
+            setShowDueCardsSheet(false);
+            handleRefresh();
+          }}
           onOpenReview={() => setShowReviewDialog(true)}
           onOpenWeakWords={() => setShowWeakWordsDialog(true)}
         />
@@ -351,10 +373,10 @@ interface ModuleTileProps {
 function ModuleTile({ debugId, icon, title, subtitle, color, disabled, onClick }: ModuleTileProps) {
   const colors = {
     blue: { bg: 'rgba(0, 122, 255, 0.25)', border: 'rgba(0, 122, 255, 0.5)', text: '#007AFF' },
-    green: { bg: 'rgba(52, 199, 89, 0.25)', border: 'rgba(52, 199, 89, 0.5)', text: '#34C759' },
+    green: { bg: 'rgba(46, 214, 26, 0.25)', border: 'rgba(46, 214, 26, 0.5)', text: '#2ED61A' },
     orange: { bg: 'rgba(255, 159, 10, 0.25)', border: 'rgba(255, 159, 10, 0.5)', text: '#FF9F0A' },
     purple: { bg: 'rgba(191, 90, 242, 0.25)', border: 'rgba(191, 90, 242, 0.5)', text: '#BF5AF2' },
-    'weak-green': { bg: 'rgba(52, 199, 89, 0.1)', border: 'rgba(52, 199, 89, 0.25)', text: 'rgba(52, 199, 89, 0.6)' },
+    'weak-green': { bg: 'rgba(46, 214, 26, 0.15)', border: 'rgba(46, 214, 26, 0.3)', text: 'rgba(46, 214, 26, 0.8)' },
     'light-orange': { bg: 'rgba(255, 159, 10, 0.3)', border: 'rgba(255, 159, 10, 0.6)', text: '#FF9F0A' },
     'light-red': { bg: 'rgba(255, 69, 58, 0.3)', border: 'rgba(255, 69, 58, 0.6)', text: '#FF453A' },
   };
