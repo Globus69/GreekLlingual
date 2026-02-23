@@ -259,7 +259,8 @@ export default function MobileDashboardPage() {
             title="Daily Phrases"
             subtitle="Useful phrases"
             color="purple"
-            onClick={() => setShowDailyPhrasesDialog(true)}
+            disabled={true}
+            onClick={() => { }}
           />
           {/* Grammar - DISABLED (grau, kein Action) */}
           <ModuleTile
